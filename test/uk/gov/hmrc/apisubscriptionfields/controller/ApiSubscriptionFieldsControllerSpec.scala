@@ -14,21 +14,20 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.apisubscriptionfields.controllers
+package uk.gov.hmrc.apisubscriptionfields.controller
 
 import play.api.http.Status
 import play.api.test.FakeRequest
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
+class ApiSubscriptionFieldsControllerSpec extends UnitSpec with WithFakeApplication{
 
-class MicroserviceHelloWorldControllerSpec extends UnitSpec with WithFakeApplication{
+  private val fakeRequest = FakeRequest("POST", "/id")
 
-  val fakeRequest = FakeRequest("GET", "/")
-
-  "GET /" should {
-    "return 200" in {
-      val result = MicroserviceHelloWorld.hello()(fakeRequest)
-      status(result) shouldBe Status.OK
+  "POST /id" should {
+    "return 201" in {
+      val result = ApiSubscriptionFieldsController.id()(fakeRequest)
+      status(result) shouldBe Status.CREATED
     }
   }
 

@@ -20,7 +20,9 @@ import play.api.http.Status
 import play.api.test.FakeRequest
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
-class ApiSubscriptionFieldsControllerSpec extends UnitSpec with WithFakeApplication{
+class ApiSubscriptionFieldsControllerSpec extends UnitSpec with WithFakeApplication {
+
+  private implicit lazy val materializer = fakeApplication.materializer
 
   private val fakeRequest = FakeRequest("POST", "/id")
 

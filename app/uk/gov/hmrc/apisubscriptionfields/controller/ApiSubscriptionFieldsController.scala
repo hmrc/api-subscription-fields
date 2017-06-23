@@ -26,21 +26,16 @@ import scala.concurrent.Future
 trait ApiSubscriptionFieldsController extends BaseController {
 
 	def id() = Action.async { implicit request =>
-
     /*
      TODO:
-     parse request json body
-     - application_id as String
-     - api_context as String
-     - api_context
-     - [application_id]_[api_context]_[api_context] is the id of the mongo record
-     - generate UUID (the header to be passed in the incoming requests)
-     - save record to mongo
-     */
+       parse `ApiSubscriptionRequest`
+       - [application_id]_[api_context]_[api_context] is the id of the mongo record, but decide good separators
+       - generate UUID (the header to be passed in the incoming requests)
+       - save record to mongo
+       */
     val subscriptionFieldsId = UUID.randomUUID()
-
-		Future.successful(Created("TODO"))
-	}
+    Future.successful(Created("TODO"))
+  }
 }
 
 object ApiSubscriptionFieldsController extends ApiSubscriptionFieldsController

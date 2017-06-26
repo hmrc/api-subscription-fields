@@ -34,7 +34,7 @@ trait ApiSubscriptionFieldsController extends BaseController {
        - save record to mongo
        */
     val subscriptionFieldsId = UUID.randomUUID()
-    Future.successful(Created("TODO"))
+    Future.successful(Created(s"${subscriptionFieldsId}"))
   }
 }
 

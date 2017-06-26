@@ -14,18 +14,10 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.apisubscriptionfields
+package uk.gov.hmrc.apisubscriptionfields.model
 
-import uk.gov.hmrc.play.audit.http.config.LoadAuditingConfig
-import uk.gov.hmrc.play.audit.http.connector.AuditConnector
-import uk.gov.hmrc.play.config.{AppName, RunMode}
-import uk.gov.hmrc.play.http.hooks.HttpHook
-import uk.gov.hmrc.play.http.ws._
+import java.util.UUID
 
-object WSHttp extends WSGet with WSPut with WSPost with WSDelete with WSPatch with AppName {
-  override val hooks: Seq[HttpHook] = NoneRequired
-}
-
-object MicroserviceAuditConnector extends AuditConnector with RunMode {
-  override lazy val auditingConfig = LoadAuditingConfig(s"auditing")
-}
+case class ApiSubscriptionRequest(applicationId: UUID,
+																	apiContext: String,
+																	apiVersion: String)

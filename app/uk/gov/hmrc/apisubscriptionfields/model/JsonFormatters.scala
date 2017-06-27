@@ -16,26 +16,12 @@
 
 package uk.gov.hmrc.apisubscriptionfields.model
 
-import java.util.UUID
+import play.api.libs.json.Json
 
-case class ApiSubscriptionRequest(applicationId: UUID,
-																	apiContext: String,
-																	apiVersion: String,
-                                  customFields: Map[String, String] = Map.empty)
+object JsonFormatters {
+  implicit val formatApiSubscription = Json.format[ApiSubscription]
+}
 
-case class ApiSubscription(
-  id: String,
-  fieldsId: UUID,
-  customFields: Map[String, String]
-)
-
-object ApiSubscription {
-  def create(request: ApiSubscriptionRequest) = {
-    ApiSubscription(
-      // TODO: use / instead of _
-      id = s"${request.applicationId.toString}_${request.apiContext}_${request.apiVersion}",
-      fieldsId = UUID.randomUUID(),
-      customFields = request.customFields
-    )
-  }
+object MongoFormat {
+  implicit val formatApiSubscription = Json.format[ApiSubscription]
 }

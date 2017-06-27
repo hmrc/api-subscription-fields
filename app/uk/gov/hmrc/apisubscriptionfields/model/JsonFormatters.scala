@@ -22,6 +22,6 @@ object JsonFormatters {
   implicit val formatApiSubscription = Json.format[ApiSubscription]
 }
 
-object MongoFormat {
+object MongoFormatters {
   implicit val formatApiSubscription = Json.format[ApiSubscription]
 }

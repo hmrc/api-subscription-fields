@@ -30,10 +30,12 @@ case class ApiSubscription(
 )
 
 object ApiSubscription {
+
+  private val separator = "___"
+
   def create(request: ApiSubscriptionRequest) = {
     ApiSubscription(
-      // TODO: use / instead of _
-      id = s"${request.applicationId.toString}_${request.apiContext}_${request.apiVersion}",
+      id = s"${request.applicationId.toString}$separator${request.apiContext}$separator${request.apiVersion}",
       fieldsId = UUID.randomUUID(),
       customFields = request.customFields
     )

@@ -19,7 +19,9 @@ package uk.gov.hmrc.apisubscriptionfields.repository
 import play.api.libs.json._
 import play.modules.reactivemongo.MongoDbConnection
 import reactivemongo.api.DB
-import reactivemongo.api.indexes.{Index, IndexType}
+import reactivemongo.api.commands.WriteResult
+import reactivemongo.api.indexes.IndexType.Ascending
+import reactivemongo.api.indexes.Index
 import reactivemongo.bson.{BSONDocument, BSONObjectID}
 import uk.gov.hmrc.apisubscriptionfields.model.{ApiSubscription, MongoFormatters}
 import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
@@ -30,11 +32,11 @@ import scala.concurrent.Future
 
 trait SubscriptionFieldsIdRepository extends Repository[ApiSubscription, BSONObjectID] {
 
-  def save(subscription: ApiSubscription): Future[ApiSubscription]
+  def save(subscription: ApiSubscription): Future[Unit]
 
   def fetch(id: String): Future[Option[ApiSubscription]]
 
-  def delete(id: String): Future[Int]
+  def delete(id: String): Future[Unit]
 }
 
 class SubscriptionFieldsIdMongoRepository(implicit mongo: () => DB)
@@ -47,23 +49,29 @@ class SubscriptionFieldsIdMongoRepository(implicit mongo: () => DB)
     override def writes(s: ApiSubscription): JsObject = MongoFormatters.formatApiSubscription.writes(s)
   }
 
-  ensureIndex("subscriptionFieldsId", "subscriptionFieldsIdIndex")
+  override def indexes = Seq(
+    createSingleFieldAscendingIndex(
+      indexFieldKey = "id",
+      indexName = Some("idIndex")
+    )
+  )
 
-  private def ensureIndex(field: String, indexName: String, isUnique: Boolean = true): Future[Boolean] = {
-    collection.indexesManager.ensure(Index(Seq(field -> IndexType.Ascending),
-      name = Some(indexName), unique = isUnique, background = true))
+  private def createSingleFieldAscendingIndex(indexFieldKey: String, indexName: Option[String],
+                                              isUnique: Boolean = false, isBackground: Boolean = true): Index = {
+    Index(
+      key = Seq(indexFieldKey -> Ascending),
+      name = indexName,
+      unique = isUnique,
+      background = isBackground
+    )
   }
 
-  override def save(subscription: ApiSubscription): Future[ApiSubscription] = {
+  override def save(subscription: ApiSubscription): Future[Unit] = {
     collection.find(Json.obj("id" -> subscription.id)).one[BSONDocument].flatMap {
       case Some(document) => collection.update(selector = BSONDocument("_id" -> document.get("_id")), update = subscription)
-      case None => collection.insert(subscription)
+      case _ => collection.insert(subscription)
     }.map {
-      // TODO: extract code for handling the errors
-      error => error.errmsg match {
-        case Some(errorMsg) => throw new RuntimeException(s"""Could not save subscription fields: $subscription. $errorMsg""")
-        case None => subscription
-      }
+      writeResult => handleError(writeResult, s"Could not save subscription fields: $subscription")
     }
   }
 
@@ -71,7 +79,19 @@ class SubscriptionFieldsIdMongoRepository(implicit mongo: () => DB)
     collection.find(Json.obj("id" -> id)).one[ApiSubscription]
   }
 
-  override def delete(id: String): Future[Int] = ???
+  override def delete(id: String): Future[Unit] = {
+    collection.remove(Json.obj("id" -> id)).map {
+      writeResult => handleError(writeResult, s"Could not delete subscription fields for id: $id")
+    }
+  }
+
+  private def handleError[T](result: WriteResult, exceptionMsg: String): Unit = {
+    result.errmsg match {
+      case Some(errMsg) => throw new RuntimeException(s"""$exceptionMsg. $errMsg""")
+      case _ => ()
+    }
+  }
+
 }
 
 object SubscriptionFieldsIdRepository extends MongoDbConnection {

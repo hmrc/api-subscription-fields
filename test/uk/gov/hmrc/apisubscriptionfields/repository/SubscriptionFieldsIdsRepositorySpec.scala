@@ -36,20 +36,12 @@ class SubscriptionFieldsIdsRepositorySpec extends UnitSpec
   override def beforeEach() {
     super.beforeEach()
     await(repository.drop)
-    await(repository.ensureIndexes)
   }
 
   override def afterAll() {
     super.afterAll()
      await(repository.drop)
   }
-
-  private val applicationId = UUID.randomUUID()
-  private val apiContext = "hello_API"
-  private val apiVersion = "2.5-v"
-  private val customFields = Map("field_1" -> "value_1", "field_2" -> "value_2", "field_3" -> "value_3")
-  private val apiSubscriptionRequest = ApiSubscriptionRequest(applicationId, apiContext, apiVersion, customFields)
-  private val apiSubscription = ApiSubscription.create(apiSubscriptionRequest)
 
   /*
   TODO:
@@ -58,10 +50,25 @@ class SubscriptionFieldsIdsRepositorySpec extends UnitSpec
    https://github.tools.tax.service.gov.uk/HMRC/third-party-application/blob/master/it/uk/gov/hmrc/repository/ApplicationRepositorySpec.scala
   */
 
+  private def createApiSubscription(): ApiSubscription = {
+    val applicationId = UUID.randomUUID()
+    val apiContext = "hello_API"
+    val apiVersion = "2.5-v"
+    val customFields = Map("field_1" -> "value_1", "field_2" -> "value_2", "field_3" -> "value_3")
+    val apiSubscriptionRequest = ApiSubscriptionRequest(applicationId, apiContext, apiVersion, customFields)
+    ApiSubscription.create(apiSubscriptionRequest)
+  }
+
+  private def collectionSize: Int = {
+    await(repository.collection.count())
+  }
+
   "save" should {
     "insert the record in the collection" in {
-      await(repository.save(apiSubscription)) shouldBe apiSubscription
-      await(repository.collection.count()) shouldBe 1
+      collectionSize shouldBe 0
+      val apiSubscription = createApiSubscription()
+      await(repository.save(apiSubscription))
+      collectionSize shouldBe 1
 
       import reactivemongo.json._
 
@@ -72,19 +79,54 @@ class SubscriptionFieldsIdsRepositorySpec extends UnitSpec
 
   "fetch" should {
     "retrieve the record from the id" in {
+      val apiSubscription = createApiSubscription()
       await(repository.save(apiSubscription))
+      collectionSize shouldBe 1
 
       await(repository.fetch(apiSubscription.id)) shouldBe Some(apiSubscription)
+    }
+
+    "return `None` when the id doesn't match any record in the collection" in {
+      for (i <- 1 to 3) {
+        await(repository.save(createApiSubscription()))
+      }
+      collectionSize shouldBe 3
+
+      await(repository.fetch("ID")) shouldBe None
     }
   }
 
   "delete" should {
-    "TODO" in {
+    "remove the record with a specific id" in {
+      val apiSubscription = createApiSubscription()
+
+      await(repository.save(apiSubscription))
+      collectionSize shouldBe 1
+
+      await(repository.delete(apiSubscription.id))
+      collectionSize shouldBe 0
+    }
+
+    "not alter the collection for unknown ids" in {
+      for (i <- 1 to 3) {
+        await(repository.save(createApiSubscription()))
+      }
+      collectionSize shouldBe 3
+
+      await(repository.delete("ID"))
+      collectionSize shouldBe 3
     }
   }
 
   "collection" should {
-    "have unique index on `id` " in {
+    "have a unique index on `id` " in {
+      val apiSubscription = createApiSubscription()
+
+      await(repository.save(apiSubscription))
+      collectionSize shouldBe 1
+
+      await(repository.save(apiSubscription))
+      collectionSize shouldBe 1
     }
   }
 }

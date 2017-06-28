@@ -144,8 +144,9 @@ class SubscriptionFieldsIdsRepositorySpec extends UnitSpec
       await(repository.save(apiSubscription))
       collectionSize shouldBe 1
 
-      await(repository.save(apiSubscription))
+      await(repository.save(apiSubscription.copy(fieldsId = UUID.randomUUID())))
       collectionSize shouldBe 1
     }
   }
+
 }

@@ -77,22 +77,41 @@ class SubscriptionFieldsIdsRepositorySpec extends UnitSpec
     }
   }
 
-  "fetch" should {
-    "retrieve the record from the id" in {
+  "fetchById" should {
+    "retrieve the correct record from the `id` " in {
       val apiSubscription = createApiSubscription()
       await(repository.save(apiSubscription))
       collectionSize shouldBe 1
 
-      await(repository.fetch(apiSubscription.id)) shouldBe Some(apiSubscription)
+      await(repository.fetchById(apiSubscription.id)) shouldBe Some(apiSubscription)
     }
 
-    "return `None` when the id doesn't match any record in the collection" in {
+    "return `None` when the `id` doesn't match any record in the collection" in {
       for (i <- 1 to 3) {
         await(repository.save(createApiSubscription()))
       }
       collectionSize shouldBe 3
 
-      await(repository.fetch("ID")) shouldBe None
+      await(repository.fetchById("ID")) shouldBe None
+    }
+  }
+
+  "fetchByFieldsId" should {
+    "retrieve the correct record from the `fieldsId` " in {
+      val apiSubscription = createApiSubscription()
+      await(repository.save(apiSubscription))
+      collectionSize shouldBe 1
+
+      await(repository.fetchByFieldsId(apiSubscription.fieldsId)) shouldBe Some(apiSubscription)
+    }
+
+    "return `None` when the `fieldsId` doesn't match any record in the collection" in {
+      for (i <- 1 to 3) {
+        await(repository.save(createApiSubscription()))
+      }
+      collectionSize shouldBe 3
+
+      await(repository.fetchByFieldsId(UUID.fromString("1-2-3-4-5"))) shouldBe None
     }
   }
 

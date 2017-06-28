@@ -16,6 +16,8 @@
 
 package uk.gov.hmrc.apisubscriptionfields.repository
 
+import java.util.UUID
+
 import play.api.libs.json._
 import play.modules.reactivemongo.MongoDbConnection
 import reactivemongo.api.DB
@@ -34,7 +36,8 @@ trait SubscriptionFieldsIdRepository extends Repository[ApiSubscription, BSONObj
 
   def save(subscription: ApiSubscription): Future[Unit]
 
-  def fetch(id: String): Future[Option[ApiSubscription]]
+  def fetchById(id: String): Future[Option[ApiSubscription]]
+  def fetchByFieldsId(fieldsId: UUID): Future[Option[ApiSubscription]]
 
   def delete(id: String): Future[Unit]
 }
@@ -53,6 +56,10 @@ class SubscriptionFieldsIdMongoRepository(implicit mongo: () => DB)
     createSingleFieldAscendingIndex(
       indexFieldKey = "id",
       indexName = Some("idIndex")
+    ),
+    createSingleFieldAscendingIndex(
+      indexFieldKey = "fieldsId",
+      indexName = Some("fieldsIdIndex")
     )
   )
 
@@ -75,8 +82,11 @@ class SubscriptionFieldsIdMongoRepository(implicit mongo: () => DB)
     }
   }
 
-  override def fetch(id: String): Future[Option[ApiSubscription]] = {
+  override def fetchById(id: String): Future[Option[ApiSubscription]] = {
     collection.find(Json.obj("id" -> id)).one[ApiSubscription]
+  }
+  override def fetchByFieldsId(fieldsId: UUID): Future[Option[ApiSubscription]] = {
+    collection.find(Json.obj("fieldsId" -> fieldsId)).one[ApiSubscription]
   }
 
   override def delete(id: String): Future[Unit] = {

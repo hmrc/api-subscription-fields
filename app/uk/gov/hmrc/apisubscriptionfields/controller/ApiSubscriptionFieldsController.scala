@@ -65,10 +65,10 @@ class ApiSubscriptionFieldsController @Inject() (service: SubscriptionFieldsServ
 
   def deleteSubscriptionFields(rawAppId: UUID, rawApiContext: String, rawApiVersion: String): Action[AnyContent] = Action.async { implicit request =>
     val identifier = SubscriptionIdentifier(AppId(rawAppId), ApiContext(rawApiContext), ApiVersion(rawApiVersion))
-    //TODO remove service.get
-    service.get(identifier) flatMap {
-      case None => Future.successful(NOT_FOUND_RESPONSE)
-      case Some(_) => service.delete(identifier).map(deleted => if (deleted) NoContent else NOT_FOUND_RESPONSE)
+
+    service.delete(identifier) map {
+      case true => NoContent
+      case false => NOT_FOUND_RESPONSE
     } recover recovery
   }
 

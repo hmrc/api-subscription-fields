@@ -14,24 +14,34 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.apisubscriptionfields.repository
+package unit.uk.gov.hmrc.apisubscriptionfields.repository
 
 import java.util.UUID
 
 import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach}
+import reactivemongo.api.DB
 import reactivemongo.bson.BSONDocument
-import uk.gov.hmrc.apisubscriptionfields.model._
-import uk.gov.hmrc.apisubscriptionfields.model.JsonFormatters.formatApiSubscription
+import uk.gov.hmrc.apisubscriptionfields.model.JsonFormatters
+import uk.gov.hmrc.apisubscriptionfields.repository.{MongoDbProvider, MongoFormatters, SubscriptionFields, SubscriptionFieldsIdMongoRepository}
 import uk.gov.hmrc.mongo.MongoSpecSupport
-import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
+import uk.gov.hmrc.play.test.UnitSpec
+import util.TestData
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class SubscriptionFieldsIdsRepositorySpec extends UnitSpec
-  with BeforeAndAfterAll with BeforeAndAfterEach
-  with WithFakeApplication with MongoSpecSupport {
+  with BeforeAndAfterAll
+  with BeforeAndAfterEach
+  with MongoSpecSupport
+  with MongoFormatters
+  with JsonFormatters
+  with TestData { self =>
 
-  private val repository = new SubscriptionFieldsIdMongoRepository
+  private val mongoDbProvider = new MongoDbProvider {
+    override val mongo: () => DB = self.mongo
+  }
+
+  private val repository = new SubscriptionFieldsIdMongoRepository(mongoDbProvider)
 
   override def beforeEach() {
     super.beforeEach()
@@ -50,13 +60,9 @@ class SubscriptionFieldsIdsRepositorySpec extends UnitSpec
    https://github.tools.tax.service.gov.uk/HMRC/third-party-application/blob/master/it/uk/gov/hmrc/repository/ApplicationRepositorySpec.scala
   */
 
-  private def createApiSubscription(): ApiSubscription = {
-    val applicationId = UUID.randomUUID()
-    val apiContext = "hello_API"
-    val apiVersion = "2.5-v"
+  private def createApiSubscription(): SubscriptionFields = {
     val customFields = Map("field_1" -> "value_1", "field_2" -> "value_2", "field_3" -> "value_3")
-    val apiSubscriptionRequest = ApiSubscriptionRequest(applicationId, apiContext, apiVersion, customFields)
-    ApiSubscription.create(apiSubscriptionRequest)
+    SubscriptionFields(s"${UUID.randomUUID().toString}-WhoCaresSoLongAsItsFixed", UUID.randomUUID(), customFields)
   }
 
   private def collectionSize: Int = {
@@ -73,7 +79,7 @@ class SubscriptionFieldsIdsRepositorySpec extends UnitSpec
       import reactivemongo.json._
 
       val selector = BSONDocument("id" -> apiSubscription.id)
-      await(repository.collection.find(selector).one[ApiSubscription]) shouldBe Some(apiSubscription)
+      await(repository.collection.find(selector).one[SubscriptionFields]) shouldBe Some(apiSubscription)
     }
   }
 

@@ -17,40 +17,41 @@
 package uk.gov.hmrc.apisubscriptionfields.repository
 
 import java.util.UUID
+import javax.inject.{Inject, Singleton}
 
+import com.google.inject.ImplementedBy
 import play.api.libs.json._
 import play.modules.reactivemongo.MongoDbConnection
 import reactivemongo.api.DB
 import reactivemongo.api.commands.WriteResult
-import reactivemongo.api.indexes.IndexType.Ascending
 import reactivemongo.api.indexes.Index
+import reactivemongo.api.indexes.IndexType.Ascending
 import reactivemongo.bson.{BSONDocument, BSONObjectID}
-import uk.gov.hmrc.apisubscriptionfields.model.{ApiSubscription, MongoFormatters}
+import uk.gov.hmrc.mongo.ReactiveRepository
 import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
-import uk.gov.hmrc.mongo.{ReactiveRepository, Repository}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-trait SubscriptionFieldsIdRepository extends Repository[ApiSubscription, BSONObjectID] {
+@ImplementedBy(classOf[SubscriptionFieldsIdMongoRepository])
+trait SubscriptionFieldsIdRepository {
 
-  def save(subscription: ApiSubscription): Future[Unit]
+  def save(subscription: SubscriptionFields): Future[Unit]
 
-  def fetchById(id: String): Future[Option[ApiSubscription]]
-  def fetchByFieldsId(fieldsId: UUID): Future[Option[ApiSubscription]]
+  def fetchById(id: String): Future[Option[SubscriptionFields]]
+  def fetchByFieldsId(fieldsId: UUID): Future[Option[SubscriptionFields]]
 
-  def delete(id: String): Future[Unit]
+  def delete(id: String): Future[Boolean]
 }
 
-class SubscriptionFieldsIdMongoRepository(implicit mongo: () => DB)
-  extends ReactiveRepository[ApiSubscription, BSONObjectID]("subscriptionFieldsId", mongo,
-    MongoFormatters.formatApiSubscription, ReactiveMongoFormats.objectIdFormats)
+//TODO remove repo inheritance
+@Singleton
+class SubscriptionFieldsIdMongoRepository @Inject() (mongoDbProvider: MongoDbProvider)
+  extends ReactiveRepository[SubscriptionFields, BSONObjectID]("subscriptionFields", mongoDbProvider.mongo,
+    MongoFormatters.ApiSubscriptionJF, ReactiveMongoFormats.objectIdFormats)
   with SubscriptionFieldsIdRepository {
 
-  private implicit val format = new OFormat[ApiSubscription] {
-    override def reads(json: JsValue): JsResult[ApiSubscription] = MongoFormatters.formatApiSubscription.reads(json)
-    override def writes(s: ApiSubscription): JsObject = MongoFormatters.formatApiSubscription.writes(s)
-  }
+  private implicit val format = MongoFormatters.ApiSubscriptionJF
 
   override def indexes = Seq(
     createSingleFieldAscendingIndex(
@@ -66,6 +67,7 @@ class SubscriptionFieldsIdMongoRepository(implicit mongo: () => DB)
   private def createSingleFieldAscendingIndex(indexFieldKey: String, indexName: Option[String],
                                               isUnique: Boolean = false, isBackground: Boolean = true): Index = {
     Index(
+      // TODO use Hashed for index type because we index something that is a UUID like thing
       key = Seq(indexFieldKey -> Ascending),
       name = indexName,
       unique = isUnique,
@@ -73,7 +75,7 @@ class SubscriptionFieldsIdMongoRepository(implicit mongo: () => DB)
     )
   }
 
-  override def save(subscription: ApiSubscription): Future[Unit] = {
+  override def save(subscription: SubscriptionFields): Future[Unit] = {
     collection.find(Json.obj("id" -> subscription.id)).one[BSONDocument].flatMap {
       case Some(document) => collection.update(selector = BSONDocument("_id" -> document.get("_id")), update = subscription)
       case _ => collection.insert(subscription)
@@ -82,31 +84,34 @@ class SubscriptionFieldsIdMongoRepository(implicit mongo: () => DB)
     }
   }
 
-  override def fetchById(id: String): Future[Option[ApiSubscription]] = {
-    collection.find(Json.obj("id" -> id)).one[ApiSubscription]
+  override def fetchById(id: String): Future[Option[SubscriptionFields]] = {
+    collection.find(Json.obj("id" -> id)).one[SubscriptionFields]
   }
-  override def fetchByFieldsId(fieldsId: UUID): Future[Option[ApiSubscription]] = {
-    collection.find(Json.obj("fieldsId" -> fieldsId)).one[ApiSubscription]
+  override def fetchByFieldsId(fieldsId: UUID): Future[Option[SubscriptionFields]] = {
+    collection.find(Json.obj("fieldsId" -> fieldsId)).one[SubscriptionFields]
   }
 
-  override def delete(id: String): Future[Unit] = {
+  override def delete(id: String): Future[Boolean] = {
     collection.remove(Json.obj("id" -> id)).map {
       writeResult => handleError(writeResult, s"Could not delete subscription fields for id: $id")
     }
   }
 
-  private def handleError[T](result: WriteResult, exceptionMsg: String): Unit = {
-    result.errmsg match {
-      case Some(errMsg) => throw new RuntimeException(s"""$exceptionMsg. $errMsg""")
-      case _ => ()
+  private def handleError[T](result: WriteResult, exceptionMsg: => String): Boolean = {
+    result.errmsg.fold(databaseAltered(result)) {
+      errMsg => throw new RuntimeException(s"""$exceptionMsg. $errMsg""")
     }
   }
 
+  private def databaseAltered(writeResult: WriteResult): Boolean = writeResult.n > 0
 }
 
-object SubscriptionFieldsIdRepository extends MongoDbConnection {
+@ImplementedBy(classOf[MongoDb])
+trait MongoDbProvider {
+  def mongo: () => DB
+}
 
-  private lazy val repository = new SubscriptionFieldsIdMongoRepository
-
-  def apply(): SubscriptionFieldsIdRepository = repository
+@Singleton
+class MongoDb extends MongoDbConnection with MongoDbProvider {
+  override val mongo: () => DB = db
 }

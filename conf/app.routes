@@ -1,3 +1,11 @@
 # microservice specific routes
 
-POST        /id         uk.gov.hmrc.apisubscriptionfields.controller.ApiSubscriptionFieldsController.id
+# TODO add endpoints for field definitions CRUD operations
+
+GET         /application/:appId/context/:apiContext/version/:apiVersion        @uk.gov.hmrc.apisubscriptionfields.controller.ApiSubscriptionFieldsController.getSubscriptionFields(appId: java.util.UUID, apiContext: String, apiVersion: String)
+
+GET         /fieldsId/:fieldsId                                                @uk.gov.hmrc.apisubscriptionfields.controller.ApiSubscriptionFieldsController.getSubscriptionFieldsByFieldsId(fieldsId: java.util.UUID)
+
+PUT         /application/:appId/context/:apiContext/version/:apiVersion        @uk.gov.hmrc.apisubscriptionfields.controller.ApiSubscriptionFieldsController.upsertSubscriptionFields(appId: java.util.UUID, apiContext: String, apiVersion: String)
+
+DELETE      /application/:appId/context/:apiContext/version/:apiVersion        @uk.gov.hmrc.apisubscriptionfields.controller.ApiSubscriptionFieldsController.deleteSubscriptionFields(appId: java.util.UUID, apiContext: String, apiVersion: String)

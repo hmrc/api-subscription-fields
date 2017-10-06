@@ -7,11 +7,12 @@ TODO: This microservice BLA BLA BLA ...
 ### Tests
 Some tests require MongoDB to run. 
 Thus, remember to start up MongoDB if you want to run the tests locally.
-The tests include unit tests and integration tests.
+There are unit tests, integration tests and acceptance tests.
 In order to run them, use this command line:
 ```
-sbt test it:test
+sbt test it:test acceptance:test
 ```
+
 
 ### License
 

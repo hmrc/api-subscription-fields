@@ -14,11 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.apisubscriptionfields.config
+package uk.gov.hmrc.apisubscriptionfields.model
 
-import uk.gov.hmrc.play.audit.http.connector.AuditConnector
-import uk.gov.hmrc.play.microservice.config.LoadAuditingConfig
+case class SubscriptionFieldsRequest(fields: Fields)
 
-object MicroserviceAuditConnector extends AuditConnector {
-  override lazy val auditingConfig = LoadAuditingConfig(s"auditing")
-}

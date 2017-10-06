@@ -16,12 +16,29 @@
 
 package uk.gov.hmrc.apisubscriptionfields.model
 
-import play.api.libs.json.Json
+import java.util.UUID
 
-object JsonFormatters {
-  implicit val formatApiSubscription = Json.format[ApiSubscription]
+import play.api.libs.json._
+
+trait SharedJsonFormatters {
+  implicit val SubscriptionFieldsIdJF = new Format[SubscriptionFieldsId] {
+    def writes(s: SubscriptionFieldsId) = JsString(s.value.toString)
+
+    def reads(json: JsValue) = json match {
+      case JsNull => JsError()
+      case _ => JsSuccess(SubscriptionFieldsId(json.as[UUID]))
+    }
+  }
 }
 
-object MongoFormatters {
-  implicit val formatApiSubscription = Json.format[ApiSubscription]
+trait JsonFormatters extends SharedJsonFormatters {
+
+  implicit val SubscriptionFieldsResponseJF = Json.format[SubscriptionFieldsResponse]
+
+  implicit val SubscriptionFieldsIdResponseJF = Json.format[SubscriptionFieldsIdResponse]
+
+  implicit val SubscriptionFieldsRequestJF = Json.format[SubscriptionFieldsRequest]
+
 }
+
+object JsonFormatters extends JsonFormatters

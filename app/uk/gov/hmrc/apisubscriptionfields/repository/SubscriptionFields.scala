@@ -14,11 +14,14 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.apisubscriptionfields.config
+package uk.gov.hmrc.apisubscriptionfields.repository
 
-import uk.gov.hmrc.play.audit.http.connector.AuditConnector
-import uk.gov.hmrc.play.microservice.config.LoadAuditingConfig
+import java.util.UUID
 
-object MicroserviceAuditConnector extends AuditConnector {
-  override lazy val auditingConfig = LoadAuditingConfig(s"auditing")
+import uk.gov.hmrc.apisubscriptionfields.model.{Fields, SubscriptionIdentifier}
+
+object SubscriptionFields {
+  def apply(id: SubscriptionIdentifier, fieldsId: UUID, customFields: Fields) : SubscriptionFields = SubscriptionFields(id.encode(), fieldsId, customFields)
 }
+
+case class SubscriptionFields(id: String, fieldsId: UUID, customFields: Fields)

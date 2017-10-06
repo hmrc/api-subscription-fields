@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.apisubscriptionfields.config
+package uk.gov.hmrc.apisubscriptionfields.repository
 
-import uk.gov.hmrc.play.audit.http.connector.AuditConnector
-import uk.gov.hmrc.play.microservice.config.LoadAuditingConfig
+import play.api.libs.json.Json
 
-object MicroserviceAuditConnector extends AuditConnector {
-  override lazy val auditingConfig = LoadAuditingConfig(s"auditing")
+trait MongoFormatters {
+  implicit val ApiSubscriptionJF = Json.format[SubscriptionFields]
+
 }
+
+object MongoFormatters extends MongoFormatters

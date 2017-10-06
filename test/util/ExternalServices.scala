@@ -14,23 +14,9 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.apisubscriptionfields.controller
+package util
 
-import play.api.http.Status
-import play.api.test.FakeRequest
-import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
-
-class ApiSubscriptionFieldsControllerSpec extends UnitSpec with WithFakeApplication {
-
-  private implicit lazy val materializer = fakeApplication.materializer
-
-  private val fakeRequest = FakeRequest("POST", "/id")
-
-  "POST /id" should {
-    "return 201" in {
-      val result = ApiSubscriptionFieldsController.id()(fakeRequest)
-      status(result) shouldBe Status.CREATED
-    }
-  }
-
+object ExternalServicesConfig {
+  val Port: Int = sys.env.getOrElse("WIREMOCK_SERVICE_LOCATOR_PORT", "11111").toInt
+  val Host = "localhost"
 }

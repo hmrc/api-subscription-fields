@@ -34,8 +34,8 @@ import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-@ImplementedBy(classOf[SubscriptionFieldsIdMongoRepository])
-trait SubscriptionFieldsIdRepository {
+@ImplementedBy(classOf[SubscriptionFieldsMongoRepository])
+trait SubscriptionFieldsRepository {
 
   def save(subscription: SubscriptionFields): Future[Unit]
 
@@ -47,10 +47,10 @@ trait SubscriptionFieldsIdRepository {
 
 //TODO remove repo inheritance
 @Singleton
-class SubscriptionFieldsIdMongoRepository @Inject() (mongoDbProvider: MongoDbProvider)
+class SubscriptionFieldsMongoRepository @Inject()(mongoDbProvider: MongoDbProvider)
   extends ReactiveRepository[SubscriptionFields, BSONObjectID]("subscriptionFields", mongoDbProvider.mongo,
     MongoFormatters.ApiSubscriptionJF, ReactiveMongoFormats.objectIdFormats)
-  with SubscriptionFieldsIdRepository {
+  with SubscriptionFieldsRepository {
 
   private implicit val format = MongoFormatters.ApiSubscriptionJF
 

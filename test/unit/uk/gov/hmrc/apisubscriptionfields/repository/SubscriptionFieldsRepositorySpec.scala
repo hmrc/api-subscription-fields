@@ -23,14 +23,14 @@ import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach}
 import reactivemongo.api.DB
 import reactivemongo.bson.BSONDocument
 import uk.gov.hmrc.apisubscriptionfields.model.JsonFormatters
-import uk.gov.hmrc.apisubscriptionfields.repository.{MongoDbProvider, MongoFormatters, SubscriptionFields, SubscriptionFieldsIdMongoRepository}
+import uk.gov.hmrc.apisubscriptionfields.repository.{MongoDbProvider, MongoFormatters, SubscriptionFields, SubscriptionFieldsMongoRepository}
 import uk.gov.hmrc.mongo.MongoSpecSupport
 import uk.gov.hmrc.play.test.UnitSpec
 import util.TestData
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class SubscriptionFieldsIdsRepositorySpec extends UnitSpec
+class SubscriptionFieldsRepositorySpec extends UnitSpec
   with BeforeAndAfterAll
   with BeforeAndAfterEach
   with MongoSpecSupport
@@ -43,7 +43,7 @@ class SubscriptionFieldsIdsRepositorySpec extends UnitSpec
     override val mongo: () => DB = self.mongo
   }
 
-  private val repository = new SubscriptionFieldsIdMongoRepository(mongoDbProvider)
+  private val repository = new SubscriptionFieldsMongoRepository(mongoDbProvider)
 
   override def beforeEach() {
     super.beforeEach()
@@ -57,7 +57,7 @@ class SubscriptionFieldsIdsRepositorySpec extends UnitSpec
 
   /*
   TODO:
-   - vedere TPA, TPDA, etc
+   - look at TPA, TPDA, etc
    - move these tests as integrations tests, as done here:
    https://github.tools.tax.service.gov.uk/HMRC/third-party-application/blob/master/it/uk/gov/hmrc/repository/ApplicationRepositorySpec.scala
   */

@@ -20,7 +20,7 @@ import java.util.UUID
 
 import scala.concurrent.Future
 
-class InMemoryRepository extends SubscriptionFieldsIdRepository {
+class InMemoryRepository extends SubscriptionFieldsRepository {
   private[this] var values: Map[String, SubscriptionFields] = Map()
   private[this] var altKey: Map[UUID, String] = Map()
 

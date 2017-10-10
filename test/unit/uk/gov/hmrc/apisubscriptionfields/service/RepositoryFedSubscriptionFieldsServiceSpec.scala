@@ -19,7 +19,7 @@ package unit.uk.gov.hmrc.apisubscriptionfields.service
 import java.util.UUID
 
 import org.scalamock.scalatest.MockFactory
-import uk.gov.hmrc.apisubscriptionfields.repository.{InMemoryRepository, SubscriptionFields, SubscriptionFieldsIdRepository}
+import uk.gov.hmrc.apisubscriptionfields.repository.{InMemoryRepository, SubscriptionFields, SubscriptionFieldsRepository}
 import uk.gov.hmrc.apisubscriptionfields.service.{RepositoryFedSubscriptionFieldsService, UUIDCreator}
 import uk.gov.hmrc.play.test.UnitSpec
 import util.TestData
@@ -28,7 +28,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 class RepositoryFedSubscriptionFieldsServiceSpec extends UnitSpec with TestData with MockFactory {
 
-  private val mockSubscriptionFieldsIdRepository = mock[SubscriptionFieldsIdRepository]
+  private val mockSubscriptionFieldsIdRepository = mock[SubscriptionFieldsRepository]
   private val mockUuidCreator = mock[UUIDCreator]
   private val service = new RepositoryFedSubscriptionFieldsService(mockSubscriptionFieldsIdRepository, mockUuidCreator)
 

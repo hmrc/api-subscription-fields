@@ -22,7 +22,7 @@ import javax.inject._
 import com.google.inject.ImplementedBy
 import play.api.Logger
 import uk.gov.hmrc.apisubscriptionfields.model._
-import uk.gov.hmrc.apisubscriptionfields.repository.{SubscriptionFields, SubscriptionFieldsIdRepository}
+import uk.gov.hmrc.apisubscriptionfields.repository.{SubscriptionFields, SubscriptionFieldsRepository}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -45,7 +45,7 @@ class UUIDCreator {
 }
 
 @Singleton
-class RepositoryFedSubscriptionFieldsService @Inject()(repository: SubscriptionFieldsIdRepository,
+class RepositoryFedSubscriptionFieldsService @Inject()(repository: SubscriptionFieldsRepository,
                                                        uuidCreator: UUIDCreator) extends SubscriptionFieldsService {
 
   def upsert(identifier: SubscriptionIdentifier, subscriptionFields: Fields): Future[(SubscriptionFieldsResponse, Boolean)] = {
@@ -69,7 +69,7 @@ class RepositoryFedSubscriptionFieldsService @Inject()(repository: SubscriptionF
 
   def delete(identifier: SubscriptionIdentifier): Future[Boolean] = {
     val id = identifier.encode()
-    Logger.debug(s"[delete] SubscriptionIdentifier: $identifier id: $id")
+    Logger.debug(s"[delete] SubscriptionIdentifier: $identifier")
     repository.delete(id)
   }
 

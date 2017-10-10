@@ -20,12 +20,14 @@ import java.util.UUID
 import javax.inject._
 
 import com.google.inject.ImplementedBy
+import play.api.Logger
 import uk.gov.hmrc.apisubscriptionfields.model._
 import uk.gov.hmrc.apisubscriptionfields.repository.{SubscriptionFields, SubscriptionFieldsIdRepository}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
+//TODO: look at flattening this into just the class
 @ImplementedBy(classOf[RepositoryFedSubscriptionFieldsService])
 trait SubscriptionFieldsService {
   def get(identifier: SubscriptionIdentifier): Future[Option[SubscriptionFieldsResponse]]
@@ -53,6 +55,8 @@ class RepositoryFedSubscriptionFieldsService @Inject()(repository: SubscriptionF
     def create(): Future[SubscriptionFieldsResponse] =
       save(SubscriptionFields(identifier, uuidCreator.uuid(), subscriptionFields))
 
+    Logger.debug(s"[upsert] SubscriptionIdentifier: $identifier")
+
     repository.fetchById(identifier.encode()) flatMap {
       o =>
         o.fold(
@@ -64,22 +68,27 @@ class RepositoryFedSubscriptionFieldsService @Inject()(repository: SubscriptionF
   }
 
   def delete(identifier: SubscriptionIdentifier): Future[Boolean] = {
-    repository.delete(identifier.encode())
+    val id = identifier.encode()
+    Logger.debug(s"[delete] SubscriptionIdentifier: $identifier id: $id")
+    repository.delete(id)
   }
 
   def get(identifier: SubscriptionIdentifier): Future[Option[SubscriptionFieldsResponse]] = {
+    Logger.debug(s"[get] SubscriptionIdentifier: $identifier")
     for {
       fetch <- repository.fetchById(identifier.encode())
     } yield fetch.map(asResponse)
   }
 
   def get(subscriptionFieldsId: SubscriptionFieldsId): Future[Option[SubscriptionFieldsResponse]] = {
+    Logger.debug(s"[get] SubscriptionFieldsId: $subscriptionFieldsId")
     for {
       fetch <- repository.fetchByFieldsId(subscriptionFieldsId.value)
     } yield fetch.map(asResponse)
   }
 
   private def save(apiSubscription: SubscriptionFields): Future[SubscriptionFieldsResponse] = {
+    Logger.debug(s"[save] SubscriptionFields: $apiSubscription")
     repository.save(apiSubscription) map {
       _ => SubscriptionFieldsResponse(SubscriptionFieldsId(apiSubscription.fieldsId), apiSubscription.customFields)
     }

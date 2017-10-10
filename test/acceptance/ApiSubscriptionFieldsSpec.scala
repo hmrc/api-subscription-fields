@@ -51,8 +51,8 @@ class ApiSubscriptionFieldsSpec extends AcceptanceTestSpec
     .withHeaders(RequestHeaders.ACCEPT_HMRC_JSON_HEADER, RequestHeaders.CONTENT_TYPE_HEADER)
     .withJsonBody(Json.toJson(contents))
 
-  def fieldsEndpoint(appId: UUID, apiContext: String, apiVersion: String) =
-    s"/application/${appId.toString}/context/$apiContext/version/$apiVersion"
+  def fieldsEndpoint(appId: String, apiContext: String, apiVersion: String) =
+    s"/application/$appId/context/$apiContext/version/$apiVersion"
 
   feature("Api-Subscription-Fields") {
     Logger.logger.info(s"App.mode = ${app.mode.toString}")

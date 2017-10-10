@@ -27,7 +27,7 @@ import scala.concurrent.Future
 
 trait TestData {
 
-  final val fakeAppId = UUID.randomUUID()
+  final val fakeAppId = UUID.randomUUID().toString
   final val fakeContext = "acontext"
   final val fakeVersion = "1.0.2"
   final val FakeSubscriptionIdentifier = SubscriptionIdentifier(AppId(fakeAppId),ApiContext(fakeContext),ApiVersion(fakeVersion))

@@ -17,7 +17,7 @@
 package unit.uk.gov.hmrc.apisubscriptionfields.controller
 
 import org.scalamock.scalatest.MockFactory
-import play.api.libs.json.{JsDefined, JsString, Json}
+import play.api.libs.json.{JsDefined, JsString}
 import play.api.mvc._
 import play.api.test.Helpers._
 import play.api.test._

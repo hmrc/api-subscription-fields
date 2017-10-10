@@ -20,7 +20,7 @@ import java.util.UUID
 
 import scala.annotation.tailrec
 
-case class AppId(value: UUID) extends AnyVal
+case class AppId(value: String) extends AnyVal
 
 case class ApiContext(value: String) extends AnyVal
 
@@ -41,7 +41,7 @@ object SubscriptionIdentifier {
     }
 
     val parts = text.split(findSeparator(Separator))
-    Some(SubscriptionIdentifier(AppId(UUID.fromString(parts(0))), ApiContext(parts(1)), ApiVersion(parts(2))))
+    Some(SubscriptionIdentifier(AppId(parts(0)), ApiContext(parts(1)), ApiVersion(parts(2))))
   }
 }
 

@@ -19,6 +19,7 @@ package uk.gov.hmrc.apisubscriptionfields.controller
 import java.util.UUID
 import javax.inject.{Inject, Singleton}
 
+import play.api.Logger
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc._
 import uk.gov.hmrc.apisubscriptionfields.model.ErrorCode._
@@ -35,12 +36,14 @@ class ApiSubscriptionFieldsController @Inject() (service: SubscriptionFieldsServ
 
   private val NOT_FOUND_RESPONSE = NotFound(JsErrorResponse(SUBSCRIPTION_FIELDS_ID_NOT_FOUND, "Subscription Fields were not found"))
 
-  def getSubscriptionFields(rawAppId: UUID, rawApiContext: String, rawApiVersion: String): Action[AnyContent] = Action.async { implicit request =>
+  def getSubscriptionFields(rawAppId: String, rawApiContext: String, rawApiVersion: String): Action[AnyContent] = Action.async { implicit request =>
+    Logger.debug(s"[getSubscriptionFields] appId: $rawAppId apiContext: $rawApiContext apiVersion: $rawApiVersion")
     val eventualMaybeResponse = service.get(SubscriptionIdentifier(AppId(rawAppId), ApiContext(rawApiContext), ApiVersion(rawApiVersion)))
     asActionResult(eventualMaybeResponse)
   }
 
   def getSubscriptionFieldsByFieldsId(rawFieldsId: UUID): Action[AnyContent] = Action.async { implicit request =>
+    Logger.debug(s"[getSubscriptionFieldsByFieldsId] fieldsId: $rawFieldsId")
     val eventualMaybeResponse = service.get(SubscriptionFieldsId(rawFieldsId))
     asActionResult(eventualMaybeResponse)
   }
@@ -52,8 +55,9 @@ class ApiSubscriptionFieldsController @Inject() (service: SubscriptionFieldsServ
     } recover recovery
   }
 
-  def upsertSubscriptionFields(rawAppId: UUID, rawApiContext: String, rawApiVersion: String): Action[JsValue] = Action.async(parse.json) { implicit request =>
+  def upsertSubscriptionFields(rawAppId: String, rawApiContext: String, rawApiVersion: String): Action[JsValue] = Action.async(parse.json) { implicit request =>
       withJsonBody[SubscriptionFieldsRequest] { payload =>
+        Logger.debug(s"[upsertSubscriptionFields] appId: $rawAppId apiContext: $rawApiContext apiVersion: $rawApiVersion")
         service.upsert(SubscriptionIdentifier(AppId(rawAppId), ApiContext(rawApiContext), ApiVersion(rawApiVersion)), payload.fields) map {
           case (response, true) => Created(Json.toJson(response))
           case (response, false) => Ok(Json.toJson(response))
@@ -63,8 +67,9 @@ class ApiSubscriptionFieldsController @Inject() (service: SubscriptionFieldsServ
       } recover recovery
     }
 
-  def deleteSubscriptionFields(rawAppId: UUID, rawApiContext: String, rawApiVersion: String): Action[AnyContent] = Action.async { implicit request =>
+  def deleteSubscriptionFields(rawAppId: String, rawApiContext: String, rawApiVersion: String): Action[AnyContent] = Action.async { implicit request =>
     val identifier = SubscriptionIdentifier(AppId(rawAppId), ApiContext(rawApiContext), ApiVersion(rawApiVersion))
+    Logger.debug(s"[deleteSubscriptionFields] appId: $rawAppId apiContext: $rawApiContext apiVersion: $rawApiVersion")
 
     service.delete(identifier) map {
       case true => NoContent

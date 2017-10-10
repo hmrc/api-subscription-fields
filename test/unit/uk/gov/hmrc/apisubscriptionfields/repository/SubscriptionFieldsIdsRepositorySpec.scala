@@ -18,6 +18,7 @@ package unit.uk.gov.hmrc.apisubscriptionfields.repository
 
 import java.util.UUID
 
+import org.scalamock.scalatest.MockFactory
 import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach}
 import reactivemongo.api.DB
 import reactivemongo.bson.BSONDocument
@@ -35,7 +36,8 @@ class SubscriptionFieldsIdsRepositorySpec extends UnitSpec
   with MongoSpecSupport
   with MongoFormatters
   with JsonFormatters
-  with TestData { self =>
+  with TestData
+  with MockFactory { self =>
 
   private val mongoDbProvider = new MongoDbProvider {
     override val mongo: () => DB = self.mongo

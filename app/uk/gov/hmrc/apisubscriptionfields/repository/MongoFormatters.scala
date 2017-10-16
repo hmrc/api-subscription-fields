@@ -22,7 +22,6 @@ import uk.gov.hmrc.apisubscriptionfields.model.JsonFormatters
 trait MongoFormatters extends JsonFormatters {
   implicit val SubscriptionFieldsJF = Json.format[SubscriptionFields]
   implicit val FieldsDefinitionJF = Json.format[FieldsDefinition]
-
 }
 
 object MongoFormatters extends MongoFormatters

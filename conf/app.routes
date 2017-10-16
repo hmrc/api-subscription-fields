@@ -1,5 +1,13 @@
 # microservice specific routes
 
+
+# subscription field definitions endpoints routes
+
+# TODO
+
+
+# subscription fields endpoints routes
+
 PUT         /field/application/:appId/context/:apiContext/version/:apiVersion        @uk.gov.hmrc.apisubscriptionfields.controller.ApiSubscriptionFieldsController.upsertSubscriptionFields(appId: String, apiContext: String, apiVersion: String)
 
 GET         /field/application/:appId/context/:apiContext/version/:apiVersion        @uk.gov.hmrc.apisubscriptionfields.controller.ApiSubscriptionFieldsController.getSubscriptionFields(appId: String, apiContext: String, apiVersion: String)

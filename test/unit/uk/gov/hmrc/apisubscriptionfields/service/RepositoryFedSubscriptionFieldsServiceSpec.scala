@@ -22,11 +22,11 @@ import org.scalamock.scalatest.MockFactory
 import uk.gov.hmrc.apisubscriptionfields.repository.{InMemoryRepository, SubscriptionFields, SubscriptionFieldsRepository}
 import uk.gov.hmrc.apisubscriptionfields.service.{RepositoryFedSubscriptionFieldsService, UUIDCreator}
 import uk.gov.hmrc.play.test.UnitSpec
-import util.TestData
+import util.SubscriptionFieldsTestData
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class RepositoryFedSubscriptionFieldsServiceSpec extends UnitSpec with TestData with MockFactory {
+class RepositoryFedSubscriptionFieldsServiceSpec extends UnitSpec with SubscriptionFieldsTestData with MockFactory {
 
   private val mockSubscriptionFieldsIdRepository = mock[SubscriptionFieldsRepository]
   private val mockUuidCreator = mock[UUIDCreator]
@@ -76,6 +76,7 @@ class RepositoryFedSubscriptionFieldsServiceSpec extends UnitSpec with TestData 
     result shouldBe Some(ValidResponse)
   }
 
+  //TODO this should be removed when removing InMemoryRepository
   "A Service using an in memory repository" should {
 
     class ListOfUUIDS(initial: Seq[UUID]) extends UUIDCreator {

@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.apisubscriptionfields.repository
 
-import java.util.UUID
 import javax.inject.{Inject, Singleton}
 
 import com.google.inject.ImplementedBy
@@ -33,34 +32,27 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 //TODO: think about getting rid of trait
-@ImplementedBy(classOf[SubscriptionFieldsMongoRepository])
-trait SubscriptionFieldsRepository {
+@ImplementedBy(classOf[FieldsDefinitionMongoRepository])
+trait FieldsDefinitionRepository {
 
   //TODO consider Future[Boolean]
-  def save(subscription: SubscriptionFields): Future[Unit]
+  def save(fieldsDefinition: FieldsDefinition): Future[Unit]
 
-  def fetchById(id: String): Future[Option[SubscriptionFields]]
-  def fetchByFieldsId(fieldsId: UUID): Future[Option[SubscriptionFields]]
-
-  def delete(id: String): Future[Boolean]
+  def fetchById(id: String): Future[Option[FieldsDefinition]]
 }
 
 @Singleton
-class SubscriptionFieldsMongoRepository @Inject()(mongoDbProvider: MongoDbProvider)
-  extends ReactiveRepository[SubscriptionFields, BSONObjectID]("subscriptionFields", mongoDbProvider.mongo,
-    MongoFormatters.SubscriptionFieldsJF, ReactiveMongoFormats.objectIdFormats)
-  with SubscriptionFieldsRepository {
+class FieldsDefinitionMongoRepository @Inject()(mongoDbProvider: MongoDbProvider)
+  extends ReactiveRepository[FieldsDefinition, BSONObjectID]("fieldsDefinitions", mongoDbProvider.mongo,
+    MongoFormatters.FieldsDefinitionJF, ReactiveMongoFormats.objectIdFormats)
+  with FieldsDefinitionRepository {
 
-  private implicit val format = MongoFormatters.SubscriptionFieldsJF
+  private implicit val format = MongoFormatters.FieldsDefinitionJF
 
   override def indexes = Seq(
     createSingleFieldAscendingIndex(
       indexFieldKey = "id",
       indexName = Some("idIndex")
-    ),
-    createSingleFieldAscendingIndex(
-      indexFieldKey = "fieldsId",
-      indexName = Some("fieldsIdIndex")
     )
   )
 
@@ -74,34 +66,20 @@ class SubscriptionFieldsMongoRepository @Inject()(mongoDbProvider: MongoDbProvid
     )
   }
 
-  //TODO change return type to boolean
-  override def save(subscription: SubscriptionFields): Future[Unit] = {
-    val selector = selectorById(subscription.id)
-    Logger.debug(s"[save] selector: $selector")
-    collection.find(selector).one[BSONDocument].flatMap {
-      case Some(document) => collection.update(selector = BSONDocument("_id" -> document.get("_id")), update = subscription)
-      case _ => collection.insert(subscription)
-    }.map {
-      writeResult => handleError(writeResult, s"Could not save subscription fields: $subscription")
-    }
-  }
-
-  override def fetchById(id: String): Future[Option[SubscriptionFields]] = {
+  override def fetchById(id: String): Future[Option[FieldsDefinition]] = {
     val selector = selectorById(id)
     Logger.debug(s"[fetchById] selector: $selector")
-    collection.find(selector).one[SubscriptionFields]
-  }
-  override def fetchByFieldsId(fieldsId: UUID): Future[Option[SubscriptionFields]] = {
-    val selector = Json.obj("fieldsId" -> fieldsId)
-    Logger.debug(s"[fetchByFieldsId] selector: $selector")
-    collection.find(selector).one[SubscriptionFields]
+    collection.find(selector).one[FieldsDefinition]
   }
 
-  override def delete(id: String): Future[Boolean] = {
-    val selector = selectorById(id)
-    Logger.debug(s"[delete] selector: $selector")
-    collection.remove(selector).map {
-      writeResult => handleError(writeResult, s"Could not delete subscription fields for id: $id")
+  override def save(fieldsDefinition: FieldsDefinition): Future[Unit] = {
+    val selector = Json.obj("id" -> fieldsDefinition.id)
+    Logger.debug(s"[save] selector: $selector")
+    collection.find(selector).one[BSONDocument].flatMap {
+      case Some(document) => collection.update(selector = BSONDocument("_id" -> document.get("_id")), update = fieldsDefinition)
+      case _ => collection.insert(fieldsDefinition)
+    }.map {
+      writeResult => handleError(writeResult, s"Could not save fields definition fields: $fieldsDefinition")
     }
   }
 

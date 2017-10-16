@@ -26,7 +26,7 @@ import uk.gov.hmrc.apisubscriptionfields.model.JsonFormatters
 import uk.gov.hmrc.apisubscriptionfields.repository.{MongoDbProvider, MongoFormatters, SubscriptionFields, SubscriptionFieldsMongoRepository}
 import uk.gov.hmrc.mongo.MongoSpecSupport
 import uk.gov.hmrc.play.test.UnitSpec
-import util.TestData
+import util.SubscriptionFieldsTestData
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -36,7 +36,7 @@ class SubscriptionFieldsRepositorySpec extends UnitSpec
   with MongoSpecSupport
   with MongoFormatters
   with JsonFormatters
-  with TestData
+  with SubscriptionFieldsTestData
   with MockFactory { self =>
 
   private val mongoDbProvider = new MongoDbProvider {

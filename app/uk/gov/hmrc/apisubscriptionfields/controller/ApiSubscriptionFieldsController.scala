@@ -34,24 +34,34 @@ class ApiSubscriptionFieldsController @Inject() (service: SubscriptionFieldsServ
 
   import JsonFormatters._
 
-  private val NOT_FOUND_RESPONSE = NotFound(JsErrorResponse(SUBSCRIPTION_FIELDS_ID_NOT_FOUND, "Subscription Fields were not found"))
+  private def notFoundResponse(message: String) = {
+    NotFound(JsErrorResponse(NOT_FOUND_CODE, message))
+  }
+
+  private def notFoundMessage(rawAppId: String, rawApiContext: String, rawApiVersion: String): String = {
+    s"Id ($rawAppId, $rawApiContext, $rawApiVersion) was not found"
+  }
+
+  private def notFoundMessage(rawFieldsId: UUID): String = {
+    s"FieldsId (${rawFieldsId.toString}) was not found"
+  }
 
   def getSubscriptionFields(rawAppId: String, rawApiContext: String, rawApiVersion: String): Action[AnyContent] = Action.async { implicit request =>
     Logger.debug(s"[getSubscriptionFields] appId: $rawAppId apiContext: $rawApiContext apiVersion: $rawApiVersion")
     val eventualMaybeResponse = service.get(SubscriptionIdentifier(AppId(rawAppId), ApiContext(rawApiContext), ApiVersion(rawApiVersion)))
-    asActionResult(eventualMaybeResponse)
+    asActionResult(eventualMaybeResponse, notFoundMessage(rawAppId, rawApiContext, rawApiVersion))
   }
 
   def getSubscriptionFieldsByFieldsId(rawFieldsId: UUID): Action[AnyContent] = Action.async { implicit request =>
     Logger.debug(s"[getSubscriptionFieldsByFieldsId] fieldsId: $rawFieldsId")
     val eventualMaybeResponse = service.get(SubscriptionFieldsId(rawFieldsId))
-    asActionResult(eventualMaybeResponse)
+    asActionResult(eventualMaybeResponse, notFoundMessage(rawFieldsId))
   }
 
-  private def asActionResult(eventualMaybeResponse: Future[Option[SubscriptionFieldsResponse]]) = {
+  private def asActionResult(eventualMaybeResponse: Future[Option[SubscriptionFieldsResponse]], notFoundMessage: String) = {
     eventualMaybeResponse map {
       case Some(subscriptionFields) => Ok(Json.toJson(subscriptionFields))
-      case None => NOT_FOUND_RESPONSE
+      case None => notFoundResponse(notFoundMessage)
     } recover recovery
   }
 
@@ -73,7 +83,7 @@ class ApiSubscriptionFieldsController @Inject() (service: SubscriptionFieldsServ
 
     service.delete(identifier) map {
       case true => NoContent
-      case false => NOT_FOUND_RESPONSE
+      case false => notFoundResponse(notFoundMessage(rawAppId, rawApiContext, rawApiVersion))
     } recover recovery
   }
 

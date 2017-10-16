@@ -14,33 +14,26 @@
  * limitations under the License.
  */
 
-package unit.apisubscriptionfields.service
+package unit.uk.gov.hmrc.apisubscriptionfields.service
 
 import java.util.UUID
 import java.util.concurrent.TimeUnit
 
 import uk.gov.hmrc.apisubscriptionfields.repository.{InMemoryRepository, MongoFormatters, SubscriptionFields}
-import uk.gov.hmrc.apisubscriptionfields.service.UUIDCreator
 
 import scala.concurrent.Await
 import scala.concurrent.duration.FiniteDuration
-import scala.concurrent.ExecutionContext.Implicits.global
 
 class InMemoryRepositorySpec extends org.scalatest.WordSpec with org.scalatest.Matchers with org.scalatest.OptionValues with MongoFormatters {
-  val FakeApplicaionIdentifier: String = "12345"
-  val AltFakeApplicaionIdentifier: String = "98765"
+  private val FakeApplicaionIdentifier: String = "12345"
+  private val AltFakeApplicaionIdentifier: String = "98765"
 
-  val FakeFieldsId = UUID.randomUUID()
-  val AltFakeFieldsId = UUID.randomUUID()
+  private val FakeFieldsId = UUID.randomUUID()
+  private val AltFakeFieldsId = UUID.randomUUID()
 
-  val fixedUuidCreator = new UUIDCreator {
-    override def uuid(): UUID = FakeFieldsId
-  }
-
-  val FakeApiSubscription = SubscriptionFields(FakeApplicaionIdentifier, FakeFieldsId, Map("f1" -> "v1", "f2" -> "v2"))
-  val UpdatedFakeApiSubscription = SubscriptionFields(FakeApplicaionIdentifier, FakeFieldsId, Map("f2" -> "xyz", "f3" -> "v3"))
-  val AltFakeApiSubscription = SubscriptionFields(AltFakeApplicaionIdentifier, AltFakeFieldsId, Map("f1" -> "v1", "f2" -> "v2"))
-
+  private val FakeApiSubscription = SubscriptionFields(FakeApplicaionIdentifier, FakeFieldsId, Map("f1" -> "v1", "f2" -> "v2"))
+  private val UpdatedFakeApiSubscription = SubscriptionFields(FakeApplicaionIdentifier, FakeFieldsId, Map("f2" -> "xyz", "f3" -> "v3"))
+  private val AltFakeApiSubscription = SubscriptionFields(AltFakeApplicaionIdentifier, AltFakeFieldsId, Map("f1" -> "v1", "f2" -> "v2"))
 
 
   "InMemoryRepository" should {

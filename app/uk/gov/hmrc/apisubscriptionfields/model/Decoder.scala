@@ -16,6 +16,28 @@
 
 package uk.gov.hmrc.apisubscriptionfields.model
 
-case class SubscriptionFieldsRequest(fields: Fields)
+import scala.annotation.tailrec
 
-case class FieldsDefinitionRequest(fields: Seq[FieldDefinition])
+trait Decoder[T] {
+  val separator: SeparatorType
+  val numOfParts: Int
+  protected def decode(tokens: Seq[String]): T
+
+  def decode(text:String): Option[T] = {
+    @tailrec
+    def findSeparator(separatorToFind: SeparatorType) : SeparatorType = {
+      if (text.split(separatorToFind).length > numOfParts)
+        findSeparator(separatorToFind + separator)
+      else
+        separatorToFind
+    }
+
+    val parts = text.split(findSeparator(separator)).toSeq
+
+    if (parts.size == numOfParts)
+      Some(decode(parts))
+    else
+      None
+  }
+
+}

@@ -14,13 +14,20 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.apisubscriptionfields
+package uk.gov.hmrc.apisubscriptionfields.repository
 
-package object model {
+import javax.inject.Singleton
 
-  type Fields = Map[String, String]
+import com.google.inject.ImplementedBy
+import play.modules.reactivemongo.MongoDbConnection
+import reactivemongo.api.DB
 
-  type SeparatorType = String
-  val Separator: SeparatorType = "##"
+@ImplementedBy(classOf[MongoDb])
+trait MongoDbProvider {
+  def mongo: () => DB
+}
 
+@Singleton
+class MongoDb extends MongoDbConnection with MongoDbProvider {
+  override val mongo: () => DB = db
 }

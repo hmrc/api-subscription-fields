@@ -17,9 +17,11 @@
 package uk.gov.hmrc.apisubscriptionfields.repository
 
 import play.api.libs.json.Json
+import uk.gov.hmrc.apisubscriptionfields.model.JsonFormatters
 
-trait MongoFormatters {
-  implicit val ApiSubscriptionJF = Json.format[SubscriptionFields]
+trait MongoFormatters extends JsonFormatters {
+  implicit val SubscriptionFieldsJF = Json.format[SubscriptionFields]
+  implicit val FieldsDefinitionJF = Json.format[FieldsDefinition]
 
 }
 

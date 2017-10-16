@@ -18,7 +18,7 @@ package uk.gov.hmrc.apisubscriptionfields.model
 
 import java.util.UUID
 
-import scala.annotation.tailrec
+import uk.gov.hmrc.apisubscriptionfields.model.FieldDefinitionType.FieldDefinitionType
 
 case class AppId(value: String) extends AnyVal
 
@@ -28,35 +28,43 @@ case class ApiVersion(value: String) extends AnyVal
 
 case class SubscriptionFieldsId(value: UUID) extends AnyVal
 
-object SubscriptionIdentifier {
-  private val Separator = "##"
-  private type SeparatorType = String
+object SubscriptionIdentifier extends Decoder[SubscriptionIdentifier] {
+  override val separator = Separator
+  override val numOfParts: Int = 3
 
-  def decode(text:String): Option[SubscriptionIdentifier] = {
-    def findSeparator(separatorToFind: SeparatorType) : SeparatorType = {
-      if (text.split(separatorToFind).length > 3)
-        findSeparator(separatorToFind+Separator)
-      else
-        separatorToFind
-    }
-
-    val parts = text.split(findSeparator(Separator))
-    Some(SubscriptionIdentifier(AppId(parts(0)), ApiContext(parts(1)), ApiVersion(parts(2))))
-  }
+  override protected def decode(tokens: Seq[String]): SubscriptionIdentifier =
+    SubscriptionIdentifier(AppId(tokens(0)), ApiContext(tokens(1)), ApiVersion(tokens(2)))
 }
 
-case class SubscriptionIdentifier(applicationId: AppId, apiContext: ApiContext, apiVersion: ApiVersion) {
-  import SubscriptionIdentifier._
+case class SubscriptionIdentifier(applicationId: AppId, apiContext: ApiContext, apiVersion: ApiVersion) extends Encoder[SubscriptionIdentifier] {
+  override val separator = Separator
 
-  def encode(): String = {
-    @tailrec
-    def findSeparator(text: String)(separatorToFind: SeparatorType): SeparatorType =
-      if (!text.contains(separatorToFind))
-        separatorToFind
-      else
-        findSeparator(text)(separatorToFind+Separator)
+  def encode(): String =
+    encode(applicationId.value, apiContext.value, apiVersion.value)
 
-    val longestSeparator: SeparatorType = findSeparator(apiVersion.value)(findSeparator(apiContext.value)(Separator))
-    s"${applicationId.value}$longestSeparator${apiContext.value}$longestSeparator${apiVersion.value}"
-  }
 }
+
+object FieldsDefinitionIdentifier extends Decoder[FieldsDefinitionIdentifier] {
+  override val separator = Separator
+  override val numOfParts: Int = 2
+
+  override protected def decode(tokens: Seq[String]): FieldsDefinitionIdentifier =
+    FieldsDefinitionIdentifier(ApiContext(tokens(0)), ApiVersion(tokens(1)))
+}
+
+case class FieldsDefinitionIdentifier(apiContext: ApiContext, apiVersion: ApiVersion) extends Encoder[FieldsDefinitionIdentifier] {
+  override val separator = Separator
+
+  def encode(): String = encode(apiContext.value, apiVersion.value)
+}
+
+object FieldDefinitionType extends Enumeration {
+  type FieldDefinitionType = Value
+
+  val URL = Value("URL")
+  val SECURE_TOKEN = Value("SecureToken")
+  val STRING = Value("STRING")
+
+}
+
+case class FieldDefinition(name: String, description: String, `type`: FieldDefinitionType)

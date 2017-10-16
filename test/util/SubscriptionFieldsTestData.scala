@@ -21,11 +21,18 @@ import java.util.UUID
 import play.api.http.HeaderNames.{ACCEPT, CONTENT_TYPE}
 import play.api.http.MimeTypes
 import uk.gov.hmrc.apisubscriptionfields.model._
-import uk.gov.hmrc.apisubscriptionfields.repository.SubscriptionFields
+import uk.gov.hmrc.apisubscriptionfields.repository.{FieldsDefinition, SubscriptionFields}
 
 import scala.concurrent.Future
 
 trait TestData {
+  final val unit = ()
+  type EmulatedFailure = UnsupportedOperationException
+  final val emulatedFailure = new EmulatedFailure("Emulated failure.")
+}
+
+
+trait SubscriptionFieldsTestData extends TestData {
 
   final val fakeAppId = UUID.randomUUID().toString
   final val fakeContext = "acontext"
@@ -45,7 +52,17 @@ trait TestData {
 
 }
 
-object TestData extends TestData
+trait FieldsDefinitionTestData extends TestData {
+  final val FakeFieldsDefinitionIdentifier = FieldsDefinitionIdentifier(ApiContext("apiContext"), ApiVersion("apiVersion"))
+  final val FakeFieldDefinitionUrl = FieldDefinition("name1", "desc1", FieldDefinitionType.URL)
+  final val FakeFieldDefinitionString = FieldDefinition("name2", "desc2", FieldDefinitionType.STRING)
+  final val FakeFieldDefinitionSecureToken = FieldDefinition("name3", "desc3", FieldDefinitionType.SECURE_TOKEN)
+  final val FakeFieldsDefinitions = Seq(FakeFieldDefinitionUrl, FakeFieldDefinitionString, FakeFieldDefinitionSecureToken)
+  final val FakeFieldsDefinition = FieldsDefinition(FakeFieldsDefinitionIdentifier.encode(), FakeFieldsDefinitions)
+  final val FakeFieldsDefinitionResponse = FieldsDefinitionResponse(FakeFieldsDefinition.fields)
+}
+
+object SubscriptionFieldsTestData extends SubscriptionFieldsTestData
 
 
 object RequestHeaders {

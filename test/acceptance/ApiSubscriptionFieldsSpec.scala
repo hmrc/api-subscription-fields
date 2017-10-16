@@ -16,22 +16,20 @@
 
 package acceptance
 
-import java.util.UUID
-
 import org.scalatest.OptionValues
 import play.api.Logger
 import play.api.mvc._
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import uk.gov.hmrc.apisubscriptionfields.model.ErrorCode.SUBSCRIPTION_FIELDS_ID_NOT_FOUND
+import uk.gov.hmrc.apisubscriptionfields.model.ErrorCode.NOT_FOUND_CODE
 import uk.gov.hmrc.apisubscriptionfields.model.{Fields, JsErrorResponse, SubscriptionFieldsRequest, SubscriptionFieldsResponse}
-import util.{RequestHeaders, TestData}
+import util.{RequestHeaders, SubscriptionFieldsTestData}
 
 import scala.concurrent.Future
 
 class ApiSubscriptionFieldsSpec extends AcceptanceTestSpec
   with OptionValues
-  with TestData {
+  with SubscriptionFieldsTestData {
 
   import play.api.libs.json._
   import uk.gov.hmrc.apisubscriptionfields.model.JsonFormatters._
@@ -52,7 +50,7 @@ class ApiSubscriptionFieldsSpec extends AcceptanceTestSpec
     .withJsonBody(Json.toJson(contents))
 
   def fieldsEndpoint(appId: String, apiContext: String, apiVersion: String) =
-    s"/application/$appId/context/$apiContext/version/$apiVersion"
+    s"/field/application/$appId/context/$apiContext/version/$apiVersion"
 
   feature("Api-Subscription-Fields") {
     Logger.logger.info(s"App.mode = ${app.mode.toString}")
@@ -72,7 +70,7 @@ class ApiSubscriptionFieldsSpec extends AcceptanceTestSpec
       status(resultFuture) shouldBe NOT_FOUND
 
       And("the response body is empty")
-      contentAsJson(resultFuture) shouldBe JsErrorResponse(SUBSCRIPTION_FIELDS_ID_NOT_FOUND, s"Subscription Fields were not found")
+      contentAsJson(resultFuture) shouldBe JsErrorResponse(NOT_FOUND_CODE, s"Id ($fakeAppId, $fakeContext, $fakeVersion) was not found")
     }
 
     scenario("the API is called to DELETE an unknown subscription fields identifier") {
@@ -90,7 +88,7 @@ class ApiSubscriptionFieldsSpec extends AcceptanceTestSpec
       status(resultFuture) shouldBe NOT_FOUND
 
       And("the response body is empty")
-      contentAsJson(resultFuture) shouldBe JsErrorResponse(SUBSCRIPTION_FIELDS_ID_NOT_FOUND, s"Subscription Fields were not found")
+      contentAsJson(resultFuture) shouldBe JsErrorResponse(NOT_FOUND_CODE, s"Id ($fakeAppId, $fakeContext, $fakeVersion) was not found")
     }
 
     scenario("the API is called to store some values for a new subscription fields identifier") {

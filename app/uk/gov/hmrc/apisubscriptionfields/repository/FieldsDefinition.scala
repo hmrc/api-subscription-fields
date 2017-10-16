@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.apisubscriptionfields
+package uk.gov.hmrc.apisubscriptionfields.repository
 
-package object model {
+import uk.gov.hmrc.apisubscriptionfields.model.{FieldDefinition, FieldsDefinitionIdentifier}
 
-  type Fields = Map[String, String]
-
-  type SeparatorType = String
-  val Separator: SeparatorType = "##"
-
+object FieldsDefinition {
+  def apply(id: FieldsDefinitionIdentifier, fields: Seq[FieldDefinition]) : FieldsDefinition = FieldsDefinition(id, fields)
 }
+
+case class FieldsDefinition(id: String, fields: Seq[FieldDefinition])

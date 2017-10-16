@@ -14,30 +14,50 @@
  * limitations under the License.
  */
 
-package unit.apisubscriptionfields.model
+package unit.uk.gov.hmrc.apisubscriptionfields.model
 
 import org.scalatest.{Matchers, WordSpec}
-import uk.gov.hmrc.apisubscriptionfields.model.{JsonFormatters, SubscriptionFieldsResponse}
-import util.TestData
+import uk.gov.hmrc.apisubscriptionfields.model.{JsonFormatters, SubscriptionFieldsResponse, FieldsDefinitionResponse}
+import util.{FieldsDefinitionTestData, SubscriptionFieldsTestData}
 
-class JsonFormatterSpec extends WordSpec with Matchers with JsonFormatters with TestData {
+class JsonFormatterSpec extends WordSpec with Matchers with JsonFormatters with SubscriptionFieldsTestData with FieldsDefinitionTestData {
   import play.api.libs.json._
 
-  val fakeFields = Map( "f1" -> "v1" )
-  val response = SubscriptionFieldsResponse(FakeFieldsId, fakeFields)
+  private val fakeFields = Map( "f1" -> "v1" )
+  private val subscriptionFieldsResponse = SubscriptionFieldsResponse(FakeFieldsId, fakeFields)
+
+  private val fakeFieldsDefinitionResponse = FieldsDefinitionResponse(Seq(FakeFieldDefinitionUrl))
 
   private def objectAsJsonString[A](a:A)(implicit t: Writes[A]) = Json.asciiStringify(Json.toJson(a))
 
   "SubscriptionFieldsResponse" should {
+    val json = s"""{"fieldsId":"$FakeRawFieldsId","fields":{"f1":"v1"}}"""
+
     "marshal json" in {
-      objectAsJsonString(response) shouldBe s"""{"fieldsId":"$FakeRawFieldsId","fields":{"f1":"v1"}}"""
+      objectAsJsonString(subscriptionFieldsResponse) shouldBe json
     }
 
     "unmarshal text" in {
-      Json.parse(s"""{"fieldsId":"$FakeRawFieldsId","fields":{"f1":"v1"}}""").validate[SubscriptionFieldsResponse] match {
-        case JsSuccess(r, _) => r shouldBe response
+      Json.parse(json).validate[SubscriptionFieldsResponse] match {
+        case JsSuccess(r, _) => r shouldBe subscriptionFieldsResponse
         case JsError(e) => fail(s"Should have parsed json text but got $e")
       }
     }
   }
+
+  "FieldsDefinitionResponse" should {
+    val json = """{"fields":[{"name":"name1","description":"desc1","type":"URL"}]}"""
+
+    "marshal json" in {
+      objectAsJsonString(fakeFieldsDefinitionResponse) shouldBe json
+    }
+
+    "unmarshal text" in {
+      Json.parse(json).validate[FieldsDefinitionResponse] match {
+        case JsSuccess(r, _) => r shouldBe fakeFieldsDefinitionResponse
+        case JsError(e) => fail(s"Should have parsed json text but got $e")
+      }
+    }
+  }
+
 }

@@ -14,13 +14,19 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.apisubscriptionfields
+package uk.gov.hmrc.apisubscriptionfields.model
 
-package object model {
+trait Encoder[T] {
+  val separator: SeparatorType
 
-  type Fields = Map[String, String]
+  def encode(tokens: String *): String = {
+    def findSeparator(separatorToFind: SeparatorType, text: String): SeparatorType =
+      if (text.contains(separatorToFind))
+        separatorToFind + separator
+      else
+        separatorToFind
 
-  type SeparatorType = String
-  val Separator: SeparatorType = "##"
-
+    val longestSeparator = tokens.foldLeft[SeparatorType](separator)(findSeparator)
+    tokens.mkString(longestSeparator)
+  }
 }

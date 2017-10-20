@@ -22,7 +22,7 @@ import uk.gov.hmrc.apisubscriptionfields.model.{Fields, SubscriptionIdentifier}
 
 object SubscriptionFields {
   def apply(id: SubscriptionIdentifier, fieldsId: UUID, fields: Fields): SubscriptionFields =
-    new SubscriptionFields(id.applicationId.value, id.apiContext.value, id.apiVersion.value, fieldsId, fields)
+    new SubscriptionFields(id.clientId.value, id.apiContext.value, id.apiVersion.value, fieldsId, fields)
 }
 
-case class SubscriptionFields(applicationId: String, apiContext: String, apiVersion: String, fieldsId: UUID, fields: Fields)
+case class SubscriptionFields(clientId: String, apiContext: String, apiVersion: String, fieldsId: UUID, fields: Fields)

@@ -77,7 +77,7 @@ class SubscriptionFieldsControllerGetSpec extends UnitSpec with SubscriptionFiel
     "return OK when exists in the repo" in {
       (mockSubscriptionFieldsService.get(_:SubscriptionIdentifier)) expects FakeSubscriptionIdentifier returns Some(responseModel)
 
-      val result = await(controller.getSubscriptionFields(fakeRawAppId, fakeRawContext, fakeRawVersion)(FakeRequest()))
+      val result = await(controller.getSubscriptionFields(fakeRawClientId, fakeRawContext, fakeRawVersion)(FakeRequest()))
 
       status(result) shouldBe OK
       contentAsJson(result) shouldBe responseJson
@@ -86,17 +86,17 @@ class SubscriptionFieldsControllerGetSpec extends UnitSpec with SubscriptionFiel
     "return NOT_FOUND when not in the repo" in {
       (mockSubscriptionFieldsService.get(_: SubscriptionIdentifier)) expects FakeSubscriptionIdentifier returns None
 
-      val result: Future[Result] = await(controller.getSubscriptionFields(fakeRawAppId, fakeRawContext, fakeRawVersion)(FakeRequest()))
+      val result: Future[Result] = await(controller.getSubscriptionFields(fakeRawClientId, fakeRawContext, fakeRawVersion)(FakeRequest()))
 
       status(result) shouldBe NOT_FOUND
       (contentAsJson(result) \ "code") shouldBe JsDefined(JsString("NOT_FOUND"))
-      (contentAsJson(result) \ "message") shouldBe JsDefined(JsString(s"Id ($fakeRawAppId, $fakeRawContext, $fakeRawVersion) was not found"))
+      (contentAsJson(result) \ "message") shouldBe JsDefined(JsString(s"Id ($fakeRawClientId, $fakeRawContext, $fakeRawVersion) was not found"))
     }
 
     "return INTERNAL_SERVER_ERROR when service throws exception" in {
       (mockSubscriptionFieldsService.get(_:SubscriptionIdentifier)) expects FakeSubscriptionIdentifier returns Future.failed(emulatedFailure)
 
-      val result: Future[Result] = await(controller.getSubscriptionFields(fakeRawAppId, fakeRawContext, fakeRawVersion)(FakeRequest()))
+      val result: Future[Result] = await(controller.getSubscriptionFields(fakeRawClientId, fakeRawContext, fakeRawVersion)(FakeRequest()))
 
       status(result) shouldBe INTERNAL_SERVER_ERROR
       (contentAsJson(result) \ "code") shouldBe JsDefined(JsString("UNKNOWN_ERROR"))
@@ -108,28 +108,28 @@ class SubscriptionFieldsControllerGetSpec extends UnitSpec with SubscriptionFiel
   "GET /field/application/{application-id}" should {
 
     "return OK when exists in the repo" in {
-      (mockSubscriptionFieldsService.get(_:AppId)) expects FakeAppId returns Some(bulkResponseModel)
+      (mockSubscriptionFieldsService.get(_:ClientId)) expects FakeClientId returns Some(bulkResponseModel)
 
-      val result = await(controller.getBulkSubscriptionFieldsByApplicationId(fakeRawAppId)(FakeRequest()))
+      val result = await(controller.getBulkSubscriptionFieldsByClientId(fakeRawClientId)(FakeRequest()))
 
       status(result) shouldBe OK
       contentAsJson(result) shouldBe bulkResponseJson
     }
 
     "return NOT_FOUND when not in the repo" in {
-      (mockSubscriptionFieldsService.get(_:AppId)) expects FakeAppId returns None
+      (mockSubscriptionFieldsService.get(_:ClientId)) expects FakeClientId returns None
 
-      val result = await(controller.getBulkSubscriptionFieldsByApplicationId(fakeRawAppId)(FakeRequest()))
+      val result = await(controller.getBulkSubscriptionFieldsByClientId(fakeRawClientId)(FakeRequest()))
 
       status(result) shouldBe NOT_FOUND
       (contentAsJson(result) \ "code") shouldBe JsDefined(JsString("NOT_FOUND"))
-      (contentAsJson(result) \ "message") shouldBe JsDefined(JsString(s"ApplicationId ($fakeRawAppId) was not found"))
+      (contentAsJson(result) \ "message") shouldBe JsDefined(JsString(s"ClientId ($fakeRawClientId) was not found"))
     }
 
     "return INTERNAL_SERVER_ERROR when service throws exception" in {
-      (mockSubscriptionFieldsService.get(_:AppId)) expects FakeAppId returns Future.failed(emulatedFailure)
+      (mockSubscriptionFieldsService.get(_:ClientId)) expects FakeClientId returns Future.failed(emulatedFailure)
 
-      val result = await(controller.getBulkSubscriptionFieldsByApplicationId(fakeRawAppId)(FakeRequest()))
+      val result = await(controller.getBulkSubscriptionFieldsByClientId(fakeRawClientId)(FakeRequest()))
 
       status(result) shouldBe INTERNAL_SERVER_ERROR
       (contentAsJson(result) \ "code") shouldBe JsDefined(JsString("UNKNOWN_ERROR"))

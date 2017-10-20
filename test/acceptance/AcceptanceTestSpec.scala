@@ -40,10 +40,10 @@ trait AcceptanceTestSpec extends FeatureSpec
   protected val ValidRequest = FakeRequest()
     .withHeaders(RequestHeaders.ACCEPT_HMRC_JSON_HEADER)
 
-  protected def idEndpoint(appId: String, apiContext: String, apiVersion: String) =
-    s"/field/application/$appId/api-context/$apiContext/version/$apiVersion"
+  protected def idEndpoint(clientId: String, apiContext: String, apiVersion: String) =
+    s"/field/application/$clientId/api-context/$apiContext/version/$apiVersion"
 
-  protected def appIdEndpoint(appId: String) = s"/field/application/$appId"
+  protected def clientIdEndpoint(clientId: String) = s"/field/application/$clientId"
 
   protected def definitionEndpoint(apiContext: String, apiVersion: String) = s"/definition/api-context/$apiContext/version/$apiVersion"
 

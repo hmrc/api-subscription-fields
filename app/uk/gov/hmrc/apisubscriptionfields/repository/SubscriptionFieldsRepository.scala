@@ -38,7 +38,7 @@ trait SubscriptionFieldsRepository {
 
   def save(subscription: SubscriptionFields): Future[Boolean]
 
-  def fetchByApplicationId(applicationId: String): Future[List[SubscriptionFields]]
+  def fetchByClientId(clientId: String): Future[List[SubscriptionFields]]
   def fetchById(identifier: SubscriptionIdentifier): Future[Option[SubscriptionFields]]
   def fetchByFieldsId(fieldsId: UUID): Future[Option[SubscriptionFields]]
 
@@ -58,15 +58,15 @@ class SubscriptionFieldsMongoRepository @Inject()(mongoDbProvider: MongoDbProvid
   override def indexes = Seq(
     createCompoundIndex(
       indexFieldMappings = Seq(
-        "applicationId" -> IndexType.Ascending,
+        "clientId" -> IndexType.Ascending,
         "apiContext" -> IndexType.Ascending,
         "apiVersion" -> IndexType.Ascending
       ),
       indexName = Some("idIndex")
     ),
     createSingleFieldAscendingIndex(
-      indexFieldKey = "applicationId",
-      indexName = Some("applicationIdIndex")
+      indexFieldKey = "clientId",
+      indexName = Some("clientIdIndex")
     ),
     createSingleFieldAscendingIndex(
       indexFieldKey = "fieldsId",
@@ -80,9 +80,9 @@ class SubscriptionFieldsMongoRepository @Inject()(mongoDbProvider: MongoDbProvid
     }
   }
 
-  override def fetchByApplicationId(applicationId: String): Future[List[SubscriptionFields]] = {
-    val selector = Json.obj("applicationId" -> applicationId)
-    Logger.debug(s"[fetchByApplicationId] selector: $selector")
+  override def fetchByClientId(clientId: String): Future[List[SubscriptionFields]] = {
+    val selector = Json.obj("clientId" -> clientId)
+    Logger.debug(s"[fetchByClientId] selector: $selector")
     collection.find(selector).cursor[SubscriptionFields](ReadPreference.primary).collect[List](Int.MaxValue, Cursor.FailOnError[List[SubscriptionFields]]())
   }
 
@@ -92,20 +92,20 @@ class SubscriptionFieldsMongoRepository @Inject()(mongoDbProvider: MongoDbProvid
     collection.find(selector).one[SubscriptionFields]
   }
 
-  private def selectorForIdentifier(applicationId: String, apiContext: String, apiVersion: String): JsObject = {
+  private def selectorForIdentifier(clientId: String, apiContext: String, apiVersion: String): JsObject = {
     Json.obj(
-      "applicationId" -> applicationId,
+      "clientId" -> clientId,
       "apiContext" -> apiContext,
       "apiVersion" -> apiVersion
     )
   }
 
   private def selectorForIdentifier(identifier: SubscriptionIdentifier): JsObject = {
-    selectorForIdentifier(identifier.applicationId.value, identifier.apiContext.value, identifier.apiVersion.value)
+    selectorForIdentifier(identifier.clientId.value, identifier.apiContext.value, identifier.apiVersion.value)
   }
 
   private def selectorForSubscription(subscription: SubscriptionFields): JsObject = {
-    selectorForIdentifier(subscription.applicationId, subscription.apiContext, subscription.apiVersion)
+    selectorForIdentifier(subscription.clientId, subscription.apiContext, subscription.apiVersion)
   }
 
   override def fetchByFieldsId(fieldsId: UUID): Future[Option[SubscriptionFields]] = {

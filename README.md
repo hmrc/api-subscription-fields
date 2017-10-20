@@ -5,9 +5,9 @@
 This microservice stores definitions and values for the HMRC Developer Hub.
 
 
-### Examples of operations for defining API subscription fields
+### Examples of requests on the API subscription fields definitions
 
-#### Creates or updates the definitions of the subscriptions fields for an API
+#### Creates or updates the definitions of subscriptions fields for an API
 ```
 curl -v -X PUT "http://localhost:9650/definition/context/ciao-api/version/1.0" -H "Content-Type: application/json" -H "Cache-Control: no-cache" -d '{ "fieldDefinitions": [ { "name": "callback-url", "description": "Callback URL", "type": "URL" }, { "name": "token", "description": "Secure Token", "type": "SecureToken" } ] }'
 ```
@@ -23,7 +23,7 @@ curl -v -X GET "http://localhost:9650/definition" -H "Cache-Control: no-cache"
 ```
 
 
-### Examples of operations for API subscriptions fields
+### Examples of requests on the API subscription field values
 
 #### Creates or updates the field values of an API subscription
 ```

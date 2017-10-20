@@ -17,6 +17,10 @@ curl -v -X PUT "http://localhost:9000/definition/context/ciao-api/version/1.0" -
 curl -v -X GET "http://localhost:9000/definition/context/ciao-api/version/1.0" -H "Cache-Control: no-cache"
 ```
 
+#### Get all field definitions
+```
+curl -v -X GET "http://localhost:9000/definition" -H "Cache-Control: no-cache"
+```
 
 ### Subscription Fields Endpoint examples
 

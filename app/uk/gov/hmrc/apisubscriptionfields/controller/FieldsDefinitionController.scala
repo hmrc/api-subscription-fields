@@ -49,7 +49,7 @@ class FieldsDefinitionController @Inject() (service: FieldsDefinitionService) ex
 
   def getAllFieldsDefinitions: Action[AnyContent] = Action.async { implicit request =>
     // TODO
-    Ok(Json.toJson(None))
+    Future.successful(notFoundResponse("TODO", "TODO"))
   }
 
   def getFieldsDefinition(rawApiContext: String, rawApiVersion: String): Action[AnyContent] = Action.async { implicit request =>

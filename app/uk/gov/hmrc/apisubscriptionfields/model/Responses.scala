@@ -19,8 +19,9 @@ package uk.gov.hmrc.apisubscriptionfields.model
 import play.api.libs.json.Json.JsValueWrapper
 import play.api.libs.json.{JsObject, Json}
 
-case class SubscriptionFieldsIdResponse(fieldsId: SubscriptionFieldsId)
-case class SubscriptionFieldsResponse(fieldsId: SubscriptionFieldsId, fields: Fields)
+case class SubscriptionFieldsResponse(id: String, fieldsId: SubscriptionFieldsId, fields: Fields)
+
+case class BulkSubscriptionFieldsResponse(fields: Seq[SubscriptionFieldsResponse])
 
 case class FieldsDefinitionResponse(fields: Seq[FieldDefinition])
 
@@ -30,7 +31,6 @@ object ErrorCode extends Enumeration {
   val INVALID_REQUEST_PAYLOAD = Value("INVALID_REQUEST_PAYLOAD")
   val UNKNOWN_ERROR = Value("UNKNOWN_ERROR")
   val NOT_FOUND_CODE = Value("NOT_FOUND")
-
 }
 
 object JsErrorResponse {
@@ -40,4 +40,3 @@ object JsErrorResponse {
       "message" -> message
     )
 }
-

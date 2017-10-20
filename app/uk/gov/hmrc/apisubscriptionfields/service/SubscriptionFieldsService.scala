@@ -19,7 +19,6 @@ package uk.gov.hmrc.apisubscriptionfields.service
 import java.util.UUID
 import javax.inject._
 
-import com.google.inject.ImplementedBy
 import play.api.Logger
 import uk.gov.hmrc.apisubscriptionfields.model._
 import uk.gov.hmrc.apisubscriptionfields.repository.{SubscriptionFields, SubscriptionFieldsRepository}
@@ -27,26 +26,14 @@ import uk.gov.hmrc.apisubscriptionfields.repository.{SubscriptionFields, Subscri
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-//TODO: look at flattening this into just the class
-@ImplementedBy(classOf[RepositoryFedSubscriptionFieldsService])
-trait SubscriptionFieldsService {
-  def get(identifier: SubscriptionIdentifier): Future[Option[SubscriptionFieldsResponse]]
-
-  def get(subscriptionFieldsId: SubscriptionFieldsId): Future[Option[SubscriptionFieldsResponse]]
-
-  def upsert(identifier: SubscriptionIdentifier, subscriptionFields: Fields): Future[(SubscriptionFieldsResponse, Boolean)]
-
-  def delete(identifier: SubscriptionIdentifier): Future[Boolean]
-}
-
 @Singleton
 class UUIDCreator {
   def uuid(): UUID = UUID.randomUUID()
 }
 
 @Singleton
-class RepositoryFedSubscriptionFieldsService @Inject()(repository: SubscriptionFieldsRepository,
-                                                       uuidCreator: UUIDCreator) extends SubscriptionFieldsService {
+class SubscriptionFieldsService @Inject()(repository: SubscriptionFieldsRepository,
+                                          uuidCreator: UUIDCreator) {
 
   def upsert(identifier: SubscriptionIdentifier, subscriptionFields: Fields): Future[(SubscriptionFieldsResponse, Boolean)] = {
     def update(existingFieldsId: UUID): Future[SubscriptionFieldsResponse] =
@@ -57,7 +44,7 @@ class RepositoryFedSubscriptionFieldsService @Inject()(repository: SubscriptionF
 
     Logger.debug(s"[upsert] SubscriptionIdentifier: $identifier")
 
-    repository.fetchById(identifier.encode()) flatMap {
+    repository.fetchById(identifier) flatMap {
       o =>
         o.fold(
           create() map { x => (x, true) }
@@ -68,15 +55,24 @@ class RepositoryFedSubscriptionFieldsService @Inject()(repository: SubscriptionF
   }
 
   def delete(identifier: SubscriptionIdentifier): Future[Boolean] = {
-    val id = identifier.encode()
     Logger.debug(s"[delete] SubscriptionIdentifier: $identifier")
-    repository.delete(id)
+    repository.delete(identifier)
+  }
+
+  def get(appId: AppId): Future[Option[BulkSubscriptionFieldsResponse]] = {
+    Logger.debug(s"[get] AppId: $appId")
+    (for {
+      list <- repository.fetchByApplicationId(appId.value)
+    } yield list.map(asResponse)) map {
+      case Nil => None
+      case list => Some(BulkSubscriptionFieldsResponse(fields = list))
+    }
   }
 
   def get(identifier: SubscriptionIdentifier): Future[Option[SubscriptionFieldsResponse]] = {
     Logger.debug(s"[get] SubscriptionIdentifier: $identifier")
     for {
-      fetch <- repository.fetchById(identifier.encode())
+      fetch <- repository.fetchById(identifier)
     } yield fetch.map(asResponse)
   }
 
@@ -90,11 +86,12 @@ class RepositoryFedSubscriptionFieldsService @Inject()(repository: SubscriptionF
   private def save(apiSubscription: SubscriptionFields): Future[SubscriptionFieldsResponse] = {
     Logger.debug(s"[save] SubscriptionFields: $apiSubscription")
     repository.save(apiSubscription) map {
-      _ => SubscriptionFieldsResponse(SubscriptionFieldsId(apiSubscription.fieldsId), apiSubscription.customFields)
+      _ => SubscriptionFieldsResponse(id = "TODO: remove this field", fieldsId = SubscriptionFieldsId(apiSubscription.fieldsId), fields = apiSubscription.fields)
     }
   }
 
   private def asResponse(apiSubscription: SubscriptionFields): SubscriptionFieldsResponse = {
-    SubscriptionFieldsResponse(fieldsId = SubscriptionFieldsId(apiSubscription.fieldsId), fields = apiSubscription.customFields)
+    SubscriptionFieldsResponse(id = "TODO: remove this field", fieldsId = SubscriptionFieldsId(apiSubscription.fieldsId), fields = apiSubscription.fields)
   }
+
 }

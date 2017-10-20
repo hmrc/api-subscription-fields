@@ -17,6 +17,7 @@
 package unit.uk.gov.hmrc.apisubscriptionfields.service
 
 import org.scalamock.scalatest.MockFactory
+import uk.gov.hmrc.apisubscriptionfields.model.FieldsDefinitionIdentifier
 import uk.gov.hmrc.apisubscriptionfields.repository.FieldsDefinitionRepository
 import uk.gov.hmrc.apisubscriptionfields.service.FieldsDefinitionService
 import uk.gov.hmrc.play.test.UnitSpec
@@ -31,7 +32,7 @@ class FieldsDefinitionServiceSpec extends UnitSpec with FieldsDefinitionTestData
 
   "A FieldsDefinitionService" should {
     "return None when no entry exist in the repo when get by identifier is called" in {
-      (mockFieldsDefinitionRepository fetchById _) expects FakeFieldsDefinitionIdentifier.encode() returns None
+      (mockFieldsDefinitionRepository fetchById (_: FieldsDefinitionIdentifier)) expects FakeFieldsDefinitionIdentifier returns None
 
       val result = await(service.get(FakeFieldsDefinitionIdentifier))
 
@@ -39,7 +40,7 @@ class FieldsDefinitionServiceSpec extends UnitSpec with FieldsDefinitionTestData
     }
 
     "return Some when entry exists in the repo when get by identifier is called" in {
-      (mockFieldsDefinitionRepository fetchById _) expects FakeFieldsDefinitionIdentifier.encode() returns Some(FakeFieldsDefinition)
+      (mockFieldsDefinitionRepository fetchById (_: FieldsDefinitionIdentifier)) expects FakeFieldsDefinitionIdentifier returns Some(FakeFieldsDefinition)
 
       val result = await(service.get(FakeFieldsDefinitionIdentifier))
 
@@ -47,8 +48,7 @@ class FieldsDefinitionServiceSpec extends UnitSpec with FieldsDefinitionTestData
     }
 
     "return false if save is for an existing fields definition" in {
-      (mockFieldsDefinitionRepository fetchById _) expects FakeFieldsDefinitionIdentifier.encode() returns Some(FakeFieldsDefinition)
-      (mockFieldsDefinitionRepository save _) expects FakeFieldsDefinition returns unit
+      (mockFieldsDefinitionRepository save _) expects FakeFieldsDefinition returns false
 
       val result = await(service.upsert(FakeFieldsDefinitionIdentifier, FakeFieldsDefinitions))
 
@@ -56,16 +56,15 @@ class FieldsDefinitionServiceSpec extends UnitSpec with FieldsDefinitionTestData
     }
 
     "return true if save is for a new fields definition" in {
-      (mockFieldsDefinitionRepository fetchById _) expects FakeFieldsDefinitionIdentifier.encode() returns None
-      (mockFieldsDefinitionRepository save _) expects FakeFieldsDefinition returns unit
+      (mockFieldsDefinitionRepository save _) expects FakeFieldsDefinition returns true
 
       val result = await(service.upsert(FakeFieldsDefinitionIdentifier, FakeFieldsDefinitions))
 
       result shouldBe true
     }
 
-    "propagate Failure in repository" in {
-      (mockFieldsDefinitionRepository fetchById _) expects FakeFieldsDefinitionIdentifier.encode() returns Future.failed(emulatedFailure)
+    "propagate Failure in repository for upsert" in {
+      (mockFieldsDefinitionRepository save _) expects * returns Future.failed(emulatedFailure)
 
       val caught = intercept[EmulatedFailure] {
         await(service.upsert(FakeFieldsDefinitionIdentifier, FakeFieldsDefinitions))

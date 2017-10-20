@@ -9,12 +9,12 @@ This microservice stores definitions and values for the HMRC Developer Hub.
 
 #### Add or modify field definitions
 ```
-curl -v -X PUT -H "Content-Type: application/json" -H "Cache-Control: no-cache" -d '{ "fieldDefinitions": [ { "name": "callback-url", "description": "Callback URL", "type": "URL" }, { "name": "token", "description": "Secure Token", "type": "SecureToken" } ] }' "http://localhost:9000/definition/context/ciao-api/version/1.0"
+curl -v -X PUT -H "Content-Type: application/json" -H "Cache-Control: no-cache" -d '{ "fieldDefinitions": [ { "name": "callback-url", "description": "Callback URL", "type": "URL" }, { "name": "token", "description": "Secure Token", "type": "SecureToken" } ] }' "http://localhost:9000/definition/api-context/ciao-api/version/1.0"
 ```
 
 #### Get field definitions by API context and API version
 ```
-curl -v -X GET -H "Content-Type: application/json" -H "Cache-Control: no-cache" "http://localhost:9000/definition/context/ciao-api/version/1.0"
+curl -v -X GET -H "Content-Type: application/json" -H "Cache-Control: no-cache" "http://localhost:9000/definition/api-context/ciao-api/version/1.0"
 ```
 
 
@@ -22,7 +22,7 @@ curl -v -X GET -H "Content-Type: application/json" -H "Cache-Control: no-cache" 
 
 #### Add or modify subscription fields
 ```
-curl -v -X PUT -H "Content-Type: application/json" -H "Cache-Control: no-cache" -d '{ "fields" : { "field-name" : "field-value" } }' "http://localhost:9000/field/application/327d9145-4965-4d28-a2c5-39dedee50334/context/ciao-api/version/1.0"
+curl -v -X PUT -H "Content-Type: application/json" -H "Cache-Control: no-cache" -d '{ "fields" : { "field-name" : "field-value" } }' "http://localhost:9000/field/application/327d9145-4965-4d28-a2c5-39dedee50334/api-context/ciao-api/version/1.0"
 ```
 
 #### Get subscription fields by fields id
@@ -32,12 +32,17 @@ curl -v -X GET -H "Content-Type: application/json" -H "Cache-Control: no-cache" 
 
 #### Get subscription fields by application id, API context, API version 
 ```
-curl -v -X GET -H "Content-Type: application/json" -H "Cache-Control: no-cache" "http://localhost:9000/field/application/327d9145-4965-4d28-a2c5-39dedee50334/context/ciao-api/version/1.0"
+curl -v -X GET -H "Content-Type: application/json" -H "Cache-Control: no-cache" "http://localhost:9000/field/application/327d9145-4965-4d28-a2c5-39dedee50334/api-context/ciao-api/version/1.0"
 ```
 
+#### Get subscription fields by application id 
+```
+curl -v -X GET -H "Content-Type: application/json" -H "Cache-Control: no-cache" "http://localhost:9000/field/application/327d9145-4965-4d28-a2c5-39dedee50334"
+
+```
 #### Delete subscription fields by application id, API context, API version
 ```
-curl -v -X DELETE -H "Cache-Control: no-cache" "http://localhost:9000/field/application/327d9145-4965-4d28-a2c5-39dedee50334/context/ciao-api/version/1.0"
+curl -v -X DELETE -H "Cache-Control: no-cache" "http://localhost:9000/field/application/327d9145-4965-4d28-a2c5-39dedee50334/api-context/ciao-api/version/1.0"
 ```
 
 

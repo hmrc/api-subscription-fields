@@ -29,39 +29,19 @@ import scala.concurrent.Future
 class FieldsDefinitionService @Inject() (repository: FieldsDefinitionRepository) {
 
   def upsert(identifier: FieldsDefinitionIdentifier, fields: Seq[FieldDefinition]): Future[Boolean] = {
-    def update(existingFieldsDefinitionId: String): Future[Boolean] =
-      save(FieldsDefinition(existingFieldsDefinitionId, fields))
-
-    def create(): Future[Boolean] =
-      save(FieldsDefinition(identifier.encode(), fields))
-
     Logger.debug(s"[upsert] FieldsDefinitionIdentifier: $identifier")
 
-    repository.fetchById(identifier.encode()) flatMap {
-      o =>
-        o.fold(
-          create() map { _ => true }
-        )(
-          existing => update(existing.id) map { _ => false }
-        )
-    }
+    repository.save(FieldsDefinition(identifier.apiContext.value, identifier.apiVersion.value, fields))
   }
 
   def get(identifier: FieldsDefinitionIdentifier): Future[Option[FieldsDefinitionResponse]] = {
     Logger.debug(s"[get] FieldsDefinitionIdentifier: $identifier")
     for {
-      fetch <- repository.fetchById(identifier.encode())
+      fetch <- repository.fetchById(identifier)
     } yield fetch.map(asResponse)
   }
 
-  private def save(fieldsDefinition: FieldsDefinition): Future[Boolean] = {
-    Logger.debug(s"[save] SubscriptionFields: $fieldsDefinition")
-    repository.save(fieldsDefinition) map {
-      _ => true
-    }
-  }
-
   private def asResponse(fieldsDefinition: FieldsDefinition): FieldsDefinitionResponse = {
-    FieldsDefinitionResponse(fields = fieldsDefinition.fields)
+    FieldsDefinitionResponse(fields = fieldsDefinition.fieldDefinitions)
   }
 }

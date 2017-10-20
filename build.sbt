@@ -26,7 +26,7 @@ import uk.gov.hmrc.versioning.SbtGitVersioning
 import scala.language.postfixOps
 
 val compile = Seq(
-  "uk.gov.hmrc" %% "play-reactivemongo" % "5.2.0",
+  "uk.gov.hmrc" %% "play-reactivemongo" % "6.1.0",
   ws,
   "uk.gov.hmrc" %% "microservice-bootstrap" % "6.9.0"
 )
@@ -103,7 +103,7 @@ lazy val acceptanceTestSettings =
 
 lazy val scoverageSettings: Seq[Setting[_]] = Seq(
   coverageExcludedPackages := "<empty>;Reverse.*;model.*;.*config.*;.*(AuthService|BuildInfo|Routes).*",
-  coverageMinimum := 81,
+  coverageMinimum := 89,
   coverageFailOnMinimum := true,
   coverageHighlighting := true,
   parallelExecution in Test := false

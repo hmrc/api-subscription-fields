@@ -5,48 +5,49 @@
 This microservice stores definitions and values for the HMRC Developer Hub.
 
 
-### Subscription Field Definitions Endpoint examples
+### Examples of operations for defining API subscription fields
 
-#### Add or modify field definitions
+#### Creates or updates the definitions of the subscriptions fields for an API
 ```
-curl -v -X PUT "http://localhost:9000/definition/context/ciao-api/version/1.0" -H "Content-Type: application/json" -H "Cache-Control: no-cache" -d '{ "fieldDefinitions": [ { "name": "callback-url", "description": "Callback URL", "type": "URL" }, { "name": "token", "description": "Secure Token", "type": "SecureToken" } ] }'
-```
-
-#### Get field definitions by API context and API version
-```
-curl -v -X GET "http://localhost:9000/definition/context/ciao-api/version/1.0" -H "Cache-Control: no-cache"
+curl -v -X PUT "http://localhost:9650/definition/context/ciao-api/version/1.0" -H "Content-Type: application/json" -H "Cache-Control: no-cache" -d '{ "fieldDefinitions": [ { "name": "callback-url", "description": "Callback URL", "type": "URL" }, { "name": "token", "description": "Secure Token", "type": "SecureToken" } ] }'
 ```
 
-#### Get all field definitions
+#### Retrieves the definitions of subscription fields for an API
 ```
-curl -v -X GET "http://localhost:9000/definition" -H "Cache-Control: no-cache"
-```
-
-### Subscription Fields Endpoint examples
-
-#### Add or modify subscription fields
-```
-curl -v -X PUT "http://localhost:9000/field/application/xp5036mSZooNOlD0Nfjz7LKnCy0a/context/ciao-api/version/1.0" -H "Content-Type: application/json" -H "Cache-Control: no-cache" -d '{ "fields" : { "callback-url" : "http://localhost:8080/url" , "token" : "abcDEF189q" } }'
+curl -v -X GET "http://localhost:9650/definition/context/ciao-api/version/1.0" -H "Cache-Control: no-cache"
 ```
 
-#### Get subscription fields by fields id
+#### Retrieves the definitions of subscription fields for all APIs  
 ```
-curl -v -X GET "http://localhost:9000/field/f121ffa3-df94-43a0-8235-ac4530f9700a" -H "Cache-Control: no-cache"
-```
-
-#### Get subscription fields by application client id, API context, API version 
-```
-curl -v -X GET "http://localhost:9000/field/application/xp5036mSZooNOlD0Nfjz7LKnCy0a/context/ciao-api/version/1.0" -H "Cache-Control: no-cache"
+curl -v -X GET "http://localhost:9650/definition" -H "Cache-Control: no-cache"
 ```
 
-#### Get subscription fields by application client id 
-```
-curl -v -X GET "http://localhost:9000/field/application/xp5036mSZooNOlD0Nfjz7LKnCy0a" -H "Cache-Control: no-cache"
 
+### Examples of operations for API subscriptions fields
+
+#### Creates or updates the field values of an API subscription
 ```
-#### Delete subscription fields by application client id, API context, API version
+curl -v -X PUT "http://localhost:9650/field/application/xp5036mSZooNOlD0Nfjz7LKnCy0a/context/ciao-api/version/1.0" -H "Content-Type: application/json" -H "Cache-Control: no-cache" -d '{ "fields" : { "callback-url" : "http://localhost:8080/url" , "token" : "abcDEF189q" } }'
 ```
-curl -v -X DELETE "http://localhost:9000/field/application/xp5036mSZooNOlD0Nfjz7LKnCy0a/context/ciao-api/version/1.0" -H "Cache-Control: no-cache"
+
+#### Retrieves the field values of an API subscription by providing the `fieldsId`
+```
+curl -v -X GET "http://localhost:9650/field/f121ffa3-df94-43a0-8235-ac4530f9700a" -H "Cache-Control: no-cache"
+```
+
+#### Retrieves the field values of an API subscription by providing the application and API details
+```
+curl -v -X GET "http://localhost:9650/field/application/xp5036mSZooNOlD0Nfjz7LKnCy0a/context/ciao-api/version/1.0" -H "Cache-Control: no-cache"
+```
+
+#### Retrieves the field values of all API subscriptions related to a specific application
+```
+curl -v -X GET "http://localhost:9650/field/application/xp5036mSZooNOlD0Nfjz7LKnCy0a" -H "Cache-Control: no-cache"
+```
+
+#### Deletes the field values of an API subscription
+```
+curl -v -X DELETE "http://localhost:9650/field/application/xp5036mSZooNOlD0Nfjz7LKnCy0a/context/ciao-api/version/1.0" -H "Cache-Control: no-cache"
 ```
 
 

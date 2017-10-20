@@ -20,7 +20,7 @@ import java.util.UUID
 
 import uk.gov.hmrc.apisubscriptionfields.model.FieldDefinitionType.FieldDefinitionType
 
-case class AppId(value: String) extends AnyVal
+case class ClientId(value: String) extends AnyVal
 
 case class ApiContext(value: String) extends AnyVal
 
@@ -28,7 +28,7 @@ case class ApiVersion(value: String) extends AnyVal
 
 case class SubscriptionFieldsId(value: UUID) extends AnyVal
 
-case class SubscriptionIdentifier(applicationId: AppId, apiContext: ApiContext, apiVersion: ApiVersion)
+case class SubscriptionIdentifier(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion)
 
 case class FieldsDefinitionIdentifier(apiContext: ApiContext, apiVersion: ApiVersion)
 

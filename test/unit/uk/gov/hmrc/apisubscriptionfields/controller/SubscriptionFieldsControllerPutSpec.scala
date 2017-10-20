@@ -34,7 +34,7 @@ class SubscriptionFieldsControllerPutSpec extends UnitSpec with SubscriptionFiel
   private val mockSubscriptionFieldsService = mock[SubscriptionFieldsService]
   private val controller = new SubscriptionFieldsController(mockSubscriptionFieldsService)
 
-  "PUT /field/application/:appId/context/:apiContext/version/:apiVersion" should {
+  "PUT /field/application/:clientId/context/:apiContext/version/:apiVersion" should {
     "return CREATED when created in the repo" in {
       (mockSubscriptionFieldsService.upsert _).expects(FakeSubscriptionIdentifier, CustomFields).returns(Future.successful((FakeSubscriptionFieldsResponse, true)))
 
@@ -56,7 +56,7 @@ class SubscriptionFieldsControllerPutSpec extends UnitSpec with SubscriptionFiel
 
 
   private def testSubmitResult(request: Request[JsValue])(test: Future[Result] => Unit) {
-    val action: Action[JsValue] = controller.upsertSubscriptionFields(fakeRawAppId, fakeRawContext, fakeRawVersion)
+    val action: Action[JsValue] = controller.upsertSubscriptionFields(fakeRawClientId, fakeRawContext, fakeRawVersion)
     val result: Future[Result] = action.apply(request)
     test(result)
   }

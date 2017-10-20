@@ -37,7 +37,7 @@ class ApiSubscriptionFieldsUnhappySpec extends AcceptanceTestSpec
     scenario("the API is called to GET an unknown subscription identifier") {
 
       Given("the API is called to GET an unknown subscription identifier")
-      val request = ValidRequest.copyFakeRequest(method = GET, uri = idEndpoint(fakeRawAppId, fakeRawContext, fakeRawVersion))
+      val request = ValidRequest.copyFakeRequest(method = GET, uri = idEndpoint(fakeRawClientId, fakeRawContext, fakeRawVersion))
 
       When("a GET request with data is sent to the API")
       val result: Option[Future[Result]] = route(app, request)
@@ -49,7 +49,7 @@ class ApiSubscriptionFieldsUnhappySpec extends AcceptanceTestSpec
       status(resultFuture) shouldBe NOT_FOUND
 
       And("the response body is empty")
-      contentAsJson(resultFuture) shouldBe JsErrorResponse(NOT_FOUND_CODE, s"Id ($fakeRawAppId, $fakeRawContext, $fakeRawVersion) was not found")
+      contentAsJson(resultFuture) shouldBe JsErrorResponse(NOT_FOUND_CODE, s"Id ($fakeRawClientId, $fakeRawContext, $fakeRawVersion) was not found")
     }
 
     scenario("the API is called to GET with an unknown fields identifier") {
@@ -73,7 +73,7 @@ class ApiSubscriptionFieldsUnhappySpec extends AcceptanceTestSpec
     scenario("the API is called to GET an unknown application identifier") {
 
       Given("the API is called to GET an unknown application identifier")
-      val request = ValidRequest.copyFakeRequest(method = GET, uri = appIdEndpoint(fakeRawAppId))
+      val request = ValidRequest.copyFakeRequest(method = GET, uri = clientIdEndpoint(fakeRawClientId))
 
       When("a GET request with data is sent to the API")
       val result: Option[Future[Result]] = route(app, request)
@@ -85,13 +85,13 @@ class ApiSubscriptionFieldsUnhappySpec extends AcceptanceTestSpec
       status(resultFuture) shouldBe NOT_FOUND
 
       And("the response body is empty")
-      contentAsJson(resultFuture) shouldBe JsErrorResponse(NOT_FOUND_CODE, s"ApplicationId ($fakeRawAppId) was not found")
+      contentAsJson(resultFuture) shouldBe JsErrorResponse(NOT_FOUND_CODE, s"ClientId ($fakeRawClientId) was not found")
     }
 
     scenario("the API is called to DELETE an unknown subscription fields identifier") {
 
       Given("a request with an unknown identifier")
-      val request = ValidRequest.copyFakeRequest(method = DELETE, uri = idEndpoint(fakeRawAppId, fakeRawContext, fakeRawVersion))
+      val request = ValidRequest.copyFakeRequest(method = DELETE, uri = idEndpoint(fakeRawClientId, fakeRawContext, fakeRawVersion))
 
       When("a GET request with data is sent to the API")
       val result: Option[Future[Result]] = route(app, request)
@@ -103,13 +103,13 @@ class ApiSubscriptionFieldsUnhappySpec extends AcceptanceTestSpec
       status(resultFuture) shouldBe NOT_FOUND
 
       And("the response body is empty")
-      contentAsJson(resultFuture) shouldBe JsErrorResponse(NOT_FOUND_CODE, s"Id ($fakeRawAppId, $fakeRawContext, $fakeRawVersion) was not found")
+      contentAsJson(resultFuture) shouldBe JsErrorResponse(NOT_FOUND_CODE, s"Id ($fakeRawClientId, $fakeRawContext, $fakeRawVersion) was not found")
     }
 
     scenario("the API is called to PUT subscription fields with an invalid payload") {
 
       Given("the API is called to PUT subscription fields with an invalid payload")
-      val request = ValidRequest.copyFakeRequest(method = PUT, uri = idEndpoint(fakeRawAppId, fakeRawContext, fakeRawVersion), body = Json.parse("{}"))
+      val request = ValidRequest.copyFakeRequest(method = PUT, uri = idEndpoint(fakeRawClientId, fakeRawContext, fakeRawVersion), body = Json.parse("{}"))
 
       When("a PUT request with data is sent to the API")
       val result: Option[Future[Result]] = route(app, request)

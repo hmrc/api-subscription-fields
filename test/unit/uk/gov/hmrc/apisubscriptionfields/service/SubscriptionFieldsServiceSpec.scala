@@ -33,9 +33,9 @@ class SubscriptionFieldsServiceSpec extends UnitSpec with SubscriptionFieldsTest
 
   "A RepositoryFedSubscriptionFieldsService" should {
     "return an None when no entry exist in the repo when get by application id is called" in {
-      (mockSubscriptionFieldsIdRepository fetchByApplicationId  _) expects fakeRawAppId returns List()
+      (mockSubscriptionFieldsIdRepository fetchByClientId  _) expects fakeRawClientId returns List()
 
-      val result = await(service.get(FakeAppId))
+      val result = await(service.get(FakeClientId))
 
       result shouldBe None
     }
@@ -43,9 +43,9 @@ class SubscriptionFieldsServiceSpec extends UnitSpec with SubscriptionFieldsTest
     "return an Some response when entry exists in the repo when get by application id is called" in {
       val subscriptionFields1 = createSubscriptionFieldsWithApiContext()
       val subscriptionFields2 = createSubscriptionFieldsWithApiContext(rawContext = fakeRawContext2)
-      (mockSubscriptionFieldsIdRepository fetchByApplicationId  _) expects fakeRawAppId returns List(subscriptionFields1, subscriptionFields2)
+      (mockSubscriptionFieldsIdRepository fetchByClientId  _) expects fakeRawClientId returns List(subscriptionFields1, subscriptionFields2)
 
-      val result = await(service.get(FakeAppId))
+      val result = await(service.get(FakeClientId))
 
       result shouldBe Some(BulkSubscriptionFieldsResponse(fields = Seq(
         SubscriptionFieldsResponse(id = "TODO: remove this field", fieldsId = SubscriptionFieldsId(subscriptionFields1.fieldsId), fields = subscriptionFields1.fields),

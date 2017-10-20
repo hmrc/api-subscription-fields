@@ -62,9 +62,9 @@ class SubscriptionFieldsRepositorySpec extends UnitSpec
    https://github.tools.tax.service.gov.uk/HMRC/third-party-application/blob/master/it/uk/gov/hmrc/repository/ApplicationRepositorySpec.scala
   */
 
-  private def createApiSubscription(applicationId: String = fakeRawAppId): SubscriptionFields = {
+  private def createApiSubscription(clientId: String = fakeRawClientId): SubscriptionFields = {
     val customFields = Map("field_1" -> "value_1", "field_2" -> "value_2", "field_3" -> "value_3")
-    SubscriptionFields(applicationId, fakeRawContext, fakeRawVersion, UUID.randomUUID(), customFields)
+    SubscriptionFields(clientId, fakeRawContext, fakeRawVersion, UUID.randomUUID(), customFields)
   }
 
   private def collectionSize: Int = {
@@ -86,25 +86,25 @@ class SubscriptionFieldsRepositorySpec extends UnitSpec
   }
 
   private def selector(s: SubscriptionFields) = {
-    BSONDocument("applicationId" -> s.applicationId, "apiContext" -> s.apiContext, "apiVersion" -> s.apiVersion)
+    BSONDocument("clientId" -> s.clientId, "apiContext" -> s.apiContext, "apiVersion" -> s.apiVersion)
   }
 
-  "fetchByApplicationId" should {
-    "retrieve the correct records for an applicationId" in {
+  "fetchByClientId" should {
+    "retrieve the correct records for a clientId" in {
       val apiSubForApp1Context1 = createSubscriptionFieldsWithApiContext()
       val apiSubForApp1Context2 = createSubscriptionFieldsWithApiContext(rawContext = fakeRawContext2)
-      val apiSubForApp2Context1 = createSubscriptionFieldsWithApiContext(applicationId = fakeRawAppId2)
+      val apiSubForApp2Context1 = createSubscriptionFieldsWithApiContext(clientId = fakeRawClientId2)
       await(repository.save(apiSubForApp1Context1))
       await(repository.save(apiSubForApp1Context2))
       await(repository.save(apiSubForApp2Context1))
       collectionSize shouldBe 3
 
-      await(repository.fetchByApplicationId(fakeRawAppId)) shouldBe List(apiSubForApp1Context1, apiSubForApp1Context2)
-      await(repository.fetchByApplicationId(fakeRawAppId2)) shouldBe List(apiSubForApp2Context1)
+      await(repository.fetchByClientId(fakeRawClientId)) shouldBe List(apiSubForApp1Context1, apiSubForApp1Context2)
+      await(repository.fetchByClientId(fakeRawClientId2)) shouldBe List(apiSubForApp2Context1)
     }
 
-    "return an empty list when applicationId is not found" in {
-      await(repository.fetchByApplicationId("APP_ID_DOES_NOT_EXIST_IN_DB")) shouldBe List()
+    "return an empty list when clientId is not found" in {
+      await(repository.fetchByClientId("APP_ID_DOES_NOT_EXIST_IN_DB")) shouldBe List()
     }
 
   }
@@ -121,12 +121,12 @@ class SubscriptionFieldsRepositorySpec extends UnitSpec
 
     "return `None` when the `id` doesn't match any record in the collection" in {
       for (i <- 1 to 3) {
-        val isInserted = await(repository.save(createApiSubscription(applicationId = uniqueApplicationId)))
+        val isInserted = await(repository.save(createApiSubscription(clientId = uniqueClientId)))
         isInserted shouldBe true
       }
       collectionSize shouldBe 3
 
-      val found = await(repository.fetchById(FakeSubscriptionIdentifier.copy(applicationId = AppId("DOES_NOT_EXISTS"))))
+      val found = await(repository.fetchById(FakeSubscriptionIdentifier.copy(clientId = ClientId("DOES_NOT_EXISTS"))))
       found shouldBe None
     }
   }
@@ -143,7 +143,7 @@ class SubscriptionFieldsRepositorySpec extends UnitSpec
 
     "return `None` when the `fieldsId` doesn't match any record in the collection" in {
       for (i <- 1 to 3) {
-        val isInserted = await(repository.save(createApiSubscription(applicationId = uniqueApplicationId)))
+        val isInserted = await(repository.save(createApiSubscription(clientId = uniqueClientId)))
         isInserted shouldBe true
       }
       collectionSize shouldBe 3
@@ -166,12 +166,12 @@ class SubscriptionFieldsRepositorySpec extends UnitSpec
 
     "not alter the collection for unknown ids" in {
       for (i <- 1 to 3) {
-        val isInserted = await(repository.save(createApiSubscription(applicationId = uniqueApplicationId)))
+        val isInserted = await(repository.save(createApiSubscription(clientId = uniqueClientId)))
         isInserted shouldBe true
       }
       collectionSize shouldBe 3
 
-      await(repository.delete(FakeSubscriptionIdentifier.copy(applicationId = AppId("DOES_NOT_EXIST"))))
+      await(repository.delete(FakeSubscriptionIdentifier.copy(clientId = ClientId("DOES_NOT_EXIST"))))
       collectionSize shouldBe 3
     }
   }

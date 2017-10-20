@@ -72,7 +72,7 @@ class SubscriptionFieldsControllerGetSpec extends UnitSpec with SubscriptionFiel
   private val bulkResponseModel = bulkResponseJson.as[BulkSubscriptionFieldsResponse]
 
 
-  "GET /application/{application id}/context/{api-context}/version/{api-version}" should {
+  "GET /application/{client-id}/context/{context}/version/{api-version}" should {
 
     "return OK when exists in the repo" in {
       (mockSubscriptionFieldsService.get(_:SubscriptionIdentifier)) expects FakeSubscriptionIdentifier returns Some(responseModel)

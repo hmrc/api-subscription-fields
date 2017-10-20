@@ -17,8 +17,8 @@
 package unit.uk.gov.hmrc.apisubscriptionfields.service
 
 import org.scalamock.scalatest.MockFactory
-import uk.gov.hmrc.apisubscriptionfields.model.FieldsDefinitionIdentifier
-import uk.gov.hmrc.apisubscriptionfields.repository.FieldsDefinitionRepository
+import uk.gov.hmrc.apisubscriptionfields.model.{FieldDefinition, FieldsDefinitionIdentifier, FieldsDefinitionResponse}
+import uk.gov.hmrc.apisubscriptionfields.repository.{FieldsDefinition, FieldsDefinitionRepository}
 import uk.gov.hmrc.apisubscriptionfields.service.FieldsDefinitionService
 import uk.gov.hmrc.play.test.UnitSpec
 import util.FieldsDefinitionTestData
@@ -31,6 +31,25 @@ class FieldsDefinitionServiceSpec extends UnitSpec with FieldsDefinitionTestData
   private val service = new FieldsDefinitionService(mockFieldsDefinitionRepository)
 
   "A FieldsDefinitionService" should {
+    "return empty list when no entry exist in the repo when getAll is called" in {
+      (mockFieldsDefinitionRepository.fetchAll _).expects().returns(List())
+
+      val result = await(service.getAll)
+
+      result shouldBe List()
+    }
+
+    "return a list of all entries when entries exist in the repo when getAll is called" in {
+      val fd1 = fieldsDefinition(apiContext = "1", fieldDefinitions = Seq(FakeFieldDefinitionUrl))
+      val fd2 = fieldsDefinition(apiContext = "2", fieldDefinitions = Seq(FakeFieldDefinitionString))
+
+      (mockFieldsDefinitionRepository.fetchAll _).expects().returns(List(fd1, fd2))
+
+      val result = await(service.getAll)
+
+      result shouldBe List(FieldsDefinitionResponse(Seq(FakeFieldDefinitionUrl)), FieldsDefinitionResponse(Seq(FakeFieldDefinitionString)))
+    }
+
     "return None when no entry exist in the repo when get by identifier is called" in {
       (mockFieldsDefinitionRepository fetchById (_: FieldsDefinitionIdentifier)) expects FakeFieldsDefinitionIdentifier returns None
 
@@ -74,5 +93,8 @@ class FieldsDefinitionServiceSpec extends UnitSpec with FieldsDefinitionTestData
     }
 
   }
+
+  private def fieldsDefinition(apiContext: String = fakeRawContext, apiVersion: String = fakeRawVersion, fieldDefinitions: Seq[FieldDefinition]) =
+    FieldsDefinition(apiContext, apiVersion, fieldDefinitions)
 
 }

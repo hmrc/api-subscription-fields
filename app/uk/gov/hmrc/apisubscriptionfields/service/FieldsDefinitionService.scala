@@ -41,6 +41,13 @@ class FieldsDefinitionService @Inject() (repository: FieldsDefinitionRepository)
     } yield fetch.map(asResponse)
   }
 
+  def getAll: Future[List[FieldsDefinitionResponse]] = {
+    Logger.debug(s"[getAll]")
+    for {
+      list <- repository.fetchAll()
+    } yield list.map(asResponse)
+  }
+
   private def asResponse(fieldsDefinition: FieldsDefinition): FieldsDefinitionResponse = {
     FieldsDefinitionResponse(fields = fieldsDefinition.fieldDefinitions)
   }

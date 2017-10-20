@@ -91,6 +91,22 @@ class FieldsDefinitionRepositorySpec extends UnitSpec
     }
   }
 
+  "fetchAll" should {
+    "retrieve all the definition records" in {
+      val fieldsDefinition1 = createFieldsDefinition(apiContext = uniqueApiContext)
+      val fieldsDefinition2 = createFieldsDefinition(apiContext = uniqueApiContext)
+      await(repository.save(fieldsDefinition1))
+      await(repository.save(fieldsDefinition2))
+      collectionSize shouldBe 2
+
+      await(repository.fetchAll()) shouldBe List(fieldsDefinition1, fieldsDefinition2)
+    }
+
+    "return an empty list when there are no definitions in the collection" in {
+      await(repository.fetchAll()) shouldBe List()
+    }
+  }
+
   "fetchById with compound id" should {
     "retrieve the correct record from the `id` " in new Setup {
       val isInsertedAfterInsert = await(repository.save(fieldsDefinition))

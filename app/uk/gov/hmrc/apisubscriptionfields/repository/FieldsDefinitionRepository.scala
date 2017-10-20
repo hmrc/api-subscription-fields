@@ -21,6 +21,7 @@ import javax.inject.{Inject, Singleton}
 import com.google.inject.ImplementedBy
 import play.api.Logger
 import play.api.libs.json._
+import reactivemongo.api.{Cursor, ReadPreference}
 import reactivemongo.api.indexes.IndexType
 import reactivemongo.bson.BSONObjectID
 import reactivemongo.play.json.ImplicitBSONHandlers._
@@ -37,6 +38,8 @@ trait FieldsDefinitionRepository {
   def save(fieldsDefinition: FieldsDefinition): Future[Boolean]
 
   def fetchById(identifier: FieldsDefinitionIdentifier): Future[Option[FieldsDefinition]]
+
+  def fetchAll(): Future[List[FieldsDefinition]]
 
 }
 
@@ -59,6 +62,11 @@ class FieldsDefinitionMongoRepository @Inject()(mongoDbProvider: MongoDbProvider
       indexName = Some("idIndex")
     )
   )
+
+  override def fetchAll(): Future[List[FieldsDefinition]] = {
+    Logger.debug(s"[fetchAll]")
+    collection.find(Json.obj()).cursor[FieldsDefinition](ReadPreference.primary).collect[List](Int.MaxValue, Cursor.FailOnError[List[FieldsDefinition]]())
+  }
 
   override def fetchById(identifier: FieldsDefinitionIdentifier): Future[Option[FieldsDefinition]] = {
     val selector = selectorForFieldsDefinitionIdentifier(identifier)

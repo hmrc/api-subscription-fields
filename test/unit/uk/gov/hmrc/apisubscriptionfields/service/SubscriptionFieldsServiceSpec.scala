@@ -17,7 +17,7 @@
 package unit.uk.gov.hmrc.apisubscriptionfields.service
 
 import org.scalamock.scalatest.MockFactory
-import uk.gov.hmrc.apisubscriptionfields.model.{BulkSubscriptionFieldsResponse, SubscriptionFieldsId, SubscriptionFieldsResponse, SubscriptionIdentifier}
+import uk.gov.hmrc.apisubscriptionfields.model._
 import uk.gov.hmrc.apisubscriptionfields.repository.SubscriptionFieldsRepository
 import uk.gov.hmrc.apisubscriptionfields.service.{SubscriptionFieldsService, UUIDCreator}
 import uk.gov.hmrc.play.test.UnitSpec

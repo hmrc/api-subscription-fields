@@ -28,35 +28,9 @@ case class ApiVersion(value: String) extends AnyVal
 
 case class SubscriptionFieldsId(value: UUID) extends AnyVal
 
-object SubscriptionIdentifier extends Decoder[SubscriptionIdentifier] {
-  override val separator = Separator
-  override val numOfParts: Int = 3
+case class SubscriptionIdentifier(applicationId: AppId, apiContext: ApiContext, apiVersion: ApiVersion)
 
-  override protected def decode(tokens: Seq[String]): SubscriptionIdentifier =
-    SubscriptionIdentifier(AppId(tokens(0)), ApiContext(tokens(1)), ApiVersion(tokens(2)))
-}
-
-case class SubscriptionIdentifier(applicationId: AppId, apiContext: ApiContext, apiVersion: ApiVersion) extends Encoder[SubscriptionIdentifier] {
-  override val separator = Separator
-
-  def encode(): String =
-    encode(applicationId.value, apiContext.value, apiVersion.value)
-
-}
-
-object FieldsDefinitionIdentifier extends Decoder[FieldsDefinitionIdentifier] {
-  override val separator = Separator
-  override val numOfParts: Int = 2
-
-  override protected def decode(tokens: Seq[String]): FieldsDefinitionIdentifier =
-    FieldsDefinitionIdentifier(ApiContext(tokens(0)), ApiVersion(tokens(1)))
-}
-
-case class FieldsDefinitionIdentifier(apiContext: ApiContext, apiVersion: ApiVersion) extends Encoder[FieldsDefinitionIdentifier] {
-  override val separator = Separator
-
-  def encode(): String = encode(apiContext.value, apiVersion.value)
-}
+case class FieldsDefinitionIdentifier(apiContext: ApiContext, apiVersion: ApiVersion)
 
 object FieldDefinitionType extends Enumeration {
   type FieldDefinitionType = Value

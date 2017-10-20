@@ -21,42 +21,52 @@ import javax.inject.{Inject, Singleton}
 
 import com.google.inject.ImplementedBy
 import play.api.Logger
-import play.api.libs.json._
-import reactivemongo.api.commands.WriteResult
-import reactivemongo.api.indexes.Index
-import reactivemongo.api.indexes.IndexType.Ascending
-import reactivemongo.bson.{BSONDocument, BSONObjectID}
+import play.api.libs.json.{JsObject, _}
+import reactivemongo.api.{Cursor, ReadPreference}
+import reactivemongo.api.indexes.IndexType
+import reactivemongo.bson.BSONObjectID
+import reactivemongo.play.json.ImplicitBSONHandlers._
+import uk.gov.hmrc.apisubscriptionfields.model.SubscriptionIdentifier
 import uk.gov.hmrc.mongo.ReactiveRepository
 import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-//TODO: think about getting rid of trait
 @ImplementedBy(classOf[SubscriptionFieldsMongoRepository])
 trait SubscriptionFieldsRepository {
 
-  //TODO consider Future[Boolean]
-  def save(subscription: SubscriptionFields): Future[Unit]
+  def save(subscription: SubscriptionFields): Future[Boolean]
 
-  def fetchById(id: String): Future[Option[SubscriptionFields]]
+  def fetchByApplicationId(applicationId: String): Future[List[SubscriptionFields]]
+  def fetchById(identifier: SubscriptionIdentifier): Future[Option[SubscriptionFields]]
   def fetchByFieldsId(fieldsId: UUID): Future[Option[SubscriptionFields]]
 
-  def delete(id: String): Future[Boolean]
+  def delete(identifier: SubscriptionIdentifier): Future[Boolean]
 }
 
 @Singleton
 class SubscriptionFieldsMongoRepository @Inject()(mongoDbProvider: MongoDbProvider)
   extends ReactiveRepository[SubscriptionFields, BSONObjectID]("subscriptionFields", mongoDbProvider.mongo,
     MongoFormatters.SubscriptionFieldsJF, ReactiveMongoFormats.objectIdFormats)
-  with SubscriptionFieldsRepository {
+  with SubscriptionFieldsRepository
+  with MongoIndexCreator
+  with MongoErrorHandler {
 
   private implicit val format = MongoFormatters.SubscriptionFieldsJF
 
   override def indexes = Seq(
-    createSingleFieldAscendingIndex(
-      indexFieldKey = "id",
+    createCompoundIndex(
+      indexFieldMappings = Seq(
+        "applicationId" -> IndexType.Ascending,
+        "apiContext" -> IndexType.Ascending,
+        "apiVersion" -> IndexType.Ascending
+      ),
       indexName = Some("idIndex")
+    ),
+    createSingleFieldAscendingIndex(
+      indexFieldKey = "applicationId",
+      indexName = Some("applicationIdIndex")
     ),
     createSingleFieldAscendingIndex(
       indexFieldKey = "fieldsId",
@@ -64,59 +74,51 @@ class SubscriptionFieldsMongoRepository @Inject()(mongoDbProvider: MongoDbProvid
     )
   )
 
-  private def createSingleFieldAscendingIndex(indexFieldKey: String, indexName: Option[String],
-                                              isUnique: Boolean = false, isBackground: Boolean = true): Index = {
-    Index(
-      key = Seq(indexFieldKey -> Ascending),
-      name = indexName,
-      unique = isUnique,
-      background = isBackground
-    )
-  }
-
-  //TODO change return type to boolean
-  override def save(subscription: SubscriptionFields): Future[Unit] = {
-    val selector = selectorById(subscription.id)
-    Logger.debug(s"[save] selector: $selector")
-    collection.find(selector).one[BSONDocument].flatMap {
-      case Some(document) => collection.update(selector = BSONDocument("_id" -> document.get("_id")), update = subscription)
-      case _ => collection.insert(subscription)
-    }.map {
-      writeResult => handleError(writeResult, s"Could not save subscription fields: $subscription")
+  override def save(subscription: SubscriptionFields): Future[Boolean] = {
+    collection.update(selector = selectorForSubscription(subscription), update = subscription, upsert = true).map {
+      updateWriteResult => handleSaveError(updateWriteResult, s"Could not save subscription fields: $subscription", updateWriteResult.upserted.nonEmpty)
     }
   }
 
-  override def fetchById(id: String): Future[Option[SubscriptionFields]] = {
-    val selector = selectorById(id)
+  override def fetchByApplicationId(applicationId: String): Future[List[SubscriptionFields]] = {
+    val selector = Json.obj("applicationId" -> applicationId)
+    Logger.debug(s"[fetchByApplicationId] selector: $selector")
+    collection.find(selector).cursor[SubscriptionFields](ReadPreference.primary).collect[List](Int.MaxValue, Cursor.FailOnError[List[SubscriptionFields]]())
+  }
+
+  override def fetchById(identifier: SubscriptionIdentifier): Future[Option[SubscriptionFields]] = {
+    val selector = selectorForIdentifier(identifier)
     Logger.debug(s"[fetchById] selector: $selector")
     collection.find(selector).one[SubscriptionFields]
   }
+
+  private def selectorForIdentifier(applicationId: String, apiContext: String, apiVersion: String): JsObject = {
+    Json.obj(
+      "applicationId" -> applicationId,
+      "apiContext" -> apiContext,
+      "apiVersion" -> apiVersion
+    )
+  }
+
+  private def selectorForIdentifier(identifier: SubscriptionIdentifier): JsObject = {
+    selectorForIdentifier(identifier.applicationId.value, identifier.apiContext.value, identifier.apiVersion.value)
+  }
+
+  private def selectorForSubscription(subscription: SubscriptionFields): JsObject = {
+    selectorForIdentifier(subscription.applicationId, subscription.apiContext, subscription.apiVersion)
+  }
+
   override def fetchByFieldsId(fieldsId: UUID): Future[Option[SubscriptionFields]] = {
     val selector = Json.obj("fieldsId" -> fieldsId)
     Logger.debug(s"[fetchByFieldsId] selector: $selector")
     collection.find(selector).one[SubscriptionFields]
   }
 
-  override def delete(id: String): Future[Boolean] = {
-    val selector = selectorById(id)
+  override def delete(identifier: SubscriptionIdentifier): Future[Boolean] = {
+    val selector = selectorForIdentifier(identifier)
     Logger.debug(s"[delete] selector: $selector")
     collection.remove(selector).map {
-      writeResult => handleError(writeResult, s"Could not delete subscription fields for id: $id")
+      writeResult => handleDeleteError(writeResult, s"Could not delete subscription fields for id: $identifier")
     }
   }
-
-  private def handleError[T](result: WriteResult, exceptionMsg: => String): Boolean = {
-    result.errmsg.fold(databaseAltered(result)) {
-      errMsg => {
-        val errorMsg = s"""$exceptionMsg. $errMsg"""
-        logger.error(errorMsg)
-        throw new RuntimeException(errorMsg)
-      }
-    }
-  }
-
-  private def databaseAltered(writeResult: WriteResult): Boolean = writeResult.n > 0
-
-  private def selectorById(id: String) = Json.obj("id" -> id)
-
 }

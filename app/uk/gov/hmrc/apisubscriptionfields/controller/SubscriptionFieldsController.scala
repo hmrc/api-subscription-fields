@@ -20,7 +20,7 @@ import java.util.UUID
 import javax.inject.{Inject, Singleton}
 
 import play.api.Logger
-import play.api.libs.json.{JsValue, Json}
+import play.api.libs.json.{JsValue, Json, Writes}
 import play.api.mvc._
 import uk.gov.hmrc.apisubscriptionfields.model.ErrorCode._
 import uk.gov.hmrc.apisubscriptionfields.model._
@@ -30,7 +30,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 @Singleton
-class ApiSubscriptionFieldsController @Inject() (service: SubscriptionFieldsService) extends CommonController {
+class SubscriptionFieldsController @Inject()(service: SubscriptionFieldsService) extends CommonController {
 
   import JsonFormatters._
 
@@ -46,6 +46,10 @@ class ApiSubscriptionFieldsController @Inject() (service: SubscriptionFieldsServ
     s"FieldsId (${rawFieldsId.toString}) was not found"
   }
 
+  private def notFoundMessage(rawAppId: String): String = {
+    s"ApplicationId ($rawAppId) was not found"
+  }
+
   def getSubscriptionFields(rawAppId: String, rawApiContext: String, rawApiVersion: String): Action[AnyContent] = Action.async { implicit request =>
     Logger.debug(s"[getSubscriptionFields] appId: $rawAppId apiContext: $rawApiContext apiVersion: $rawApiVersion")
     val eventualMaybeResponse = service.get(SubscriptionIdentifier(AppId(rawAppId), ApiContext(rawApiContext), ApiVersion(rawApiVersion)))
@@ -58,7 +62,20 @@ class ApiSubscriptionFieldsController @Inject() (service: SubscriptionFieldsServ
     asActionResult(eventualMaybeResponse, notFoundMessage(rawFieldsId))
   }
 
-  private def asActionResult(eventualMaybeResponse: Future[Option[SubscriptionFieldsResponse]], notFoundMessage: String) = {
+  def getBulkSubscriptionFieldsByApplicationId(rawAppId: String): Action[AnyContent] = Action.async { implicit request =>
+    Logger.debug(s"[getBulkSubscriptionFieldsByApplicationId] appId: $rawAppId")
+    val eventualMaybeResponse = service.get(AppId(rawAppId))
+    asBulkActionResult(eventualMaybeResponse, notFoundMessage(rawAppId))
+  }
+
+  private def asActionResult[T](eventualMaybeResponse: Future[Option[T]], notFoundMessage: String)(implicit writes: Writes[T]) = {
+    eventualMaybeResponse map {
+      case Some(payload) => Ok(Json.toJson(payload))
+      case None => notFoundResponse(notFoundMessage)
+    } recover recovery
+  }
+
+  private def asBulkActionResult(eventualMaybeResponse: Future[Option[BulkSubscriptionFieldsResponse]], notFoundMessage: String) = {
     eventualMaybeResponse map {
       case Some(subscriptionFields) => Ok(Json.toJson(subscriptionFields))
       case None => notFoundResponse(notFoundMessage)

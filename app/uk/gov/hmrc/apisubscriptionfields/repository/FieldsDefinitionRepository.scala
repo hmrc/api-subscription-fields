@@ -21,80 +21,69 @@ import javax.inject.{Inject, Singleton}
 import com.google.inject.ImplementedBy
 import play.api.Logger
 import play.api.libs.json._
-import reactivemongo.api.commands.WriteResult
-import reactivemongo.api.indexes.Index
-import reactivemongo.api.indexes.IndexType.Ascending
-import reactivemongo.bson.{BSONDocument, BSONObjectID}
+import reactivemongo.api.indexes.IndexType
+import reactivemongo.bson.BSONObjectID
+import reactivemongo.play.json.ImplicitBSONHandlers._
+import uk.gov.hmrc.apisubscriptionfields.model.FieldsDefinitionIdentifier
 import uk.gov.hmrc.mongo.ReactiveRepository
 import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-//TODO: think about getting rid of trait
 @ImplementedBy(classOf[FieldsDefinitionMongoRepository])
 trait FieldsDefinitionRepository {
 
-  //TODO consider Future[Boolean]
-  def save(fieldsDefinition: FieldsDefinition): Future[Unit]
+  def save(fieldsDefinition: FieldsDefinition): Future[Boolean]
 
-  def fetchById(id: String): Future[Option[FieldsDefinition]]
+  def fetchById(identifier: FieldsDefinitionIdentifier): Future[Option[FieldsDefinition]]
+
 }
 
 @Singleton
 class FieldsDefinitionMongoRepository @Inject()(mongoDbProvider: MongoDbProvider)
   extends ReactiveRepository[FieldsDefinition, BSONObjectID]("fieldsDefinitions", mongoDbProvider.mongo,
     MongoFormatters.FieldsDefinitionJF, ReactiveMongoFormats.objectIdFormats)
-  with FieldsDefinitionRepository {
+  with FieldsDefinitionRepository
+  with MongoIndexCreator
+  with MongoErrorHandler {
 
   private implicit val format = MongoFormatters.FieldsDefinitionJF
 
   override def indexes = Seq(
-    createSingleFieldAscendingIndex(
-      indexFieldKey = "id",
+    createCompoundIndex(
+      indexFieldMappings = Seq(
+        "apiContext" -> IndexType.Ascending,
+        "apiVersion" -> IndexType.Ascending
+      ),
       indexName = Some("idIndex")
     )
   )
 
-  private def createSingleFieldAscendingIndex(indexFieldKey: String, indexName: Option[String],
-                                              isUnique: Boolean = false, isBackground: Boolean = true): Index = {
-    Index(
-      key = Seq(indexFieldKey -> Ascending),
-      name = indexName,
-      unique = isUnique,
-      background = isBackground
-    )
-  }
-
-  override def fetchById(id: String): Future[Option[FieldsDefinition]] = {
-    val selector = selectorById(id)
+  override def fetchById(identifier: FieldsDefinitionIdentifier): Future[Option[FieldsDefinition]] = {
+    val selector = selectorForFieldsDefinitionIdentifier(identifier)
     Logger.debug(s"[fetchById] selector: $selector")
     collection.find(selector).one[FieldsDefinition]
   }
 
-  override def save(fieldsDefinition: FieldsDefinition): Future[Unit] = {
-    val selector = Json.obj("id" -> fieldsDefinition.id)
-    Logger.debug(s"[save] selector: $selector")
-    collection.find(selector).one[BSONDocument].flatMap {
-      case Some(document) => collection.update(selector = BSONDocument("_id" -> document.get("_id")), update = fieldsDefinition)
-      case _ => collection.insert(fieldsDefinition)
-    }.map {
-      writeResult => handleError(writeResult, s"Could not save fields definition fields: $fieldsDefinition")
+  override def save(fieldsDefinition: FieldsDefinition): Future[Boolean] = {
+    collection.update(selector = selectorForFieldsDefinition(fieldsDefinition), update = fieldsDefinition, upsert = true).map {
+      updateWriteResult => handleSaveError(updateWriteResult, s"Could not save fields definition fields: $fieldsDefinition", updateWriteResult.upserted.nonEmpty)
     }
   }
 
-  private def handleError[T](result: WriteResult, exceptionMsg: => String): Boolean = {
-    result.errmsg.fold(databaseAltered(result)) {
-      errMsg => {
-        val errorMsg = s"""$exceptionMsg. $errMsg"""
-        logger.error(errorMsg)
-        throw new RuntimeException(errorMsg)
-      }
-    }
+  private def selectorForFieldsDefinitionIdentifier(fdi: FieldsDefinitionIdentifier): JsObject = {
+    selector(fdi.apiContext.value, fdi.apiVersion.value)
   }
 
-  private def databaseAltered(writeResult: WriteResult): Boolean = writeResult.n > 0
+  private def selectorForFieldsDefinition(fd: FieldsDefinition): JsObject = {
+    selector(fd.apiContext, fd.apiVersion)
+  }
 
-  private def selectorById(id: String) = Json.obj("id" -> id)
-
+  private def selector(apiContext: String, apiVersion: String): JsObject = {
+    Json.obj(
+      "apiContext" -> apiContext,
+      "apiVersion" -> apiVersion
+    )
+  }
 }

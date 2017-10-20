@@ -20,7 +20,4 @@ package object model {
 
   type Fields = Map[String, String]
 
-  type SeparatorType = String
-  val Separator: SeparatorType = "##"
-
 }

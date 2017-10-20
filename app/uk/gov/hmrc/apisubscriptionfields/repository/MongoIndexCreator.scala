@@ -16,13 +16,25 @@
 
 package uk.gov.hmrc.apisubscriptionfields.repository
 
-import java.util.UUID
+import reactivemongo.api.indexes.IndexType.Ascending
+import reactivemongo.api.indexes.{Index, IndexType}
 
-import uk.gov.hmrc.apisubscriptionfields.model.{Fields, SubscriptionIdentifier}
 
-object SubscriptionFields {
-  def apply(id: SubscriptionIdentifier, fieldsId: UUID, fields: Fields): SubscriptionFields =
-    new SubscriptionFields(id.applicationId.value, id.apiContext.value, id.apiVersion.value, fieldsId, fields)
+trait MongoIndexCreator {
+
+  def createSingleFieldAscendingIndex(indexFieldKey: String, indexName: Option[String]): Index = {
+
+    createCompoundIndex(Seq(indexFieldKey -> Ascending), indexName)
+  }
+
+  def createCompoundIndex(indexFieldMappings: Seq[(String, IndexType)], indexName: Option[String],
+                          isUnique: Boolean = false, isBackground: Boolean = true): Index = {
+
+    Index(
+      key = indexFieldMappings,
+      name = indexName,
+      unique = isUnique,
+      background = isBackground
+    )
+  }
 }
-
-case class SubscriptionFields(applicationId: String, apiContext: String, apiVersion: String, fieldsId: UUID, fields: Fields)

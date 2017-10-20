@@ -16,13 +16,38 @@
 
 package acceptance
 
+import java.util.UUID
+
 import org.scalatest._
-import org.scalatestplus.play.guice._
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
-import util.ExternalServicesConfig
+import play.api.test.FakeRequest
+import play.modules.reactivemongo.MongoDbConnection
+import util.{ExternalServicesConfig, RequestHeaders}
 
-trait AcceptanceTestSpec extends FeatureSpec with Matchers with GivenWhenThen with GuiceOneAppPerSuite {
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.duration._
+import scala.concurrent.{Await, Future}
+
+
+trait AcceptanceTestSpec extends FeatureSpec
+  with GivenWhenThen
+  with BeforeAndAfterAll
+  with Matchers
+  with GuiceOneAppPerSuite {
+
+  protected val ValidRequest = FakeRequest()
+    .withHeaders(RequestHeaders.ACCEPT_HMRC_JSON_HEADER)
+
+  protected def idEndpoint(appId: String, apiContext: String, apiVersion: String) =
+    s"/field/application/$appId/api-context/$apiContext/version/$apiVersion"
+
+  protected def appIdEndpoint(appId: String) = s"/field/application/$appId"
+
+  protected def definitionEndpoint(apiContext: String, apiVersion: String) = s"/definition/api-context/$apiContext/version/$apiVersion"
+
+  protected def fieldsIdEndpoint(fieldsId: UUID) = s"/field/$fieldsId"
 
   override def fakeApplication(): Application = new GuiceApplicationBuilder().configure(Map(
     "run.mode" -> "Stub",
@@ -30,4 +55,18 @@ trait AcceptanceTestSpec extends FeatureSpec with Matchers with GivenWhenThen wi
     "Test.microservice.services.api-subscription-fields.port" -> ExternalServicesConfig.Port
     ))
     .build()
+
+  protected def await[A](future: Future[A]): A = Await.result(future, 5.seconds)
+
+  override protected def beforeAll = {
+    dropDatabase()
+  }
+
+  override protected def afterAll = {
+    dropDatabase()
+  }
+
+  private def dropDatabase() = {
+    await(new MongoDbConnection(){}.db().drop())
+  }
 }

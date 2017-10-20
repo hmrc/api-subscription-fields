@@ -47,6 +47,11 @@ class FieldsDefinitionController @Inject() (service: FieldsDefinitionService) ex
     } recover recovery
   }
 
+  def getAllFieldsDefinitions: Action[AnyContent] = Action.async { implicit request =>
+    // TODO
+    Ok(Json.toJson(None))
+  }
+
   def getFieldsDefinition(rawApiContext: String, rawApiVersion: String): Action[AnyContent] = Action.async { implicit request =>
     Logger.debug(s"[getFieldsDefinition] apiContext: $rawApiContext apiVersion: $rawApiVersion")
     val eventualMaybeResponse = service.get(FieldsDefinitionIdentifier(ApiContext(rawApiContext), ApiVersion(rawApiVersion)))

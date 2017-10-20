@@ -1,18 +1,11 @@
 # microservice-specific routes
 
-# subscription field definitions endpoint routes
 PUT           /definition/context/:apiContext/version/:apiVersion                      @uk.gov.hmrc.apisubscriptionfields.controller.FieldsDefinitionController.upsertFieldsDefinition(apiContext: String, apiVersion: String)
-
 GET           /definition/context/:apiContext/version/:apiVersion                      @uk.gov.hmrc.apisubscriptionfields.controller.FieldsDefinitionController.getFieldsDefinition(apiContext: String, apiVersion: String)
+GET           /definition                                                              @uk.gov.hmrc.apisubscriptionfields.controller.FieldsDefinitionController.getAllFieldsDefinitions
 
-
-# subscription fields endpoint routes
 PUT           /field/application/:clientId/context/:apiContext/version/:apiVersion     @uk.gov.hmrc.apisubscriptionfields.controller.SubscriptionFieldsController.upsertSubscriptionFields(clientId: String, apiContext: String, apiVersion: String)
-
 GET           /field/application/:clientId/context/:apiContext/version/:apiVersion     @uk.gov.hmrc.apisubscriptionfields.controller.SubscriptionFieldsController.getSubscriptionFields(clientId: String, apiContext: String, apiVersion: String)
-
 GET           /field/:fieldsId                                                         @uk.gov.hmrc.apisubscriptionfields.controller.SubscriptionFieldsController.getSubscriptionFieldsByFieldsId(fieldsId: java.util.UUID)
-
 GET           /field/application/:clientId                                             @uk.gov.hmrc.apisubscriptionfields.controller.SubscriptionFieldsController.getBulkSubscriptionFieldsByClientId(clientId: String)
-
 DELETE        /field/application/:clientId/context/:apiContext/version/:apiVersion     @uk.gov.hmrc.apisubscriptionfields.controller.SubscriptionFieldsController.deleteSubscriptionFields(clientId: String, apiContext: String, apiVersion: String)

@@ -37,7 +37,7 @@ trait FieldsDefinitionRepository {
 
   def save(fieldsDefinition: FieldsDefinition): Future[Boolean]
 
-  def fetchById(identifier: FieldsDefinitionIdentifier): Future[Option[FieldsDefinition]]
+  def fetch(identifier: FieldsDefinitionIdentifier): Future[Option[FieldsDefinition]]
 
   def fetchAll(): Future[List[FieldsDefinition]]
 
@@ -59,24 +59,30 @@ class FieldsDefinitionMongoRepository @Inject()(mongoDbProvider: MongoDbProvider
         "apiContext" -> IndexType.Ascending,
         "apiVersion" -> IndexType.Ascending
       ),
-      indexName = Some("idIndex")
+      indexName = Some("apiContext-apiVersion_index"),
+      isUnique = true
     )
   )
 
   override def fetchAll(): Future[List[FieldsDefinition]] = {
     Logger.debug(s"[fetchAll]")
-    collection.find(Json.obj()).cursor[FieldsDefinition](ReadPreference.primary).collect[List](Int.MaxValue, Cursor.FailOnError[List[FieldsDefinition]]())
+    collection.find(Json.obj()).cursor[FieldsDefinition](ReadPreference.primary).collect[List](
+      Int.MaxValue, Cursor.FailOnError[List[FieldsDefinition]]()
+    )
   }
 
-  override def fetchById(identifier: FieldsDefinitionIdentifier): Future[Option[FieldsDefinition]] = {
+  override def fetch(identifier: FieldsDefinitionIdentifier): Future[Option[FieldsDefinition]] = {
     val selector = selectorForFieldsDefinitionIdentifier(identifier)
-    Logger.debug(s"[fetchById] selector: $selector")
+    Logger.debug(s"[fetch] selector: $selector")
     collection.find(selector).one[FieldsDefinition]
   }
 
   override def save(fieldsDefinition: FieldsDefinition): Future[Boolean] = {
     collection.update(selector = selectorForFieldsDefinition(fieldsDefinition), update = fieldsDefinition, upsert = true).map {
-      updateWriteResult => handleSaveError(updateWriteResult, s"Could not save fields definition fields: $fieldsDefinition", updateWriteResult.upserted.nonEmpty)
+      updateWriteResult =>
+        handleSaveError(updateWriteResult, s"Could not save fields definition fields: $fieldsDefinition",
+          updateWriteResult.upserted.nonEmpty
+      )
     }
   }
 

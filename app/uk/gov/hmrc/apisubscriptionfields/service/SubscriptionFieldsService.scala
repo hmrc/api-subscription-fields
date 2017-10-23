@@ -44,7 +44,7 @@ class SubscriptionFieldsService @Inject()(repository: SubscriptionFieldsReposito
 
     Logger.debug(s"[upsert] SubscriptionIdentifier: $identifier")
 
-    repository.fetchById(identifier) flatMap {
+    repository.fetch(identifier) flatMap {
       o =>
         o.fold(
           create() map { x => (x, true) }
@@ -72,7 +72,7 @@ class SubscriptionFieldsService @Inject()(repository: SubscriptionFieldsReposito
   def get(identifier: SubscriptionIdentifier): Future[Option[SubscriptionFieldsResponse]] = {
     Logger.debug(s"[get] SubscriptionIdentifier: $identifier")
     for {
-      fetch <- repository.fetchById(identifier)
+      fetch <- repository.fetch(identifier)
     } yield fetch.map(asResponse)
   }
 

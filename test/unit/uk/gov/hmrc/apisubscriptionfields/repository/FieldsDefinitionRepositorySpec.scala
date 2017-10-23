@@ -50,7 +50,7 @@ class FieldsDefinitionRepositorySpec extends UnitSpec
 
   override def afterAll() {
     super.afterAll()
-     await(repository.drop)
+    await(repository.drop)
   }
 
   private def collectionSize: Int = {
@@ -63,30 +63,26 @@ class FieldsDefinitionRepositorySpec extends UnitSpec
     val fieldsDefinition = createFieldsDefinition
   }
 
-  "upsert" should {
+  "save" should {
+    import reactivemongo.play.json._
+
     "insert the record in the collection" in new Setup {
       collectionSize shouldBe 0
-      val isInsertedAfterInsert = await(repository.save(fieldsDefinition))
+
+      await(repository.save(fieldsDefinition)) shouldBe true
       collectionSize shouldBe 1
-
-      import reactivemongo.play.json._
-
-      isInsertedAfterInsert shouldBe true
       await(repository.collection.find(selector(fieldsDefinition)).one[FieldsDefinition]) shouldBe Some(fieldsDefinition)
     }
 
     "update the record in the collection" in new Setup {
-      import reactivemongo.play.json._
-
       collectionSize shouldBe 0
-      val isInsertedAfterInsert = await(repository.save(fieldsDefinition))
+
+      await(repository.save(fieldsDefinition)) shouldBe true
       collectionSize shouldBe 1
-      isInsertedAfterInsert shouldBe true
+
       val edited = fieldsDefinition.copy(fieldDefinitions = Seq.empty)
-
-      val isInsertedAfterEdit = await(repository.save(edited))
-
-      isInsertedAfterEdit shouldBe false
+      await(repository.save(edited)) shouldBe false
+      collectionSize shouldBe 1
       await(repository.collection.find(selector(edited)).one[FieldsDefinition]) shouldBe Some(edited)
     }
   }
@@ -107,35 +103,32 @@ class FieldsDefinitionRepositorySpec extends UnitSpec
     }
   }
 
-  "fetchById with compound id" should {
+  "fetch with compound id" should {
     "retrieve the correct record from the `id` " in new Setup {
-      val isInsertedAfterInsert = await(repository.save(fieldsDefinition))
+      await(repository.save(fieldsDefinition)) shouldBe true
       collectionSize shouldBe 1
-      isInsertedAfterInsert shouldBe true
 
-      await(repository.fetchById(FakeFieldsDefinitionIdentifier)) shouldBe Some(fieldsDefinition)
+      await(repository.fetch(FakeFieldsDefinitionIdentifier)) shouldBe Some(fieldsDefinition)
     }
 
     "return `None` when the `id` doesn't match any record in the collection" in {
       for (i <- 1 to 3) {
-        val isInsertedAfterInsert = await(repository.save(createFieldsDefinition(apiContext = uniqueApiContext)))
-        isInsertedAfterInsert shouldBe true
+        val result = await(repository.save(createFieldsDefinition(apiContext = uniqueApiContext)))
+        result shouldBe true
       }
       collectionSize shouldBe 3
 
-      await(repository.fetchById(FakeFieldsDefinitionIdentifier.copy(apiContext = ApiContext("CONTEXT_DOES_NOT_EXIST")))) shouldBe None
+      await(repository.fetch(FakeFieldsDefinitionIdentifier.copy(apiContext = ApiContext("CONTEXT_DOES_NOT_EXIST")))) shouldBe None
     }
   }
 
   "collection" should {
-    "have a unique index on `id` " in new Setup {
+    "have a unique compound index based on `apiContext` and `apiVersion`" in new Setup {
 
-      val isInsertedAfterInsert = await(repository.save(fieldsDefinition))
+      await(repository.save(fieldsDefinition)) shouldBe true
       collectionSize shouldBe 1
-      isInsertedAfterInsert shouldBe true
 
-      val isInsertedAfterEdit = await(repository.save(fieldsDefinition.copy(fieldDefinitions = Seq(FakeFieldDefinitionUrl))))
-      isInsertedAfterEdit shouldBe false
+      await(repository.save(fieldsDefinition)) shouldBe false
       collectionSize shouldBe 1
     }
   }

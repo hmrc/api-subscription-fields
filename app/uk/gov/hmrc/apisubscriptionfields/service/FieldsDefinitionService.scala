@@ -37,7 +37,7 @@ class FieldsDefinitionService @Inject() (repository: FieldsDefinitionRepository)
   def get(identifier: FieldsDefinitionIdentifier): Future[Option[FieldsDefinitionResponse]] = {
     Logger.debug(s"[get] FieldsDefinitionIdentifier: $identifier")
     for {
-      fetch <- repository.fetchById(identifier)
+      fetch <- repository.fetch(identifier)
     } yield fetch.map(asResponse)
   }
 

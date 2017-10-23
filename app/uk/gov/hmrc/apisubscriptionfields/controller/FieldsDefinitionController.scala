@@ -38,7 +38,7 @@ class FieldsDefinitionController @Inject() (service: FieldsDefinitionService) ex
   def upsertFieldsDefinition(rawApiContext: String, rawApiVersion: String): Action[JsValue] = Action.async(parse.json) { implicit request =>
     withJsonBody[FieldsDefinitionRequest] { payload =>
       Logger.debug(s"[upsertFieldsDefinition] apiContext: $rawApiContext apiVersion: $rawApiVersion")
-      service.upsert(FieldsDefinitionIdentifier(ApiContext(rawApiContext), ApiVersion(rawApiVersion)), payload.fields) map {
+      service.upsert(FieldsDefinitionIdentifier(ApiContext(rawApiContext), ApiVersion(rawApiVersion)), payload.fieldDefinitions) map {
         case true => Created
         case false => Ok
       } recover {

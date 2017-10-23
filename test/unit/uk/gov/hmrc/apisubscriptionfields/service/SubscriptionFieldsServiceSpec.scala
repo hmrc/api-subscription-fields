@@ -54,7 +54,7 @@ class SubscriptionFieldsServiceSpec extends UnitSpec with SubscriptionFieldsTest
     }
 
     "return None when no entry exist in the repo when get by composite id is called" in {
-      (mockSubscriptionFieldsIdRepository fetchById _) expects FakeSubscriptionIdentifier returns None
+      (mockSubscriptionFieldsIdRepository fetch _) expects FakeSubscriptionIdentifier returns None
 
       val result = await(service.get(FakeSubscriptionIdentifier))
 
@@ -62,7 +62,7 @@ class SubscriptionFieldsServiceSpec extends UnitSpec with SubscriptionFieldsTest
     }
 
     "return Some SubscriptionFieldsResponse when composite id is found" in {
-      (mockSubscriptionFieldsIdRepository fetchById _) expects FakeSubscriptionIdentifier returns Some(FakeApiSubscription)
+      (mockSubscriptionFieldsIdRepository fetch _) expects FakeSubscriptionIdentifier returns Some(FakeApiSubscription)
 
       val result = await(service.get(FakeSubscriptionIdentifier))
 

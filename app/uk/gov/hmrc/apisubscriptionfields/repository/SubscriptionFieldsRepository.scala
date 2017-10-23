@@ -21,7 +21,7 @@ import javax.inject.{Inject, Singleton}
 
 import com.google.inject.ImplementedBy
 import play.api.Logger
-import play.api.libs.json.{JsObject, _}
+import play.api.libs.json._
 import reactivemongo.api.{Cursor, ReadPreference}
 import reactivemongo.api.indexes.IndexType
 import reactivemongo.bson.BSONObjectID
@@ -39,7 +39,7 @@ trait SubscriptionFieldsRepository {
   def save(subscription: SubscriptionFields): Future[Boolean]
 
   def fetchByClientId(clientId: String): Future[List[SubscriptionFields]]
-  def fetchById(identifier: SubscriptionIdentifier): Future[Option[SubscriptionFields]]
+  def fetch(identifier: SubscriptionIdentifier): Future[Option[SubscriptionFields]]
   def fetchByFieldsId(fieldsId: UUID): Future[Option[SubscriptionFields]]
 
   def delete(identifier: SubscriptionIdentifier): Future[Boolean]
@@ -58,43 +58,50 @@ class SubscriptionFieldsMongoRepository @Inject()(mongoDbProvider: MongoDbProvid
   override def indexes = Seq(
     createCompoundIndex(
       indexFieldMappings = Seq(
-        "clientId" -> IndexType.Ascending,
+        "clientId"   -> IndexType.Ascending,
         "apiContext" -> IndexType.Ascending,
         "apiVersion" -> IndexType.Ascending
       ),
-      indexName = Some("idIndex")
+      indexName = Some("clientId-apiContext-apiVersion_Index"),
+      isUnique = true
     ),
     createSingleFieldAscendingIndex(
       indexFieldKey = "clientId",
-      indexName = Some("clientIdIndex")
+      indexName = Some("clientIdIndex"),
+      isUnique = false
     ),
     createSingleFieldAscendingIndex(
       indexFieldKey = "fieldsId",
-      indexName = Some("fieldsIdIndex")
+      indexName = Some("fieldsIdIndex"),
+      isUnique = true
     )
   )
 
   override def save(subscription: SubscriptionFields): Future[Boolean] = {
-    collection.update(selector = selectorForSubscription(subscription), update = subscription, upsert = true).map {
-      updateWriteResult => handleSaveError(updateWriteResult, s"Could not save subscription fields: $subscription", updateWriteResult.upserted.nonEmpty)
+    collection.update(selector = selectorForSubscriptionFields(subscription), update = subscription, upsert = true).map {
+      updateWriteResult => handleSaveError(updateWriteResult, s"Could not save subscription fields: $subscription",
+        updateWriteResult.upserted.nonEmpty
+      )
     }
   }
 
   override def fetchByClientId(clientId: String): Future[List[SubscriptionFields]] = {
     val selector = Json.obj("clientId" -> clientId)
     Logger.debug(s"[fetchByClientId] selector: $selector")
-    collection.find(selector).cursor[SubscriptionFields](ReadPreference.primary).collect[List](Int.MaxValue, Cursor.FailOnError[List[SubscriptionFields]]())
+    collection.find(selector).cursor[SubscriptionFields](ReadPreference.primary).collect[List](
+      Int.MaxValue, Cursor.FailOnError[List[SubscriptionFields]]()
+    )
   }
 
-  override def fetchById(identifier: SubscriptionIdentifier): Future[Option[SubscriptionFields]] = {
+  override def fetch(identifier: SubscriptionIdentifier): Future[Option[SubscriptionFields]] = {
     val selector = selectorForIdentifier(identifier)
-    Logger.debug(s"[fetchById] selector: $selector")
+    Logger.debug(s"[fetch] selector: $selector")
     collection.find(selector).one[SubscriptionFields]
   }
 
   private def selectorForIdentifier(clientId: String, apiContext: String, apiVersion: String): JsObject = {
     Json.obj(
-      "clientId" -> clientId,
+      "clientId"   -> clientId,
       "apiContext" -> apiContext,
       "apiVersion" -> apiVersion
     )
@@ -104,7 +111,7 @@ class SubscriptionFieldsMongoRepository @Inject()(mongoDbProvider: MongoDbProvid
     selectorForIdentifier(identifier.clientId.value, identifier.apiContext.value, identifier.apiVersion.value)
   }
 
-  private def selectorForSubscription(subscription: SubscriptionFields): JsObject = {
+  private def selectorForSubscriptionFields(subscription: SubscriptionFields): JsObject = {
     selectorForIdentifier(subscription.clientId, subscription.apiContext, subscription.apiVersion)
   }
 

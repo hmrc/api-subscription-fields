@@ -22,13 +22,13 @@ import reactivemongo.api.indexes.{Index, IndexType}
 
 trait MongoIndexCreator {
 
-  def createSingleFieldAscendingIndex(indexFieldKey: String, indexName: Option[String]): Index = {
+  def createSingleFieldAscendingIndex(indexFieldKey: String, indexName: Option[String], isUnique: Boolean): Index = {
 
-    createCompoundIndex(Seq(indexFieldKey -> Ascending), indexName)
+    createCompoundIndex(indexFieldMappings = Seq(indexFieldKey -> Ascending), indexName, isUnique)
   }
 
   def createCompoundIndex(indexFieldMappings: Seq[(String, IndexType)], indexName: Option[String],
-                          isUnique: Boolean = false, isBackground: Boolean = true): Index = {
+                          isUnique: Boolean, isBackground: Boolean = true): Index = {
 
     Index(
       key = indexFieldMappings,

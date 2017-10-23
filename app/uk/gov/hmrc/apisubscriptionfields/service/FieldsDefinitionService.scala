@@ -30,7 +30,6 @@ class FieldsDefinitionService @Inject() (repository: FieldsDefinitionRepository)
 
   def upsert(identifier: FieldsDefinitionIdentifier, fields: Seq[FieldDefinition]): Future[Boolean] = {
     Logger.debug(s"[upsert] FieldsDefinitionIdentifier: $identifier")
-
     repository.save(FieldsDefinition(identifier.apiContext.value, identifier.apiVersion.value, fields))
   }
 
@@ -41,11 +40,9 @@ class FieldsDefinitionService @Inject() (repository: FieldsDefinitionRepository)
     } yield fetch.map(asResponse)
   }
 
-  def getAll: Future[List[FieldsDefinitionResponse]] = {
-    Logger.debug(s"[getAll]")
-    for {
-      list <- repository.fetchAll()
-    } yield list.map(asResponse)
+  def getAll: Future[FieldsDefinitionResponse] = {
+    Logger.debug(s"[getAllFieldDefinitions]")
+    repository.fetchAll() map { defs => defs.flatMap { _.fieldDefinitions } } map (FieldsDefinitionResponse(_))
   }
 
   private def asResponse(fieldsDefinition: FieldsDefinition): FieldsDefinitionResponse = {

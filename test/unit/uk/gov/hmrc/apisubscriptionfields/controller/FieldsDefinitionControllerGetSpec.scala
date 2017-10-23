@@ -35,45 +35,38 @@ class FieldsDefinitionControllerGetSpec extends UnitSpec with FieldsDefinitionTe
 
   private val responseJsonString =
     """{ "fields": [
-    |          {
-    |            "name": "callback-url",
-    |            "description": "Callback URL",
-    |            "type": "URL"
-    |          },
-    |          {
-    |            "name": "token",
-    |            "description": "Secure Token",
-    |            "type": "SecureToken"
-    |          }
-    |        ]
-    |}""".stripMargin
+      |          {
+      |            "name": "callback-url",
+      |            "description": "Callback URL",
+      |            "type": "URL"
+      |          },
+      |          {
+      |            "name": "token",
+      |            "description": "Secure Token",
+      |            "type": "SecureToken"
+      |          }
+      |        ]
+      |}""".stripMargin
   private val responseJson = Json.parse(responseJsonString)
   private val responseModel = responseJson.as[FieldsDefinitionResponse]
 
   private val allResponseJsonString =
-    """[
-      |  {
-      |    "fields": [
-      |      {
-      |        "name": "name1",
-      |        "description": "desc1",
-      |        "type": "URL"
-      |      }
-      |    ]
-      |  },
-      |  {
-      |    "fields": [
-      |      {
-      |        "name": "name2",
-      |        "description": "desc2",
-      |        "type": "STRING"
-      |      }
-      |    ]
-      |  }
-      |]""".stripMargin
+    """{ "fields": [
+      |          {
+      |            "name": "callback-url",
+      |            "description": "Callback URL",
+      |            "type": "URL"
+      |          },
+      |          {
+      |            "name": "token",
+      |            "description": "Secure Token",
+      |            "type": "SecureToken"
+      |          }
+      |        ]
+      |}""".stripMargin
   private val allResponseJson = Json.parse(allResponseJsonString)
-  private val allResponseModel = allResponseJson.as[List[FieldsDefinitionResponse]]
-  private val emptyAllResponsJson = Json.toJson(List[FieldsDefinitionResponse]())
+  private val allResponseModel = allResponseJson.as[FieldsDefinitionResponse]
+  private val emptyAllResponseJson = Json.toJson(FieldsDefinitionResponse(List()))
 
   "GET /definition/context/:apiContext/version/:apiVersion" should {
     "return OK when exists in the repo" in {
@@ -117,12 +110,12 @@ class FieldsDefinitionControllerGetSpec extends UnitSpec with FieldsDefinitionTe
     }
 
     "return OK with an empty list when no definitions exists in the repo" in {
-      mockFieldsDefinitionService.getAll _ expects () returns Future.successful(List())
+      mockFieldsDefinitionService.getAll _ expects () returns Future.successful(FieldsDefinitionResponse(List()))
 
       val result = await(controller.getAllFieldsDefinitions()(FakeRequest()))
 
       status(result) shouldBe OK
-      contentAsJson(result) shouldBe emptyAllResponsJson
+      contentAsJson(result) shouldBe emptyAllResponseJson
     }
 
     "return INTERNAL_SERVER_ERROR when service throws exception" in {

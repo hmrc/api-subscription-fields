@@ -17,8 +17,8 @@
 package unit.uk.gov.hmrc.apisubscriptionfields.service
 
 import org.scalamock.scalatest.MockFactory
-import uk.gov.hmrc.apisubscriptionfields.model.{FieldDefinition, FieldsDefinitionIdentifier, FieldsDefinitionResponse}
-import uk.gov.hmrc.apisubscriptionfields.repository.{FieldsDefinition, FieldsDefinitionRepository}
+import uk.gov.hmrc.apisubscriptionfields.model.{FieldsDefinitionIdentifier, FieldsDefinitionResponse}
+import uk.gov.hmrc.apisubscriptionfields.repository.FieldsDefinitionRepository
 import uk.gov.hmrc.apisubscriptionfields.service.FieldsDefinitionService
 import uk.gov.hmrc.play.test.UnitSpec
 import util.FieldsDefinitionTestData
@@ -36,7 +36,7 @@ class FieldsDefinitionServiceSpec extends UnitSpec with FieldsDefinitionTestData
 
       val result = await(service.getAll)
 
-      result shouldBe List()
+      result shouldBe FieldsDefinitionResponse(List())
     }
 
     "return a list of all entries when entries exist in the repo when getAll is called" in {
@@ -47,7 +47,7 @@ class FieldsDefinitionServiceSpec extends UnitSpec with FieldsDefinitionTestData
 
       val result = await(service.getAll)
 
-      result shouldBe List(FieldsDefinitionResponse(Seq(FakeFieldDefinitionUrl)), FieldsDefinitionResponse(Seq(FakeFieldDefinitionString)))
+      result shouldBe FieldsDefinitionResponse(Seq(FakeFieldDefinitionUrl, FakeFieldDefinitionString))
     }
 
     "return None when no entry exist in the repo when get by identifier is called" in {

@@ -47,6 +47,8 @@ trait AcceptanceTestSpec extends FeatureSpec
 
   protected def definitionEndpoint(apiContext: String, apiVersion: String) = s"/definition/context/$apiContext/version/$apiVersion"
 
+  protected val allDefinitionsEndpoint = "/definition"
+
   protected def fieldsIdEndpoint(fieldsId: UUID) = s"/field/$fieldsId"
 
   override def fakeApplication(): Application = new GuiceApplicationBuilder().configure(Map(

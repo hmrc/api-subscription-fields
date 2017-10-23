@@ -48,8 +48,10 @@ class FieldsDefinitionController @Inject() (service: FieldsDefinitionService) ex
   }
 
   def getAllFieldsDefinitions: Action[AnyContent] = Action.async { implicit request =>
-    // TODO
-    Future.successful(notFoundResponse("TODO", "TODO"))
+    Logger.debug(s"[getAllFieldsDefinitions]")
+    service.getAll.map(list =>
+      Ok(Json.toJson(list))
+    ) recover recovery
   }
 
   def getFieldsDefinition(rawApiContext: String, rawApiVersion: String): Action[AnyContent] = Action.async { implicit request =>

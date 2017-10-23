@@ -40,8 +40,8 @@ class FieldsDefinitionServiceSpec extends UnitSpec with FieldsDefinitionTestData
     }
 
     "return a list of all entries when entries exist in the repo when getAll is called" in {
-      val fd1 = fieldsDefinition(apiContext = "1", fieldDefinitions = Seq(FakeFieldDefinitionUrl))
-      val fd2 = fieldsDefinition(apiContext = "2", fieldDefinitions = Seq(FakeFieldDefinitionString))
+      val fd1 = createFieldsDefinition(apiContext = "1", fieldDefinitions = Seq(FakeFieldDefinitionUrl))
+      val fd2 = createFieldsDefinition(apiContext = "2", fieldDefinitions = Seq(FakeFieldDefinitionString))
 
       (mockFieldsDefinitionRepository.fetchAll _).expects().returns(List(fd1, fd2))
 
@@ -93,8 +93,4 @@ class FieldsDefinitionServiceSpec extends UnitSpec with FieldsDefinitionTestData
     }
 
   }
-
-  private def fieldsDefinition(apiContext: String = fakeRawContext, apiVersion: String = fakeRawVersion, fieldDefinitions: Seq[FieldDefinition]) =
-    FieldsDefinition(apiContext, apiVersion, fieldDefinitions)
-
 }

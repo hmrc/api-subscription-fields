@@ -74,8 +74,8 @@ trait FieldsDefinitionTestData extends TestData {
   final val FakeFieldsDefinition = FieldsDefinition(fakeRawContext, fakeRawVersion, FakeFieldsDefinitions)
   final val FakeFieldsDefinitionResponse = FieldsDefinitionResponse(FakeFieldsDefinition.fieldDefinitions)
 
-  def createFieldsDefinition(apiContext: String = fakeRawContext, apiVersion: String = fakeRawVersion) =
-    FieldsDefinition(apiContext, apiVersion, FakeFieldsDefinitions)
+  def createFieldsDefinition(apiContext: String = fakeRawContext, apiVersion: String = fakeRawVersion, fieldDefinitions: Seq[FieldDefinition] = FakeFieldsDefinitions) =
+    FieldsDefinition(apiContext, apiVersion, fieldDefinitions)
 
   def uniqueApiContext = UUID.randomUUID().toString
 }

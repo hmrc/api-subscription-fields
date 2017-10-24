@@ -24,7 +24,7 @@ class JsonFormatterSpec extends WordSpec with Matchers with JsonFormatters with 
   import play.api.libs.json._
 
   private val fakeFields = Map( "f1" -> "v1" )
-  private val subscriptionFieldsResponse = SubscriptionFieldsResponse(FakeRawIdentifier, FakeFieldsId, fakeFields)
+  private val subscriptionFieldsResponse = SubscriptionFieldsResponse(fakeRawClientId, fakeRawContext, fakeRawVersion, FakeFieldsId, fakeFields)
 
   private val bulkSubscriptionFieldsResponse = BulkSubscriptionFieldsResponse(Seq(subscriptionFieldsResponse))
 
@@ -33,7 +33,7 @@ class JsonFormatterSpec extends WordSpec with Matchers with JsonFormatters with 
   private def objectAsJsonString[A](a:A)(implicit t: Writes[A]) = Json.asciiStringify(Json.toJson(a))
 
   "SubscriptionFieldsResponse" should {
-    val json = s"""{"id":"$FakeRawIdentifier","fieldsId":"$FakeRawFieldsId","fields":{"f1":"v1"}}"""
+    val json = s"""{"clientId":"$fakeRawClientId","apiContext":"$fakeRawContext","apiVersion":"$fakeRawVersion","fieldsId":"$FakeRawFieldsId","fields":{"f1":"v1"}}"""
 
     "marshal json" in {
       objectAsJsonString(subscriptionFieldsResponse) shouldBe json
@@ -48,7 +48,7 @@ class JsonFormatterSpec extends WordSpec with Matchers with JsonFormatters with 
   }
 
   "BulkSubscriptionFieldsResponse" should {
-    val json = s"""{"fields":[{"id":"$FakeRawIdentifier","fieldsId":"$FakeRawFieldsId","fields":{"f1":"v1"}}]}"""
+    val json = s"""{"fields":[{"clientId":"$fakeRawClientId","apiContext":"$fakeRawContext","apiVersion":"$fakeRawVersion","fieldsId":"$FakeRawFieldsId","fields":{"f1":"v1"}}]}"""
 
     "marshal json" in {
       objectAsJsonString(bulkSubscriptionFieldsResponse) shouldBe json

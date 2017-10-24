@@ -35,7 +35,7 @@ class SubscriptionFieldsControllerDeleteSpec extends UnitSpec with SubscriptionF
 
   "DELETE /field/application/:clientId/context/:apiContext/version/:apiVersion" should {
     "return NO_CONTENT (204) when successfully deleted from repo" in {
-      (mockSubscriptionFieldsService.delete _).expects(FakeSubscriptionIdentifier).returns(Future.successful(true))
+      (mockSubscriptionFieldsService.delete _).expects(FakeClientId, FakeContext, FakeVersion).returns(Future.successful(true))
 
       val result = await(controller.deleteSubscriptionFields(fakeRawClientId, fakeRawContext, fakeRawVersion)(FakeRequest()))
 
@@ -43,13 +43,13 @@ class SubscriptionFieldsControllerDeleteSpec extends UnitSpec with SubscriptionF
     }
 
     "return NOT_FOUND (404) when failed to delete from repo" in {
-      (mockSubscriptionFieldsService.delete _).expects(FakeSubscriptionIdentifier).returns(Future.successful(false))
+      (mockSubscriptionFieldsService.delete _).expects(FakeClientId, FakeContext, FakeVersion).returns(Future.successful(false))
 
       val result = await(controller.deleteSubscriptionFields(fakeRawClientId, fakeRawContext, fakeRawVersion)(FakeRequest()))
 
       status(result) shouldBe NOT_FOUND
       (contentAsJson(result) \ "code") shouldBe JsDefined(JsString("NOT_FOUND"))
-      (contentAsJson(result) \ "message") shouldBe JsDefined(JsString(s"Id ($fakeRawClientId, $fakeRawContext, $fakeRawVersion) was not found"))
+      (contentAsJson(result) \ "message") shouldBe JsDefined(JsString(s"Subscription fields not found for ($fakeRawClientId, $fakeRawContext, $fakeRawVersion)"))
     }
   }
 

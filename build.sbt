@@ -103,7 +103,7 @@ lazy val acceptanceTestSettings =
 
 lazy val scoverageSettings: Seq[Setting[_]] = Seq(
   coverageExcludedPackages := "<empty>;Reverse.*;model.*;.*config.*;.*(AuthService|BuildInfo|Routes).*",
-  coverageMinimum := 89,
+  coverageMinimum := 90,
   coverageFailOnMinimum := true,
   coverageHighlighting := true,
   parallelExecution in Test := false

@@ -36,7 +36,9 @@ class SubscriptionFieldsControllerGetSpec extends UnitSpec with SubscriptionFiel
 
   private val responseJsonString =
     """{
-      |  "id":"[application-id]___[api-context]___[api-version]",
+      |  "clientId": "afsdknbw34ty4hebdv",
+      |  "apiContext": "ciao-api",
+      |  "apiVersion": "1.0",
       |  "fieldsId":"327d9145-4965-4d28-a2c5-39dedee50334",
       |  "fields":{
       |    "callback-id":"http://localhost",
@@ -50,7 +52,9 @@ class SubscriptionFieldsControllerGetSpec extends UnitSpec with SubscriptionFiel
     """{
       |  "fields": [
       |    {
-      |      "id": "[application-id]___[api-context]___[api-version]",
+      |      "clientId": "afsdknbw34ty4hebdv",
+      |      "apiContext": "ciao-api",
+      |      "apiVersion": "1.0",
       |      "fieldsId": "327d9145-4965-4d28-a2c5-39dedee50334",
       |      "fields": {
       |        "callback-id": "http://localhost",
@@ -58,8 +62,10 @@ class SubscriptionFieldsControllerGetSpec extends UnitSpec with SubscriptionFiel
       |      }
       |    },
       |    {
-      |      "id": "[application-id]___[api-context]___[api-version2]",
-      |      "fieldsId": "327d9145-4965-4d28-a2c5-39dedee50334",
+      |      "clientId": "afsdknbw34ty4hebdvx",
+      |      "apiContext": "ciao-api",
+      |      "apiVersion": "2.0",
+      |      "fieldsId": "327d9145-4965-4d28-a2c5-39dedee50335",
       |      "fields": {
       |        "callback-id": "https://application.sage.com/return-route",
       |        "token": "zyx456"
@@ -75,7 +81,7 @@ class SubscriptionFieldsControllerGetSpec extends UnitSpec with SubscriptionFiel
   "GET /application/{client-id}/context/{context}/version/{api-version}" should {
 
     "return OK when exists in the repo" in {
-      (mockSubscriptionFieldsService.get(_:SubscriptionIdentifier)) expects FakeSubscriptionIdentifier returns Some(responseModel)
+      (mockSubscriptionFieldsService.get(_:ClientId, _:ApiContext, _:ApiVersion)) expects(FakeClientId, FakeContext, FakeVersion) returns Some(responseModel)
 
       val result = await(controller.getSubscriptionFields(fakeRawClientId, fakeRawContext, fakeRawVersion)(FakeRequest()))
 
@@ -84,17 +90,17 @@ class SubscriptionFieldsControllerGetSpec extends UnitSpec with SubscriptionFiel
     }
 
     "return NOT_FOUND when not in the repo" in {
-      (mockSubscriptionFieldsService.get(_: SubscriptionIdentifier)) expects FakeSubscriptionIdentifier returns None
+      (mockSubscriptionFieldsService.get(_:ClientId, _:ApiContext, _:ApiVersion)) expects(FakeClientId, FakeContext, FakeVersion) returns None
 
       val result: Future[Result] = await(controller.getSubscriptionFields(fakeRawClientId, fakeRawContext, fakeRawVersion)(FakeRequest()))
 
       status(result) shouldBe NOT_FOUND
       (contentAsJson(result) \ "code") shouldBe JsDefined(JsString("NOT_FOUND"))
-      (contentAsJson(result) \ "message") shouldBe JsDefined(JsString(s"Id ($fakeRawClientId, $fakeRawContext, $fakeRawVersion) was not found"))
+      (contentAsJson(result) \ "message") shouldBe JsDefined(JsString(s"Subscription fields not found for ($fakeRawClientId, $fakeRawContext, $fakeRawVersion)"))
     }
 
     "return INTERNAL_SERVER_ERROR when service throws exception" in {
-      (mockSubscriptionFieldsService.get(_:SubscriptionIdentifier)) expects FakeSubscriptionIdentifier returns Future.failed(emulatedFailure)
+      (mockSubscriptionFieldsService.get(_:ClientId, _:ApiContext, _:ApiVersion)) expects(FakeClientId, FakeContext, FakeVersion) returns Future.failed(emulatedFailure)
 
       val result: Future[Result] = await(controller.getSubscriptionFields(fakeRawClientId, fakeRawContext, fakeRawVersion)(FakeRequest()))
 

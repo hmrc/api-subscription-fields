@@ -22,11 +22,11 @@ import javax.inject.{Inject, Singleton}
 import com.google.inject.ImplementedBy
 import play.api.Logger
 import play.api.libs.json._
-import reactivemongo.api.{Cursor, ReadPreference}
 import reactivemongo.api.indexes.IndexType
+import reactivemongo.api.{Cursor, ReadPreference}
 import reactivemongo.bson.BSONObjectID
 import reactivemongo.play.json.ImplicitBSONHandlers._
-import uk.gov.hmrc.apisubscriptionfields.model.SubscriptionIdentifier
+import uk.gov.hmrc.apisubscriptionfields.model.{ApiContext, ApiVersion, ClientId}
 import uk.gov.hmrc.mongo.ReactiveRepository
 import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
 
@@ -39,10 +39,10 @@ trait SubscriptionFieldsRepository {
   def save(subscription: SubscriptionFields): Future[Boolean]
 
   def fetchByClientId(clientId: String): Future[List[SubscriptionFields]]
-  def fetch(identifier: SubscriptionIdentifier): Future[Option[SubscriptionFields]]
+  def fetch(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion): Future[Option[SubscriptionFields]]
   def fetchByFieldsId(fieldsId: UUID): Future[Option[SubscriptionFields]]
 
-  def delete(identifier: SubscriptionIdentifier): Future[Boolean]
+  def delete(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion): Future[Boolean]
 }
 
 @Singleton
@@ -93,13 +93,13 @@ class SubscriptionFieldsMongoRepository @Inject()(mongoDbProvider: MongoDbProvid
     )
   }
 
-  override def fetch(identifier: SubscriptionIdentifier): Future[Option[SubscriptionFields]] = {
-    val selector = selectorForIdentifier(identifier)
+  override def fetch(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion): Future[Option[SubscriptionFields]] = {
+    val selector = selectorForSubscriptionFields(clientId.value, apiContext.value, apiVersion.value)
     Logger.debug(s"[fetch] selector: $selector")
     collection.find(selector).one[SubscriptionFields]
   }
 
-  private def selectorForIdentifier(clientId: String, apiContext: String, apiVersion: String): JsObject = {
+  private def selectorForSubscriptionFields(clientId: String, apiContext: String, apiVersion: String): JsObject = {
     Json.obj(
       "clientId"   -> clientId,
       "apiContext" -> apiContext,
@@ -107,12 +107,8 @@ class SubscriptionFieldsMongoRepository @Inject()(mongoDbProvider: MongoDbProvid
     )
   }
 
-  private def selectorForIdentifier(identifier: SubscriptionIdentifier): JsObject = {
-    selectorForIdentifier(identifier.clientId.value, identifier.apiContext.value, identifier.apiVersion.value)
-  }
-
   private def selectorForSubscriptionFields(subscription: SubscriptionFields): JsObject = {
-    selectorForIdentifier(subscription.clientId, subscription.apiContext, subscription.apiVersion)
+    selectorForSubscriptionFields(subscription.clientId, subscription.apiContext, subscription.apiVersion)
   }
 
   override def fetchByFieldsId(fieldsId: UUID): Future[Option[SubscriptionFields]] = {
@@ -121,11 +117,11 @@ class SubscriptionFieldsMongoRepository @Inject()(mongoDbProvider: MongoDbProvid
     collection.find(selector).one[SubscriptionFields]
   }
 
-  override def delete(identifier: SubscriptionIdentifier): Future[Boolean] = {
-    val selector = selectorForIdentifier(identifier)
+  override def delete(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion): Future[Boolean] = {
+    val selector = selectorForSubscriptionFields(clientId.value, apiContext.value, apiVersion.value)
     Logger.debug(s"[delete] selector: $selector")
     collection.remove(selector).map {
-      writeResult => handleDeleteError(writeResult, s"Could not delete subscription fields for id: $identifier")
+      writeResult => handleDeleteError(writeResult, s"Could not delete subscription fields for clientId: $clientId, apiContext: $apiContext, apiVersion: $apiVersion")
     }
   }
 }

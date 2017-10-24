@@ -22,7 +22,7 @@ import play.api.mvc._
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.apisubscriptionfields.controller.SubscriptionFieldsController
-import uk.gov.hmrc.apisubscriptionfields.model.{JsonFormatters, SubscriptionFieldsRequest}
+import uk.gov.hmrc.apisubscriptionfields.model._
 import uk.gov.hmrc.apisubscriptionfields.service.SubscriptionFieldsService
 import uk.gov.hmrc.play.test.UnitSpec
 import util.SubscriptionFieldsTestData
@@ -36,7 +36,7 @@ class SubscriptionFieldsControllerPutSpec extends UnitSpec with SubscriptionFiel
 
   "PUT /field/application/:clientId/context/:apiContext/version/:apiVersion" should {
     "return CREATED when created in the repo" in {
-      (mockSubscriptionFieldsService.upsert _).expects(FakeSubscriptionIdentifier, CustomFields).returns(Future.successful((FakeSubscriptionFieldsResponse, true)))
+      (mockSubscriptionFieldsService.upsert(_: ClientId, _: ApiContext, _: ApiVersion, _: Fields)) expects(FakeClientId, FakeContext, FakeVersion, CustomFields) returns Future.successful((FakeSubscriptionFieldsResponse, true))
 
       val json = mkJson(SubscriptionFieldsRequest(CustomFields))
       testSubmitResult(mkRequest(json)) { result =>
@@ -45,7 +45,7 @@ class SubscriptionFieldsControllerPutSpec extends UnitSpec with SubscriptionFiel
     }
 
     "return OK when updated in the repo" in {
-      (mockSubscriptionFieldsService.upsert _).expects(FakeSubscriptionIdentifier, CustomFields).returns(Future.successful((FakeSubscriptionFieldsResponse, false)))
+      (mockSubscriptionFieldsService.upsert (_: ClientId, _: ApiContext, _: ApiVersion, _: Fields)) expects(FakeClientId, FakeContext, FakeVersion, CustomFields) returns Future.successful((FakeSubscriptionFieldsResponse, false))
 
       val json = mkJson(SubscriptionFieldsRequest(CustomFields))
       testSubmitResult(mkRequest(json)) { result =>

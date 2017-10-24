@@ -28,10 +28,6 @@ case class ApiVersion(value: String) extends AnyVal
 
 case class SubscriptionFieldsId(value: UUID) extends AnyVal
 
-case class SubscriptionIdentifier(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion)
-
-case class FieldsDefinitionIdentifier(apiContext: ApiContext, apiVersion: ApiVersion)
-
 object FieldDefinitionType extends Enumeration {
   type FieldDefinitionType = Value
 

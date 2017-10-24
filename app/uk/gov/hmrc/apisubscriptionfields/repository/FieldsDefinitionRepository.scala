@@ -21,11 +21,11 @@ import javax.inject.{Inject, Singleton}
 import com.google.inject.ImplementedBy
 import play.api.Logger
 import play.api.libs.json._
-import reactivemongo.api.{Cursor, ReadPreference}
 import reactivemongo.api.indexes.IndexType
+import reactivemongo.api.{Cursor, ReadPreference}
 import reactivemongo.bson.BSONObjectID
 import reactivemongo.play.json.ImplicitBSONHandlers._
-import uk.gov.hmrc.apisubscriptionfields.model.FieldsDefinitionIdentifier
+import uk.gov.hmrc.apisubscriptionfields.model.{ApiContext, ApiVersion}
 import uk.gov.hmrc.mongo.ReactiveRepository
 import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
 
@@ -37,7 +37,7 @@ trait FieldsDefinitionRepository {
 
   def save(fieldsDefinition: FieldsDefinition): Future[Boolean]
 
-  def fetch(identifier: FieldsDefinitionIdentifier): Future[Option[FieldsDefinition]]
+  def fetch(apiContext: ApiContext, apiVersion: ApiVersion): Future[Option[FieldsDefinition]]
 
   def fetchAll(): Future[List[FieldsDefinition]]
 
@@ -71,8 +71,8 @@ class FieldsDefinitionMongoRepository @Inject()(mongoDbProvider: MongoDbProvider
     )
   }
 
-  override def fetch(identifier: FieldsDefinitionIdentifier): Future[Option[FieldsDefinition]] = {
-    val selector = selectorForFieldsDefinitionIdentifier(identifier)
+  override def fetch(apiContext: ApiContext, apiVersion: ApiVersion): Future[Option[FieldsDefinition]] = {
+    val selector = selectorForFieldsDefinition(apiContext, apiVersion)
     Logger.debug(s"[fetch] selector: $selector")
     collection.find(selector).one[FieldsDefinition]
   }
@@ -86,8 +86,8 @@ class FieldsDefinitionMongoRepository @Inject()(mongoDbProvider: MongoDbProvider
     }
   }
 
-  private def selectorForFieldsDefinitionIdentifier(fdi: FieldsDefinitionIdentifier): JsObject = {
-    selector(fdi.apiContext.value, fdi.apiVersion.value)
+  private def selectorForFieldsDefinition(apiContext: ApiContext, apiVersion: ApiVersion): JsObject = {
+    selector(apiContext.value, apiVersion.value)
   }
 
   private def selectorForFieldsDefinition(fd: FieldsDefinition): JsObject = {

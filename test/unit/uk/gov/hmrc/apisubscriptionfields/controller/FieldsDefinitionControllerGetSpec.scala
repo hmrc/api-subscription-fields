@@ -70,7 +70,7 @@ class FieldsDefinitionControllerGetSpec extends UnitSpec with FieldsDefinitionTe
 
   "GET /definition/context/:apiContext/version/:apiVersion" should {
     "return OK when exists in the repo" in {
-      mockFieldsDefinitionService.get _ expects FakeFieldsDefinitionIdentifier returns Future.successful(Some(responseModel))
+      mockFieldsDefinitionService.get _ expects (FakeContext, FakeVersion) returns Future.successful(Some(responseModel))
 
       val result = await(controller.getFieldsDefinition(fakeRawContext, fakeRawVersion)(FakeRequest()))
 
@@ -79,17 +79,17 @@ class FieldsDefinitionControllerGetSpec extends UnitSpec with FieldsDefinitionTe
     }
 
     "return NOT_FOUND when entity does not exists in the repo" in {
-      mockFieldsDefinitionService.get _ expects FakeFieldsDefinitionIdentifier returns Future.successful(None)
+      mockFieldsDefinitionService.get _ expects (FakeContext, FakeVersion) returns Future.successful(None)
 
       val result = await(controller.getFieldsDefinition(fakeRawContext, fakeRawVersion)(FakeRequest()))
 
       status(result) shouldBe NOT_FOUND
       (contentAsJson(result) \ "code") shouldBe JsDefined(JsString("NOT_FOUND"))
-      (contentAsJson(result) \ "message") shouldBe JsDefined(JsString(s"Id ($fakeRawContext, $fakeRawVersion) was not found"))
+      (contentAsJson(result) \ "message") shouldBe JsDefined(JsString(s"Fields definition not found for ($fakeRawContext, $fakeRawVersion)"))
     }
 
     "return INTERNAL_SERVER_ERROR when service throws exception" in {
-      mockFieldsDefinitionService.get _ expects FakeFieldsDefinitionIdentifier returns Future.failed(emulatedFailure)
+      mockFieldsDefinitionService.get _ expects (FakeContext, FakeVersion) returns Future.failed(emulatedFailure)
 
       val result = await(controller.getFieldsDefinition(fakeRawContext, fakeRawVersion)(FakeRequest()))
 

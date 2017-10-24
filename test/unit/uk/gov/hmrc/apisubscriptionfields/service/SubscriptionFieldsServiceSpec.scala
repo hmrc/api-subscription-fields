@@ -29,10 +29,8 @@ class SubscriptionFieldsServiceSpec extends UnitSpec with SubscriptionFieldsTest
   private val mockUuidCreator = mock[UUIDCreator]
   private val service = new SubscriptionFieldsService(mockSubscriptionFieldsIdRepository, mockUuidCreator)
 
-  private val SomeOtherFields = Map("f3" -> "v3", "f2" -> "v2b")
-
   "A RepositoryFedSubscriptionFieldsService" should {
-    "return an None when no entry exist in the repo when get by application client id is called" in {
+    "return None when no entry exist in the repo when get by application client id is called" in {
       (mockSubscriptionFieldsIdRepository fetchByClientId  _) expects fakeRawClientId returns List()
 
       val result = await(service.get(FakeClientId))
@@ -40,7 +38,7 @@ class SubscriptionFieldsServiceSpec extends UnitSpec with SubscriptionFieldsTest
       result shouldBe None
     }
 
-    "return an Some response when entry exists in the repo when get by application client id is called" in {
+    "return Some response when entry exists in the repo when get by application client id is called" in {
       val subscriptionFields1 = createSubscriptionFieldsWithApiContext()
       val subscriptionFields2 = createSubscriptionFieldsWithApiContext(rawContext = fakeRawContext2)
       (mockSubscriptionFieldsIdRepository fetchByClientId  _) expects fakeRawClientId returns List(subscriptionFields1, subscriptionFields2)
@@ -48,44 +46,44 @@ class SubscriptionFieldsServiceSpec extends UnitSpec with SubscriptionFieldsTest
       val result = await(service.get(FakeClientId))
 
       result shouldBe Some(BulkSubscriptionFieldsResponse(fields = Seq(
-        SubscriptionFieldsResponse(id = "TODO: remove this field", fieldsId = SubscriptionFieldsId(subscriptionFields1.fieldsId), fields = subscriptionFields1.fields),
-        SubscriptionFieldsResponse(id = "TODO: remove this field", fieldsId = SubscriptionFieldsId(subscriptionFields2.fieldsId), fields = subscriptionFields2.fields)
+        SubscriptionFieldsResponse(clientId = subscriptionFields1.clientId, apiVersion = subscriptionFields1.apiVersion, apiContext = subscriptionFields1.apiContext, fieldsId = SubscriptionFieldsId(subscriptionFields1.fieldsId), fields = subscriptionFields1.fields),
+        SubscriptionFieldsResponse(clientId = subscriptionFields2.clientId, apiVersion = subscriptionFields2.apiVersion, apiContext = subscriptionFields2.apiContext, fieldsId = SubscriptionFieldsId(subscriptionFields2.fieldsId), fields = subscriptionFields2.fields)
       )))
     }
 
-    "return None when no entry exist in the repo when get by composite id is called" in {
-      (mockSubscriptionFieldsIdRepository fetch _) expects FakeSubscriptionIdentifier returns None
+    "return None when no entry exists in the repo" in {
+      (mockSubscriptionFieldsIdRepository fetch(_:ClientId, _:ApiContext, _:ApiVersion)) expects (FakeClientId, FakeContext, FakeVersion) returns None
 
-      val result = await(service.get(FakeSubscriptionIdentifier))
+      val result = await(service.get(FakeClientId, FakeContext, FakeVersion))
 
       result shouldBe None
     }
 
-    "return Some SubscriptionFieldsResponse when composite id is found" in {
-      (mockSubscriptionFieldsIdRepository fetch _) expects FakeSubscriptionIdentifier returns Some(FakeApiSubscription)
+    "return Some SubscriptionFieldsResponse when subscription field is found" in {
+      (mockSubscriptionFieldsIdRepository fetch(_:ClientId, _:ApiContext, _:ApiVersion)) expects (FakeClientId, FakeContext, FakeVersion) returns Some(FakeApiSubscription)
 
-      val result = await(service.get(FakeSubscriptionIdentifier))
+      val result = await(service.get(FakeClientId, FakeContext, FakeVersion))
 
       result shouldBe Some(FakeSubscriptionFieldsResponse)
     }
 
     "return Successful true when an entry exists in the repo when delete is called" in {
-      (mockSubscriptionFieldsIdRepository delete _) expects FakeSubscriptionIdentifier returns true
+      (mockSubscriptionFieldsIdRepository delete (_:ClientId, _:ApiContext, _:ApiVersion)) expects (FakeClientId, FakeContext, FakeVersion) returns true
 
-      val result: Boolean = await(service.delete(FakeSubscriptionIdentifier))
+      val result: Boolean = await(service.delete(FakeClientId, FakeContext, FakeVersion))
 
       result shouldBe true
     }
 
     "return Successful false when an entry does not exist in the repo when delete is called" in {
-      (mockSubscriptionFieldsIdRepository delete _) expects FakeSubscriptionIdentifier returns false
+      (mockSubscriptionFieldsIdRepository delete (_:ClientId, _:ApiContext, _:ApiVersion)) expects (FakeClientId, FakeContext, FakeVersion) returns false
 
-      val result: Boolean = await(service.delete(FakeSubscriptionIdentifier))
+      val result: Boolean = await(service.delete(FakeClientId, FakeContext, FakeVersion))
 
       result shouldBe false
     }
 
-    "return Successful None when no entry exist in the repo when get by fields ID is called" in {
+    "return Successful None when no entry exists in the repo when get by fieldsId is called" in {
       (mockSubscriptionFieldsIdRepository fetchByFieldsId _) expects FakeRawFieldsId returns None
 
       val result = await(service.get(FakeFieldsId))
@@ -93,7 +91,7 @@ class SubscriptionFieldsServiceSpec extends UnitSpec with SubscriptionFieldsTest
       result shouldBe None
     }
 
-    "return Successful ApiSubscription when an entry exist in the repo when get by fields ID is called" in {
+    "return Successful ApiSubscription when an entry exists in the repo when get by fieldsId is called" in {
       (mockSubscriptionFieldsIdRepository fetchByFieldsId _) expects FakeRawFieldsId returns Some(FakeApiSubscription)
 
       val result = await(service.get(FakeFieldsId))

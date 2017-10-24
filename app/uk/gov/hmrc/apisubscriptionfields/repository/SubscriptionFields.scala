@@ -18,11 +18,6 @@ package uk.gov.hmrc.apisubscriptionfields.repository
 
 import java.util.UUID
 
-import uk.gov.hmrc.apisubscriptionfields.model.{Fields, SubscriptionIdentifier}
-
-object SubscriptionFields {
-  def apply(id: SubscriptionIdentifier, fieldsId: UUID, fields: Fields): SubscriptionFields =
-    new SubscriptionFields(id.clientId.value, id.apiContext.value, id.apiVersion.value, fieldsId, fields)
-}
+import uk.gov.hmrc.apisubscriptionfields.model.Fields
 
 case class SubscriptionFields(clientId: String, apiContext: String, apiVersion: String, fieldsId: UUID, fields: Fields)

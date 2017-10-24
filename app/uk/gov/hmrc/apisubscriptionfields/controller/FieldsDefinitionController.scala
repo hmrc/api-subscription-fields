@@ -33,12 +33,12 @@ class FieldsDefinitionController @Inject() (service: FieldsDefinitionService) ex
   import JsonFormatters._
 
   private def notFoundResponse(rawApiContext: String, rawApiVersion: String) =
-    NotFound(JsErrorResponse(ErrorCode.NOT_FOUND_CODE, s"Id ($rawApiContext, $rawApiVersion) was not found"))
+    NotFound(JsErrorResponse(ErrorCode.NOT_FOUND_CODE, s"Fields definition not found for ($rawApiContext, $rawApiVersion)"))
 
   def upsertFieldsDefinition(rawApiContext: String, rawApiVersion: String): Action[JsValue] = Action.async(parse.json) { implicit request =>
     withJsonBody[FieldsDefinitionRequest] { payload =>
       Logger.debug(s"[upsertFieldsDefinition] apiContext: $rawApiContext apiVersion: $rawApiVersion")
-      service.upsert(FieldsDefinitionIdentifier(ApiContext(rawApiContext), ApiVersion(rawApiVersion)), payload.fieldDefinitions) map {
+      service.upsert(ApiContext(rawApiContext), ApiVersion(rawApiVersion), payload.fieldDefinitions) map {
         case true => Created
         case false => Ok
       } recover {
@@ -54,7 +54,7 @@ class FieldsDefinitionController @Inject() (service: FieldsDefinitionService) ex
 
   def getFieldsDefinition(rawApiContext: String, rawApiVersion: String): Action[AnyContent] = Action.async { implicit request =>
     Logger.debug(s"[getFieldsDefinition] apiContext: $rawApiContext apiVersion: $rawApiVersion")
-    val eventualMaybeResponse = service.get(FieldsDefinitionIdentifier(ApiContext(rawApiContext), ApiVersion(rawApiVersion)))
+    val eventualMaybeResponse = service.get(ApiContext(rawApiContext), ApiVersion(rawApiVersion))
     asActionResult(eventualMaybeResponse, rawApiContext, rawApiVersion)
   }
 

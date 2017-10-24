@@ -124,33 +124,33 @@ class SubscriptionFieldsRepositorySpec extends UnitSpec
     }
 
     "return an empty list when clientId is not found" in {
-      await(repository.fetchByClientId("APP_ID_DOES_NOT_EXIST_IN_DB")) shouldBe List()
+      await(repository.fetchByClientId("CLIENT_ID_DOES_NOT_EXIST_IN_DB")) shouldBe List()
     }
 
   }
 
-  "fetch using compound Id" should {
-    "retrieve the correct record for a compound Id" in {
+  "fetch using clientId, apiContext, apiVersion" should {
+    "retrieve the correct record" in {
       val apiSubscription = createApiSubscriptionFields()
       await(repository.save(apiSubscription)) shouldBe true
       collectionSize shouldBe 1
 
-      await(repository.fetch(FakeSubscriptionIdentifier)) shouldBe Some(apiSubscription)
+      await(repository.fetch(FakeClientId, FakeContext, FakeVersion)) shouldBe Some(apiSubscription)
     }
 
-    "return `None` when the `id` doesn't match any record in the collection" in {
+    "return None when no subscription fields are found in the collection" in {
       for (i <- 1 to 3) {
         val result = await(repository.save(createApiSubscriptionFields(clientId = uniqueClientId)))
         result shouldBe true
       }
       collectionSize shouldBe 3
 
-      val found = await(repository.fetch(FakeSubscriptionIdentifier.copy(clientId = ClientId("DOES_NOT_EXISTS"))))
+      val found = await(repository.fetch(ClientId("DOES_NOT_EXIST"), FakeContext, FakeVersion))
       found shouldBe None
     }
   }
 
-  "fetchByFieldsId" should {
+  "fetch by fieldsId" should {
     "retrieve the correct record from the `fieldsId` " in {
       val apiSubscription = createApiSubscriptionFields()
       await(repository.save(apiSubscription)) shouldBe true
@@ -171,24 +171,24 @@ class SubscriptionFieldsRepositorySpec extends UnitSpec
   }
 
   "delete by compound key" should {
-    "remove the record with a specific id" in {
+    "remove the record with a specific subscription field" in {
       val apiSubscription: SubscriptionFields = createApiSubscriptionFields()
 
       await(repository.save(apiSubscription)) shouldBe true
       collectionSize shouldBe 1
 
-      await(repository.delete(subscriptionIdentifier(apiSubscription))) shouldBe true
+      await(repository.delete(ClientId(apiSubscription.clientId), ApiContext(apiSubscription.apiContext), ApiVersion(apiSubscription.apiVersion))) shouldBe true
       collectionSize shouldBe 0
     }
 
-    "not alter the collection for unknown ids" in {
+    "not alter the collection for unknown subscription fields" in {
       for (i <- 1 to 3) {
         val result = await(repository.save(createApiSubscriptionFields(clientId = uniqueClientId)))
         result shouldBe true
       }
       collectionSize shouldBe 3
 
-      val result = await(repository.delete(FakeSubscriptionIdentifier.copy(clientId = ClientId("DOES_NOT_EXIST"))))
+      val result = await(repository.delete(ClientId("DOES_NOT_EXIST"), FakeContext, FakeVersion))
       result shouldBe false
       collectionSize shouldBe 3
     }

@@ -17,7 +17,7 @@
 package unit.uk.gov.hmrc.apisubscriptionfields.service
 
 import org.scalamock.scalatest.MockFactory
-import uk.gov.hmrc.apisubscriptionfields.model.{FieldsDefinitionIdentifier, FieldsDefinitionResponse}
+import uk.gov.hmrc.apisubscriptionfields.model.{ApiContext, ApiVersion, FieldsDefinitionResponse}
 import uk.gov.hmrc.apisubscriptionfields.repository.FieldsDefinitionRepository
 import uk.gov.hmrc.apisubscriptionfields.service.FieldsDefinitionService
 import uk.gov.hmrc.play.test.UnitSpec
@@ -50,18 +50,18 @@ class FieldsDefinitionServiceSpec extends UnitSpec with FieldsDefinitionTestData
       result shouldBe FieldsDefinitionResponse(Seq(FakeFieldDefinitionUrl, FakeFieldDefinitionString))
     }
 
-    "return None when no entry exist in the repo when get by identifier is called" in {
-      (mockFieldsDefinitionRepository fetch (_: FieldsDefinitionIdentifier)) expects FakeFieldsDefinitionIdentifier returns None
+    "return None when no definition exists in the repo" in {
+      (mockFieldsDefinitionRepository fetch (_: ApiContext, _: ApiVersion)) expects (FakeContext, FakeVersion) returns None
 
-      val result = await(service.get(FakeFieldsDefinitionIdentifier))
+      val result = await(service.get(FakeContext, FakeVersion))
 
       result shouldBe None
     }
 
-    "return Some when entry exists in the repo when get by identifier is called" in {
-      (mockFieldsDefinitionRepository fetch (_: FieldsDefinitionIdentifier)) expects FakeFieldsDefinitionIdentifier returns Some(FakeFieldsDefinition)
+    "return Some when definition exists in the repo" in {
+      (mockFieldsDefinitionRepository fetch (_: ApiContext, _: ApiVersion)) expects (FakeContext, FakeVersion) returns Some(FakeFieldsDefinition)
 
-      val result = await(service.get(FakeFieldsDefinitionIdentifier))
+      val result = await(service.get(FakeContext, FakeVersion))
 
       result shouldBe Some(FakeFieldsDefinitionResponse)
     }
@@ -69,7 +69,7 @@ class FieldsDefinitionServiceSpec extends UnitSpec with FieldsDefinitionTestData
     "return false if save is for an existing fields definition" in {
       (mockFieldsDefinitionRepository save _) expects FakeFieldsDefinition returns false
 
-      val result = await(service.upsert(FakeFieldsDefinitionIdentifier, FakeFieldsDefinitions))
+      val result = await(service.upsert(FakeContext, FakeVersion, FakeFieldsDefinitions))
 
       result shouldBe false
     }
@@ -77,7 +77,7 @@ class FieldsDefinitionServiceSpec extends UnitSpec with FieldsDefinitionTestData
     "return true if save is for a new fields definition" in {
       (mockFieldsDefinitionRepository save _) expects FakeFieldsDefinition returns true
 
-      val result = await(service.upsert(FakeFieldsDefinitionIdentifier, FakeFieldsDefinitions))
+      val result = await(service.upsert(FakeContext, FakeVersion, FakeFieldsDefinitions))
 
       result shouldBe true
     }
@@ -86,7 +86,7 @@ class FieldsDefinitionServiceSpec extends UnitSpec with FieldsDefinitionTestData
       (mockFieldsDefinitionRepository save _) expects * returns Future.failed(emulatedFailure)
 
       val caught = intercept[EmulatedFailure] {
-        await(service.upsert(FakeFieldsDefinitionIdentifier, FakeFieldsDefinitions))
+        await(service.upsert(FakeContext, FakeVersion, FakeFieldsDefinitions))
       }
 
       caught shouldBe emulatedFailure

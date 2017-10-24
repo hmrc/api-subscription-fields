@@ -103,12 +103,12 @@ class FieldsDefinitionRepositorySpec extends UnitSpec
     }
   }
 
-  "fetch with compound id" should {
-    "retrieve the correct record from the `id` " in new Setup {
+  "fetch with fields definition" should {
+    "retrieve the correct record from the fields definition" in new Setup {
       await(repository.save(fieldsDefinition)) shouldBe true
       collectionSize shouldBe 1
 
-      await(repository.fetch(FakeFieldsDefinitionIdentifier)) shouldBe Some(fieldsDefinition)
+      await(repository.fetch(FakeContext, FakeVersion)) shouldBe Some(fieldsDefinition)
     }
 
     "return `None` when the `id` doesn't match any record in the collection" in {
@@ -118,7 +118,7 @@ class FieldsDefinitionRepositorySpec extends UnitSpec
       }
       collectionSize shouldBe 3
 
-      await(repository.fetch(FakeFieldsDefinitionIdentifier.copy(apiContext = ApiContext("CONTEXT_DOES_NOT_EXIST")))) shouldBe None
+      await(repository.fetch(ApiContext("CONTEXT_DOES_NOT_EXIST"), FakeVersion)) shouldBe None
     }
   }
 

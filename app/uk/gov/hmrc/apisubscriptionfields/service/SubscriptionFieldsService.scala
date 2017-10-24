@@ -62,7 +62,7 @@ class SubscriptionFieldsService @Inject()(repository: SubscriptionFieldsReposito
   def get(clientId: ClientId): Future[Option[BulkSubscriptionFieldsResponse]] = {
     Logger.debug(s"[get] ClientId: $clientId")
     (for {
-      list <- repository.fetchByClientId(clientId.value)
+      list <- repository.fetchByClientId(clientId)
     } yield list.map(asResponse)) map {
       case Nil => None
       case list => Some(BulkSubscriptionFieldsResponse(fields = list))

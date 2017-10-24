@@ -47,14 +47,9 @@ class SubscriptionFieldsRepositorySpec extends UnitSpec
   private val repository = new SubscriptionFieldsMongoRepository(mongoDbProvider) {
 
     import play.api.libs.json._
-    import reactivemongo.play.json.ImplicitBSONHandlers._
 
     def saveByFieldsId(subscription: SubscriptionFields): Future[Boolean] = {
-      collection.update(selector = Json.obj("fieldsId" -> subscription.fieldsId), update = subscription, upsert = true).map {
-        updateWriteResult => handleSaveError(updateWriteResult, s"Could not save subscription fields: $subscription",
-          updateWriteResult.upserted.nonEmpty
-        )
-      }
+      save(subscription, Json.obj("fieldsId" -> subscription.fieldsId))
     }
 
   }
@@ -119,12 +114,12 @@ class SubscriptionFieldsRepositorySpec extends UnitSpec
       await(repository.save(apiSubForApp2Context1))
       collectionSize shouldBe 3
 
-      await(repository.fetchByClientId(fakeRawClientId)) shouldBe List(apiSubForApp1Context1, apiSubForApp1Context2)
-      await(repository.fetchByClientId(fakeRawClientId2)) shouldBe List(apiSubForApp2Context1)
+      await(repository.fetchByClientId(FakeClientId)) shouldBe List(apiSubForApp1Context1, apiSubForApp1Context2)
+      await(repository.fetchByClientId(FakeClientId2)) shouldBe List(apiSubForApp2Context1)
     }
 
     "return an empty list when clientId is not found" in {
-      await(repository.fetchByClientId("CLIENT_ID_DOES_NOT_EXIST_IN_DB")) shouldBe List()
+      await(repository.fetchByClientId(ClientId("CLIENT_ID_DOES_NOT_EXIST_IN_DB"))) shouldBe List()
     }
 
   }

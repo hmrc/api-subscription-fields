@@ -17,7 +17,7 @@
 package uk.gov.hmrc.apisubscriptionfields.repository
 
 import play.api.Logger
-import reactivemongo.api.commands.WriteResult
+import reactivemongo.api.commands.{UpdateWriteResult, WriteResult}
 
 trait MongoErrorHandler {
 
@@ -25,15 +25,15 @@ trait MongoErrorHandler {
     handleError(result, databaseAltered, exceptionMsg)
   }
 
-  def handleSaveError(result: WriteResult, exceptionMsg: => String, isInserted: Boolean): Boolean = {
+  def handleSaveError(updateWriteResult: UpdateWriteResult, exceptionMsg: => String): Boolean = {
 
     def handleUpsertError(result: WriteResult) =
       if (databaseAltered(result))
-        isInserted
+        updateWriteResult.upserted.nonEmpty
       else
         throw new RuntimeException(exceptionMsg)
 
-    handleError(result, handleUpsertError, exceptionMsg)
+    handleError(updateWriteResult, handleUpsertError, exceptionMsg)
   }
 
   private def handleError(result: WriteResult, f: WriteResult => Boolean, exceptionMsg: String): Boolean = {

@@ -19,17 +19,14 @@ package uk.gov.hmrc.apisubscriptionfields.repository
 import javax.inject.{Inject, Singleton}
 
 import com.google.inject.ImplementedBy
-import play.api.Logger
 import play.api.libs.json._
 import reactivemongo.api.indexes.IndexType
-import reactivemongo.api.{Cursor, ReadPreference}
 import reactivemongo.bson.BSONObjectID
-import reactivemongo.play.json.ImplicitBSONHandlers._
+import reactivemongo.play.json.collection.JSONCollection
 import uk.gov.hmrc.apisubscriptionfields.model.{ApiContext, ApiVersion}
 import uk.gov.hmrc.mongo.ReactiveRepository
 import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 @ImplementedBy(classOf[FieldsDefinitionMongoRepository])
@@ -48,9 +45,9 @@ class FieldsDefinitionMongoRepository @Inject()(mongoDbProvider: MongoDbProvider
   extends ReactiveRepository[FieldsDefinition, BSONObjectID]("fieldsDefinitions", mongoDbProvider.mongo,
     MongoFormatters.FieldsDefinitionJF, ReactiveMongoFormats.objectIdFormats)
   with FieldsDefinitionRepository
-  with MongoIndexCreator
-  with MongoErrorHandler {
+  with MongoCrudHelper[FieldsDefinition] {
 
+  override val col: JSONCollection = collection
   private implicit val format = MongoFormatters.FieldsDefinitionJF
 
   override def indexes = Seq(
@@ -65,25 +62,16 @@ class FieldsDefinitionMongoRepository @Inject()(mongoDbProvider: MongoDbProvider
   )
 
   override def fetchAll(): Future[List[FieldsDefinition]] = {
-    Logger.debug(s"[fetchAll]")
-    collection.find(Json.obj()).cursor[FieldsDefinition](ReadPreference.primary).collect[List](
-      Int.MaxValue, Cursor.FailOnError[List[FieldsDefinition]]()
-    )
+    getMany(Json.obj())
   }
 
   override def fetch(apiContext: ApiContext, apiVersion: ApiVersion): Future[Option[FieldsDefinition]] = {
     val selector = selectorForFieldsDefinition(apiContext, apiVersion)
-    Logger.debug(s"[fetch] selector: $selector")
-    collection.find(selector).one[FieldsDefinition]
+    getOne(selector)
   }
 
   override def save(fieldsDefinition: FieldsDefinition): Future[Boolean] = {
-    collection.update(selector = selectorForFieldsDefinition(fieldsDefinition), update = fieldsDefinition, upsert = true).map {
-      updateWriteResult =>
-        handleSaveError(updateWriteResult, s"Could not save fields definition fields: $fieldsDefinition",
-          updateWriteResult.upserted.nonEmpty
-      )
-    }
+    save(fieldsDefinition, selectorForFieldsDefinition(fieldsDefinition))
   }
 
   private def selectorForFieldsDefinition(apiContext: ApiContext, apiVersion: ApiVersion): JsObject = {

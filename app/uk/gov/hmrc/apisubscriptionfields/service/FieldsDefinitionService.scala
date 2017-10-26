@@ -28,13 +28,13 @@ import scala.concurrent.Future
 @Singleton
 class FieldsDefinitionService @Inject() (repository: FieldsDefinitionRepository) {
 
-  def upsert(apiContext: ApiContext, apiVersion: ApiVersion, fields: Seq[FieldDefinition]): Future[Boolean] = {
-    Logger.debug(s"[upsert] ApiContext: $apiContext, ApiVersion: $apiVersion")
-    repository.save(FieldsDefinition(apiContext.value, apiVersion.value, fields))
+  def upsert(apiContext: ApiContext, apiVersion: ApiVersion, fieldDefinitions: Seq[FieldDefinition]): Future[Boolean] = {
+    Logger.debug(s"[upsert] apiContext: $apiContext, apiVersion: $apiVersion, fieldDefinitions: $fieldDefinitions")
+    repository.save(FieldsDefinition(apiContext.value, apiVersion.value, fieldDefinitions))
   }
 
   def get(apiContext: ApiContext, apiVersion: ApiVersion): Future[Option[FieldsDefinitionResponse]] = {
-    Logger.debug(s"[get] ApiContext: $apiContext, ApiVersion: $apiVersion")
+    Logger.debug(s"[get] apiContext: $apiContext, apiVersion: $apiVersion")
     for {
       fetch <- repository.fetch(apiContext, apiVersion)
     } yield fetch.map(asResponse)

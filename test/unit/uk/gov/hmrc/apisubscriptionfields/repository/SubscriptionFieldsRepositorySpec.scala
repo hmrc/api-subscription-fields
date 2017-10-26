@@ -151,7 +151,7 @@ class SubscriptionFieldsRepositorySpec extends UnitSpec
       await(repository.save(apiSubscription)) shouldBe true
       collectionSize shouldBe 1
 
-      await(repository.fetchByFieldsId(apiSubscription.fieldsId)) shouldBe Some(apiSubscription)
+      await(repository.fetchByFieldsId(SubscriptionFieldsId(apiSubscription.fieldsId))) shouldBe Some(apiSubscription)
     }
 
     "return `None` when the `fieldsId` doesn't match any record in the collection" in {
@@ -161,7 +161,7 @@ class SubscriptionFieldsRepositorySpec extends UnitSpec
       }
       collectionSize shouldBe 3
 
-      await(repository.fetchByFieldsId(UUID.fromString("1-2-3-4-5"))) shouldBe None
+      await(repository.fetchByFieldsId(SubscriptionFieldsId(UUID.fromString("1-2-3-4-5")))) shouldBe None
     }
   }
 

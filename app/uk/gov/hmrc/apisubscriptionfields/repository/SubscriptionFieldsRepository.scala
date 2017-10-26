@@ -24,7 +24,7 @@ import play.api.libs.json._
 import reactivemongo.api.indexes.IndexType
 import reactivemongo.bson.BSONObjectID
 import reactivemongo.play.json.collection.JSONCollection
-import uk.gov.hmrc.apisubscriptionfields.model.{ApiContext, ApiVersion, ClientId}
+import uk.gov.hmrc.apisubscriptionfields.model._
 import uk.gov.hmrc.mongo.ReactiveRepository
 import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
 
@@ -37,7 +37,7 @@ trait SubscriptionFieldsRepository {
 
   def fetchByClientId(clientId: ClientId): Future[List[SubscriptionFields]]
   def fetch(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion): Future[Option[SubscriptionFields]]
-  def fetchByFieldsId(fieldsId: UUID): Future[Option[SubscriptionFields]]
+  def fetchByFieldsId(fieldsId: SubscriptionFieldsId): Future[Option[SubscriptionFields]]
 
   def delete(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion): Future[Boolean]
 }
@@ -89,8 +89,8 @@ class SubscriptionFieldsMongoRepository @Inject()(mongoDbProvider: MongoDbProvid
     getOne(selector)
   }
 
-  override def fetchByFieldsId(fieldsId: UUID): Future[Option[SubscriptionFields]] = {
-    val selector = Json.obj("fieldsId" -> fieldsId)
+  override def fetchByFieldsId(fieldsId: SubscriptionFieldsId): Future[Option[SubscriptionFields]] = {
+    val selector = Json.obj("fieldsId" -> fieldsId.value)
     getOne(selector)
   }
 

@@ -40,14 +40,16 @@ trait AcceptanceTestSpec extends FeatureSpec
   protected val ValidRequest = FakeRequest()
     .withHeaders(RequestHeaders.ACCEPT_HMRC_JSON_HEADER)
 
+  protected val allDefinitionsEndpoint = "/definition"
+
+  protected val InvalidNonJsonPayload = "##INVALID_JSON_PAYLOAD##"
+
   protected def subscriptionFieldsEndpoint(clientId: String, apiContext: String, apiVersion: String) =
     s"/field/application/$clientId/context/$apiContext/version/$apiVersion"
 
   protected def byClientIdEndpoint(clientId: String) = s"/field/application/$clientId"
 
   protected def definitionEndpoint(apiContext: String, apiVersion: String) = s"/definition/context/$apiContext/version/$apiVersion"
-
-  protected val allDefinitionsEndpoint = "/definition"
 
   protected def fieldsIdEndpoint(fieldsId: UUID) = s"/field/$fieldsId"
 

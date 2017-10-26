@@ -63,7 +63,7 @@ class JsonFormatterSpec extends WordSpec with Matchers with JsonFormatters with 
   }
 
   "FieldsDefinitionResponse" should {
-    val json = """{"fields":[{"name":"name1","description":"desc1","type":"URL"}]}"""
+    val json = """{"fieldDefinitions":[{"name":"name1","description":"desc1","type":"URL"}]}"""
 
     "marshal json" in {
       objectAsJsonString(fakeFieldsDefinitionResponse) shouldBe json

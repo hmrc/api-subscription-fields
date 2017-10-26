@@ -41,8 +41,6 @@ class FieldsDefinitionController @Inject() (service: FieldsDefinitionService) ex
       service.upsert(ApiContext(rawApiContext), ApiVersion(rawApiVersion), payload.fieldDefinitions) map {
         case true => Created
         case false => Ok
-      } recover {
-        case e: Exception => BadRequest(e.getMessage)
       }
     } recover recovery
   }

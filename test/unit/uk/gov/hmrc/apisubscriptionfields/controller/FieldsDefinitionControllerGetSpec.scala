@@ -34,7 +34,7 @@ class FieldsDefinitionControllerGetSpec extends UnitSpec with FieldsDefinitionTe
   private val controller = new FieldsDefinitionController(mockFieldsDefinitionService)
 
   private val responseJsonString =
-    """{ "fields": [
+    """{ "fieldDefinitions": [
       |          {
       |            "name": "callback-url",
       |            "description": "Callback URL",
@@ -51,7 +51,7 @@ class FieldsDefinitionControllerGetSpec extends UnitSpec with FieldsDefinitionTe
   private val responseModel = responseJson.as[FieldsDefinitionResponse]
 
   private val allResponseJsonString =
-    """{ "fields": [
+    """{ "fieldDefinitions": [
       |          {
       |            "name": "callback-url",
       |            "description": "Callback URL",

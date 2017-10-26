@@ -88,8 +88,6 @@ class SubscriptionFieldsController @Inject()(service: SubscriptionFieldsService)
         service.upsert(ClientId(rawClientId), ApiContext(rawApiContext), ApiVersion(rawApiVersion), payload.fields) map {
           case (response, true) => Created(Json.toJson(response))
           case (response, false) => Ok(Json.toJson(response))
-        } recover {
-          case e: Exception => BadRequest(e.getMessage)
         }
       } recover recovery
     }

@@ -17,11 +17,12 @@
 package uk.gov.hmrc.apisubscriptionfields.controller
 
 import play.api.Logger
-import play.api.libs.json.{JsError, JsSuccess, JsValue, Reads}
+import play.api.libs.json._
 import play.api.mvc.{Request, Result}
+import uk.gov.hmrc.apisubscriptionfields.model.ErrorCode._
 import uk.gov.hmrc.apisubscriptionfields.model.JsErrorResponse
 import uk.gov.hmrc.play.microservice.controller.BaseController
-import uk.gov.hmrc.apisubscriptionfields.model.ErrorCode._
+
 import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
 
@@ -31,9 +32,14 @@ trait CommonController extends BaseController {
   (f: (T) => Future[Result])(implicit request: Request[JsValue], m: Manifest[T], reads: Reads[T]): Future[Result] = {
     Try(request.body.validate[T]) match {
       case Success(JsSuccess(payload, _)) => f(payload)
-      case Success(JsError(errs)) => Future.successful(UnprocessableEntity(JsErrorResponse(INVALID_REQUEST_PAYLOAD, JsError.toJson(errs))))
-      case Failure(e) => Future.successful(UnprocessableEntity(JsErrorResponse(INVALID_REQUEST_PAYLOAD, e.getMessage)))
+      case Success(JsError(errs)) => jsonError(JsError.toJson(errs).toString())
+      case Failure(e) => jsonError(e.getMessage)
     }
+  }
+
+  private def jsonError(errorText: String) = {
+    Logger.error(s"A JSON error occurred: $errorText")
+    Future.successful(UnprocessableEntity(JsErrorResponse(INVALID_REQUEST_PAYLOAD, "A JSON error occurred")))
   }
 
   def recovery: PartialFunction[Throwable, Result] = {
@@ -44,6 +50,4 @@ trait CommonController extends BaseController {
     Logger.error(s"An unexpected error occurred: ${e.getMessage}", e)
     InternalServerError(JsErrorResponse(UNKNOWN_ERROR, "An unexpected error occurred"))
   }
-
 }
-

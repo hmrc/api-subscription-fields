@@ -12,7 +12,7 @@ Further development can be found in the [roadmap](docs/ROADMAP.md)
 
 | Path                                                                                                       |  Method  | Description                              |
 |------------------------------------------------------------------------------------------------------------|----------|------------------------------------------|
-| [`/definition/context/:apiContext/version/:apiVersion`](#user-content-put-field-definitions)               | `PUT`    | Creates or updates the definitions of the subscriptions fields for an API. |
+| [`/definition/context/:apiContext/version/:apiVersion`](#user-content-put-field-definitions)               | `PUT`    | Creates or updates the definitions of the subscriptions fields for an API |
 | [`/definition/context/:apiContext/version/:apiVersion`](#user-content-get-field-definitions)               | `GET`    | Retrieves the definitions of subscription fields for an API |
 | [`/definition`](#user-content-get-field-definitions-for-all-apis)                                          | `GET`    | Retrieves the definitions of subscription fields for all APIs |
 | [`/field/application/:clientId/context/:apiContext/version/:apiVersion`](#user-content-put-field-values)   | `PUT`    | Creates or updates the field values of an API subscription |
@@ -25,7 +25,7 @@ Further development can be found in the [roadmap](docs/ROADMAP.md)
 
 ### PUT Field Definitions 
 #### `PUT /definition/context/:apiContext/version/:apiVersion`
-Creates or updates the definitions of the subscriptions fields for an API.
+Creates or updates the definitions of the subscriptions fields for an API
 
 #### Response with
 

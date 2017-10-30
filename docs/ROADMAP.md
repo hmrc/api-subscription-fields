@@ -10,7 +10,7 @@ This microservice stores definitions and values for the HMRC Developer Hub.
 
 | Path                                                                                                       |  Method  | Description                              |
 |------------------------------------------------------------------------------------------------------------|----------|------------------------------------------|
-| [`/definition/context/:apiContext/version/:apiVersion`](#user-content-put-field-definitions)               | `PUT`    | Creates or updates the definitions of the subscriptions fields for an API. |
+| [`/definition/context/:apiContext/version/:apiVersion`](#user-content-put-field-definitions)               | `PUT`    | Creates or updates the definitions of the subscriptions fields for an API |
 | [`/definition/context/:apiContext/version/:apiVersion`](#user-content-get-field-definitions)               | `GET`    | Retrieves the definitions of subscription fields for an API |
 | [`/definition`](#user-content-get-field-definitions-for-all-apis)                                          | `GET`    | Retrieves the definitions of subscription fields for all APIs |
 | [`/definition/context/:apiContext/version/:apiVersion`](#user-content-delete-field-definitions)            | `DELETE` | Deletes the definitions of all subscriptions fields for an API |
@@ -25,7 +25,7 @@ This microservice stores definitions and values for the HMRC Developer Hub.
 
 ### PUT Field Definitions 
 #### `PUT /definition/context/:apiContext/version/:apiVersion`
-Creates or updates the definitions of the subscriptions fields for an API.
+Creates or updates the definitions of the subscriptions fields for an API
 
 #### Response with
 

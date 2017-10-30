@@ -42,7 +42,7 @@ class SubscriptionFieldsService @Inject()(repository: SubscriptionFieldsReposito
     def create(): Future[SubscriptionFieldsResponse] =
       save(SubscriptionFields(clientId.value, apiContext.value, apiVersion.value, uuidCreator.uuid(), subscriptionFields))
 
-    Logger.debug(s"[upsert] clientId: $clientId, apiContext: $apiVersion, apiVersion: $apiVersion")
+    Logger.debug(s"[upsert subscription fields] clientId: $clientId, apiContext: $apiVersion, apiVersion: $apiVersion")
 
     repository.fetch(clientId, apiContext, apiVersion) flatMap {
       o =>
@@ -55,12 +55,12 @@ class SubscriptionFieldsService @Inject()(repository: SubscriptionFieldsReposito
   }
 
   def delete(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion): Future[Boolean] = {
-    Logger.debug(s"[delete] clientId: $clientId, apiContext: $apiVersion, apiVersion: $apiVersion")
+    Logger.debug(s"[delete subscription fields] clientId: $clientId, apiContext: $apiVersion, apiVersion: $apiVersion")
     repository.delete(clientId, apiContext, apiVersion)
   }
 
   def get(clientId: ClientId): Future[Option[BulkSubscriptionFieldsResponse]] = {
-    Logger.debug(s"[get] clientId: $clientId")
+    Logger.debug(s"[get subscription fields] clientId: $clientId")
     (for {
       list <- repository.fetchByClientId(clientId)
     } yield list.map(asResponse)) map {
@@ -70,22 +70,22 @@ class SubscriptionFieldsService @Inject()(repository: SubscriptionFieldsReposito
   }
 
   def get(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion): Future[Option[SubscriptionFieldsResponse]] = {
-    Logger.debug(s"[get] clientId: $clientId")
+    Logger.debug(s"[get subscription fields] clientId: $clientId, apiContext: $apiVersion, apiVersion: $apiVersion")
     for {
       fetch <- repository.fetch(clientId, apiContext, apiVersion)
     } yield fetch.map(asResponse)
   }
 
   def get(subscriptionFieldsId: SubscriptionFieldsId): Future[Option[SubscriptionFieldsResponse]] = {
-    Logger.debug(s"[get] subscriptionFieldsId: $subscriptionFieldsId")
+    Logger.debug(s"[get subscription fields] fieldsId: $subscriptionFieldsId")
     for {
       fetch <- repository.fetchByFieldsId(subscriptionFieldsId)
     } yield fetch.map(asResponse)
   }
 
-  private def save(apiSubscription: SubscriptionFields): Future[SubscriptionFieldsResponse] = {
-    Logger.debug(s"[save] subscriptionFields: $apiSubscription")
-    repository.save(apiSubscription) map(_ => asResponse(apiSubscription))
+  private def save(apiSubscriptionFields: SubscriptionFields): Future[SubscriptionFieldsResponse] = {
+    Logger.debug(s"[save subscription fields] subscriptionFields: $apiSubscriptionFields")
+    repository.save(apiSubscriptionFields) map(_ => asResponse(apiSubscriptionFields))
   }
 
   private def asResponse(apiSubscription: SubscriptionFields): SubscriptionFieldsResponse = {

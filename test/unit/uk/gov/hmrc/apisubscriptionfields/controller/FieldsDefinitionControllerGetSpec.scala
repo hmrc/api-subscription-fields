@@ -61,12 +61,22 @@ class FieldsDefinitionControllerGetSpec extends UnitSpec with FieldsDefinitionTe
       |            "name": "token",
       |            "description": "Secure Token",
       |            "type": "SecureToken"
+      |          },
+      |          {
+      |            "name": "address",
+      |            "description": "where you live",
+      |            "type": "STRING"
+      |          },
+      |          {
+      |            "name": "number",
+      |            "description": "telephone number",
+      |            "type": "STRING"
       |          }
       |        ]
       |}""".stripMargin
   private val allResponseJson = Json.parse(allResponseJsonString)
   private val allResponseModel = allResponseJson.as[FieldsDefinitionResponse]
-  private val emptyAllResponseJson = Json.toJson(FieldsDefinitionResponse(List()))
+  private val emptyAllResponseJson = Json.toJson(FieldsDefinitionResponse(Seq()))
 
   "GET /definition/context/:apiContext/version/:apiVersion" should {
     "return OK when exists in the repo" in {
@@ -110,7 +120,7 @@ class FieldsDefinitionControllerGetSpec extends UnitSpec with FieldsDefinitionTe
     }
 
     "return OK with an empty list when no definitions exists in the repo" in {
-      mockFieldsDefinitionService.getAll _ expects () returns Future.successful(FieldsDefinitionResponse(List()))
+      mockFieldsDefinitionService.getAll _ expects () returns Future.successful(FieldsDefinitionResponse(Seq()))
 
       val result = await(controller.getAllFieldsDefinitions()(FakeRequest()))
 

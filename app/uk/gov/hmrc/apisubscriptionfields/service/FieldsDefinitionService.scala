@@ -29,23 +29,24 @@ import scala.concurrent.Future
 class FieldsDefinitionService @Inject() (repository: FieldsDefinitionRepository) {
 
   def upsert(apiContext: ApiContext, apiVersion: ApiVersion, fieldDefinitions: Seq[FieldDefinition]): Future[Boolean] = {
-    Logger.debug(s"[upsert] apiContext: $apiContext, apiVersion: $apiVersion, fieldDefinitions: $fieldDefinitions")
+    Logger.debug(s"[upsert fields definotion] apiContext: $apiContext, apiVersion: $apiVersion, fieldDefinitions: $fieldDefinitions")
     repository.save(FieldsDefinition(apiContext.value, apiVersion.value, fieldDefinitions))
   }
 
   def get(apiContext: ApiContext, apiVersion: ApiVersion): Future[Option[FieldsDefinitionResponse]] = {
-    Logger.debug(s"[get] apiContext: $apiContext, apiVersion: $apiVersion")
+    Logger.debug(s"[get fields definition] apiContext: $apiContext, apiVersion: $apiVersion")
     for {
       fetch <- repository.fetch(apiContext, apiVersion)
     } yield fetch.map(asResponse)
   }
 
   def getAll: Future[FieldsDefinitionResponse] = {
-    Logger.debug(s"[getAllFieldDefinitions]")
+    Logger.debug(s"[get all field definitions]")
+    // TODO: we need to separate the field definitions by API context and API version, otherwise this is useless!
     repository.fetchAll() map { defs => defs.flatMap { _.fieldDefinitions } } map (FieldsDefinitionResponse(_))
   }
 
   private def asResponse(fieldsDefinition: FieldsDefinition): FieldsDefinitionResponse = {
-    FieldsDefinitionResponse(fieldDefinitions = fieldsDefinition.fieldDefinitions)
+    FieldsDefinitionResponse(fieldsDefinition.fieldDefinitions)
   }
 }

@@ -6,7 +6,9 @@ This microservice stores definitions and values for the HMRC Developer Hub.
 
 Further development can be found in the [roadmap](docs/ROADMAP.md) 
 
-## Endpoints Summary
+---
+
+### Endpoints Summary
 
 | Path                                                                                                       |  Method  | Description                              |
 |------------------------------------------------------------------------------------------------------------|----------|------------------------------------------|
@@ -19,24 +21,26 @@ Further development can be found in the [roadmap](docs/ROADMAP.md)
 | [`/field/application/:clientId`](#user-content-get-field-values-by-application)                            | `GET`    | Retrieves the field values of all API subscriptions related to a specific application |
 | [`/field/application/:clientId/context/:apiContext/version/:apiVersion`](#user-content-delete-field-values)| `DELETE` | Deletes the field values of an API subscription |
 
-## PUT Field Definitions 
-### `PUT /definition/context/:apiContext/version/:apiVersion`
+---
+
+### PUT Field Definitions 
+#### `PUT /definition/context/:apiContext/version/:apiVersion`
 Creates or updates the definitions of the subscriptions fields for an API.
 
-### Response with
+#### Response with
 
 | Status | Description                          |
 |--------|--------------------------------------|
 | 201    | Created                              |
 | 200    | Updated                              |
 
-### example
+#### example
 
-#### curl command
+##### curl command
 ```
 curl -v -X PUT "http://localhost:9650/definition/context/hello/version/1.0" -H "Cache-Control: no-cache" -H "Content-Type: application/json" -d '{ "fieldDefinitions": [ { "name": "callback-url", "description": "Callback URL", "type": "URL" }, { "name": "token", "description": "Secure Token", "type": "SecureToken" } ] }' 
 ```
-#### Request body
+##### Request body
 ```json
 {
   "fieldDefinitions": [
@@ -53,29 +57,31 @@ curl -v -X PUT "http://localhost:9650/definition/context/hello/version/1.0" -H "
   ]
 }
 ```
-#### Response body
+##### Response body
 None
 
-## GET Field Definitions for an API
-### `GET /definition/context/:apiContext/version/:apiVersion`
+---
+
+### GET Field Definitions for an API
+#### `GET /definition/context/:apiContext/version/:apiVersion`
 Retrieves the definitions of subscription fields for an API
 
-### Response with
+#### Response with
 
 | Status | Description                          |
 |--------|--------------------------------------|
 | 200    | Updated                              |
 | 404    | Not found                            |
 
-### example
+#### example
 
-#### curl command
+##### curl command
 ```
 curl -v -X GET "http://localhost:9650/definition/context/hello/version/1.0" -H "Cache-Control: no-cache"
 ```
-#### Request body
+##### Request body
 None
-#### Response body
+##### Response body
 ```json
 {
   "fieldDefinitions": [
@@ -93,25 +99,27 @@ None
 }
 ```
 
-## GET Field Definitions For All APIs
-### `/definition`
+---
+
+### GET Field Definitions For All APIs
+#### `/definition`
 Retrieves the definitions of subscription fields for all APIs
 
-### Response with
+#### Response with
 
 | Status | Description                          |
 |--------|--------------------------------------|
 | 200    | OK                                   |
 
-### example
+#### example
 
-#### curl command
+##### curl command
 ```
 curl -v -X GET "http://localhost:9650/definition" -H "Cache-Control: no-cache"
 ```
-#### Request body
+##### Request body
 None
-#### Response body
+##### Response body
 ```json
 {
   "fieldDefinitions": [
@@ -139,24 +147,26 @@ None
 }
 ```
 
-## PUT Field Values 
-### `PUT /field/application/:clientId/context/:apiContext/version/:apiVersion`
+---
+
+### PUT Field Values 
+#### `PUT /field/application/:clientId/context/:apiContext/version/:apiVersion`
 Creates or updates the field values of an API subscription   
 
-### Response with
+#### Response with
 
 | Status | Description                          |
 |--------|--------------------------------------|
 | 201    | Created                              |
 | 200    | Updated                              |
 
-### example
+#### example
 
-#### curl command
+##### curl command
 ```
 curl -v -X PUT "http://localhost:9650/field/application/hBnFo14C0y4SckYUbcoL2PbFA40a/context/hello/version/1.0" -H "Cache-Control: no-cache" -H "Content-Type: application/json" -d '{ "fields" : { "callback-url" : "http://localhost:8080/callback", "token" : "abc59609za2q" } }'
 ```
-#### Request body
+##### Request body
 ```json
 {
   "fields": {
@@ -165,7 +175,7 @@ curl -v -X PUT "http://localhost:9650/field/application/hBnFo14C0y4SckYUbcoL2PbF
   }
 }
 ```
-#### Response body
+##### Response body
 ```json
 {
   "clientId": "hBnFo14C0y4SckYUbcoL2PbFA40a",
@@ -179,26 +189,28 @@ curl -v -X PUT "http://localhost:9650/field/application/hBnFo14C0y4SckYUbcoL2PbF
 }
 ```
 
-## GET Field Values by application and API
-### `GET /field/application/:clientId/context/:apiContext/version/:apiVersion`
+---
+
+### GET Field Values by application and API
+#### `GET /field/application/:clientId/context/:apiContext/version/:apiVersion`
 Retrieves the field values of an API subscription by providing the application and API details
 
-### Response with
+#### Response with
 
 | Status | Description                          |
 |--------|--------------------------------------|
 | 200    | OK                                   |
 | 404    | Not found                            |
 
-### example
+#### example
 
-#### curl command
+##### curl command
 ```
 curl -v -X GET "http://localhost:9650/field/application/hBnFo14C0y4SckYUbcoL2PbFA40a/context/hello/version/1.0" -H "Cache-Control: no-cache"
 ```
-#### Request body
+##### Request body
 None
-#### Response body
+##### Response body
 ```json
 {
   "clientId": "hBnFo14C0y4SckYUbcoL2PbFA40a",
@@ -212,26 +224,28 @@ None
 }
 ```
 
-## GET Field Values by `fieldsId` 
-### `GET /field/application/:fieldsId`
+---
+
+### GET Field Values by `fieldsId` 
+#### `GET /field/application/:fieldsId`
 Retrieves the field values by providing the `fieldsId` 
 
-### Response with
+#### Response with
 
 | Status | Description                          |
 |--------|--------------------------------------|
 | 200    | OK                                   |
 | 404    | Not found                            |
 
-### example
+#### example
 
-#### curl command
+##### curl command
 ```
 curl -v -X GET "http://localhost:9650/field/f121ffa3-df94-43a0-8235-ac4530f9700a" -H "Cache-Control: no-cache"
 ```
-#### Request body
+##### Request body
 None
-#### Response body
+##### Response body
 ```json
 {
   "clientId": "xp5036mSZooNOlD0Nfjz7LKnCy0a",
@@ -245,24 +259,26 @@ None
 }
 ```
 
-## GET Field Values by application 
-### `GET /field/application/:clientId`
+---
+
+### GET Field Values by application 
+#### `GET /field/application/:clientId`
 Retrieves the field values of all API subscriptions related to a specific application
 
-### Response with
+#### Response with
 
 | Status | Description                          |
 |--------|--------------------------------------|
 | 200    | OK                                   |
 | 404    | Not found                            |
 
-### example
+#### example
 
-#### curl command
+##### curl command
 ```
 curl -v -X GET "http://localhost:9650/field/application/xp5036mSZooNOlD0Nfjz7LKnCy0a" -H "Cache-Control: no-cache"
 ```
-#### Request body
+##### Request body
 None
 #### Response body
 ```json
@@ -291,30 +307,34 @@ None
   ]
 }
 ```
-## DELETE Field Values 
-### `DELETE /field/application/:clientId/context/:apiContext/version/:apiVersion`
+
+---
+
+### DELETE Field Values 
+#### `DELETE /field/application/:clientId/context/:apiContext/version/:apiVersion`
 Deletes the field values of an API subscription
 
-### Response with
+#### Response with
 
 | Status | Description                          |
 |--------|--------------------------------------|
 | 204    | Deleted                              |
 | 404    | Not found                            |
 
-### example
+#### example
 
-#### curl command
+##### curl command
 ```
 curl -v -X DELETE "http://localhost:9650/field/application/hBnFo14C0y4SckYUbcoL2PbFA40a/context/hello/version/1.0" -H "Cache-Control: no-cache"
 ```
-#### Request body
+##### Request body
 None
-#### Response body
+##### Response body
 None
 
+---
 
-## Tests
+### Tests
 Some tests require MongoDB to run. 
 Thus, remember to start up MongoDB if you want to run the tests locally.
 There are unit tests, integration tests and acceptance tests plus code coverage reports are generated too.
@@ -323,6 +343,7 @@ In order to run them, use this command line:
 ./precheck.sh
 ```
 
+---
 
 ### License
 

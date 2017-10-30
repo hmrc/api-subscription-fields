@@ -56,7 +56,7 @@ curl -v -X PUT "http://localhost:9650/definition/context/hello/version/1.0" -H "
 #### Response body
 None
 
-## GET Field Definitions 
+## GET Field Definitions for an API
 ### `GET /definition/context/:apiContext/version/:apiVersion`
 Retrieves the definitions of subscription fields for an API
 
@@ -179,7 +179,7 @@ curl -v -X PUT "http://localhost:9650/field/application/hBnFo14C0y4SckYUbcoL2PbF
 }
 ```
 
-## GET Field Values 
+## GET Field Values by application and API
 ### `GET /field/application/:clientId/context/:apiContext/version/:apiVersion`
 Retrieves the field values of an API subscription by providing the application and API details
 

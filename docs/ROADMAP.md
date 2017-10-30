@@ -225,8 +225,8 @@ curl -v -X PUT "http://localhost:9650/field/application/hBnFo14C0y4SckYUbcoL2PbF
 ```json
 {
   "fields": {
-    "callback-id": "http://localhost",
-    "token": "abc123"
+    "callback-url": "http://localhost:8080/callback",
+    "token": "abc59609za2q"
   }
 }
 ```
@@ -238,7 +238,7 @@ curl -v -X PUT "http://localhost:9650/field/application/hBnFo14C0y4SckYUbcoL2PbF
   "apiVersion": "1.0",
   "fieldsId": "55c2b945-1c82-4749-b4fc-42e5u32192ew", 
   "fields": {
-    "callback-id": "http://localhost:8080/callback",
+    "callback-url": "http://localhost:8080/callback",
     "token": "abc59609za2q"
   }
 }
@@ -273,8 +273,8 @@ None
   "apiVersion": "1.0",
   "fieldsId": "55c2b945-1c82-4749-b4fc-42e5u32192ew", 
   "fields": {
-    "callback-id": "http://localhost",
-    "token": "abc123"
+    "callback-url": "http://localhost:8080/callback",
+    "token": "abc59609za2q"
   }
 }
 ```
@@ -296,7 +296,7 @@ Retrieves the field values by providing the `fieldsId`
 
 ##### curl command
 ```
-curl -v -X GET "http://localhost:9650/field/f121ffa3-df94-43a0-8235-ac4530f9700a" -H "Cache-Control: no-cache"
+curl -v -X GET "http://localhost:9650/field/55c2b945-1c82-4749-b4fc-42e5u32192ew" -H "Cache-Control: no-cache"
 ```
 ##### Request body
 None
@@ -308,8 +308,8 @@ None
   "apiVersion": "1.0",
   "fieldsId": "55c2b945-1c82-4749-b4fc-42e5u32192ew", 
   "fields": {
-    "callback-id": "http://localhost",
-    "token": "abc123"
+    "callback-url": "http://localhost:8080/callback",
+    "token": "abc59609za2q"
   }
 }
 ```
@@ -345,8 +345,8 @@ None
       "apiVersion": "1.0",
       "fieldsId": "55c2b945-1c82-4749-b4fc-42e5u32192ew",
       "fields": {
-        "callback-id": "http://localhost:8080",
-        "token": "abc123"
+        "callback-url": "http://localhost:8080/callback",
+        "token": "abc59609za2q"
       }
     },
     {
@@ -355,8 +355,8 @@ None
       "apiVersion": "2.0",
       "fieldsId": "66c2b945-1c82-4749-b4fc-42e5u39999ew",
       "fields": {
-        "callback-id": "http://localhost:8081",
-        "token": "def456"
+        "callback-url": "http://localhost:8081/callback",
+        "token": "def45609za2p"
       }
     }
   ]
@@ -393,8 +393,8 @@ None
       "apiVersion": "1.0",
       "fieldsId": "55c2b945-1c82-4749-b4fc-42e5u32192ew",
       "fields": {
-        "callback-id": "http://localhost:8080",
-        "token": "abc123"
+        "callback-url": "http://localhost:8080/callback",
+        "token": "abc59609za2q"
       }
     },
     {
@@ -403,8 +403,8 @@ None
       "apiVersion": "2.0",
       "fieldsId": "66c2b945-1c82-4749-b4fc-42e5u39999ew",
       "fields": {
-        "callback-id": "http://localhost:8081",
-        "token": "def456"
+        "callback-url": "http://localhost:8081/callback",
+        "token": "def45609za2p"
       }
     }
   ]

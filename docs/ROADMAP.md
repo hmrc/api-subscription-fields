@@ -8,18 +8,18 @@ This microservice stores definitions and values for the HMRC Developer Hub.
 
 ### Endpoints Summary
 
-| Path                                                                                                       |  Method  | Description                              |
-|------------------------------------------------------------------------------------------------------------|----------|------------------------------------------|
-| [`/definition/context/:apiContext/version/:apiVersion`](#user-content-put-field-definitions)               | `PUT`    | Creates or updates the definitions of the subscriptions fields for an API |
-| [`/definition/context/:apiContext/version/:apiVersion`](#user-content-get-field-definitions)               | `GET`    | Retrieves the definitions of subscription fields for an API |
-| [`/definition`](#user-content-get-field-definitions-for-all-apis)                                          | `GET`    | Retrieves the definitions of subscription fields for all APIs |
-| [`/definition/context/:apiContext/version/:apiVersion`](#user-content-delete-field-definitions)            | `DELETE` | Deletes the definitions of all subscriptions fields for an API |
-| [`/field/application/:clientId/context/:apiContext/version/:apiVersion`](#user-content-put-field-values)   | `PUT`    | Creates or updates the field values of an API subscription |
-| [`/field/application/:clientId/context/:apiContext/version/:apiVersion`](#user-content-get-field-values)   | `GET`    | Retrieves the field values of an API subscription by providing the application and API details |
-| [`/field/:fieldsId`](#user-content-get-field-values-by-fieldsid)                                           | `GET`    | Retrieves the field values of an API subscription by providing the `fieldsId` |
-| [`/field/application/:clientId`](#user-content-get-field-values-by-application)                            | `GET`    | Retrieves the field values of all API subscriptions related to a specific application |
-| [`/field`](#user-content-get-all-field-values)                                                             | `GET`    | Retrieves the field values of all API subscriptions |
-| [`/field/application/:clientId/context/:apiContext/version/:apiVersion`](#user-content-delete-field-values)| `DELETE` | Deletes the field values of an API subscription |
+| Path                                                                                                                            |  Method  | Description                              |
+|---------------------------------------------------------------------------------------------------------------------------------|----------|------------------------------------------|
+| [`/definition/context/:apiContext/version/:apiVersion`](#user-content-put-field-definitions)                                    | `PUT`    | Creates or updates the definitions of the subscriptions fields for an API |
+| [`/definition/context/:apiContext/version/:apiVersion`](#user-content-get-field-definitions-for-an-api)                         | `GET`    | Retrieves the definitions of subscription fields for an API |
+| [`/definition`](#user-content-get-field-definitions-for-all-apis)                                                               | `GET`    | Retrieves the definitions of subscription fields for all APIs |
+| [`/definition/context/:apiContext/version/:apiVersion`](#user-content-delete-field-definitions)                                 | `DELETE` | Deletes the definitions of all subscriptions fields for an API |
+| [`/field/application/:clientId/context/:apiContext/version/:apiVersion`](#user-content-put-field-values)                        | `PUT`    | Creates or updates the field values of an API subscription |
+| [`/field/application/:clientId/context/:apiContext/version/:apiVersion`](#user-content-get-field-values-by-application-and-api) | `GET`    | Retrieves the field values of an API subscription by providing the application and API details |
+| [`/field/:fieldsId`](#user-content-get-field-values-by-fieldsid)                                                                | `GET`    | Retrieves the field values of an API subscription by providing the `fieldsId` |
+| [`/field/application/:clientId`](#user-content-get-field-values-by-application)                                                 | `GET`    | Retrieves the field values of all API subscriptions related to a specific application |
+| [`/field`](#user-content-get-all-field-values)                                                                                  | `GET`    | Retrieves the field values of all API subscriptions |
+| [`/field/application/:clientId/context/:apiContext/version/:apiVersion`](#user-content-delete-field-values)                     | `DELETE` | Deletes the field values of an API subscription |
 
 ---
 

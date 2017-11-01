@@ -180,6 +180,37 @@ class ApiSubscriptionFieldsUnhappySpec extends AcceptanceTestSpec
       contentAsJson(resultFuture) shouldBe JsErrorResponse(INVALID_REQUEST_PAYLOAD, _: Json.JsValueWrapper)
     }
 
+    scenario("the API is called to PUT a fields definition with an invalid field definition type") {
+
+      val invalidFieldDefinition =
+        """{
+          |  "fieldDefinitions": [
+          |    {
+          |      "name" : "address",
+          |      "description" : "where you live",
+          |      "type" : "NOT_VALID_TYPE"
+          |    }
+          |  ]
+          |}
+          |""".stripMargin
+
+      Given("the API is called to PUT a fields definition with an invalid JSON payload")
+      val request = ValidRequest.copyFakeRequest(method = PUT, uri = definitionEndpoint(fakeRawContext, fakeRawVersion))
+        .withJsonBody(Json.parse(invalidFieldDefinition))
+
+      When("a PUT request with data is sent to the API")
+      val result: Option[Future[Result]] = route(app, request)
+
+      Then(s"a response with a 422 status is received")
+      result shouldBe 'defined
+      val resultFuture = result.value
+
+      status(resultFuture) shouldBe UNPROCESSABLE_ENTITY
+
+      And("the response body contains error message")
+      contentAsJson(resultFuture) shouldBe JsErrorResponse(INVALID_REQUEST_PAYLOAD, _: Json.JsValueWrapper)
+    }
+
     scenario("the API is called to PUT a fields definition with an invalid non JSON payload") {
 
       Given("the API is called to PUT a fields definition with an invalid non JSON payload")

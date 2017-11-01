@@ -38,6 +38,7 @@ trait FieldsDefinitionRepository {
 
   def fetchAll(): Future[List[FieldsDefinition]]
 
+  def delete(apiContext: ApiContext, apiVersion: ApiVersion): Future[Boolean]
 }
 
 @Singleton
@@ -72,6 +73,11 @@ class FieldsDefinitionMongoRepository @Inject()(mongoDbProvider: MongoDbProvider
 
   override def save(fieldsDefinition: FieldsDefinition): Future[Boolean] = {
     save(fieldsDefinition, selectorForFieldsDefinition(fieldsDefinition))
+  }
+
+  override def delete(apiContext: ApiContext, apiVersion: ApiVersion): Future[Boolean] = {
+    val selector = selectorForFieldsDefinition(apiContext, apiVersion)
+    deleteOne(selector)
   }
 
   private def selectorForFieldsDefinition(apiContext: ApiContext, apiVersion: ApiVersion): JsObject = {

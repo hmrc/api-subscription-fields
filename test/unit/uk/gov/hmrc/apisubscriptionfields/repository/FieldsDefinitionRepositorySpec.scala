@@ -20,7 +20,7 @@ import org.scalamock.scalatest.MockFactory
 import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach}
 import reactivemongo.api.DB
 import reactivemongo.bson.BSONDocument
-import uk.gov.hmrc.apisubscriptionfields.model.{ApiContext, JsonFormatters}
+import uk.gov.hmrc.apisubscriptionfields.model.{ApiContext, ApiVersion, JsonFormatters}
 import uk.gov.hmrc.apisubscriptionfields.repository._
 import uk.gov.hmrc.mongo.MongoSpecSupport
 import uk.gov.hmrc.play.test.UnitSpec
@@ -119,6 +119,26 @@ class FieldsDefinitionRepositorySpec extends UnitSpec
       collectionSize shouldBe 3
 
       await(repository.fetch(ApiContext("CONTEXT_DOES_NOT_EXIST"), FakeVersion)) shouldBe None
+    }
+  }
+
+  "delete by compound key" should {
+    "remove the record with a specific fields definition" in {
+      val fieldsDefinition = createFieldsDefinition
+
+      await(repository.save(fieldsDefinition)) shouldBe true
+      collectionSize shouldBe 1
+
+      await(repository.delete(ApiContext(fieldsDefinition.apiContext), ApiVersion(fieldsDefinition.apiVersion))) shouldBe true
+      collectionSize shouldBe 0
+    }
+
+    "not alter the collection for unknown fields definition" in {
+      await(repository.save(createFieldsDefinition)) shouldBe true
+      collectionSize shouldBe 1
+
+      await(repository.delete(ApiContext("DOES_NOT_EXIST"), FakeVersion)) shouldBe false
+      collectionSize shouldBe 1
     }
   }
 

@@ -56,6 +56,14 @@ class FieldsDefinitionController @Inject() (service: FieldsDefinitionService) ex
     asActionResult(eventualMaybeResponse, rawApiContext, rawApiVersion)
   }
 
+  def deleteFieldsDefinition(rawApiContext: String, rawApiVersion: String): Action[AnyContent] = Action.async { implicit request =>
+    Logger.debug(s"[deleteFieldsDefinition] apiContext: $rawApiContext apiVersion: $rawApiVersion")
+    service.delete(ApiContext(rawApiContext), ApiVersion(rawApiVersion)) map {
+      case true => NoContent
+      case false => notFoundResponse(rawApiContext, rawApiVersion)
+    } recover recovery
+  }
+
   private def asActionResult(eventualMaybeResponse: Future[Option[FieldsDefinitionResponse]], rawApiContext: String, rawApiVersion: String) = {
     eventualMaybeResponse map {
       case Some(subscriptionFields) => Ok(Json.toJson(subscriptionFields))

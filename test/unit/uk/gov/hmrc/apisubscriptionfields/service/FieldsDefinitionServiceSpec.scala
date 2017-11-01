@@ -92,5 +92,16 @@ class FieldsDefinitionServiceSpec extends UnitSpec with FieldsDefinitionTestData
       caught shouldBe emulatedFailure
     }
 
+    "return true when delete is called and an entry exists in the repo" in {
+      (mockFieldsDefinitionRepository delete (_:ApiContext, _:ApiVersion)) expects (FakeContext, FakeVersion) returns true
+
+      await(service.delete(FakeContext, FakeVersion)) shouldBe true
+    }
+
+    "return false when delete is called and an entry does not exist in the repo" in {
+      (mockFieldsDefinitionRepository delete (_:ApiContext, _:ApiVersion)) expects (FakeContext, FakeVersion) returns false
+
+      await(service.delete(FakeContext, FakeVersion)) shouldBe false
+    }
   }
 }

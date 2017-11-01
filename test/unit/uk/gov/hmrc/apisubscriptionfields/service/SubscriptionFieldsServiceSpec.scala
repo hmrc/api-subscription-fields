@@ -67,7 +67,7 @@ class SubscriptionFieldsServiceSpec extends UnitSpec with SubscriptionFieldsTest
       result shouldBe Some(FakeSubscriptionFieldsResponse)
     }
 
-    "return Successful true when an entry exists in the repo when delete is called" in {
+    "return true when delete is called and an entry exists in the repo" in {
       (mockSubscriptionFieldsIdRepository delete (_:ClientId, _:ApiContext, _:ApiVersion)) expects (FakeClientId, FakeContext, FakeVersion) returns true
 
       val result: Boolean = await(service.delete(FakeClientId, FakeContext, FakeVersion))
@@ -75,7 +75,7 @@ class SubscriptionFieldsServiceSpec extends UnitSpec with SubscriptionFieldsTest
       result shouldBe true
     }
 
-    "return Successful false when an entry does not exist in the repo when delete is called" in {
+    "return false when delete is called and an entry does not exist in the repo" in {
       (mockSubscriptionFieldsIdRepository delete (_:ClientId, _:ApiContext, _:ApiVersion)) expects (FakeClientId, FakeContext, FakeVersion) returns false
 
       val result: Boolean = await(service.delete(FakeClientId, FakeContext, FakeVersion))
@@ -83,7 +83,7 @@ class SubscriptionFieldsServiceSpec extends UnitSpec with SubscriptionFieldsTest
       result shouldBe false
     }
 
-    "return Successful None when no entry exists in the repo when get by fieldsId is called" in {
+    "return None when no entry exists in the repo when get by fieldsId is called" in {
       (mockSubscriptionFieldsIdRepository fetchByFieldsId _) expects SubscriptionFieldsId(FakeRawFieldsId) returns None
 
       val result = await(service.get(FakeFieldsId))
@@ -91,7 +91,7 @@ class SubscriptionFieldsServiceSpec extends UnitSpec with SubscriptionFieldsTest
       result shouldBe None
     }
 
-    "return Successful ApiSubscription when an entry exists in the repo when get by fieldsId is called" in {
+    "return the expected ApiSubscription when an entry exists in the repo when get by fieldsId is called" in {
       (mockSubscriptionFieldsIdRepository fetchByFieldsId _) expects SubscriptionFieldsId(FakeRawFieldsId) returns Some(FakeApiSubscription)
 
       val result = await(service.get(FakeFieldsId))

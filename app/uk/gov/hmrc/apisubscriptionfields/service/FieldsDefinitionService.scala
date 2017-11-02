@@ -29,8 +29,13 @@ import scala.concurrent.Future
 class FieldsDefinitionService @Inject() (repository: FieldsDefinitionRepository) {
 
   def upsert(apiContext: ApiContext, apiVersion: ApiVersion, fieldDefinitions: Seq[FieldDefinition]): Future[Boolean] = {
-    Logger.debug(s"[upsert fields definotion] apiContext: $apiContext, apiVersion: $apiVersion, fieldDefinitions: $fieldDefinitions")
+    Logger.debug(s"[upsert fields definition] apiContext: $apiContext, apiVersion: $apiVersion, fieldDefinitions: $fieldDefinitions")
     repository.save(FieldsDefinition(apiContext.value, apiVersion.value, fieldDefinitions))
+  }
+
+  def delete(apiContext: ApiContext, apiVersion: ApiVersion): Future[Boolean] = {
+    Logger.debug(s"[delete fields definition] apiContext: $apiVersion, apiVersion: $apiVersion")
+    repository.delete(apiContext, apiVersion)
   }
 
   def get(apiContext: ApiContext, apiVersion: ApiVersion): Future[Option[FieldsDefinitionResponse]] = {

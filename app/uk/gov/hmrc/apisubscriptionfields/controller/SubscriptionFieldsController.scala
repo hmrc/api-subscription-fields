@@ -83,14 +83,14 @@ class SubscriptionFieldsController @Inject()(service: SubscriptionFieldsService)
   }
 
   def upsertSubscriptionFields(rawClientId: String, rawApiContext: String, rawApiVersion: String): Action[JsValue] = Action.async(parse.json) { implicit request =>
-      withJsonBody[SubscriptionFieldsRequest] { payload =>
-        Logger.debug(s"[upsertSubscriptionFields] clientId: $rawClientId apiContext: $rawApiContext apiVersion: $rawApiVersion")
-        service.upsert(ClientId(rawClientId), ApiContext(rawApiContext), ApiVersion(rawApiVersion), payload.fields) map {
-          case (response, true) => Created(Json.toJson(response))
-          case (response, false) => Ok(Json.toJson(response))
-        }
-      } recover recovery
-    }
+    withJsonBody[SubscriptionFieldsRequest] { payload =>
+      Logger.debug(s"[upsertSubscriptionFields] clientId: $rawClientId apiContext: $rawApiContext apiVersion: $rawApiVersion")
+      service.upsert(ClientId(rawClientId), ApiContext(rawApiContext), ApiVersion(rawApiVersion), payload.fields) map {
+        case (response, true) => Created(Json.toJson(response))
+        case (response, false) => Ok(Json.toJson(response))
+      }
+    } recover recovery
+  }
 
   def deleteSubscriptionFields(rawClientId: String, rawApiContext: String, rawApiVersion: String): Action[AnyContent] = Action.async { implicit request =>
     Logger.debug(s"[deleteSubscriptionFields] clientId: $rawClientId apiContext: $rawApiContext apiVersion: $rawApiVersion")

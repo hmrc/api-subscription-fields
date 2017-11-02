@@ -21,7 +21,7 @@ import play.api.libs.json.{JsObject, Json}
 
 case class SubscriptionFieldsResponse(clientId: String, apiContext: String, apiVersion: String, fieldsId: SubscriptionFieldsId, fields: Fields)
 
-case class BulkSubscriptionFieldsResponse(fields: Seq[SubscriptionFieldsResponse])
+case class BulkSubscriptionFieldsResponse(subscriptions: Seq[SubscriptionFieldsResponse])
 
 case class FieldsDefinitionResponse(fieldDefinitions: Seq[FieldDefinition])
 

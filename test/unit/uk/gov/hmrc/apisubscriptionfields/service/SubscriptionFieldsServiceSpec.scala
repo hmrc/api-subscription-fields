@@ -18,7 +18,7 @@ package unit.uk.gov.hmrc.apisubscriptionfields.service
 
 import org.scalamock.scalatest.MockFactory
 import uk.gov.hmrc.apisubscriptionfields.model._
-import uk.gov.hmrc.apisubscriptionfields.repository.SubscriptionFieldsRepository
+import uk.gov.hmrc.apisubscriptionfields.repository._
 import uk.gov.hmrc.apisubscriptionfields.service.{SubscriptionFieldsService, UUIDCreator}
 import uk.gov.hmrc.play.test.UnitSpec
 import util.SubscriptionFieldsTestData
@@ -29,8 +29,8 @@ class SubscriptionFieldsServiceSpec extends UnitSpec with SubscriptionFieldsTest
   private val mockUuidCreator = mock[UUIDCreator]
   private val service = new SubscriptionFieldsService(mockSubscriptionFieldsIdRepository, mockUuidCreator)
 
-  "A RepositoryFedSubscriptionFieldsService" should {
-    "return None when no entry exist in the repo when get by application client id is called" in {
+  "get by clientId" should {
+    "return None when the expected record does not exist in the database collection" in {
       (mockSubscriptionFieldsIdRepository fetchByClientId _) expects FakeClientId returns List()
 
       val result = await(service.get(FakeClientId))
@@ -38,52 +38,40 @@ class SubscriptionFieldsServiceSpec extends UnitSpec with SubscriptionFieldsTest
       result shouldBe None
     }
 
-    "return Some response when entry exists in the repo when get by application client id is called" in {
+    "return the expected response when the entry exists in the database collection" in {
       val subscriptionFields1 = createSubscriptionFieldsWithApiContext()
       val subscriptionFields2 = createSubscriptionFieldsWithApiContext(rawContext = fakeRawContext2)
       (mockSubscriptionFieldsIdRepository fetchByClientId _) expects FakeClientId returns List(subscriptionFields1, subscriptionFields2)
 
       val result = await(service.get(FakeClientId))
 
-      result shouldBe Some(BulkSubscriptionFieldsResponse(fields = Seq(
+      result shouldBe Some(BulkSubscriptionFieldsResponse(subscriptions = Seq(
         SubscriptionFieldsResponse(clientId = subscriptionFields1.clientId, apiVersion = subscriptionFields1.apiVersion, apiContext = subscriptionFields1.apiContext, fieldsId = SubscriptionFieldsId(subscriptionFields1.fieldsId), fields = subscriptionFields1.fields),
         SubscriptionFieldsResponse(clientId = subscriptionFields2.clientId, apiVersion = subscriptionFields2.apiVersion, apiContext = subscriptionFields2.apiContext, fieldsId = SubscriptionFieldsId(subscriptionFields2.fieldsId), fields = subscriptionFields2.fields)
       )))
     }
+  }
 
+  "get" should {
     "return None when no entry exists in the repo" in {
-      (mockSubscriptionFieldsIdRepository fetch(_:ClientId, _:ApiContext, _:ApiVersion)) expects (FakeClientId, FakeContext, FakeVersion) returns None
+      (mockSubscriptionFieldsIdRepository fetch(_: ClientId, _: ApiContext, _: ApiVersion)) expects(FakeClientId, FakeContext, FakeVersion) returns None
 
       val result = await(service.get(FakeClientId, FakeContext, FakeVersion))
 
       result shouldBe None
     }
 
-    "return Some SubscriptionFieldsResponse when subscription field is found" in {
-      (mockSubscriptionFieldsIdRepository fetch(_:ClientId, _:ApiContext, _:ApiVersion)) expects (FakeClientId, FakeContext, FakeVersion) returns Some(FakeApiSubscription)
+    "return the expected response when the entry exists in the database collection" in {
+      (mockSubscriptionFieldsIdRepository fetch(_: ClientId, _: ApiContext, _: ApiVersion)) expects(FakeClientId, FakeContext, FakeVersion) returns Some(FakeApiSubscription)
 
       val result = await(service.get(FakeClientId, FakeContext, FakeVersion))
 
       result shouldBe Some(FakeSubscriptionFieldsResponse)
     }
+  }
 
-    "return true when delete is called and an entry exists in the repo" in {
-      (mockSubscriptionFieldsIdRepository delete (_:ClientId, _:ApiContext, _:ApiVersion)) expects (FakeClientId, FakeContext, FakeVersion) returns true
-
-      val result: Boolean = await(service.delete(FakeClientId, FakeContext, FakeVersion))
-
-      result shouldBe true
-    }
-
-    "return false when delete is called and an entry does not exist in the repo" in {
-      (mockSubscriptionFieldsIdRepository delete (_:ClientId, _:ApiContext, _:ApiVersion)) expects (FakeClientId, FakeContext, FakeVersion) returns false
-
-      val result: Boolean = await(service.delete(FakeClientId, FakeContext, FakeVersion))
-
-      result shouldBe false
-    }
-
-    "return None when no entry exists in the repo when get by fieldsId is called" in {
+  "get by fieldsId" should {
+    "return None when no entry exists in the repo" in {
       (mockSubscriptionFieldsIdRepository fetchByFieldsId _) expects SubscriptionFieldsId(FakeRawFieldsId) returns None
 
       val result = await(service.get(FakeFieldsId))
@@ -91,12 +79,30 @@ class SubscriptionFieldsServiceSpec extends UnitSpec with SubscriptionFieldsTest
       result shouldBe None
     }
 
-    "return the expected ApiSubscription when an entry exists in the repo when get by fieldsId is called" in {
+    "return the expected response when the entry exists in the database collection" in {
       (mockSubscriptionFieldsIdRepository fetchByFieldsId _) expects SubscriptionFieldsId(FakeRawFieldsId) returns Some(FakeApiSubscription)
 
       val result = await(service.get(FakeFieldsId))
 
       result shouldBe Some(FakeSubscriptionFieldsResponse)
+    }
+  }
+
+  "delete" should {
+    "return true when the entry exists in the database collection" in {
+      (mockSubscriptionFieldsIdRepository delete(_: ClientId, _: ApiContext, _: ApiVersion)) expects(FakeClientId, FakeContext, FakeVersion) returns true
+
+      val result: Boolean = await(service.delete(FakeClientId, FakeContext, FakeVersion))
+
+      result shouldBe true
+    }
+
+    "return false when the entry does not exist in the database collection" in {
+      (mockSubscriptionFieldsIdRepository delete(_: ClientId, _: ApiContext, _: ApiVersion)) expects(FakeClientId, FakeContext, FakeVersion) returns false
+
+      val result: Boolean = await(service.delete(FakeClientId, FakeContext, FakeVersion))
+
+      result shouldBe false
     }
   }
 

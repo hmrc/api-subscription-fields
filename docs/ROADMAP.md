@@ -379,7 +379,7 @@ Retrieves the field values of all API subscriptions
 
 ##### curl command
 ```
-curl -v -X GET "http://localhost:9650/field -H "Cache-Control: no-cache"
+curl -v -X GET "http://localhost:9650/field" -H "Cache-Control: no-cache"
 ```
 ##### Request body
 None

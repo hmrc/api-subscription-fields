@@ -59,16 +59,6 @@ class SubscriptionFieldsService @Inject()(repository: SubscriptionFieldsReposito
     repository.delete(clientId, apiContext, apiVersion)
   }
 
-  def get(clientId: ClientId): Future[Option[BulkSubscriptionFieldsResponse]] = {
-    Logger.debug(s"[get subscription fields] clientId: $clientId")
-    (for {
-      list <- repository.fetchByClientId(clientId)
-    } yield list.map(asResponse)) map {
-      case Nil => None
-      case list => Some(BulkSubscriptionFieldsResponse(fields = list))
-    }
-  }
-
   def get(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion): Future[Option[SubscriptionFieldsResponse]] = {
     Logger.debug(s"[get subscription fields] clientId: $clientId, apiContext: $apiVersion, apiVersion: $apiVersion")
     for {
@@ -81,6 +71,16 @@ class SubscriptionFieldsService @Inject()(repository: SubscriptionFieldsReposito
     for {
       fetch <- repository.fetchByFieldsId(subscriptionFieldsId)
     } yield fetch.map(asResponse)
+  }
+
+  def get(clientId: ClientId): Future[Option[BulkSubscriptionFieldsResponse]] = {
+    Logger.debug(s"[get subscription fields] clientId: $clientId")
+    (for {
+      fields <- repository.fetchByClientId(clientId)
+    } yield fields.map(asResponse)) map {
+      case Nil => None
+      case fs => Some(BulkSubscriptionFieldsResponse(subscriptions = fs))
+    }
   }
 
   private def save(apiSubscriptionFields: SubscriptionFields): Future[SubscriptionFieldsResponse] = {

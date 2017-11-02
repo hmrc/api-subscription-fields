@@ -35,7 +35,6 @@ trait FieldsDefinitionRepository {
   def save(fieldsDefinition: FieldsDefinition): Future[Boolean]
 
   def fetch(apiContext: ApiContext, apiVersion: ApiVersion): Future[Option[FieldsDefinition]]
-
   def fetchAll(): Future[List[FieldsDefinition]]
 
   def delete(apiContext: ApiContext, apiVersion: ApiVersion): Future[Boolean]
@@ -62,8 +61,8 @@ class FieldsDefinitionMongoRepository @Inject()(mongoDbProvider: MongoDbProvider
     )
   )
 
-  override def fetchAll(): Future[List[FieldsDefinition]] = {
-    getMany(Json.obj())
+  override def save(fieldsDefinition: FieldsDefinition): Future[Boolean] = {
+    save(fieldsDefinition, selectorForFieldsDefinition(fieldsDefinition))
   }
 
   override def fetch(apiContext: ApiContext, apiVersion: ApiVersion): Future[Option[FieldsDefinition]] = {
@@ -71,8 +70,8 @@ class FieldsDefinitionMongoRepository @Inject()(mongoDbProvider: MongoDbProvider
     getOne(selector)
   }
 
-  override def save(fieldsDefinition: FieldsDefinition): Future[Boolean] = {
-    save(fieldsDefinition, selectorForFieldsDefinition(fieldsDefinition))
+  override def fetchAll(): Future[List[FieldsDefinition]] = {
+    getMany(Json.obj())
   }
 
   override def delete(apiContext: ApiContext, apiVersion: ApiVersion): Future[Boolean] = {

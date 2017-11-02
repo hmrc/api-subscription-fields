@@ -48,7 +48,7 @@ class JsonFormatterSpec extends WordSpec with Matchers with JsonFormatters with 
   }
 
   "BulkSubscriptionFieldsResponse" should {
-    val json = s"""{"fields":[{"clientId":"$fakeRawClientId","apiContext":"$fakeRawContext","apiVersion":"$fakeRawVersion","fieldsId":"$FakeRawFieldsId","fields":{"f1":"v1"}}]}"""
+    val json = s"""{"subscriptions":[{"clientId":"$fakeRawClientId","apiContext":"$fakeRawContext","apiVersion":"$fakeRawVersion","fieldsId":"$FakeRawFieldsId","fields":{"f1":"v1"}}]}"""
 
     "marshal json" in {
       objectAsJsonString(bulkSubscriptionFieldsResponse) shouldBe json

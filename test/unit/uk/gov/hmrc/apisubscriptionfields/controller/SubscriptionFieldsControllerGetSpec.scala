@@ -50,7 +50,7 @@ class SubscriptionFieldsControllerGetSpec extends UnitSpec with SubscriptionFiel
 
   private val bulkResponseJsonString =
     """{
-      |  "fields": [
+      |  "subscriptions": [
       |    {
       |      "clientId": "afsdknbw34ty4hebdv",
       |      "apiContext": "ciao-api",
@@ -62,7 +62,7 @@ class SubscriptionFieldsControllerGetSpec extends UnitSpec with SubscriptionFiel
       |      }
       |    },
       |    {
-      |      "clientId": "afsdknbw34ty4hebdvx",
+      |      "clientId": "afsdknbw34ty4hebdv",
       |      "apiContext": "ciao-api",
       |      "apiVersion": "2.0",
       |      "fieldsId": "327d9145-4965-4d28-a2c5-39dedee50335",
@@ -78,9 +78,9 @@ class SubscriptionFieldsControllerGetSpec extends UnitSpec with SubscriptionFiel
   private val bulkResponseModel = bulkResponseJson.as[BulkSubscriptionFieldsResponse]
 
 
-  "GET /application/{client-id}/context/{context}/version/{api-version}" should {
+  "GET /field/application/{client-id}/context/{context}/version/{api-version}" should {
 
-    "return OK when exists in the repo" in {
+    "return OK when the expected record exists in the repo" in {
       (mockSubscriptionFieldsService.get(_:ClientId, _:ApiContext, _:ApiVersion)) expects(FakeClientId, FakeContext, FakeVersion) returns Some(responseModel)
 
       val result = await(controller.getSubscriptionFields(fakeRawClientId, fakeRawContext, fakeRawVersion)(FakeRequest()))
@@ -111,9 +111,9 @@ class SubscriptionFieldsControllerGetSpec extends UnitSpec with SubscriptionFiel
 
   }
 
-  "GET /field/application/{application-id}" should {
+  "GET /field/application/{client-id}" should {
 
-    "return OK when exists in the repo" in {
+    "return OK when the expected record exists in the repo" in {
       (mockSubscriptionFieldsService.get(_:ClientId)) expects FakeClientId returns Some(bulkResponseModel)
 
       val result = await(controller.getBulkSubscriptionFieldsByClientId(fakeRawClientId)(FakeRequest()))

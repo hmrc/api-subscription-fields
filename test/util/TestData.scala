@@ -49,15 +49,15 @@ trait SubscriptionFieldsTestData extends TestData {
   final val FakeFieldsId = SubscriptionFieldsId(FakeRawFieldsId)
 
   final val EmptyResponse: Future[Option[SubscriptionFieldsResponse]] = Future.successful(None)
-  final val CustomFields = Map("A" -> "X", "B" -> "Y")
+  final val subscriptionFields = Map("A" -> "X", "B" -> "Y")
 
-  final val FakeApiSubscription = SubscriptionFields(fakeRawClientId, fakeRawContext, fakeRawVersion, FakeRawFieldsId, CustomFields)
+  final val FakeApiSubscription = SubscriptionFields(fakeRawClientId, fakeRawContext, fakeRawVersion, FakeRawFieldsId, subscriptionFields)
   final val FakeSubscriptionFieldsId = SubscriptionFieldsId(FakeRawFieldsId)
-  final val FakeSubscriptionFieldsResponse: SubscriptionFieldsResponse = SubscriptionFieldsResponse(fakeRawClientId, fakeRawContext, fakeRawVersion, FakeSubscriptionFieldsId, CustomFields)
+  final val FakeSubscriptionFieldsResponse: SubscriptionFieldsResponse = SubscriptionFieldsResponse(fakeRawClientId, fakeRawContext, fakeRawVersion, FakeSubscriptionFieldsId, subscriptionFields)
 
   def createSubscriptionFieldsWithApiContext(clientId: String = fakeRawClientId, rawContext: String = fakeRawContext) = {
     val customFields = Map("field_1" -> "value_1", "field_2" -> "value_2", "field_3" -> "value_3")
-    SubscriptionFields(clientId, rawContext, fakeRawVersion,  UUID.randomUUID(), customFields)
+    SubscriptionFields(clientId, rawContext, fakeRawVersion,  UUID.randomUUID(), subscriptionFields)
   }
 
   def uniqueClientId = UUID.randomUUID().toString

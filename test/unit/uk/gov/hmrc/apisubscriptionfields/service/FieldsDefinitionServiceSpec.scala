@@ -30,8 +30,8 @@ class FieldsDefinitionServiceSpec extends UnitSpec with FieldsDefinitionTestData
   private val mockFieldsDefinitionRepository = mock[FieldsDefinitionRepository]
   private val service = new FieldsDefinitionService(mockFieldsDefinitionRepository)
 
-  "A FieldsDefinitionService" should {
-    "return empty list when no entry exist in the repo when getAll is called" in {
+  "getAll" should {
+    "return an empty list when there are no records in the database collection" in {
       (mockFieldsDefinitionRepository.fetchAll _).expects().returns(List())
 
       val result = await(service.getAll)
@@ -39,7 +39,7 @@ class FieldsDefinitionServiceSpec extends UnitSpec with FieldsDefinitionTestData
       result shouldBe FieldsDefinitionResponse(List())
     }
 
-    "return a list of all entries when entries exist in the repo when getAll is called" in {
+    "return a list of all entries" in {
       val fd1 = createFieldsDefinition(apiContext = "1", fieldDefinitions = Seq(FakeFieldDefinitionUrl))
       val fd2 = createFieldsDefinition(apiContext = "2", fieldDefinitions = Seq(FakeFieldDefinitionString))
 
@@ -49,24 +49,28 @@ class FieldsDefinitionServiceSpec extends UnitSpec with FieldsDefinitionTestData
 
       result shouldBe FieldsDefinitionResponse(Seq(FakeFieldDefinitionUrl, FakeFieldDefinitionString))
     }
+  }
 
-    "return None when no definition exists in the repo" in {
-      (mockFieldsDefinitionRepository fetch (_: ApiContext, _: ApiVersion)) expects (FakeContext, FakeVersion) returns None
+  "get" should {
+    "return None when no definition exists in the database collection" in {
+      (mockFieldsDefinitionRepository fetch(_: ApiContext, _: ApiVersion)) expects(FakeContext, FakeVersion) returns None
 
       val result = await(service.get(FakeContext, FakeVersion))
 
       result shouldBe None
     }
 
-    "return Some when definition exists in the repo" in {
-      (mockFieldsDefinitionRepository fetch (_: ApiContext, _: ApiVersion)) expects (FakeContext, FakeVersion) returns Some(FakeFieldsDefinition)
+    "return the expected definition" in {
+      (mockFieldsDefinitionRepository fetch(_: ApiContext, _: ApiVersion)) expects(FakeContext, FakeVersion) returns Some(FakeFieldsDefinition)
 
       val result = await(service.get(FakeContext, FakeVersion))
 
       result shouldBe Some(FakeFieldsDefinitionResponse)
     }
+  }
 
-    "return false if save is for an existing fields definition" in {
+  "upsert" should {
+    "return false when updating an existing fields definition" in {
       (mockFieldsDefinitionRepository save _) expects FakeFieldsDefinition returns false
 
       val result = await(service.upsert(FakeContext, FakeVersion, FakeFieldsDefinitions))
@@ -74,7 +78,7 @@ class FieldsDefinitionServiceSpec extends UnitSpec with FieldsDefinitionTestData
       result shouldBe false
     }
 
-    "return true if save is for a new fields definition" in {
+    "return true when creating a new fields definition" in {
       (mockFieldsDefinitionRepository save _) expects FakeFieldsDefinition returns true
 
       val result = await(service.upsert(FakeContext, FakeVersion, FakeFieldsDefinitions))
@@ -82,7 +86,7 @@ class FieldsDefinitionServiceSpec extends UnitSpec with FieldsDefinitionTestData
       result shouldBe true
     }
 
-    "propagate Failure in repository for upsert" in {
+    "propagate the error" in {
       (mockFieldsDefinitionRepository save _) expects * returns Future.failed(emulatedFailure)
 
       val caught = intercept[EmulatedFailure] {
@@ -91,14 +95,16 @@ class FieldsDefinitionServiceSpec extends UnitSpec with FieldsDefinitionTestData
 
       caught shouldBe emulatedFailure
     }
+  }
 
-    "return true when delete is called and an entry exists in the repo" in {
+  "delete" should {
+    "return true when the record is removed from the database collection" in {
       (mockFieldsDefinitionRepository delete (_:ApiContext, _:ApiVersion)) expects (FakeContext, FakeVersion) returns true
 
       await(service.delete(FakeContext, FakeVersion)) shouldBe true
     }
 
-    "return false when delete is called and an entry does not exist in the repo" in {
+    "return false when the record is not found in the database collection" in {
       (mockFieldsDefinitionRepository delete (_:ApiContext, _:ApiVersion)) expects (FakeContext, FakeVersion) returns false
 
       await(service.delete(FakeContext, FakeVersion)) shouldBe false

@@ -36,18 +36,18 @@ class SubscriptionFieldsControllerPutSpec extends UnitSpec with SubscriptionFiel
 
   "PUT /field/application/:clientId/context/:apiContext/version/:apiVersion" should {
     "return CREATED when created in the repo" in {
-      (mockSubscriptionFieldsService.upsert(_: ClientId, _: ApiContext, _: ApiVersion, _: Fields)) expects(FakeClientId, FakeContext, FakeVersion, CustomFields) returns Future.successful((FakeSubscriptionFieldsResponse, true))
+      (mockSubscriptionFieldsService.upsert(_: ClientId, _: ApiContext, _: ApiVersion, _: Fields)) expects(FakeClientId, FakeContext, FakeVersion, subscriptionFields) returns Future.successful((FakeSubscriptionFieldsResponse, true))
 
-      val json = mkJson(SubscriptionFieldsRequest(CustomFields))
+      val json = mkJson(SubscriptionFieldsRequest(subscriptionFields))
       testSubmitResult(mkRequest(json)) { result =>
         status(result) shouldBe CREATED
       }
     }
 
     "return OK when updated in the repo" in {
-      (mockSubscriptionFieldsService.upsert (_: ClientId, _: ApiContext, _: ApiVersion, _: Fields)) expects(FakeClientId, FakeContext, FakeVersion, CustomFields) returns Future.successful((FakeSubscriptionFieldsResponse, false))
+      (mockSubscriptionFieldsService.upsert (_: ClientId, _: ApiContext, _: ApiVersion, _: Fields)) expects(FakeClientId, FakeContext, FakeVersion, subscriptionFields) returns Future.successful((FakeSubscriptionFieldsResponse, false))
 
-      val json = mkJson(SubscriptionFieldsRequest(CustomFields))
+      val json = mkJson(SubscriptionFieldsRequest(subscriptionFields))
       testSubmitResult(mkRequest(json)) { result =>
         status(result) shouldBe OK
       }

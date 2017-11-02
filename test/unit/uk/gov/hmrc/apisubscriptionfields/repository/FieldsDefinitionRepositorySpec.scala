@@ -88,7 +88,7 @@ class FieldsDefinitionRepositorySpec extends UnitSpec
   }
 
   "fetchAll" should {
-    "retrieve all the definition records" in {
+    "retrieve all the field definitions from the collection" in {
       val fieldsDefinition1 = createFieldsDefinition(apiContext = uniqueApiContext)
       val fieldsDefinition2 = createFieldsDefinition(apiContext = uniqueApiContext)
       await(repository.save(fieldsDefinition1))
@@ -98,12 +98,12 @@ class FieldsDefinitionRepositorySpec extends UnitSpec
       await(repository.fetchAll()) shouldBe List(fieldsDefinition1, fieldsDefinition2)
     }
 
-    "return an empty list when there are no definitions in the collection" in {
+    "return an empty list when there are no field definitions in the collection" in {
       await(repository.fetchAll()) shouldBe List()
     }
   }
 
-  "fetch with fields definition" should {
+  "fetch" should {
     "retrieve the correct record from the fields definition" in new Setup {
       await(repository.save(fieldsDefinition)) shouldBe true
       collectionSize shouldBe 1
@@ -122,7 +122,7 @@ class FieldsDefinitionRepositorySpec extends UnitSpec
     }
   }
 
-  "delete by compound key" should {
+  "delete" should {
     "remove the record with a specific fields definition" in {
       val fieldsDefinition = createFieldsDefinition
 

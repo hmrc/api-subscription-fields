@@ -73,6 +73,10 @@ class SubscriptionFieldsRepositorySpec extends UnitSpec
     await(repository.collection.count())
   }
 
+  private def selector(s: SubscriptionFields) = {
+    BSONDocument("clientId" -> s.clientId, "apiContext" -> s.apiContext, "apiVersion" -> s.apiVersion)
+  }
+
   "save" should {
     val apiSubscriptionFields = createApiSubscriptionFields()
 
@@ -97,10 +101,6 @@ class SubscriptionFieldsRepositorySpec extends UnitSpec
       collectionSize shouldBe 1
       await(repository.collection.find(selector(edited)).one[SubscriptionFields]) shouldBe Some(edited)
     }
-  }
-
-  private def selector(s: SubscriptionFields) = {
-    BSONDocument("clientId" -> s.clientId, "apiContext" -> s.apiContext, "apiVersion" -> s.apiVersion)
   }
 
   "fetchByClientId" should {
@@ -135,8 +135,7 @@ class SubscriptionFieldsRepositorySpec extends UnitSpec
 
     "return None when no subscription fields are found in the collection" in {
       for (i <- 1 to 3) {
-        val result = await(repository.save(createApiSubscriptionFields(clientId = uniqueClientId)))
-        result shouldBe true
+        await(repository.save(createApiSubscriptionFields(clientId = uniqueClientId))) shouldBe true
       }
       collectionSize shouldBe 3
 
@@ -145,7 +144,7 @@ class SubscriptionFieldsRepositorySpec extends UnitSpec
     }
   }
 
-  "fetch by fieldsId" should {
+  "fetchByFieldsId" should {
     "retrieve the correct record from the `fieldsId` " in {
       val apiSubscription = createApiSubscriptionFields()
       await(repository.save(apiSubscription)) shouldBe true
@@ -165,7 +164,7 @@ class SubscriptionFieldsRepositorySpec extends UnitSpec
     }
   }
 
-  "delete by compound key" should {
+  "delete" should {
     "remove the record with a specific subscription field" in {
       val apiSubscription: SubscriptionFields = createApiSubscriptionFields()
 

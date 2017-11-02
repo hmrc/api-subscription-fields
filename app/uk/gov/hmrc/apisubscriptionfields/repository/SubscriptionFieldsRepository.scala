@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.apisubscriptionfields.repository
 
-import java.util.UUID
 import javax.inject.{Inject, Singleton}
 
 import com.google.inject.ImplementedBy
@@ -35,9 +34,9 @@ trait SubscriptionFieldsRepository {
 
   def save(subscription: SubscriptionFields): Future[Boolean]
 
-  def fetchByClientId(clientId: ClientId): Future[List[SubscriptionFields]]
   def fetch(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion): Future[Option[SubscriptionFields]]
   def fetchByFieldsId(fieldsId: SubscriptionFieldsId): Future[Option[SubscriptionFields]]
+  def fetchByClientId(clientId: ClientId): Future[List[SubscriptionFields]]
 
   def delete(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion): Future[Boolean]
 }
@@ -79,11 +78,6 @@ class SubscriptionFieldsMongoRepository @Inject()(mongoDbProvider: MongoDbProvid
     save(subscription, selectorForSubscriptionFields(subscription))
   }
 
-  override def fetchByClientId(clientId: ClientId): Future[List[SubscriptionFields]] = {
-    val selector = Json.obj("clientId" -> clientId.value)
-    getMany(selector)
-  }
-
   override def fetch(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion): Future[Option[SubscriptionFields]] = {
     val selector = selectorForSubscriptionFields(clientId.value, apiContext.value, apiVersion.value)
     getOne(selector)
@@ -92,6 +86,11 @@ class SubscriptionFieldsMongoRepository @Inject()(mongoDbProvider: MongoDbProvid
   override def fetchByFieldsId(fieldsId: SubscriptionFieldsId): Future[Option[SubscriptionFields]] = {
     val selector = Json.obj("fieldsId" -> fieldsId.value)
     getOne(selector)
+  }
+
+  override def fetchByClientId(clientId: ClientId): Future[List[SubscriptionFields]] = {
+    val selector = Json.obj("clientId" -> clientId.value)
+    getMany(selector)
   }
 
   override def delete(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion): Future[Boolean] = {

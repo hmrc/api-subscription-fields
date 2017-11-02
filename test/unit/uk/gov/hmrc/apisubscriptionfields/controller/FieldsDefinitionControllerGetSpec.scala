@@ -79,7 +79,7 @@ class FieldsDefinitionControllerGetSpec extends UnitSpec with FieldsDefinitionTe
   private val emptyAllResponseJson = Json.toJson(FieldsDefinitionResponse(Seq()))
 
   "GET /definition/context/:apiContext/version/:apiVersion" should {
-    "return OK when exists in the repo" in {
+    "return OK when the expected record exists in the repo" in {
       mockFieldsDefinitionService.get _ expects (FakeContext, FakeVersion) returns Future.successful(Some(responseModel))
 
       val result = await(controller.getFieldsDefinition(fakeRawContext, fakeRawVersion)(FakeRequest()))
@@ -88,7 +88,7 @@ class FieldsDefinitionControllerGetSpec extends UnitSpec with FieldsDefinitionTe
       contentAsJson(result) shouldBe responseJson
     }
 
-    "return NOT_FOUND when entity does not exists in the repo" in {
+    "return NOT_FOUND when entity does not exist in the repo" in {
       mockFieldsDefinitionService.get _ expects (FakeContext, FakeVersion) returns Future.successful(None)
 
       val result = await(controller.getFieldsDefinition(fakeRawContext, fakeRawVersion)(FakeRequest()))
@@ -110,19 +110,19 @@ class FieldsDefinitionControllerGetSpec extends UnitSpec with FieldsDefinitionTe
   }
 
   "GET /definition" should {
-    "return OK with a all definitions when definitions exists in the repo" in {
+    "return OK with all field definitions" in {
       mockFieldsDefinitionService.getAll _ expects () returns Future.successful(allResponseModel)
 
-      val result = await(controller.getAllFieldsDefinitions()(FakeRequest()))
+      val result = await(controller.getAllFieldsDefinitions(FakeRequest()))
 
       status(result) shouldBe OK
       contentAsJson(result) shouldBe allResponseJson
     }
 
-    "return OK with an empty list when no definitions exists in the repo" in {
+    "return OK with an empty list when no field definitions exist in the repo" in {
       mockFieldsDefinitionService.getAll _ expects () returns Future.successful(FieldsDefinitionResponse(Seq()))
 
-      val result = await(controller.getAllFieldsDefinitions()(FakeRequest()))
+      val result = await(controller.getAllFieldsDefinitions(FakeRequest()))
 
       status(result) shouldBe OK
       contentAsJson(result) shouldBe emptyAllResponseJson
@@ -131,7 +131,7 @@ class FieldsDefinitionControllerGetSpec extends UnitSpec with FieldsDefinitionTe
     "return INTERNAL_SERVER_ERROR when service throws exception" in {
       mockFieldsDefinitionService.getAll _ expects () returns Future.failed(emulatedFailure)
 
-      val result = await(controller.getAllFieldsDefinitions()(FakeRequest()))
+      val result = await(controller.getAllFieldsDefinitions(FakeRequest()))
 
       status(result) shouldBe INTERNAL_SERVER_ERROR
       (contentAsJson(result) \ "code") shouldBe JsDefined(JsString("UNKNOWN_ERROR"))

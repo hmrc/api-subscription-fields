@@ -308,7 +308,7 @@ None
 ##### Response body
 ```json
 {
-  "fields": [
+  "subscriptions": [
     {
       "clientId": "xp5036mSZooNOlD0Nfjz7LKnCy0a",
       "apiContext": "hello",

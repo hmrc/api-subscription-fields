@@ -20,6 +20,7 @@ Further development can be found in the [roadmap](docs/ROADMAP.md)
 | [`/field/application/:clientId/context/:apiContext/version/:apiVersion`](#user-content-get-field-values-by-application-and-api) | `GET`    | Retrieves the field values of an API subscription by providing the application and API details |
 | [`/field/:fieldsId`](#user-content-get-field-values-by-fieldsid)                                                                | `GET`    | Retrieves the field values of an API subscription by providing the `fieldsId` |
 | [`/field/application/:clientId`](#user-content-get-field-values-by-application)                                                 | `GET`    | Retrieves the field values of all API subscriptions related to a specific application |
+| [`/field`](#user-content-get-all-field-values)                                                                                  | `GET`    | Retrieves the field values of all API subscriptions |
 | [`/field/application/:clientId/context/:apiContext/version/:apiVersion`](#user-content-delete-field-values)                     | `DELETE` | Deletes the field values of an API subscription |
 
 ---
@@ -321,6 +322,54 @@ None
     },
     {
       "clientId": "xp5036mSZooNOlD0Nfjz7LKnCy0a",
+      "apiContext": "callme",
+      "apiVersion": "2.0",
+      "fieldsId": "66c2b945-1c82-4749-b4fc-42e5u39999ew",
+      "fields": {
+        "callback-url": "http://localhost:8081/callback",
+        "token": "def45609za2p"
+      }
+    }
+  ]
+}
+```
+
+---
+
+### GET All Field Values
+#### `GET /field`
+Retrieves the field values of all API subscriptions
+
+#### Response with
+
+| Status | Description                          |
+|--------|--------------------------------------|
+| 200    | OK                                   |
+
+#### example
+
+##### curl command
+```
+curl -v -X GET "http://localhost:9650/field" -H "Cache-Control: no-cache"
+```
+##### Request body
+None
+##### Response body
+```json
+{
+  "subscriptions": [
+    {
+      "clientId": "xp5036mSZooNOlD0Nfjz7LKnCy0a",
+      "apiContext": "hello",
+      "apiVersion": "1.0",
+      "fieldsId": "55c2b945-1c82-4749-b4fc-42e5u32192ew",
+      "fields": {
+        "callback-url": "http://localhost:8080/callback",
+        "token": "abc59609za2q"
+      }
+    },
+    {
+      "clientId": "ab4536mPZooNOlD0Nfjz7LKuJy0b",
       "apiContext": "callme",
       "apiVersion": "2.0",
       "fieldsId": "66c2b945-1c82-4749-b4fc-42e5u39999ew",

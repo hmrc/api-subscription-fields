@@ -68,6 +68,11 @@ class SubscriptionFieldsController @Inject()(service: SubscriptionFieldsService)
     asBulkActionResult(eventualMaybeResponse, notFoundMessage(rawClientId))
   }
 
+  def getAllSubscriptionFields: Action[AnyContent] = Action.async { implicit request =>
+    Logger.debug("[getAllSubscriptionFields]")
+    service.getAll map (fields => Ok(Json.toJson(fields))) recover recovery
+  }
+
   private def asActionResult[T](eventualMaybeResponse: Future[Option[T]], notFoundMessage: String)(implicit writes: Writes[T]) = {
     eventualMaybeResponse map {
       case Some(payload) => Ok(Json.toJson(payload))

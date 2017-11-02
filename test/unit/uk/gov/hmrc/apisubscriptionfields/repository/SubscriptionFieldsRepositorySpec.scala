@@ -164,6 +164,24 @@ class SubscriptionFieldsRepositorySpec extends UnitSpec
     }
   }
 
+  "fetchAll" should {
+    "retrieve all the subscription fields from the collection" in {
+      val subscriptionFields1 = createApiSubscriptionFields(clientId = uniqueClientId)
+      val subscriptionFields2 = createApiSubscriptionFields(clientId = uniqueClientId)
+      val subscriptionFields3 = createApiSubscriptionFields(clientId = uniqueClientId)
+      await(repository.save(subscriptionFields1))
+      await(repository.save(subscriptionFields2))
+      await(repository.save(subscriptionFields3))
+      collectionSize shouldBe 3
+
+      await(repository.fetchAll()) shouldBe List(subscriptionFields1, subscriptionFields2, subscriptionFields3)
+    }
+
+    "return an empty list when there are no subscription fields in the collection" in {
+      await(repository.fetchAll()) shouldBe List()
+    }
+  }
+
   "delete" should {
     "remove the record with a specific subscription field" in {
       val apiSubscription: SubscriptionFields = createApiSubscriptionFields()

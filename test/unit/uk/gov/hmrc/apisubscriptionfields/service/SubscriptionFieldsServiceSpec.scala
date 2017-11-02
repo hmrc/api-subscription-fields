@@ -29,6 +29,29 @@ class SubscriptionFieldsServiceSpec extends UnitSpec with SubscriptionFieldsTest
   private val mockUuidCreator = mock[UUIDCreator]
   private val service = new SubscriptionFieldsService(mockSubscriptionFieldsIdRepository, mockUuidCreator)
 
+  "getAll" should {
+    "return an empty list when no entry exists in the database collection" in {
+      (mockSubscriptionFieldsIdRepository.fetchAll _).expects().returns(List())
+
+      val result = await(service.getAll)
+
+      result shouldBe BulkSubscriptionFieldsResponse(subscriptions = List())
+    }
+
+    "return a list containing all subscription fields" in {
+      val sf1: SubscriptionFields = createSubscriptionFieldsWithApiContext(clientId = "c1")
+      val sf2: SubscriptionFields = createSubscriptionFieldsWithApiContext(clientId = "c2")
+
+      (mockSubscriptionFieldsIdRepository.fetchAll _).expects().returns(List(sf1, sf2))
+
+      val expectedResponse = BulkSubscriptionFieldsResponse(subscriptions = List(
+        SubscriptionFieldsResponse(sf1.clientId, sf1.apiContext, sf1.apiVersion, SubscriptionFieldsId(sf1.fieldsId), sf1.fields),
+        SubscriptionFieldsResponse(sf2.clientId, sf2.apiContext, sf2.apiVersion, SubscriptionFieldsId(sf2.fieldsId), sf2.fields)
+      ))
+      await(service.getAll) shouldBe expectedResponse
+    }
+  }
+
   "get by clientId" should {
     "return None when the expected record does not exist in the database collection" in {
       (mockSubscriptionFieldsIdRepository fetchByClientId _) expects FakeClientId returns List()

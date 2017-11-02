@@ -37,6 +37,7 @@ trait SubscriptionFieldsRepository {
   def fetch(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion): Future[Option[SubscriptionFields]]
   def fetchByFieldsId(fieldsId: SubscriptionFieldsId): Future[Option[SubscriptionFields]]
   def fetchByClientId(clientId: ClientId): Future[List[SubscriptionFields]]
+  def fetchAll(): Future[List[SubscriptionFields]]
 
   def delete(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion): Future[Boolean]
 }
@@ -91,6 +92,10 @@ class SubscriptionFieldsMongoRepository @Inject()(mongoDbProvider: MongoDbProvid
   override def fetchByClientId(clientId: ClientId): Future[List[SubscriptionFields]] = {
     val selector = Json.obj("clientId" -> clientId.value)
     getMany(selector)
+  }
+
+  override def fetchAll(): Future[List[SubscriptionFields]] = {
+    getMany(Json.obj())
   }
 
   override def delete(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion): Future[Boolean] = {

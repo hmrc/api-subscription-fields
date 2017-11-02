@@ -144,4 +144,34 @@ class SubscriptionFieldsControllerGetSpec extends UnitSpec with SubscriptionFiel
 
   }
 
+  "GET /field" should {
+    "return OK with all field subscriptions" in {
+      mockSubscriptionFieldsService.getAll _ expects () returns bulkResponseModel
+
+      val result = await(controller.getAllSubscriptionFields(FakeRequest()))
+
+      status(result) shouldBe OK
+      contentAsJson(result) shouldBe bulkResponseJson
+    }
+
+    "return OK with an empty list when no field subscriptions exist in the repo" in {
+      mockSubscriptionFieldsService.getAll _ expects () returns BulkSubscriptionFieldsResponse(subscriptions = Seq())
+
+      val result = await(controller.getAllSubscriptionFields(FakeRequest()))
+
+      status(result) shouldBe OK
+      contentAsJson(result) shouldBe Json.toJson(BulkSubscriptionFieldsResponse(Seq()))
+    }
+
+    "return INTERNAL_SERVER_ERROR when service throws exception" in {
+      mockSubscriptionFieldsService.getAll _ expects () returns Future.failed(emulatedFailure)
+
+      val result = await(controller.getAllSubscriptionFields(FakeRequest()))
+
+      status(result) shouldBe INTERNAL_SERVER_ERROR
+      (contentAsJson(result) \ "code") shouldBe JsDefined(JsString("UNKNOWN_ERROR"))
+      (contentAsJson(result) \ "message") shouldBe JsDefined(JsString("An unexpected error occurred"))
+    }
+  }
+
 }

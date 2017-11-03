@@ -22,7 +22,7 @@ import play.api.libs.json.Json
 import play.api.mvc._
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import uk.gov.hmrc.apisubscriptionfields.model.{Fields, SubscriptionFieldsRequest, SubscriptionFieldsResponse, _}
+import uk.gov.hmrc.apisubscriptionfields.model._
 import util.{FieldsDefinitionTestData, RequestHeaders, SubscriptionFieldsTestData}
 
 import scala.concurrent.Future
@@ -61,7 +61,8 @@ class ApiSubscriptionFieldsSpec extends AcceptanceTestSpec
 
     scenario("the API is called to store some values for a new subscription field") {
       Given("a request with valid payload")
-      val request = validSubscriptionPutRequest(SampleFields1).copyFakeRequest(method = PUT, uri = subscriptionFieldsEndpoint(fakeRawClientId, fakeRawContext, fakeRawVersion))
+      val request = validSubscriptionPutRequest(SampleFields1)
+        .copyFakeRequest(method = PUT, uri = subscriptionFieldsEndpoint(fakeRawClientId, fakeRawContext, fakeRawVersion))
 
       When("a PUT request with data is sent to the API")
       val result: Option[Future[Result]] = route(app, request)
@@ -74,15 +75,17 @@ class ApiSubscriptionFieldsSpec extends AcceptanceTestSpec
 
       And("the response body should be a valid response")
       val sfr = contentAsJson(resultFuture).validate[SubscriptionFieldsResponse]
+      val fieldsId = sfr.get.fieldsId
 
       sfr.isSuccess shouldBe true
-      sfr.get should matchPattern { case SubscriptionFieldsResponse(`fakeRawClientId`, "acontext", "1.0.2", _, SampleFields1) => }
+      sfr.get shouldBe SubscriptionFieldsResponse(fakeRawClientId, "acontext", "1.0.2", fieldsId, SampleFields1)
     }
 
     scenario("the API is called to GET with a known subscription field") {
 
       Given("a request with a known subscription field")
-      val request = ValidRequest.copyFakeRequest(method = GET, uri = subscriptionFieldsEndpoint(fakeRawClientId, fakeRawContext, fakeRawVersion))
+      val request = ValidRequest
+        .copyFakeRequest(method = GET, uri = subscriptionFieldsEndpoint(fakeRawClientId, fakeRawContext, fakeRawVersion))
 
       When("a GET request with data is sent to the API")
       val result: Option[Future[Result]] = route(app, request)
@@ -95,15 +98,17 @@ class ApiSubscriptionFieldsSpec extends AcceptanceTestSpec
 
       And("the response body should be a valid response")
       val sfr = contentAsJson(resultFuture).validate[SubscriptionFieldsResponse]
+      val fieldsId = sfr.get.fieldsId
 
       sfr.isSuccess shouldBe true
-      sfr.get should matchPattern { case SubscriptionFieldsResponse(`fakeRawClientId`, "acontext", "1.0.2", _, SampleFields1) => }
+      sfr.get shouldBe SubscriptionFieldsResponse(fakeRawClientId, "acontext", "1.0.2", fieldsId, SampleFields1)
     }
 
     scenario("the API is called to GET with a known fieldsId") {
 
       Given("a request with a known fieldsId")
-      val requestId = ValidRequest.copyFakeRequest(method = GET, uri = subscriptionFieldsEndpoint(fakeRawClientId, fakeRawContext, fakeRawVersion))
+      val requestId = ValidRequest
+        .copyFakeRequest(method = GET, uri = subscriptionFieldsEndpoint(fakeRawClientId, fakeRawContext, fakeRawVersion))
 
       When("an id GET request with data is sent to the API")
       val result: Option[Future[Result]] = route(app, requestId)
@@ -132,7 +137,7 @@ class ApiSubscriptionFieldsSpec extends AcceptanceTestSpec
       val sfrFieldsId = contentAsJson(resultFuture).validate[SubscriptionFieldsResponse]
 
       sfrFieldsId.isSuccess shouldBe true
-      sfrFieldsId.get should matchPattern { case SubscriptionFieldsResponse(`fakeRawClientId`, "acontext", "1.0.2", `fieldsId`, SampleFields1) => }
+      sfrFieldsId.get shouldBe SubscriptionFieldsResponse(fakeRawClientId, "acontext", "1.0.2", fieldsId, SampleFields1)
     }
 
     scenario("the API is called to GET existing subscription fields by application clientId") {
@@ -151,15 +156,17 @@ class ApiSubscriptionFieldsSpec extends AcceptanceTestSpec
 
       And("the response body should be a valid response")
       val sfr = contentAsJson(resultFuture).validate[BulkSubscriptionFieldsResponse]
+      val fieldsId = sfr.get.subscriptions.head.fieldsId
 
       sfr.isSuccess shouldBe true
-      sfr.get should matchPattern { case BulkSubscriptionFieldsResponse(Seq(SubscriptionFieldsResponse(`fakeRawClientId`, "acontext", "1.0.2", _, SampleFields1))) => }
+      sfr.get shouldBe BulkSubscriptionFieldsResponse(Seq(SubscriptionFieldsResponse(fakeRawClientId, "acontext", "1.0.2", fieldsId, SampleFields1)))
     }
 
     scenario("the API is called to update existing subscription fields") {
 
       Given("a request with valid payload")
-      val request = validSubscriptionPutRequest(SampleFields2).copyFakeRequest(method = PUT, uri = subscriptionFieldsEndpoint(fakeRawClientId, fakeRawContext, fakeRawVersion))
+      val request = validSubscriptionPutRequest(SampleFields2)
+        .copyFakeRequest(method = PUT, uri = subscriptionFieldsEndpoint(fakeRawClientId, fakeRawContext, fakeRawVersion))
 
       When("a PUT request with data is sent to the API")
       val result: Option[Future[Result]] = route(app, request)
@@ -172,15 +179,17 @@ class ApiSubscriptionFieldsSpec extends AcceptanceTestSpec
 
       And("the response body should be a valid response")
       val sfr = contentAsJson(resultFuture).validate[SubscriptionFieldsResponse]
+      val fieldsId = sfr.get.fieldsId
 
       sfr.isSuccess shouldBe true
-      sfr.get should matchPattern { case SubscriptionFieldsResponse(`fakeRawClientId`, "acontext", "1.0.2", _, SampleFields2) => }
+      sfr.get shouldBe SubscriptionFieldsResponse(fakeRawClientId, "acontext", "1.0.2", fieldsId, SampleFields2)
     }
 
     scenario("the API is called to DELETE existing subscription fields") {
 
       Given("a request with existing subscription fields")
-      val request = ValidRequest.copyFakeRequest(method = DELETE, uri = subscriptionFieldsEndpoint(fakeRawClientId, fakeRawContext, fakeRawVersion))
+      val request = ValidRequest
+        .copyFakeRequest(method = DELETE, uri = subscriptionFieldsEndpoint(fakeRawClientId, fakeRawContext, fakeRawVersion))
 
       When("a GET request with data is sent to the API")
       val result: Option[Future[Result]] = route(app, request)
@@ -201,7 +210,8 @@ class ApiSubscriptionFieldsSpec extends AcceptanceTestSpec
     scenario("the API is called to store some new fields definitions") {
 
       Given("a request with valid payload")
-      val request = validDefinitionPutRequest(FakeFieldsDefinitions).copyFakeRequest(method = PUT, uri = definitionEndpoint(fakeRawContext, fakeRawVersion))
+      val request = validDefinitionPutRequest(FakeFieldsDefinitions)
+        .copyFakeRequest(method = PUT, uri = definitionEndpoint(fakeRawContext, fakeRawVersion))
 
       When("a PUT request with data is sent to the API")
       val result: Option[Future[Result]] = route(app, request)
@@ -231,7 +241,7 @@ class ApiSubscriptionFieldsSpec extends AcceptanceTestSpec
       val fdr = contentAsJson(resultFuture).validate[FieldsDefinitionResponse]
 
       fdr.isSuccess shouldBe true
-      fdr.get should matchPattern { case FieldsDefinitionResponse(FakeFieldsDefinitionResponse) => }
+      fdr.get shouldBe FakeFieldsDefinitionResponse
     }
 
     scenario("the API is called to GET all fields definitions") {
@@ -252,13 +262,14 @@ class ApiSubscriptionFieldsSpec extends AcceptanceTestSpec
       val allFdr = contentAsJson(resultFuture).validate[BulkFieldsDefinitionsResponse]
 
       allFdr.isSuccess shouldBe true
-      allFdr.get should matchPattern { case BulkFieldsDefinitionsResponse(List(FakeFieldsDefinitionResponse)) => }
+      allFdr.get shouldBe BulkFieldsDefinitionsResponse(List(FakeFieldsDefinitionResponse))
     }
 
     scenario("the API is called to update some existing fields definitions") {
 
       Given("a request with valid payload")
-      val request = validDefinitionPutRequest(Seq.empty).copyFakeRequest(method = PUT, uri = definitionEndpoint(fakeRawContext, fakeRawVersion))
+      val request = validDefinitionPutRequest(Seq.empty)
+        .copyFakeRequest(method = PUT, uri = definitionEndpoint(fakeRawContext, fakeRawVersion))
 
       When("a PUT request with data is sent to the API")
       val result: Option[Future[Result]] = route(app, request)

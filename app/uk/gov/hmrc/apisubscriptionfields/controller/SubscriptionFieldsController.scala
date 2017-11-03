@@ -90,6 +90,8 @@ class SubscriptionFieldsController @Inject()(service: SubscriptionFieldsService)
   def upsertSubscriptionFields(rawClientId: String, rawApiContext: String, rawApiVersion: String): Action[JsValue] = Action.async(parse.json) { implicit request =>
     withJsonBody[SubscriptionFieldsRequest] { payload =>
       Logger.debug(s"[upsertSubscriptionFields] clientId: $rawClientId apiContext: $rawApiContext apiVersion: $rawApiVersion")
+      // TODO: ensure that `fields` is not empty (at least one subscription field)
+      // TODO: ensure that each subscription field has a name (map key) matching a field definition and a non-empty value
       service.upsert(ClientId(rawClientId), ApiContext(rawApiContext), ApiVersion(rawApiVersion), payload.fields) map {
         case (response, true) => Created(Json.toJson(response))
         case (response, false) => Ok(Json.toJson(response))

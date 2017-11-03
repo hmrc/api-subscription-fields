@@ -18,14 +18,12 @@ package uk.gov.hmrc.apisubscriptionfields.repository
 
 import play.api.Logger
 import play.api.libs.json.{JsObject, OWrites, Reads}
-import reactivemongo.api.{Cursor, ReadPreference}
+import reactivemongo.api.Cursor
 import reactivemongo.play.json.ImplicitBSONHandlers._
 import reactivemongo.play.json.collection.JSONCollection
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-
-
 
 trait MongoCrudHelper[T] extends MongoIndexCreator with MongoErrorHandler {
 

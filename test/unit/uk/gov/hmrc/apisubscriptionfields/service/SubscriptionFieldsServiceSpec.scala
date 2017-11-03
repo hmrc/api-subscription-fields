@@ -16,6 +16,8 @@
 
 package unit.uk.gov.hmrc.apisubscriptionfields.service
 
+import java.util.UUID
+
 import org.scalamock.scalatest.MockFactory
 import uk.gov.hmrc.apisubscriptionfields.model._
 import uk.gov.hmrc.apisubscriptionfields.repository._
@@ -23,19 +25,21 @@ import uk.gov.hmrc.apisubscriptionfields.service.{SubscriptionFieldsService, UUI
 import uk.gov.hmrc.play.test.UnitSpec
 import util.SubscriptionFieldsTestData
 
+import scala.concurrent.Future
+
 class SubscriptionFieldsServiceSpec extends UnitSpec with SubscriptionFieldsTestData with MockFactory {
 
   private val mockSubscriptionFieldsIdRepository = mock[SubscriptionFieldsRepository]
-  private val mockUuidCreator = mock[UUIDCreator]
+  private val mockUuidCreator = new UUIDCreator {
+    override def uuid(): UUID = FakeRawFieldsId
+  }
   private val service = new SubscriptionFieldsService(mockSubscriptionFieldsIdRepository, mockUuidCreator)
 
   "getAll" should {
     "return an empty list when no entry exists in the database collection" in {
       (mockSubscriptionFieldsIdRepository.fetchAll _).expects().returns(List())
 
-      val result = await(service.getAll)
-
-      result shouldBe BulkSubscriptionFieldsResponse(subscriptions = List())
+      await(service.getAll) shouldBe BulkSubscriptionFieldsResponse(subscriptions = List())
     }
 
     "return a list containing all subscription fields" in {
@@ -48,6 +52,7 @@ class SubscriptionFieldsServiceSpec extends UnitSpec with SubscriptionFieldsTest
         SubscriptionFieldsResponse(sf1.clientId, sf1.apiContext, sf1.apiVersion, SubscriptionFieldsId(sf1.fieldsId), sf1.fields),
         SubscriptionFieldsResponse(sf2.clientId, sf2.apiContext, sf2.apiVersion, SubscriptionFieldsId(sf2.fieldsId), sf2.fields)
       ))
+
       await(service.getAll) shouldBe expectedResponse
     }
   }
@@ -56,21 +61,19 @@ class SubscriptionFieldsServiceSpec extends UnitSpec with SubscriptionFieldsTest
     "return None when the expected record does not exist in the database collection" in {
       (mockSubscriptionFieldsIdRepository fetchByClientId _) expects FakeClientId returns List()
 
-      val result = await(service.get(FakeClientId))
-
-      result shouldBe None
+      await(service.get(FakeClientId)) shouldBe None
     }
 
     "return the expected response when the entry exists in the database collection" in {
-      val subscriptionFields1 = createSubscriptionFieldsWithApiContext()
-      val subscriptionFields2 = createSubscriptionFieldsWithApiContext(rawContext = fakeRawContext2)
-      (mockSubscriptionFieldsIdRepository fetchByClientId _) expects FakeClientId returns List(subscriptionFields1, subscriptionFields2)
+      val sf1 = createSubscriptionFieldsWithApiContext()
+      val sf2 = createSubscriptionFieldsWithApiContext(rawContext = fakeRawContext2)
+      (mockSubscriptionFieldsIdRepository fetchByClientId _) expects FakeClientId returns List(sf1, sf2)
 
       val result = await(service.get(FakeClientId))
 
       result shouldBe Some(BulkSubscriptionFieldsResponse(subscriptions = Seq(
-        SubscriptionFieldsResponse(clientId = subscriptionFields1.clientId, apiVersion = subscriptionFields1.apiVersion, apiContext = subscriptionFields1.apiContext, fieldsId = SubscriptionFieldsId(subscriptionFields1.fieldsId), fields = subscriptionFields1.fields),
-        SubscriptionFieldsResponse(clientId = subscriptionFields2.clientId, apiVersion = subscriptionFields2.apiVersion, apiContext = subscriptionFields2.apiContext, fieldsId = SubscriptionFieldsId(subscriptionFields2.fieldsId), fields = subscriptionFields2.fields)
+        SubscriptionFieldsResponse(sf1.clientId, sf1.apiVersion, sf1.apiContext, SubscriptionFieldsId(sf1.fieldsId), sf1.fields),
+        SubscriptionFieldsResponse(sf2.clientId, sf2.apiVersion, sf2.apiContext, SubscriptionFieldsId(sf2.fieldsId), sf2.fields)
       )))
     }
   }
@@ -79,9 +82,7 @@ class SubscriptionFieldsServiceSpec extends UnitSpec with SubscriptionFieldsTest
     "return None when no entry exists in the repo" in {
       (mockSubscriptionFieldsIdRepository fetch(_: ClientId, _: ApiContext, _: ApiVersion)) expects(FakeClientId, FakeContext, FakeVersion) returns None
 
-      val result = await(service.get(FakeClientId, FakeContext, FakeVersion))
-
-      result shouldBe None
+      await(service.get(FakeClientId, FakeContext, FakeVersion)) shouldBe None
     }
 
     "return the expected response when the entry exists in the database collection" in {
@@ -97,17 +98,43 @@ class SubscriptionFieldsServiceSpec extends UnitSpec with SubscriptionFieldsTest
     "return None when no entry exists in the repo" in {
       (mockSubscriptionFieldsIdRepository fetchByFieldsId _) expects SubscriptionFieldsId(FakeRawFieldsId) returns None
 
-      val result = await(service.get(FakeFieldsId))
-
-      result shouldBe None
+      await(service.get(FakeFieldsId)) shouldBe None
     }
 
     "return the expected response when the entry exists in the database collection" in {
       (mockSubscriptionFieldsIdRepository fetchByFieldsId _) expects SubscriptionFieldsId(FakeRawFieldsId) returns Some(FakeApiSubscription)
 
-      val result = await(service.get(FakeFieldsId))
+      await(service.get(FakeFieldsId)) shouldBe Some(FakeSubscriptionFieldsResponse)
+    }
+  }
 
-      result shouldBe Some(FakeSubscriptionFieldsResponse)
+  "upsert" should {
+    "return false when updating an existing api subscription fields" in {
+      (mockSubscriptionFieldsIdRepository save _) expects FakeApiSubscription returns false
+      (mockSubscriptionFieldsIdRepository fetch(_: ClientId, _: ApiContext, _: ApiVersion)) expects(FakeClientId, FakeContext, FakeVersion) returns Some(FakeApiSubscription)
+
+      val result = await(service.upsert(FakeClientId, FakeContext, FakeVersion, subscriptionFields))
+
+      result shouldBe ((SubscriptionFieldsResponse(fakeRawClientId, fakeRawContext, fakeRawVersion, FakeFieldsId, subscriptionFields), false))
+    }
+
+    "return true when creating a new api subscription fields" in {
+      (mockSubscriptionFieldsIdRepository save _) expects FakeApiSubscription returns true
+      (mockSubscriptionFieldsIdRepository fetch(_: ClientId, _: ApiContext, _: ApiVersion)) expects(FakeClientId, FakeContext, FakeVersion) returns None
+
+      val result = await(service.upsert(FakeClientId, FakeContext, FakeVersion, subscriptionFields))
+
+      result shouldBe ((SubscriptionFieldsResponse(fakeRawClientId, fakeRawContext, fakeRawVersion, FakeFieldsId, subscriptionFields), true))
+    }
+
+    "propagate the error" in {
+      (mockSubscriptionFieldsIdRepository fetch(_: ClientId, _: ApiContext, _: ApiVersion)) expects (*, *, *) returns Future.failed(emulatedFailure)
+
+      val caught = intercept[EmulatedFailure] {
+        await(service.upsert(FakeClientId, FakeContext, FakeVersion, subscriptionFields))
+      }
+
+      caught shouldBe emulatedFailure
     }
   }
 
@@ -115,17 +142,13 @@ class SubscriptionFieldsServiceSpec extends UnitSpec with SubscriptionFieldsTest
     "return true when the entry exists in the database collection" in {
       (mockSubscriptionFieldsIdRepository delete(_: ClientId, _: ApiContext, _: ApiVersion)) expects(FakeClientId, FakeContext, FakeVersion) returns true
 
-      val result: Boolean = await(service.delete(FakeClientId, FakeContext, FakeVersion))
-
-      result shouldBe true
+      await(service.delete(FakeClientId, FakeContext, FakeVersion)) shouldBe true
     }
 
     "return false when the entry does not exist in the database collection" in {
       (mockSubscriptionFieldsIdRepository delete(_: ClientId, _: ApiContext, _: ApiVersion)) expects(FakeClientId, FakeContext, FakeVersion) returns false
 
-      val result: Boolean = await(service.delete(FakeClientId, FakeContext, FakeVersion))
-
-      result shouldBe false
+      await(service.delete(FakeClientId, FakeContext, FakeVersion)) shouldBe false
     }
   }
 

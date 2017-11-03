@@ -77,7 +77,6 @@ class SubscriptionFieldsControllerGetSpec extends UnitSpec with SubscriptionFiel
   private val bulkResponseJson = Json.parse(bulkResponseJsonString)
   private val bulkResponseModel = bulkResponseJson.as[BulkSubscriptionFieldsResponse]
 
-
   "GET /field/application/{client-id}/context/{context}/version/{api-version}" should {
 
     "return OK when the expected record exists in the repo" in {
@@ -109,6 +108,38 @@ class SubscriptionFieldsControllerGetSpec extends UnitSpec with SubscriptionFiel
       (contentAsJson(result) \ "message") shouldBe JsDefined(JsString("An unexpected error occurred"))
     }
 
+  }
+
+  "GET /field/{fields-id}" should {
+
+    "return OK when the expected record exists in the repo" in {
+      (mockSubscriptionFieldsService.get(_:SubscriptionFieldsId)) expects FakeFieldsId returns Some(responseModel)
+
+      val result = await(controller.getSubscriptionFieldsByFieldsId(FakeRawFieldsId)(FakeRequest()))
+
+      status(result) shouldBe OK
+      contentAsJson(result) shouldBe responseJson
+    }
+
+    "return NOT_FOUND when not in the repo" in {
+      (mockSubscriptionFieldsService.get(_:SubscriptionFieldsId)) expects FakeFieldsId returns None
+
+      val result: Future[Result] = await(controller.getSubscriptionFieldsByFieldsId(FakeRawFieldsId)(FakeRequest()))
+
+      status(result) shouldBe NOT_FOUND
+      (contentAsJson(result) \ "code") shouldBe JsDefined(JsString("NOT_FOUND"))
+      (contentAsJson(result) \ "message") shouldBe JsDefined(JsString(s"FieldsId ($FakeRawFieldsId) was not found"))
+    }
+
+    "return INTERNAL_SERVER_ERROR when service throws exception" in {
+      (mockSubscriptionFieldsService.get(_:SubscriptionFieldsId)) expects FakeFieldsId returns Future.failed(emulatedFailure)
+
+      val result: Future[Result] = await(controller.getSubscriptionFieldsByFieldsId(FakeRawFieldsId)(FakeRequest()))
+
+      status(result) shouldBe INTERNAL_SERVER_ERROR
+      (contentAsJson(result) \ "code") shouldBe JsDefined(JsString("UNKNOWN_ERROR"))
+      (contentAsJson(result) \ "message") shouldBe JsDefined(JsString("An unexpected error occurred"))
+    }
   }
 
   "GET /field/application/{client-id}" should {

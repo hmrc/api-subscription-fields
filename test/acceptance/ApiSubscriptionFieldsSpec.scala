@@ -231,7 +231,7 @@ class ApiSubscriptionFieldsSpec extends AcceptanceTestSpec
       val fdr = contentAsJson(resultFuture).validate[FieldsDefinitionResponse]
 
       fdr.isSuccess shouldBe true
-      fdr.get should matchPattern { case FieldsDefinitionResponse(FakeFieldsDefinitions) => }
+      fdr.get should matchPattern { case FieldsDefinitionResponse(FakeFieldsDefinitionResponse) => }
     }
 
     scenario("the API is called to GET all fields definitions") {
@@ -249,12 +249,10 @@ class ApiSubscriptionFieldsSpec extends AcceptanceTestSpec
       status(resultFuture) shouldBe OK
 
       And("the response body should be a valid response")
-      val allFdr = contentAsJson(resultFuture).validate[FieldsDefinitionResponse]
+      val allFdr = contentAsJson(resultFuture).validate[BulkFieldsDefinitionsResponse]
 
       allFdr.isSuccess shouldBe true
-      allFdr.get should matchPattern {
-        case FieldsDefinitionResponse(FakeFieldsDefinitions) =>
-      }
+      allFdr.get should matchPattern { case BulkFieldsDefinitionsResponse(List(FakeFieldsDefinitionResponse)) => }
     }
 
     scenario("the API is called to update some existing fields definitions") {

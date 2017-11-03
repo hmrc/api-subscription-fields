@@ -33,19 +33,17 @@ trait SharedJsonFormatters {
 
 trait JsonFormatters extends SharedJsonFormatters {
 
-  implicit val SubscriptionFieldsResponseJF = Json.format[SubscriptionFieldsResponse]
-
-  implicit val BulkSubscriptionFieldsResponseJF = Json.format[BulkSubscriptionFieldsResponse]
-
-  implicit val SubscriptionFieldsRequestJF = Json.format[SubscriptionFieldsRequest]
-
   implicit val FieldDefinitionTypeReads = Reads.enumNameReads(FieldDefinitionType)
-
   implicit val FieldDefinitionJF = Json.format[FieldDefinition]
 
   implicit val FieldsDefinitionRequestJF = Json.format[FieldsDefinitionRequest]
+  implicit val SubscriptionFieldsRequestJF = Json.format[SubscriptionFieldsRequest]
 
   implicit val FieldsDefinitionResponseJF = Json.format[FieldsDefinitionResponse]
+  implicit val BulkFieldsDefinitionsResponseJF = Json.format[BulkFieldsDefinitionsResponse]
+  implicit val SubscriptionFieldsResponseJF = Json.format[SubscriptionFieldsResponse]
+  implicit val BulkSubscriptionFieldsResponseJF = Json.format[BulkSubscriptionFieldsResponse]
+
 }
 
 object JsonFormatters extends JsonFormatters

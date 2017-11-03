@@ -45,13 +45,14 @@ class FieldsDefinitionService @Inject() (repository: FieldsDefinitionRepository)
     } yield fetch.map(asResponse)
   }
 
-  def getAll: Future[FieldsDefinitionResponse] = {
+  def getAll: Future[BulkFieldsDefinitionsResponse] = {
     Logger.debug(s"[get all field definitions]")
-    // TODO: we need to separate the field definitions by API context and API version, otherwise this is useless!
-    repository.fetchAll() map { defs => defs.flatMap { _.fieldDefinitions } } map (FieldsDefinitionResponse(_))
+    (for {
+      defs <- repository.fetchAll()
+    } yield defs.map(asResponse)) map (BulkFieldsDefinitionsResponse(_))
   }
 
   private def asResponse(fieldsDefinition: FieldsDefinition): FieldsDefinitionResponse = {
-    FieldsDefinitionResponse(fieldsDefinition.fieldDefinitions)
+    FieldsDefinitionResponse(fieldsDefinition.apiContext, fieldsDefinition.apiVersion, fieldsDefinition.fieldDefinitions)
   }
 }

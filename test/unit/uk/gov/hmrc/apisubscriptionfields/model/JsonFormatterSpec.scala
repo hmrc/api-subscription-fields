@@ -28,7 +28,7 @@ class JsonFormatterSpec extends WordSpec with Matchers with JsonFormatters with 
 
   private val bulkSubscriptionFieldsResponse = BulkSubscriptionFieldsResponse(Seq(subscriptionFieldsResponse))
 
-  private val fakeFieldsDefinitionResponse = FieldsDefinitionResponse(Seq(FakeFieldDefinitionUrl))
+  private val fakeFieldsDefinitionResponse = FieldsDefinitionResponse(fakeRawContext, fakeRawVersion, Seq(FakeFieldDefinitionUrl))
 
   private def objectAsJsonString[A](a:A)(implicit t: Writes[A]) = Json.asciiStringify(Json.toJson(a))
 
@@ -63,7 +63,7 @@ class JsonFormatterSpec extends WordSpec with Matchers with JsonFormatters with 
   }
 
   "FieldsDefinitionResponse" should {
-    val json = """{"fieldDefinitions":[{"name":"name1","description":"desc1","type":"URL"}]}"""
+    val json = s"""{"apiContext":"$fakeRawContext","apiVersion":"$fakeRawVersion","fieldDefinitions":[{"name":"name1","description":"desc1","type":"URL"}]}"""
 
     "marshal json" in {
       objectAsJsonString(fakeFieldsDefinitionResponse) shouldBe json

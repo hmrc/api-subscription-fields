@@ -87,7 +87,7 @@ class SubscriptionFieldsService @Inject()(repository: SubscriptionFieldsReposito
     Logger.debug(s"[get all subscription fields]")
     (for {
       fields <- repository.fetchAll()
-    } yield fields.map(asResponse)) map (fs => BulkSubscriptionFieldsResponse(subscriptions = fs))
+    } yield fields.map(asResponse)) map (BulkSubscriptionFieldsResponse(_))
   }
 
   private def save(apiSubscriptionFields: SubscriptionFields): Future[SubscriptionFieldsResponse] = {

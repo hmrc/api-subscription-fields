@@ -72,9 +72,8 @@ class SubscriptionFieldsServiceSpec extends UnitSpec with SubscriptionFieldsTest
       val result = await(service.get(FakeClientId))
 
       result shouldBe Some(BulkSubscriptionFieldsResponse(subscriptions = Seq(
-        SubscriptionFieldsResponse(sf1.clientId, sf1.apiVersion, sf1.apiContext, SubscriptionFieldsId(sf1.fieldsId), sf1.fields),
-        SubscriptionFieldsResponse(sf2.clientId, sf2.apiVersion, sf2.apiContext, SubscriptionFieldsId(sf2.fieldsId), sf2.fields)
-      )))
+        SubscriptionFieldsResponse(sf1.clientId, sf1.apiContext, sf1.apiVersion, SubscriptionFieldsId(sf1.fieldsId), sf1.fields),
+        SubscriptionFieldsResponse(sf2.clientId, sf2.apiContext, sf2.apiVersion, SubscriptionFieldsId(sf2.fieldsId), sf2.fields))))
     }
   }
 

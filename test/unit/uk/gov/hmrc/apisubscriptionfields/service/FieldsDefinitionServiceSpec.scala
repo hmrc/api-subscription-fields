@@ -17,7 +17,7 @@
 package unit.uk.gov.hmrc.apisubscriptionfields.service
 
 import org.scalamock.scalatest.MockFactory
-import uk.gov.hmrc.apisubscriptionfields.model.{ApiContext, ApiVersion, FieldsDefinitionResponse}
+import uk.gov.hmrc.apisubscriptionfields.model.{ApiContext, ApiVersion, BulkFieldsDefinitionsResponse, FieldsDefinitionResponse}
 import uk.gov.hmrc.apisubscriptionfields.repository.FieldsDefinitionRepository
 import uk.gov.hmrc.apisubscriptionfields.service.FieldsDefinitionService
 import uk.gov.hmrc.play.test.UnitSpec
@@ -36,18 +36,21 @@ class FieldsDefinitionServiceSpec extends UnitSpec with FieldsDefinitionTestData
 
       val result = await(service.getAll)
 
-      result shouldBe FieldsDefinitionResponse(List())
+      result shouldBe BulkFieldsDefinitionsResponse(List())
     }
 
     "return a list of all entries" in {
-      val fd1 = createFieldsDefinition(apiContext = "1", fieldDefinitions = Seq(FakeFieldDefinitionUrl))
-      val fd2 = createFieldsDefinition(apiContext = "2", fieldDefinitions = Seq(FakeFieldDefinitionString))
+      val fd1 = createFieldsDefinition(apiContext = "api-1", fieldDefinitions = Seq(FakeFieldDefinitionUrl))
+      val fd2 = createFieldsDefinition(apiContext = "api-2", fieldDefinitions = Seq(FakeFieldDefinitionString))
 
       (mockFieldsDefinitionRepository.fetchAll _).expects().returns(List(fd1, fd2))
 
       val result = await(service.getAll)
 
-      result shouldBe FieldsDefinitionResponse(Seq(FakeFieldDefinitionUrl, FakeFieldDefinitionString))
+      val expectedResponse = BulkFieldsDefinitionsResponse(apis = Seq(
+        FieldsDefinitionResponse("api-1", fakeRawVersion, Seq(FakeFieldDefinitionUrl)),
+        FieldsDefinitionResponse("api-2", fakeRawVersion, Seq(FakeFieldDefinitionString))))
+      result shouldBe expectedResponse
     }
   }
 

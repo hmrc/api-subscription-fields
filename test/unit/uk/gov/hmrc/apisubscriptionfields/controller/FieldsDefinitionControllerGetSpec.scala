@@ -21,7 +21,7 @@ import play.api.libs.json.{JsDefined, JsString, Json}
 import play.api.test.Helpers._
 import play.api.test._
 import uk.gov.hmrc.apisubscriptionfields.controller.FieldsDefinitionController
-import uk.gov.hmrc.apisubscriptionfields.model.{FieldsDefinitionResponse, JsonFormatters}
+import uk.gov.hmrc.apisubscriptionfields.model.{BulkFieldsDefinitionsResponse, FieldsDefinitionResponse, JsonFormatters}
 import uk.gov.hmrc.apisubscriptionfields.service.FieldsDefinitionService
 import uk.gov.hmrc.play.test.UnitSpec
 import util.FieldsDefinitionTestData
@@ -34,49 +34,65 @@ class FieldsDefinitionControllerGetSpec extends UnitSpec with FieldsDefinitionTe
   private val controller = new FieldsDefinitionController(mockFieldsDefinitionService)
 
   private val responseJsonString =
-    """{ "fieldDefinitions": [
-      |          {
-      |            "name": "callback-url",
-      |            "description": "Callback URL",
-      |            "type": "URL"
-      |          },
-      |          {
-      |            "name": "token",
-      |            "description": "Secure Token",
-      |            "type": "SecureToken"
-      |          }
-      |        ]
+    """{
+      |   "apiContext": "hello",
+      |   "apiVersion": "1.0",
+      |   "fieldDefinitions": [
+      |     {
+      |       "name": "callback-url",
+      |       "description": "Callback URL",
+      |       "type": "URL"
+      |     },
+      |     {
+      |       "name": "token",
+      |       "description": "Secure Token",
+      |       "type": "SecureToken"
+      |     }
+      |   ]
       |}""".stripMargin
   private val responseJson = Json.parse(responseJsonString)
   private val responseModel = responseJson.as[FieldsDefinitionResponse]
 
   private val allResponseJsonString =
-    """{ "fieldDefinitions": [
-      |          {
-      |            "name": "callback-url",
-      |            "description": "Callback URL",
-      |            "type": "URL"
-      |          },
-      |          {
-      |            "name": "token",
-      |            "description": "Secure Token",
-      |            "type": "SecureToken"
-      |          },
-      |          {
-      |            "name": "address",
-      |            "description": "where you live",
-      |            "type": "STRING"
-      |          },
-      |          {
-      |            "name": "number",
-      |            "description": "telephone number",
-      |            "type": "STRING"
-      |          }
-      |        ]
+    """{
+      |  "apis": [
+      |    {
+      |      "apiContext": "hello",
+      |      "apiVersion": "1.0",
+      |      "fieldDefinitions": [
+      |        {
+      |          "name": "callback-url",
+      |          "description": "Callback URL",
+      |          "type": "URL"
+      |        },
+      |        {
+      |          "name": "token",
+      |          "description": "Secure Token",
+      |          "type": "SecureToken"
+      |        }
+      |      ]
+      |    },
+      |    {
+      |      "apiContext": "ciao",
+      |      "apiVersion": "2.0",
+      |      "fieldDefinitions": [
+      |        {
+      |          "name": "address",
+      |          "description": "where you live",
+      |          "type": "STRING"
+      |        },
+      |        {
+      |          "name": "number",
+      |          "description": "telephone number",
+      |          "type": "STRING"
+      |        }
+      |      ]
+      |    }
+      |  ]
       |}""".stripMargin
   private val allResponseJson = Json.parse(allResponseJsonString)
-  private val allResponseModel = allResponseJson.as[FieldsDefinitionResponse]
-  private val emptyAllResponseJson = Json.toJson(FieldsDefinitionResponse(Seq()))
+  private val allResponseModel = allResponseJson.as[BulkFieldsDefinitionsResponse]
+  private val emptyAllResponseJson = Json.toJson(BulkFieldsDefinitionsResponse(Seq()))
 
   "GET /definition/context/:apiContext/version/:apiVersion" should {
     "return OK when the expected record exists in the repo" in {
@@ -120,7 +136,7 @@ class FieldsDefinitionControllerGetSpec extends UnitSpec with FieldsDefinitionTe
     }
 
     "return OK with an empty list when no field definitions exist in the repo" in {
-      mockFieldsDefinitionService.getAll _ expects () returns Future.successful(FieldsDefinitionResponse(Seq()))
+      mockFieldsDefinitionService.getAll _ expects () returns Future.successful(BulkFieldsDefinitionsResponse(Seq()))
 
       val result = await(controller.getAllFieldsDefinitions(FakeRequest()))
 

@@ -23,7 +23,9 @@ case class SubscriptionFieldsResponse(clientId: String, apiContext: String, apiV
 
 case class BulkSubscriptionFieldsResponse(subscriptions: Seq[SubscriptionFieldsResponse])
 
-case class FieldsDefinitionResponse(fieldDefinitions: Seq[FieldDefinition])
+case class FieldsDefinitionResponse(apiContext: String, apiVersion: String, fieldDefinitions: Seq[FieldDefinition])
+
+case class BulkFieldsDefinitionsResponse(apis: Seq[FieldsDefinitionResponse])
 
 object ErrorCode extends Enumeration {
   type ErrorCode = Value

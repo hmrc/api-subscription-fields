@@ -86,6 +86,8 @@ None
 ##### Response body
 ```json
 {
+  "apiContext": "hello",
+  "apiVersion": "1.0",
   "fieldDefinitions": [
     {
       "name": "callback-url",
@@ -124,26 +126,38 @@ None
 ##### Response body
 ```json
 {
-  "fieldDefinitions": [
+  "apis": [
     {
-      "name": "callback-url",
-      "description": "Callback URL",
-      "type": "URL"
+      "apiContext": "hello",
+      "apiVersion": "1.0",
+      "fieldDefinitions": [
+        {
+          "name": "callback-url",
+          "description": "Callback URL",
+          "type": "URL"
+        },
+        {
+          "name": "token",
+          "description": "Secure Token",
+          "type": "SecureToken"
+        }
+      ]
     },
     {
-      "name": "token",
-      "description": "Secure Token",
-      "type": "SecureToken"
-    },
-    {
-      "name": "address",
-      "description": "where you live",
-      "type": "STRING"
-    },
-    {
-      "name": "number",
-      "description": "telephone number",
-      "type": "STRING"
+      "apiContext": "ciao",
+      "apiVersion": "2.0",
+      "fieldDefinitions": [
+        {
+          "name": "address",
+          "description": "where you live",
+          "type": "STRING"
+        },
+        {
+          "name": "number",
+          "description": "telephone number",
+          "type": "STRING"
+        }
+      ]
     }
   ]
 }

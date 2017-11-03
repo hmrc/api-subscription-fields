@@ -56,7 +56,7 @@ trait SubscriptionFieldsTestData extends TestData {
   final val FakeSubscriptionFieldsResponse: SubscriptionFieldsResponse = SubscriptionFieldsResponse(fakeRawClientId, fakeRawContext, fakeRawVersion, FakeSubscriptionFieldsId, subscriptionFields)
 
   def createSubscriptionFieldsWithApiContext(clientId: String = fakeRawClientId, rawContext: String = fakeRawContext) = {
-    val customFields = Map("field_1" -> "value_1", "field_2" -> "value_2", "field_3" -> "value_3")
+    val subscriptionFields = Map("field_1" -> "value_1", "field_2" -> "value_2", "field_3" -> "value_3")
     SubscriptionFields(clientId, rawContext, fakeRawVersion,  UUID.randomUUID(), subscriptionFields)
   }
 
@@ -69,7 +69,7 @@ trait FieldsDefinitionTestData extends TestData {
   final val FakeFieldDefinitionSecureToken = FieldDefinition("name3", "desc3", FieldDefinitionType.SECURE_TOKEN)
   final val FakeFieldsDefinitions = Seq(FakeFieldDefinitionUrl, FakeFieldDefinitionString, FakeFieldDefinitionSecureToken)
   final val FakeFieldsDefinition = FieldsDefinition(fakeRawContext, fakeRawVersion, FakeFieldsDefinitions)
-  final val FakeFieldsDefinitionResponse = FieldsDefinitionResponse(FakeFieldsDefinition.fieldDefinitions)
+  final val FakeFieldsDefinitionResponse = FieldsDefinitionResponse(fakeRawContext, fakeRawVersion, FakeFieldsDefinition.fieldDefinitions)
 
   def createFieldsDefinition(apiContext: String = fakeRawContext, apiVersion: String = fakeRawVersion, fieldDefinitions: Seq[FieldDefinition] = FakeFieldsDefinitions) =
     FieldsDefinition(apiContext, apiVersion, fieldDefinitions)

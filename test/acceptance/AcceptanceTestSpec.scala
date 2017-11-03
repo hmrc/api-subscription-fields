@@ -30,7 +30,6 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
 
-
 trait AcceptanceTestSpec extends FeatureSpec
   with GivenWhenThen
   with BeforeAndAfterAll

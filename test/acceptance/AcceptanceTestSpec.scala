@@ -22,8 +22,12 @@ import org.scalatest._
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.libs.json.Json
+import play.api.mvc.{AnyContentAsEmpty, AnyContentAsJson}
 import play.api.test.FakeRequest
 import play.modules.reactivemongo.MongoDbConnection
+import uk.gov.hmrc.apisubscriptionfields.model._
+import uk.gov.hmrc.apisubscriptionfields.model.JsonFormatters._
 import util.{ExternalServicesConfig, RequestHeaders}
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -41,6 +45,8 @@ trait AcceptanceTestSpec extends FeatureSpec
 
   protected val allDefinitionsEndpoint = "/definition"
 
+  protected val allSubscriptionFieldsEndpoint = "/field"
+
   protected val InvalidNonJsonPayload = "##INVALID_JSON_PAYLOAD##"
 
   protected def subscriptionFieldsEndpoint(clientId: String, apiContext: String, apiVersion: String) =
@@ -51,6 +57,28 @@ trait AcceptanceTestSpec extends FeatureSpec
   protected def definitionEndpoint(apiContext: String, apiVersion: String) = s"/definition/context/$apiContext/version/$apiVersion"
 
   protected def fieldsIdEndpoint(fieldsId: UUID) = s"/field/$fieldsId"
+
+  protected val SampleFields1 = Map("field1" -> "value1", "field2" -> "value2")
+  protected val SampleFields2 = Map("field1" -> "value1b", "field3" -> "value3")
+
+  protected def validSubscriptionPutRequest(fields: Fields): FakeRequest[AnyContentAsJson] =
+    validSubscriptionPutRequest(SubscriptionFieldsRequest(fields))
+
+  protected def validSubscriptionPutRequest(contents: SubscriptionFieldsRequest): FakeRequest[AnyContentAsJson] =
+    fakeRequestWithHeaders.withJsonBody(Json.toJson(contents))
+
+  protected def validDefinitionPutRequest(fieldDefinitions: Seq[FieldDefinition]): FakeRequest[AnyContentAsJson] =
+    validDefinitionPutRequest(FieldsDefinitionRequest(fieldDefinitions))
+
+  protected def validDefinitionPutRequest(contents: FieldsDefinitionRequest): FakeRequest[AnyContentAsJson] =
+    fakeRequestWithHeaders.withJsonBody(Json.toJson(contents))
+
+  protected def fakeRequestWithHeaders: FakeRequest[AnyContentAsEmpty.type] = {
+    FakeRequest().withHeaders(RequestHeaders.ACCEPT_HMRC_JSON_HEADER, RequestHeaders.CONTENT_TYPE_HEADER)
+  }
+
+  protected def fieldsEndpoint(clientId: String, apiContext: String, apiVersion: String) =
+    s"/field/application/$clientId/context/$apiContext/version/$apiVersion"
 
   override def fakeApplication(): Application = new GuiceApplicationBuilder().configure(Map(
     "run.mode" -> "Stub",

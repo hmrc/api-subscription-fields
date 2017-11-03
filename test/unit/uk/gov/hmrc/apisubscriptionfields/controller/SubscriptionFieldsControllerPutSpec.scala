@@ -54,7 +54,6 @@ class SubscriptionFieldsControllerPutSpec extends UnitSpec with SubscriptionFiel
     }
   }
 
-
   private def testSubmitResult(request: Request[JsValue])(test: Future[Result] => Unit) {
     val action: Action[JsValue] = controller.upsertSubscriptionFields(fakeRawClientId, fakeRawContext, fakeRawVersion)
     val result: Future[Result] = action.apply(request)

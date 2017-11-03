@@ -18,45 +18,22 @@ package acceptance
 
 import org.scalatest.OptionValues
 import play.api.Logger
-import play.api.libs.json.Json
 import play.api.mvc._
-import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.apisubscriptionfields.model._
-import util.{FieldsDefinitionTestData, RequestHeaders, SubscriptionFieldsTestData}
+import util.{FieldsDefinitionTestData, SubscriptionFieldsTestData}
 
 import scala.concurrent.Future
 
-class ApiSubscriptionFieldsSpec extends AcceptanceTestSpec
+class ApiSubscriptionFieldsHappySpec extends AcceptanceTestSpec
   with OptionValues
   with SubscriptionFieldsTestData
   with FieldsDefinitionTestData {
 
   import uk.gov.hmrc.apisubscriptionfields.model.JsonFormatters._
 
-  private val SampleFields1 = Map("field1" -> "value1", "field2" -> "value2")
-  private val SampleFields2 = Map("field1" -> "value1b", "field3" -> "value3")
-
-  private def validSubscriptionPutRequest(fields: Fields): FakeRequest[AnyContentAsJson] =
-    validSubscriptionPutRequest(SubscriptionFieldsRequest(fields))
-
-  private def validSubscriptionPutRequest(contents: SubscriptionFieldsRequest): FakeRequest[AnyContentAsJson] =
-    fakeRequestWithHeaders.withJsonBody(Json.toJson(contents))
-
-  private def validDefinitionPutRequest(fieldDefinitions: Seq[FieldDefinition]): FakeRequest[AnyContentAsJson] =
-    validDefinitionPutRequest(FieldsDefinitionRequest(fieldDefinitions))
-
-  private def validDefinitionPutRequest(contents: FieldsDefinitionRequest): FakeRequest[AnyContentAsJson] =
-    fakeRequestWithHeaders.withJsonBody(Json.toJson(contents))
-
-  private def fakeRequestWithHeaders: FakeRequest[AnyContentAsEmpty.type] = {
-    FakeRequest().withHeaders(RequestHeaders.ACCEPT_HMRC_JSON_HEADER, RequestHeaders.CONTENT_TYPE_HEADER)
-  }
-
-  def fieldsEndpoint(clientId: String, apiContext: String, apiVersion: String) =
-    s"/field/application/$clientId/context/$apiContext/version/$apiVersion"
-
   feature("Subscription-Fields") {
+
     Logger.logger.info(s"App.mode = ${app.mode.toString}")
 
     scenario("the API is called to store some values for a new subscription field") {
@@ -81,7 +58,7 @@ class ApiSubscriptionFieldsSpec extends AcceptanceTestSpec
       sfr.get shouldBe SubscriptionFieldsResponse(fakeRawClientId, "acontext", "1.0.2", fieldsId, SampleFields1)
     }
 
-    scenario("the API is called to GET with a known subscription field") {
+    scenario("the API is called to GET some existing subscription fields") {
 
       Given("a request with a known subscription field")
       val request = ValidRequest
@@ -102,6 +79,29 @@ class ApiSubscriptionFieldsSpec extends AcceptanceTestSpec
 
       sfr.isSuccess shouldBe true
       sfr.get shouldBe SubscriptionFieldsResponse(fakeRawClientId, "acontext", "1.0.2", fieldsId, SampleFields1)
+    }
+
+    scenario("the API is called to GET all existing subscription fields") {
+
+      Given("a request with a known subscription field")
+      val request = ValidRequest
+        .copyFakeRequest(method = GET, uri = allSubscriptionFieldsEndpoint)
+
+      When("a GET request with data is sent to the API")
+      val result: Option[Future[Result]] = route(app, request)
+
+      Then(s"a response with a 200 status is received")
+      result shouldBe 'defined
+      val resultFuture = result.value
+
+      status(resultFuture) shouldBe OK
+
+      And("the response body should be a valid response")
+      val sfr = contentAsJson(resultFuture).validate[BulkSubscriptionFieldsResponse]
+      val fieldsId = sfr.get.subscriptions.head.fieldsId
+
+      sfr.isSuccess shouldBe true
+      sfr.get shouldBe BulkSubscriptionFieldsResponse(Seq(SubscriptionFieldsResponse(fakeRawClientId, "acontext", "1.0.2", fieldsId, SampleFields1)))
     }
 
     scenario("the API is called to GET with a known fieldsId") {
@@ -202,83 +202,6 @@ class ApiSubscriptionFieldsSpec extends AcceptanceTestSpec
 
       And("the response body is empty")
       contentAsString(resultFuture) shouldBe 'empty
-    }
-  }
-
-  feature("Fields-Definition") {
-
-    scenario("the API is called to store some new fields definitions") {
-
-      Given("a request with valid payload")
-      val request = validDefinitionPutRequest(FakeFieldsDefinitions)
-        .copyFakeRequest(method = PUT, uri = definitionEndpoint(fakeRawContext, fakeRawVersion))
-
-      When("a PUT request with data is sent to the API")
-      val result: Option[Future[Result]] = route(app, request)
-
-      Then(s"a response with a 201 status is received")
-      result shouldBe 'defined
-      val resultFuture = result.value
-
-      status(resultFuture) shouldBe CREATED
-    }
-
-    scenario("the API is called to GET a known fields definition") {
-
-      Given("a request with a known fields definition")
-      val request = ValidRequest.copyFakeRequest(method = GET, uri = definitionEndpoint(fakeRawContext, fakeRawVersion))
-
-      When("a GET request with data is sent to the API")
-      val result: Option[Future[Result]] = route(app, request)
-
-      Then(s"a response with a 200 status is received")
-      result shouldBe 'defined
-      val resultFuture = result.value
-
-      status(resultFuture) shouldBe OK
-
-      And("the response body should be a valid response")
-      val fdr = contentAsJson(resultFuture).validate[FieldsDefinitionResponse]
-
-      fdr.isSuccess shouldBe true
-      fdr.get shouldBe FakeFieldsDefinitionResponse
-    }
-
-    scenario("the API is called to GET all fields definitions") {
-
-      Given("a request for all fields definition")
-      val request = ValidRequest.copyFakeRequest(method = GET, uri = allDefinitionsEndpoint)
-
-      When("a GET request is sent to the API")
-      val result: Option[Future[Result]] = route(app, request)
-
-      Then(s"a response with a 200 status is received")
-      result shouldBe 'defined
-      val resultFuture = result.value
-
-      status(resultFuture) shouldBe OK
-
-      And("the response body should be a valid response")
-      val allFdr = contentAsJson(resultFuture).validate[BulkFieldsDefinitionsResponse]
-
-      allFdr.isSuccess shouldBe true
-      allFdr.get shouldBe BulkFieldsDefinitionsResponse(List(FakeFieldsDefinitionResponse))
-    }
-
-    scenario("the API is called to update some existing fields definitions") {
-
-      Given("a request with valid payload")
-      val request = validDefinitionPutRequest(Seq.empty)
-        .copyFakeRequest(method = PUT, uri = definitionEndpoint(fakeRawContext, fakeRawVersion))
-
-      When("a PUT request with data is sent to the API")
-      val result: Option[Future[Result]] = route(app, request)
-
-      Then(s"a response with a 200 status is received")
-      result shouldBe 'defined
-      val resultFuture = result.value
-
-      status(resultFuture) shouldBe OK
     }
 
   }

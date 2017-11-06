@@ -28,9 +28,23 @@ import scala.concurrent.Future
 @Singleton
 class FieldsDefinitionService @Inject() (repository: FieldsDefinitionRepository) {
 
-  def upsert(apiContext: ApiContext, apiVersion: ApiVersion, fieldDefinitions: Seq[FieldDefinition]): Future[Boolean] = {
+  def upsert(apiContext: ApiContext, apiVersion: ApiVersion, fieldDefinitions: Seq[FieldDefinition]): Future[(FieldsDefinitionResponse, Boolean)] = {
+
+    def update(existingApiContext: String, existingApiVersion: String): Future[FieldsDefinitionResponse] =
+      save(FieldsDefinition(apiContext.value, apiVersion.value, fieldDefinitions))
+
+    def create(): Future[FieldsDefinitionResponse] =
+      save(FieldsDefinition(apiContext.value, apiVersion.value, fieldDefinitions))
+
     Logger.debug(s"[upsert fields definition] apiContext: $apiContext, apiVersion: $apiVersion, fieldDefinitions: $fieldDefinitions")
-    repository.save(FieldsDefinition(apiContext.value, apiVersion.value, fieldDefinitions))
+    repository.fetch(apiContext, apiVersion) flatMap { o =>
+      o.fold(
+        create().map((_, true))
+      )(
+        existing => update(existing.apiContext, existing.apiVersion).map((_, false))
+      )
+    }
+
   }
 
   def delete(apiContext: ApiContext, apiVersion: ApiVersion): Future[Boolean] = {
@@ -50,6 +64,11 @@ class FieldsDefinitionService @Inject() (repository: FieldsDefinitionRepository)
     (for {
       defs <- repository.fetchAll()
     } yield defs.map(asResponse)) map (BulkFieldsDefinitionsResponse(_))
+  }
+
+  private def save(fieldsDefinition: FieldsDefinition): Future[FieldsDefinitionResponse] = {
+    Logger.debug(s"[save fields definition] fieldsDefinition: $fieldsDefinition")
+    repository.save(fieldsDefinition).map(_ => asResponse(fieldsDefinition))
   }
 
   private def asResponse(fieldsDefinition: FieldsDefinition): FieldsDefinitionResponse = {

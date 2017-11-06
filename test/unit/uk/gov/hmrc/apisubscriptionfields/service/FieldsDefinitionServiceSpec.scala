@@ -17,7 +17,7 @@
 package unit.uk.gov.hmrc.apisubscriptionfields.service
 
 import org.scalamock.scalatest.MockFactory
-import uk.gov.hmrc.apisubscriptionfields.model.{ApiContext, ApiVersion, BulkFieldsDefinitionsResponse, FieldsDefinitionResponse}
+import uk.gov.hmrc.apisubscriptionfields.model._
 import uk.gov.hmrc.apisubscriptionfields.repository.FieldsDefinitionRepository
 import uk.gov.hmrc.apisubscriptionfields.service.FieldsDefinitionService
 import uk.gov.hmrc.play.test.UnitSpec
@@ -56,7 +56,8 @@ class FieldsDefinitionServiceSpec extends UnitSpec with FieldsDefinitionTestData
 
   "get" should {
     "return None when no definition exists in the database collection" in {
-      (mockFieldsDefinitionRepository fetch(_: ApiContext, _: ApiVersion)) expects(FakeContext, FakeVersion) returns None
+      (mockFieldsDefinitionRepository fetch(_: ApiContext, _: ApiVersion)).expects(FakeContext, FakeVersion)
+        .returns(None)
 
       val result = await(service.get(FakeContext, FakeVersion))
 
@@ -64,7 +65,8 @@ class FieldsDefinitionServiceSpec extends UnitSpec with FieldsDefinitionTestData
     }
 
     "return the expected definition" in {
-      (mockFieldsDefinitionRepository fetch(_: ApiContext, _: ApiVersion)) expects(FakeContext, FakeVersion) returns Some(FakeFieldsDefinition)
+      (mockFieldsDefinitionRepository fetch(_: ApiContext, _: ApiVersion)).expects(FakeContext, FakeVersion)
+        .returns(Some(FakeFieldsDefinition))
 
       val result = await(service.get(FakeContext, FakeVersion))
 
@@ -75,22 +77,27 @@ class FieldsDefinitionServiceSpec extends UnitSpec with FieldsDefinitionTestData
   "upsert" should {
     "return false when updating an existing fields definition" in {
       (mockFieldsDefinitionRepository save _) expects FakeFieldsDefinition returns false
+      (mockFieldsDefinitionRepository fetch(_: ApiContext, _: ApiVersion)).expects(FakeContext, FakeVersion)
+        .returns(Some(FakeFieldsDefinition))
 
       val result = await(service.upsert(FakeContext, FakeVersion, FakeFieldsDefinitions))
 
-      result shouldBe false
+      result shouldBe ((FieldsDefinitionResponse(fakeRawContext, fakeRawVersion, FakeFieldsDefinitions), false))
     }
 
     "return true when creating a new fields definition" in {
       (mockFieldsDefinitionRepository save _) expects FakeFieldsDefinition returns true
+      (mockFieldsDefinitionRepository fetch(_: ApiContext, _: ApiVersion)).expects(FakeContext, FakeVersion)
+        .returns(None)
 
       val result = await(service.upsert(FakeContext, FakeVersion, FakeFieldsDefinitions))
 
-      result shouldBe true
+      result shouldBe ((FieldsDefinitionResponse(fakeRawContext, fakeRawVersion, FakeFieldsDefinitions), true))
     }
 
     "propagate the error" in {
-      (mockFieldsDefinitionRepository save _) expects * returns Future.failed(emulatedFailure)
+      (mockFieldsDefinitionRepository fetch(_: ApiContext, _: ApiVersion)).expects(*, *)
+        .returns(Future.failed(emulatedFailure))
 
       val caught = intercept[EmulatedFailure] {
         await(service.upsert(FakeContext, FakeVersion, FakeFieldsDefinitions))
@@ -102,13 +109,15 @@ class FieldsDefinitionServiceSpec extends UnitSpec with FieldsDefinitionTestData
 
   "delete" should {
     "return true when the record is removed from the database collection" in {
-      (mockFieldsDefinitionRepository delete (_:ApiContext, _:ApiVersion)) expects (FakeContext, FakeVersion) returns true
+      (mockFieldsDefinitionRepository delete (_:ApiContext, _:ApiVersion)).expects(FakeContext, FakeVersion)
+        .returns(true)
 
       await(service.delete(FakeContext, FakeVersion)) shouldBe true
     }
 
     "return false when the record is not found in the database collection" in {
-      (mockFieldsDefinitionRepository delete (_:ApiContext, _:ApiVersion)) expects (FakeContext, FakeVersion) returns false
+      (mockFieldsDefinitionRepository delete (_:ApiContext, _:ApiVersion)).expects(FakeContext, FakeVersion)
+        .returns(false)
 
       await(service.delete(FakeContext, FakeVersion)) shouldBe false
     }

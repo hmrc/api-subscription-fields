@@ -41,8 +41,8 @@ class FieldsDefinitionController @Inject() (service: FieldsDefinitionService) ex
       // TODO: ensure that `fieldDefinitions` is not empty (at least one field definition must be defined)
       // TODO: ensure that each field definition has an allowed type and a non-empty name
       service.upsert(ApiContext(rawApiContext), ApiVersion(rawApiVersion), payload.fieldDefinitions) map {
-        case true => Created
-        case false => Ok
+        case (response, true) => Created(Json.toJson(response))
+        case (response, false) => Ok(Json.toJson(response))
       }
     } recover recovery
   }

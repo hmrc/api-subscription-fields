@@ -29,14 +29,19 @@ import util.SubscriptionFieldsTestData
 
 import scala.concurrent.Future
 
-class SubscriptionFieldsControllerPutSpec extends UnitSpec with SubscriptionFieldsTestData with MockFactory with JsonFormatters {
+class SubscriptionFieldsControllerPutSpec extends UnitSpec
+  with SubscriptionFieldsTestData
+  with MockFactory
+  with JsonFormatters {
 
   private val mockSubscriptionFieldsService = mock[SubscriptionFieldsService]
   private val controller = new SubscriptionFieldsController(mockSubscriptionFieldsService)
 
   "PUT /field/application/:clientId/context/:apiContext/version/:apiVersion" should {
     "return CREATED when created in the repo" in {
-      (mockSubscriptionFieldsService.upsert(_: ClientId, _: ApiContext, _: ApiVersion, _: Fields)) expects(FakeClientId, FakeContext, FakeVersion, subscriptionFields) returns Future.successful((FakeSubscriptionFieldsResponse, true))
+      (mockSubscriptionFieldsService.upsert(_: ClientId, _: ApiContext, _: ApiVersion, _: Fields)).
+        expects(FakeClientId, FakeContext, FakeVersion, subscriptionFields).
+        returns(Future.successful((FakeSubscriptionFieldsResponse, true)))
 
       val json = mkJson(SubscriptionFieldsRequest(subscriptionFields))
       testSubmitResult(mkRequest(json)) { result =>
@@ -45,7 +50,9 @@ class SubscriptionFieldsControllerPutSpec extends UnitSpec with SubscriptionFiel
     }
 
     "return OK when updated in the repo" in {
-      (mockSubscriptionFieldsService.upsert (_: ClientId, _: ApiContext, _: ApiVersion, _: Fields)) expects(FakeClientId, FakeContext, FakeVersion, subscriptionFields) returns Future.successful((FakeSubscriptionFieldsResponse, false))
+      (mockSubscriptionFieldsService.upsert (_: ClientId, _: ApiContext, _: ApiVersion, _: Fields)).
+        expects(FakeClientId, FakeContext, FakeVersion, subscriptionFields).
+        returns(Future.successful((FakeSubscriptionFieldsResponse, false)))
 
       val json = mkJson(SubscriptionFieldsRequest(subscriptionFields))
       testSubmitResult(mkRequest(json)) { result =>
@@ -65,5 +72,4 @@ class SubscriptionFieldsControllerPutSpec extends UnitSpec with SubscriptionFiel
       .withJsonBody(jsonBody).map(r => r.json)
 
   private def mkJson(model: SubscriptionFieldsRequest) = Json.toJson(model)(Json.writes[SubscriptionFieldsRequest])
-
 }

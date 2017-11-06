@@ -2,9 +2,7 @@
 
 [![Build Status](https://travis-ci.org/hmrc/api-subscription-fields.svg)](https://travis-ci.org/hmrc/api-subscription-fields) [ ![Download](https://api.bintray.com/packages/hmrc/releases/api-subscription-fields/images/download.svg) ](https://bintray.com/hmrc/releases/api-subscription-fields/_latestVersion)
 
-This microservice stores definitions and values for the HMRC Developer Hub. 
-
-Further development can be found in the [roadmap](docs/ROADMAP.md) 
+This microservice stores definitions and values for the HMRC Developer Hub.
 
 ---
 
@@ -60,7 +58,24 @@ curl -v -X PUT "http://localhost:9650/definition/context/hello/version/1.0" -H "
 }
 ```
 ##### Response body
-None
+```json
+{
+  "apiContext": "hello",
+  "apiVersion": "1.0",
+  "fieldDefinitions": [
+    {
+      "name": "callback-url",
+      "description": "Callback URL",
+      "type": "URL"
+    },
+    {
+      "name": "token",
+      "description": "Secure Token",
+      "type": "SecureToken"
+    }
+  ]
+}
+```
 
 ---
 

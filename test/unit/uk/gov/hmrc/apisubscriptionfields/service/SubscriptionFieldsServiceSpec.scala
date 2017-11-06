@@ -79,13 +79,15 @@ class SubscriptionFieldsServiceSpec extends UnitSpec with SubscriptionFieldsTest
 
   "get" should {
     "return None when no entry exists in the repo" in {
-      (mockSubscriptionFieldsIdRepository fetch(_: ClientId, _: ApiContext, _: ApiVersion)) expects(FakeClientId, FakeContext, FakeVersion) returns None
+      (mockSubscriptionFieldsIdRepository fetch(_: ClientId, _: ApiContext, _: ApiVersion))
+        .expects(FakeClientId, FakeContext, FakeVersion).returns(None)
 
       await(service.get(FakeClientId, FakeContext, FakeVersion)) shouldBe None
     }
 
     "return the expected response when the entry exists in the database collection" in {
-      (mockSubscriptionFieldsIdRepository fetch(_: ClientId, _: ApiContext, _: ApiVersion)) expects(FakeClientId, FakeContext, FakeVersion) returns Some(FakeApiSubscription)
+      (mockSubscriptionFieldsIdRepository fetch(_: ClientId, _: ApiContext, _: ApiVersion))
+        .expects(FakeClientId, FakeContext, FakeVersion).returns(Some(FakeApiSubscription))
 
       val result = await(service.get(FakeClientId, FakeContext, FakeVersion))
 
@@ -101,7 +103,8 @@ class SubscriptionFieldsServiceSpec extends UnitSpec with SubscriptionFieldsTest
     }
 
     "return the expected response when the entry exists in the database collection" in {
-      (mockSubscriptionFieldsIdRepository fetchByFieldsId _) expects SubscriptionFieldsId(FakeRawFieldsId) returns Some(FakeApiSubscription)
+      (mockSubscriptionFieldsIdRepository fetchByFieldsId _).expects(SubscriptionFieldsId(FakeRawFieldsId))
+        .returns(Some(FakeApiSubscription))
 
       await(service.get(FakeFieldsId)) shouldBe Some(FakeSubscriptionFieldsResponse)
     }
@@ -110,7 +113,8 @@ class SubscriptionFieldsServiceSpec extends UnitSpec with SubscriptionFieldsTest
   "upsert" should {
     "return false when updating an existing api subscription fields" in {
       (mockSubscriptionFieldsIdRepository save _) expects FakeApiSubscription returns false
-      (mockSubscriptionFieldsIdRepository fetch(_: ClientId, _: ApiContext, _: ApiVersion)) expects(FakeClientId, FakeContext, FakeVersion) returns Some(FakeApiSubscription)
+      (mockSubscriptionFieldsIdRepository fetch(_: ClientId, _: ApiContext, _: ApiVersion))
+        .expects(FakeClientId, FakeContext, FakeVersion).returns(Some(FakeApiSubscription))
 
       val result = await(service.upsert(FakeClientId, FakeContext, FakeVersion, subscriptionFields))
 
@@ -119,7 +123,8 @@ class SubscriptionFieldsServiceSpec extends UnitSpec with SubscriptionFieldsTest
 
     "return true when creating a new api subscription fields" in {
       (mockSubscriptionFieldsIdRepository save _) expects FakeApiSubscription returns true
-      (mockSubscriptionFieldsIdRepository fetch(_: ClientId, _: ApiContext, _: ApiVersion)) expects(FakeClientId, FakeContext, FakeVersion) returns None
+      (mockSubscriptionFieldsIdRepository fetch(_: ClientId, _: ApiContext, _: ApiVersion))
+        .expects(FakeClientId, FakeContext, FakeVersion).returns(None)
 
       val result = await(service.upsert(FakeClientId, FakeContext, FakeVersion, subscriptionFields))
 
@@ -127,7 +132,8 @@ class SubscriptionFieldsServiceSpec extends UnitSpec with SubscriptionFieldsTest
     }
 
     "propagate the error" in {
-      (mockSubscriptionFieldsIdRepository fetch(_: ClientId, _: ApiContext, _: ApiVersion)) expects (*, *, *) returns Future.failed(emulatedFailure)
+      (mockSubscriptionFieldsIdRepository fetch(_: ClientId, _: ApiContext, _: ApiVersion))
+        .expects(*, *, *).returns(Future.failed(emulatedFailure))
 
       val caught = intercept[EmulatedFailure] {
         await(service.upsert(FakeClientId, FakeContext, FakeVersion, subscriptionFields))
@@ -139,13 +145,15 @@ class SubscriptionFieldsServiceSpec extends UnitSpec with SubscriptionFieldsTest
 
   "delete" should {
     "return true when the entry exists in the database collection" in {
-      (mockSubscriptionFieldsIdRepository delete(_: ClientId, _: ApiContext, _: ApiVersion)) expects(FakeClientId, FakeContext, FakeVersion) returns true
+      (mockSubscriptionFieldsIdRepository delete(_: ClientId, _: ApiContext, _: ApiVersion))
+        .expects(FakeClientId, FakeContext, FakeVersion).returns(true)
 
       await(service.delete(FakeClientId, FakeContext, FakeVersion)) shouldBe true
     }
 
     "return false when the entry does not exist in the database collection" in {
-      (mockSubscriptionFieldsIdRepository delete(_: ClientId, _: ApiContext, _: ApiVersion)) expects(FakeClientId, FakeContext, FakeVersion) returns false
+      (mockSubscriptionFieldsIdRepository delete(_: ClientId, _: ApiContext, _: ApiVersion))
+        .expects(FakeClientId, FakeContext, FakeVersion).returns(false)
 
       await(service.delete(FakeClientId, FakeContext, FakeVersion)) shouldBe false
     }

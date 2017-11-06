@@ -29,14 +29,19 @@ import util.FieldsDefinitionTestData
 
 import scala.concurrent.Future
 
-class FieldsDefinitionControllerPutSpec extends UnitSpec with FieldsDefinitionTestData with MockFactory with JsonFormatters {
+class FieldsDefinitionControllerPutSpec extends UnitSpec
+  with FieldsDefinitionTestData
+  with MockFactory
+  with JsonFormatters {
 
   private val mockFieldsDefinitionService = mock[FieldsDefinitionService]
   private val controller = new FieldsDefinitionController(mockFieldsDefinitionService)
 
   "PUT /definition/context/:apiContext/version/:apiVersion" should {
     "return CREATED when created in the repo" in {
-      (mockFieldsDefinitionService.upsert _).expects(FakeContext, FakeVersion, FakeFieldsDefinitions).returns(Future.successful(true))
+      (mockFieldsDefinitionService.upsert _).
+        expects(FakeContext, FakeVersion, FakeFieldsDefinitions).
+        returns(Future.successful((FakeFieldsDefinitionResponse, true)))
 
       val json = mkJson(FieldsDefinitionRequest(FakeFieldsDefinitions))
       testSubmitResult(mkRequest(json)) { result =>
@@ -45,7 +50,9 @@ class FieldsDefinitionControllerPutSpec extends UnitSpec with FieldsDefinitionTe
     }
 
     "return OK when updated in the repo" in {
-      (mockFieldsDefinitionService.upsert _).expects(FakeContext, FakeVersion, FakeFieldsDefinitions).returns(Future.successful(false))
+      (mockFieldsDefinitionService.upsert _).
+        expects(FakeContext, FakeVersion, FakeFieldsDefinitions).
+        returns(Future.successful((FakeFieldsDefinitionResponse, false)))
 
       val json = mkJson(FieldsDefinitionRequest(FakeFieldsDefinitions))
       testSubmitResult(mkRequest(json)) { result =>

@@ -36,14 +36,14 @@ trait MongoCrudHelper[T] extends MongoIndexCreator with MongoErrorHandler {
     }
   }
 
-  def getMany(selector: JsObject)(implicit r: Reads[T]):Future[List[T]] = {
+  def getMany(selector: JsObject)(implicit r: Reads[T]): Future[List[T]] = {
     Logger.debug(s"[getMany] selector: $selector")
     col.find(selector).cursor[T]().collect[List](
       Int.MaxValue, Cursor.FailOnError[List[T]]()
     )
   }
 
-  def getOne(selector: JsObject)(implicit r: Reads[T]):Future[Option[T]] = {
+  def getOne(selector: JsObject)(implicit r: Reads[T]): Future[Option[T]] = {
     Logger.debug(s"[getOne] selector: $selector")
     col.find(selector).one[T]
   }

@@ -440,7 +440,7 @@ None
 ### Tests
 Some tests require MongoDB to run. 
 Thus, remember to start up MongoDB if you want to run the tests locally.
-There are unit tests, integration tests and acceptance tests plus code coverage reports are generated too.
+There are unit tests, acceptance tests and code coverage reports.
 In order to run them, use this command line:
 ```
 ./precheck.sh

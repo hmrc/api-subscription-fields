@@ -27,28 +27,28 @@ import scala.concurrent.Future
 
 trait MongoCrudHelper[T] extends MongoIndexCreator with MongoErrorHandler {
 
-  protected val col: JSONCollection
+  protected val mongoCollection: JSONCollection
 
   def save(entity: T, selector: JsObject)(implicit w: OWrites[T]): Future[(T, Boolean)] = {
     Logger.debug(s"[save] entity: $entity selector: $selector")
-    col.update(selector, entity, upsert = true).map {
+    mongoCollection.update(selector, entity, upsert = true).map {
       updateWriteResult => (entity, handleSaveError(updateWriteResult, s"Could not save entity: $entity"))
     }
   }
 
   def getMany(selector: JsObject)(implicit r: Reads[T]): Future[List[T]] = {
     Logger.debug(s"[getMany] selector: $selector")
-    col.find(selector).cursor[T]().collect[List](Int.MaxValue, Cursor.FailOnError[List[T]]())
+    mongoCollection.find(selector).cursor[T]().collect[List](Int.MaxValue, Cursor.FailOnError[List[T]]())
   }
 
   def getOne(selector: JsObject)(implicit r: Reads[T]): Future[Option[T]] = {
     Logger.debug(s"[getOne] selector: $selector")
-    col.find(selector).one[T]
+    mongoCollection.find(selector).one[T]
   }
 
   def deleteOne(selector: JsObject): Future[Boolean] = {
     Logger.debug(s"[deleteOne] selector: $selector")
-    col.remove(selector).map(handleDeleteError(_, s"Could not delete entity for selector: $selector"))
+    mongoCollection.remove(selector).map(handleDeleteError(_, s"Could not delete entity for selector: $selector"))
   }
 
 }

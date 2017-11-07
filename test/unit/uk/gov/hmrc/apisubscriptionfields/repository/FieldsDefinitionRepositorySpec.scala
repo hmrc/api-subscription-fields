@@ -54,7 +54,7 @@ class FieldsDefinitionRepositorySpec extends UnitSpec
   }
 
   private def collectionSize: Int = {
-    await(repository.mongoCollection.count())
+    await(repository.collection.count())
   }
 
   private def createFieldsDefinition = FieldsDefinition(fakeRawContext, fakeRawVersion, FakeFieldsDefinitions)
@@ -71,7 +71,7 @@ class FieldsDefinitionRepositorySpec extends UnitSpec
 
       await(repository.save(fieldsDefinition)) shouldBe ((fieldsDefinition, true))
       collectionSize shouldBe 1
-      await(repository.mongoCollection.find(selector(fieldsDefinition)).one[FieldsDefinition]) shouldBe Some(fieldsDefinition)
+      await(repository.collection.find(selector(fieldsDefinition)).one[FieldsDefinition]) shouldBe Some(fieldsDefinition)
     }
 
     "update the record in the collection" in new Setup {
@@ -83,7 +83,7 @@ class FieldsDefinitionRepositorySpec extends UnitSpec
       val edited = fieldsDefinition.copy(fieldDefinitions = Seq.empty)
       await(repository.save(edited)) shouldBe ((edited, false))
       collectionSize shouldBe 1
-      await(repository.mongoCollection.find(selector(edited)).one[FieldsDefinition]) shouldBe Some(edited)
+      await(repository.collection.find(selector(edited)).one[FieldsDefinition]) shouldBe Some(edited)
     }
   }
 

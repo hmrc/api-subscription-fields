@@ -47,7 +47,7 @@ class FieldsDefinitionMongoRepository @Inject()(mongoDbProvider: MongoDbProvider
   with FieldsDefinitionRepository
   with MongoCrudHelper[FieldsDefinition] {
 
-  override val mongoCollection: JSONCollection = mongoCollection
+  override val mongoCollection: JSONCollection = collection
   private implicit val format = MongoFormatters.FieldsDefinitionJF
 
   override def indexes = Seq(

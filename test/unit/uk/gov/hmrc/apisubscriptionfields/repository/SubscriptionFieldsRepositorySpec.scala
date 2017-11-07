@@ -70,7 +70,7 @@ class SubscriptionFieldsRepositorySpec extends UnitSpec
   }
 
   private def collectionSize: Int = {
-    await(repository.mongoCollection.count())
+    await(repository.collection.count())
   }
 
   private def selector(s: SubscriptionFields) = {
@@ -87,7 +87,7 @@ class SubscriptionFieldsRepositorySpec extends UnitSpec
 
       await(repository.save(apiSubscriptionFields)) shouldBe ((apiSubscriptionFields, true))
       collectionSize shouldBe 1
-      await(repository.mongoCollection.find(selector(apiSubscriptionFields)).one[SubscriptionFields]) shouldBe Some(apiSubscriptionFields)
+      await(repository.collection.find(selector(apiSubscriptionFields)).one[SubscriptionFields]) shouldBe Some(apiSubscriptionFields)
     }
 
     "update the record in the collection" in {
@@ -99,7 +99,7 @@ class SubscriptionFieldsRepositorySpec extends UnitSpec
       val edited = apiSubscriptionFields.copy(fields = Map("field4" -> "value_4"))
       await(repository.save(edited)) shouldBe ((edited, false))
       collectionSize shouldBe 1
-      await(repository.mongoCollection.find(selector(edited)).one[SubscriptionFields]) shouldBe Some(edited)
+      await(repository.collection.find(selector(edited)).one[SubscriptionFields]) shouldBe Some(edited)
     }
   }
 

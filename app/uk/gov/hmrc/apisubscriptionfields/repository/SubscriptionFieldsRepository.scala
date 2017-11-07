@@ -49,7 +49,7 @@ class SubscriptionFieldsMongoRepository @Inject()(mongoDbProvider: MongoDbProvid
   with SubscriptionFieldsRepository
   with MongoCrudHelper[SubscriptionFields] {
 
-  override val mongoCollection: JSONCollection = mongoCollection
+  override val mongoCollection: JSONCollection = collection
 
   private implicit val format = MongoFormatters.SubscriptionFieldsJF
 

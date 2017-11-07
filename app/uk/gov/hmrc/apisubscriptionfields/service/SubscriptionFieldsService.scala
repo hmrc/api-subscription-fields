@@ -43,6 +43,10 @@ class SubscriptionFieldsService @Inject()(repository: SubscriptionFieldsReposito
       save(SubscriptionFields(clientId.value, apiContext.value, apiVersion.value, uuidCreator.uuid(), subscriptionFields))
 
     Logger.debug(s"[upsert subscription fields] clientId: $clientId, apiContext: $apiVersion, apiVersion: $apiVersion")
+    // TODO: we need to change the method `upsert` and make it atomic.
+    // At the moment we call `save` after `fetch`, this might lead to issues in case of concurrent upserts.
+    // This can be fixed by calling `collection.findAndModify()` (instead of `collection.update()`) in the `MongoCrudHelper.save()` implementation.
+    // https://stackoverflow.com/questions/10778493/whats-the-difference-between-findandmodify-and-update-in-mongodb
     repository.fetch(clientId, apiContext, apiVersion) flatMap { o =>
       o.fold(
         create().map((_, true))

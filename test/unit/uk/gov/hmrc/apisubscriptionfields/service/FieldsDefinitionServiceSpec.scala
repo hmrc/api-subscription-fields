@@ -117,4 +117,5 @@ class FieldsDefinitionServiceSpec extends UnitSpec with FieldsDefinitionTestData
       await(service.delete(FakeContext, FakeVersion)) shouldBe false
     }
   }
+
 }

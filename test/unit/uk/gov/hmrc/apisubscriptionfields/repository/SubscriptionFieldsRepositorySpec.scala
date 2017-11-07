@@ -48,7 +48,7 @@ class SubscriptionFieldsRepositorySpec extends UnitSpec
 
     import play.api.libs.json._
 
-    def saveByFieldsId(subscription: SubscriptionFields): Future[Boolean] = {
+    def saveByFieldsId(subscription: SubscriptionFields): Future[(SubscriptionFields, Boolean)] = {
       save(subscription, Json.obj("fieldsId" -> subscription.fieldsId))
     }
 
@@ -85,7 +85,7 @@ class SubscriptionFieldsRepositorySpec extends UnitSpec
     "insert the record in the collection" in {
       collectionSize shouldBe 0
 
-      await(repository.save(apiSubscriptionFields)) shouldBe true
+      await(repository.save(apiSubscriptionFields)) shouldBe ((apiSubscriptionFields, true))
       collectionSize shouldBe 1
       await(repository.collection.find(selector(apiSubscriptionFields)).one[SubscriptionFields]) shouldBe Some(apiSubscriptionFields)
     }
@@ -93,11 +93,11 @@ class SubscriptionFieldsRepositorySpec extends UnitSpec
     "update the record in the collection" in {
       collectionSize shouldBe 0
 
-      await(repository.save(apiSubscriptionFields)) shouldBe true
+      await(repository.save(apiSubscriptionFields)) shouldBe ((apiSubscriptionFields, true))
       collectionSize shouldBe 1
 
       val edited = apiSubscriptionFields.copy(fields = Map("field4" -> "value_4"))
-      await(repository.save(edited)) shouldBe false
+      await(repository.save(edited)) shouldBe ((edited, false))
       collectionSize shouldBe 1
       await(repository.collection.find(selector(edited)).one[SubscriptionFields]) shouldBe Some(edited)
     }
@@ -127,7 +127,7 @@ class SubscriptionFieldsRepositorySpec extends UnitSpec
   "fetch using clientId, apiContext, apiVersion" should {
     "retrieve the correct record" in {
       val apiSubscription = createApiSubscriptionFields()
-      await(repository.save(apiSubscription)) shouldBe true
+      await(repository.save(apiSubscription))
       collectionSize shouldBe 1
 
       await(repository.fetch(FakeClientId, FakeContext, FakeVersion)) shouldBe Some(apiSubscription)
@@ -135,7 +135,8 @@ class SubscriptionFieldsRepositorySpec extends UnitSpec
 
     "return None when no subscription fields are found in the collection" in {
       for (i <- 1 to 3) {
-        await(repository.save(createApiSubscriptionFields(clientId = uniqueClientId))) shouldBe true
+        val apiSubscription = createApiSubscriptionFields(clientId = uniqueClientId)
+        await(repository.save(apiSubscription))
       }
       collectionSize shouldBe 3
 
@@ -147,7 +148,7 @@ class SubscriptionFieldsRepositorySpec extends UnitSpec
   "fetchByFieldsId" should {
     "retrieve the correct record from the `fieldsId` " in {
       val apiSubscription = createApiSubscriptionFields()
-      await(repository.save(apiSubscription)) shouldBe true
+      await(repository.save(apiSubscription))
       collectionSize shouldBe 1
 
       await(repository.fetchByFieldsId(SubscriptionFieldsId(apiSubscription.fieldsId))) shouldBe Some(apiSubscription)
@@ -155,8 +156,7 @@ class SubscriptionFieldsRepositorySpec extends UnitSpec
 
     "return `None` when the `fieldsId` doesn't match any record in the collection" in {
       for (i <- 1 to 3) {
-        val isInserted = await(repository.save(createApiSubscriptionFields(clientId = uniqueClientId)))
-        isInserted shouldBe true
+        await(repository.save(createApiSubscriptionFields(clientId = uniqueClientId)))
       }
       collectionSize shouldBe 3
 
@@ -186,7 +186,7 @@ class SubscriptionFieldsRepositorySpec extends UnitSpec
     "remove the record with a specific subscription field" in {
       val apiSubscription: SubscriptionFields = createApiSubscriptionFields()
 
-      await(repository.save(apiSubscription)) shouldBe true
+      await(repository.save(apiSubscription))
       collectionSize shouldBe 1
 
       await(repository.delete(ClientId(apiSubscription.clientId), ApiContext(apiSubscription.apiContext), ApiVersion(apiSubscription.apiVersion))) shouldBe true
@@ -195,13 +195,11 @@ class SubscriptionFieldsRepositorySpec extends UnitSpec
 
     "not alter the collection for unknown subscription fields" in {
       for (i <- 1 to 3) {
-        val result = await(repository.save(createApiSubscriptionFields(clientId = uniqueClientId)))
-        result shouldBe true
+        await(repository.save(createApiSubscriptionFields(clientId = uniqueClientId)))
       }
       collectionSize shouldBe 3
 
-      val result = await(repository.delete(ClientId("DOES_NOT_EXIST"), FakeContext, FakeVersion))
-      result shouldBe false
+      await(repository.delete(ClientId("DOES_NOT_EXIST"), FakeContext, FakeVersion))
       collectionSize shouldBe 3
     }
   }
@@ -210,28 +208,26 @@ class SubscriptionFieldsRepositorySpec extends UnitSpec
     val apiSubscription = createApiSubscriptionFields("A_FIXED_CLIENTID")
 
     "have a unique compound index based on `clientId`, `apiContext` and `apiVersion`" in {
-      await(repository.save(apiSubscription)) shouldBe true
+      await(repository.save(apiSubscription))
       collectionSize shouldBe 1
 
-      await(repository.save(apiSubscription.copy(fieldsId = UUID.randomUUID()))) shouldBe false
+      await(repository.save(apiSubscription.copy(fieldsId = UUID.randomUUID())))
       collectionSize shouldBe 1
     }
 
     "have a unique index based on `fieldsId`" in {
-      await(repository.save(apiSubscription)) shouldBe true
+      await(repository.save(apiSubscription))
       collectionSize shouldBe 1
 
-      val result = await(repository.saveByFieldsId(apiSubscription.copy(apiVersion = "2.2")))
-      result shouldBe false
+      await(repository.saveByFieldsId(apiSubscription.copy(apiVersion = "2.2")))
       collectionSize shouldBe 1
     }
 
     "have a non-unique index based on `clientId`" in {
-      await(repository.save(apiSubscription)) shouldBe true
+      await(repository.save(apiSubscription))
       collectionSize shouldBe 1
 
-      val result = await(repository.save(apiSubscription.copy(apiContext = fakeRawContext2, fieldsId = UUID.randomUUID())))
-      result shouldBe true
+      await(repository.save(apiSubscription.copy(apiContext = fakeRawContext2, fieldsId = UUID.randomUUID())))
       collectionSize shouldBe 2
     }
   }

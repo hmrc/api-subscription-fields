@@ -18,7 +18,7 @@ package unit.uk.gov.hmrc.apisubscriptionfields.service
 
 import org.scalamock.scalatest.MockFactory
 import uk.gov.hmrc.apisubscriptionfields.model._
-import uk.gov.hmrc.apisubscriptionfields.repository.FieldsDefinitionRepository
+import uk.gov.hmrc.apisubscriptionfields.repository.{FieldsDefinition, FieldsDefinitionRepository}
 import uk.gov.hmrc.apisubscriptionfields.service.FieldsDefinitionService
 import uk.gov.hmrc.play.test.UnitSpec
 import util.FieldsDefinitionTestData
@@ -76,9 +76,7 @@ class FieldsDefinitionServiceSpec extends UnitSpec with FieldsDefinitionTestData
 
   "upsert" should {
     "return false when updating an existing fields definition" in {
-      (mockFieldsDefinitionRepository save _) expects FakeFieldsDefinition returns false
-      (mockFieldsDefinitionRepository fetch(_: ApiContext, _: ApiVersion)).expects(FakeContext, FakeVersion)
-        .returns(Some(FakeFieldsDefinition))
+      (mockFieldsDefinitionRepository save _) expects FakeFieldsDefinition returns ((FakeFieldsDefinition, false))
 
       val result = await(service.upsert(FakeContext, FakeVersion, FakeFieldsDefinitions))
 
@@ -86,9 +84,7 @@ class FieldsDefinitionServiceSpec extends UnitSpec with FieldsDefinitionTestData
     }
 
     "return true when creating a new fields definition" in {
-      (mockFieldsDefinitionRepository save _) expects FakeFieldsDefinition returns true
-      (mockFieldsDefinitionRepository fetch(_: ApiContext, _: ApiVersion)).expects(FakeContext, FakeVersion)
-        .returns(None)
+      (mockFieldsDefinitionRepository save _) expects FakeFieldsDefinition returns ((FakeFieldsDefinition, true))
 
       val result = await(service.upsert(FakeContext, FakeVersion, FakeFieldsDefinitions))
 
@@ -96,8 +92,7 @@ class FieldsDefinitionServiceSpec extends UnitSpec with FieldsDefinitionTestData
     }
 
     "propagate the error" in {
-      (mockFieldsDefinitionRepository fetch(_: ApiContext, _: ApiVersion)).expects(*, *)
-        .returns(Future.failed(emulatedFailure))
+      (mockFieldsDefinitionRepository save(_: FieldsDefinition)) expects * returns Future.failed(emulatedFailure)
 
       val caught = intercept[EmulatedFailure] {
         await(service.upsert(FakeContext, FakeVersion, FakeFieldsDefinitions))

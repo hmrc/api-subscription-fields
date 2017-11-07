@@ -69,7 +69,7 @@ class FieldsDefinitionRepositorySpec extends UnitSpec
     "insert the record in the collection" in new Setup {
       collectionSize shouldBe 0
 
-      await(repository.save(fieldsDefinition)) shouldBe true
+      await(repository.save(fieldsDefinition)) shouldBe ((fieldsDefinition, true))
       collectionSize shouldBe 1
       await(repository.collection.find(selector(fieldsDefinition)).one[FieldsDefinition]) shouldBe Some(fieldsDefinition)
     }
@@ -77,11 +77,11 @@ class FieldsDefinitionRepositorySpec extends UnitSpec
     "update the record in the collection" in new Setup {
       collectionSize shouldBe 0
 
-      await(repository.save(fieldsDefinition)) shouldBe true
+      await(repository.save(fieldsDefinition)) shouldBe ((fieldsDefinition, true))
       collectionSize shouldBe 1
 
       val edited = fieldsDefinition.copy(fieldDefinitions = Seq.empty)
-      await(repository.save(edited)) shouldBe false
+      await(repository.save(edited)) shouldBe ((edited, false))
       collectionSize shouldBe 1
       await(repository.collection.find(selector(edited)).one[FieldsDefinition]) shouldBe Some(edited)
     }
@@ -105,7 +105,7 @@ class FieldsDefinitionRepositorySpec extends UnitSpec
 
   "fetch" should {
     "retrieve the correct record from the fields definition" in new Setup {
-      await(repository.save(fieldsDefinition)) shouldBe true
+      await(repository.save(fieldsDefinition))
       collectionSize shouldBe 1
 
       await(repository.fetch(FakeContext, FakeVersion)) shouldBe Some(fieldsDefinition)
@@ -113,8 +113,8 @@ class FieldsDefinitionRepositorySpec extends UnitSpec
 
     "return `None` when the `id` doesn't match any record in the collection" in {
       for (i <- 1 to 3) {
-        val result = await(repository.save(createFieldsDefinition(apiContext = uniqueApiContext)))
-        result shouldBe true
+        val fieldsDefinition = createFieldsDefinition(apiContext = uniqueApiContext)
+        await(repository.save(fieldsDefinition))
       }
       collectionSize shouldBe 3
 
@@ -126,7 +126,7 @@ class FieldsDefinitionRepositorySpec extends UnitSpec
     "remove the record with a specific fields definition" in {
       val fieldsDefinition = createFieldsDefinition
 
-      await(repository.save(fieldsDefinition)) shouldBe true
+      await(repository.save(fieldsDefinition))
       collectionSize shouldBe 1
 
       await(repository.delete(ApiContext(fieldsDefinition.apiContext), ApiVersion(fieldsDefinition.apiVersion))) shouldBe true
@@ -134,7 +134,7 @@ class FieldsDefinitionRepositorySpec extends UnitSpec
     }
 
     "not alter the collection for unknown fields definition" in {
-      await(repository.save(createFieldsDefinition)) shouldBe true
+      await(repository.save(createFieldsDefinition))
       collectionSize shouldBe 1
 
       await(repository.delete(ApiContext("DOES_NOT_EXIST"), FakeVersion)) shouldBe false
@@ -145,10 +145,10 @@ class FieldsDefinitionRepositorySpec extends UnitSpec
   "collection" should {
     "have a unique compound index based on `apiContext` and `apiVersion`" in new Setup {
 
-      await(repository.save(fieldsDefinition)) shouldBe true
+      await(repository.save(fieldsDefinition))
       collectionSize shouldBe 1
 
-      await(repository.save(fieldsDefinition)) shouldBe false
+      await(repository.save(fieldsDefinition))
       collectionSize shouldBe 1
     }
   }

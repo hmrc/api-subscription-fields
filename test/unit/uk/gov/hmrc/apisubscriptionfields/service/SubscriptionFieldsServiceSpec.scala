@@ -112,7 +112,7 @@ class SubscriptionFieldsServiceSpec extends UnitSpec with SubscriptionFieldsTest
 
   "upsert" should {
     "return false when updating an existing api subscription fields" in {
-      (mockSubscriptionFieldsIdRepository save _) expects FakeApiSubscription returns false
+      (mockSubscriptionFieldsIdRepository save _) expects FakeApiSubscription returns ((FakeApiSubscription, false))
       (mockSubscriptionFieldsIdRepository fetch(_: ClientId, _: ApiContext, _: ApiVersion))
         .expects(FakeClientId, FakeContext, FakeVersion).returns(Some(FakeApiSubscription))
 
@@ -122,7 +122,7 @@ class SubscriptionFieldsServiceSpec extends UnitSpec with SubscriptionFieldsTest
     }
 
     "return true when creating a new api subscription fields" in {
-      (mockSubscriptionFieldsIdRepository save _) expects FakeApiSubscription returns true
+      (mockSubscriptionFieldsIdRepository save _) expects FakeApiSubscription returns ((FakeApiSubscription, true))
       (mockSubscriptionFieldsIdRepository fetch(_: ClientId, _: ApiContext, _: ApiVersion))
         .expects(FakeClientId, FakeContext, FakeVersion).returns(None)
 

@@ -32,8 +32,7 @@ class UUIDCreator {
 }
 
 @Singleton
-class SubscriptionFieldsService @Inject()(repository: SubscriptionFieldsRepository,
-                                          uuidCreator: UUIDCreator) {
+class SubscriptionFieldsService @Inject()(repository: SubscriptionFieldsRepository, uuidCreator: UUIDCreator) {
 
   def upsert(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion, subscriptionFields: Fields): Future[(SubscriptionFieldsResponse, Boolean)] = {
 

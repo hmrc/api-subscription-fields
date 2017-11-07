@@ -32,7 +32,7 @@ import scala.concurrent.Future
 @ImplementedBy(classOf[FieldsDefinitionMongoRepository])
 trait FieldsDefinitionRepository {
 
-  def save(fieldsDefinition: FieldsDefinition): Future[Boolean]
+  def save(fieldsDefinition: FieldsDefinition): Future[(FieldsDefinition, Boolean)]
 
   def fetch(apiContext: ApiContext, apiVersion: ApiVersion): Future[Option[FieldsDefinition]]
   def fetchAll(): Future[List[FieldsDefinition]]
@@ -61,13 +61,12 @@ class FieldsDefinitionMongoRepository @Inject()(mongoDbProvider: MongoDbProvider
     )
   )
 
-  override def save(fieldsDefinition: FieldsDefinition): Future[Boolean] = {
+  override def save(fieldsDefinition: FieldsDefinition): Future[(FieldsDefinition, Boolean)] = {
     save(fieldsDefinition, selectorForFieldsDefinition(fieldsDefinition))
   }
 
   override def fetch(apiContext: ApiContext, apiVersion: ApiVersion): Future[Option[FieldsDefinition]] = {
-    val selector = selectorForFieldsDefinition(apiContext, apiVersion)
-    getOne(selector)
+    getOne(selectorForFieldsDefinition(apiContext, apiVersion))
   }
 
   override def fetchAll(): Future[List[FieldsDefinition]] = {
@@ -75,8 +74,7 @@ class FieldsDefinitionMongoRepository @Inject()(mongoDbProvider: MongoDbProvider
   }
 
   override def delete(apiContext: ApiContext, apiVersion: ApiVersion): Future[Boolean] = {
-    val selector = selectorForFieldsDefinition(apiContext, apiVersion)
-    deleteOne(selector)
+    deleteOne(selectorForFieldsDefinition(apiContext, apiVersion))
   }
 
   private def selectorForFieldsDefinition(apiContext: ApiContext, apiVersion: ApiVersion): JsObject = {

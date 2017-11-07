@@ -32,7 +32,7 @@ import scala.concurrent.Future
 @ImplementedBy(classOf[SubscriptionFieldsMongoRepository])
 trait SubscriptionFieldsRepository {
 
-  def save(subscription: SubscriptionFields): Future[Boolean]
+  def save(subscription: SubscriptionFields): Future[(SubscriptionFields, Boolean)]
 
   def fetch(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion): Future[Option[SubscriptionFields]]
   def fetchByFieldsId(fieldsId: SubscriptionFieldsId): Future[Option[SubscriptionFields]]
@@ -75,23 +75,20 @@ class SubscriptionFieldsMongoRepository @Inject()(mongoDbProvider: MongoDbProvid
     )
   )
 
-  override def save(subscription: SubscriptionFields): Future[Boolean] = {
+  override def save(subscription: SubscriptionFields): Future[(SubscriptionFields, Boolean)] = {
     save(subscription, selectorForSubscriptionFields(subscription))
   }
 
   override def fetch(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion): Future[Option[SubscriptionFields]] = {
-    val selector = selectorForSubscriptionFields(clientId.value, apiContext.value, apiVersion.value)
-    getOne(selector)
+    getOne(selectorForSubscriptionFields(clientId.value, apiContext.value, apiVersion.value))
   }
 
   override def fetchByFieldsId(fieldsId: SubscriptionFieldsId): Future[Option[SubscriptionFields]] = {
-    val selector = Json.obj("fieldsId" -> fieldsId.value)
-    getOne(selector)
+    getOne(Json.obj("fieldsId" -> fieldsId.value))
   }
 
   override def fetchByClientId(clientId: ClientId): Future[List[SubscriptionFields]] = {
-    val selector = Json.obj("clientId" -> clientId.value)
-    getMany(selector)
+    getMany(Json.obj("clientId" -> clientId.value))
   }
 
   override def fetchAll(): Future[List[SubscriptionFields]] = {
@@ -99,8 +96,7 @@ class SubscriptionFieldsMongoRepository @Inject()(mongoDbProvider: MongoDbProvid
   }
 
   override def delete(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion): Future[Boolean] = {
-    val selector = selectorForSubscriptionFields(clientId.value, apiContext.value, apiVersion.value)
-    deleteOne(selector)
+    deleteOne(selectorForSubscriptionFields(clientId.value, apiContext.value, apiVersion.value))
   }
 
   private def selectorForSubscriptionFields(clientId: String, apiContext: String, apiVersion: String): JsObject = {

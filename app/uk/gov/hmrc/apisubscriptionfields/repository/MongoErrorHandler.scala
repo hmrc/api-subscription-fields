@@ -18,6 +18,7 @@ package uk.gov.hmrc.apisubscriptionfields.repository
 
 import play.api.Logger
 import reactivemongo.api.commands.{UpdateWriteResult, WriteResult}
+import uk.gov.hmrc.apisubscriptionfields.model.IsInsert
 
 trait MongoErrorHandler {
 
@@ -25,7 +26,7 @@ trait MongoErrorHandler {
     handleError(result, databaseAltered, exceptionMsg)
   }
 
-  def handleSaveError(updateWriteResult: UpdateWriteResult, exceptionMsg: => String): Boolean = {
+  def handleSaveError(updateWriteResult: UpdateWriteResult, exceptionMsg: => String): IsInsert = {
 
     def handleUpsertError(result: WriteResult) =
       if (databaseAltered(result))

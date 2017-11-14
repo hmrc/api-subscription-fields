@@ -17,10 +17,11 @@
 package uk.gov.hmrc.apisubscriptionfields.repository
 
 import play.api.Logger
-import play.api.libs.json.{JsObject, OWrites, Reads}
+import play.api.libs.json.{JsObject, OFormat, OWrites, Reads}
 import reactivemongo.api.Cursor
 import reactivemongo.play.json.ImplicitBSONHandlers._
 import reactivemongo.play.json.collection.JSONCollection
+import uk.gov.hmrc.apisubscriptionfields.model.IsInsert
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -29,7 +30,34 @@ trait MongoCrudHelper[T] extends MongoIndexCreator with MongoErrorHandler {
 
   protected val mongoCollection: JSONCollection
 
-  def save(entity: T, selector: JsObject)(implicit w: OWrites[T]): Future[(T, Boolean)] = {
+  def saveAtomic(selector: JsObject, updateOperations: JsObject)(implicit w: OFormat[T]): Future[(T, IsInsert)] = {
+    Logger.debug(s"[saveAtomic] selector: $selector updateOperations: $updateOperations")
+
+    val updateOp = mongoCollection.updateModifier(
+      update = updateOperations,
+      fetchNewObject = true,
+      upsert = true
+    )
+
+    mongoCollection.findAndModify(selector, updateOp).map { findAndModifyResult =>
+      val maybeTuple: Option[(T, IsInsert)] = for {
+        value <- findAndModifyResult.value
+        updateLastError <- findAndModifyResult.lastError
+      } yield (value.as[T], !updateLastError.updatedExisting)
+
+      maybeTuple.fold[(T, IsInsert)] {
+        handleError(selector, findAndModifyResult)
+      } (tuple => tuple)
+    }
+  }
+
+  private def handleError(selector: JsObject, findAndModifyResult: mongoCollection.BatchCommands.FindAndModifyCommand.FindAndModifyResult) = {
+    val error = s"Error upserting database for $selector."
+    Logger.error(s"$error lastError: ${findAndModifyResult.lastError}")
+    throw new RuntimeException(error)
+  }
+
+  def save(entity: T, selector: JsObject)(implicit w: OWrites[T]): Future[(T, IsInsert)] = {
     Logger.debug(s"[save] entity: $entity selector: $selector")
     mongoCollection.update(selector, entity, upsert = true).map {
       updateWriteResult => (entity, handleSaveError(updateWriteResult, s"Could not save entity: $entity"))

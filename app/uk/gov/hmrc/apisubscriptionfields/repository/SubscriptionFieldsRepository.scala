@@ -19,9 +19,11 @@ package uk.gov.hmrc.apisubscriptionfields.repository
 import javax.inject.{Inject, Singleton}
 
 import com.google.inject.ImplementedBy
+import play.api.Logger
 import play.api.libs.json._
 import reactivemongo.api.indexes.IndexType
 import reactivemongo.bson.BSONObjectID
+import reactivemongo.play.json._
 import reactivemongo.play.json.collection.JSONCollection
 import uk.gov.hmrc.apisubscriptionfields.model._
 import uk.gov.hmrc.mongo.ReactiveRepository
@@ -32,7 +34,7 @@ import scala.concurrent.Future
 @ImplementedBy(classOf[SubscriptionFieldsMongoRepository])
 trait SubscriptionFieldsRepository {
 
-  def save(subscription: SubscriptionFields): Future[(SubscriptionFields, Boolean)]
+  def saveAtomic(subscription: SubscriptionFields): Future[(SubscriptionFields, IsInsert)]
 
   def fetch(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion): Future[Option[SubscriptionFields]]
   def fetchByFieldsId(fieldsId: SubscriptionFieldsId): Future[Option[SubscriptionFields]]
@@ -75,8 +77,18 @@ class SubscriptionFieldsMongoRepository @Inject()(mongoDbProvider: MongoDbProvid
     )
   )
 
-  override def save(subscription: SubscriptionFields): Future[(SubscriptionFields, Boolean)] = {
-    save(subscription, selectorForSubscriptionFields(subscription))
+  override def saveAtomic(subscription: SubscriptionFields): Future[(SubscriptionFields, IsInsert)] = {
+
+    Logger.debug(s"[saveAtomic] entity: $subscription")
+
+    // Note that $setOnInsert operation will happen for inserts only, it is ignored for updates.
+    saveAtomic(
+      selector = selectorForSubscriptionFields(subscription),
+      updateOperations = Json.obj(
+        "$setOnInsert" -> Json.obj("fieldsId" -> subscription.fieldsId.toString),
+        "$set" -> Json.obj("fields" -> Json.toJson(subscription.fields))
+      )
+    )
   }
 
   override def fetch(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion): Future[Option[SubscriptionFields]] = {

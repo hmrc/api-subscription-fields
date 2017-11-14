@@ -20,4 +20,6 @@ package object model {
 
   type Fields = Map[String, String]
 
+  type IsInsert = Boolean
+
 }

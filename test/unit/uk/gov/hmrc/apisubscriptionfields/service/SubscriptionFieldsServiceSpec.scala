@@ -112,9 +112,7 @@ class SubscriptionFieldsServiceSpec extends UnitSpec with SubscriptionFieldsTest
 
   "upsert" should {
     "return false when updating an existing api subscription fields" in {
-      (mockSubscriptionFieldsIdRepository save _) expects FakeApiSubscription returns ((FakeApiSubscription, false))
-      (mockSubscriptionFieldsIdRepository fetch(_: ClientId, _: ApiContext, _: ApiVersion))
-        .expects(FakeClientId, FakeContext, FakeVersion).returns(Some(FakeApiSubscription))
+      (mockSubscriptionFieldsIdRepository saveAtomic _) expects FakeApiSubscription returns ((FakeApiSubscription, false))
 
       val result = await(service.upsert(FakeClientId, FakeContext, FakeVersion, subscriptionFields))
 
@@ -122,9 +120,7 @@ class SubscriptionFieldsServiceSpec extends UnitSpec with SubscriptionFieldsTest
     }
 
     "return true when creating a new api subscription fields" in {
-      (mockSubscriptionFieldsIdRepository save _) expects FakeApiSubscription returns ((FakeApiSubscription, true))
-      (mockSubscriptionFieldsIdRepository fetch(_: ClientId, _: ApiContext, _: ApiVersion))
-        .expects(FakeClientId, FakeContext, FakeVersion).returns(None)
+      (mockSubscriptionFieldsIdRepository saveAtomic _) expects FakeApiSubscription returns ((FakeApiSubscription, true))
 
       val result = await(service.upsert(FakeClientId, FakeContext, FakeVersion, subscriptionFields))
 
@@ -132,8 +128,7 @@ class SubscriptionFieldsServiceSpec extends UnitSpec with SubscriptionFieldsTest
     }
 
     "propagate the error" in {
-      (mockSubscriptionFieldsIdRepository fetch(_: ClientId, _: ApiContext, _: ApiVersion))
-        .expects(*, *, *).returns(Future.failed(emulatedFailure))
+      (mockSubscriptionFieldsIdRepository saveAtomic _) expects FakeApiSubscription returns Future.failed(emulatedFailure)
 
       val caught = intercept[EmulatedFailure] {
         await(service.upsert(FakeClientId, FakeContext, FakeVersion, subscriptionFields))

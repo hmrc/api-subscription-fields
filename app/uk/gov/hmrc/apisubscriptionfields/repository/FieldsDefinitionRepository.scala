@@ -23,7 +23,7 @@ import play.api.libs.json._
 import reactivemongo.api.indexes.IndexType
 import reactivemongo.bson.BSONObjectID
 import reactivemongo.play.json.collection.JSONCollection
-import uk.gov.hmrc.apisubscriptionfields.model.{ApiContext, ApiVersion}
+import uk.gov.hmrc.apisubscriptionfields.model.{ApiContext, ApiVersion, IsInsert}
 import uk.gov.hmrc.mongo.ReactiveRepository
 import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
 
@@ -32,7 +32,7 @@ import scala.concurrent.Future
 @ImplementedBy(classOf[FieldsDefinitionMongoRepository])
 trait FieldsDefinitionRepository {
 
-  def save(fieldsDefinition: FieldsDefinition): Future[(FieldsDefinition, Boolean)]
+  def save(fieldsDefinition: FieldsDefinition): Future[(FieldsDefinition, IsInsert)]
 
   def fetch(apiContext: ApiContext, apiVersion: ApiVersion): Future[Option[FieldsDefinition]]
   def fetchAll(): Future[List[FieldsDefinition]]
@@ -61,7 +61,7 @@ class FieldsDefinitionMongoRepository @Inject()(mongoDbProvider: MongoDbProvider
     )
   )
 
-  override def save(fieldsDefinition: FieldsDefinition): Future[(FieldsDefinition, Boolean)] = {
+  override def save(fieldsDefinition: FieldsDefinition): Future[(FieldsDefinition, IsInsert)] = {
     save(fieldsDefinition, selectorForFieldsDefinition(fieldsDefinition))
   }
 

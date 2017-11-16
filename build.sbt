@@ -52,10 +52,8 @@ lazy val plugins: Seq[Plugins] = Seq.empty
 lazy val playSettings: Seq[Setting[_]] = Seq.empty
 
 lazy val AcceptanceTest = config("acceptance") extend Test
-lazy val AsfIntegrationTest = config("it") extend Test
 
-val testConfig = Seq(AcceptanceTest, AsfIntegrationTest, Test)
-
+val testConfig = Seq(AcceptanceTest, Test)
 
 lazy val microservice = Project(appName, file("."))
   .enablePlugins(Seq(PlayScala, SbtAutoBuildPlugin, SbtGitVersioning, SbtDistributablesPlugin) ++ plugins: _*)
@@ -65,7 +63,6 @@ lazy val microservice = Project(appName, file("."))
   .settings(publishingSettings: _*)
   .settings(defaultSettings(): _*)
   .settings(unitTestSettings: _*)
-  .settings(integrationTestSettings: _*)
   .settings(acceptanceTestSettings: _*)
   .settings(
     libraryDependencies ++= appDependencies,
@@ -80,16 +77,6 @@ lazy val unitTestSettings =
       testOptions in Test := Seq(Tests.Filter(onPackageName("unit"))),
       unmanagedSourceDirectories in Test := Seq((baseDirectory in Test).value  / "test"),
       addTestReportOption(Test, "test-reports")
-    )
-
-lazy val integrationTestSettings =
-  inConfig(AsfIntegrationTest)(Defaults.testTasks) ++
-    Seq(
-      testOptions in AsfIntegrationTest := Seq(Tests.Filter(onPackageName("integration"))),
-      fork in AsfIntegrationTest := false,
-      parallelExecution in AsfIntegrationTest := false,
-      addTestReportOption(AsfIntegrationTest, "int-test-reports"),
-      testGrouping in AsfIntegrationTest := oneForkedJvmPerTest((definedTests in Test).value)
     )
 
 lazy val acceptanceTestSettings =

@@ -31,14 +31,14 @@ val compile = Seq(
   "uk.gov.hmrc" %% "microservice-bootstrap" % "6.10.0"
 )
 
-def test(scope: String = "test,it") = Seq(
+def test(scope: String = "test,acceptance") = Seq(
   "uk.gov.hmrc" %% "hmrctest" % "3.0.0" % scope,
   "uk.gov.hmrc" %% "reactivemongo-test" % "3.0.0" % scope,
   "org.scalamock" %% "scalamock-scalatest-support" % "3.6.0" % scope,
   "org.scalatest" %% "scalatest" % "3.0.4" % scope,
   "org.scalatestplus.play" %% "scalatestplus-play" % "2.0.1" % scope,
   "org.pegdown" % "pegdown" % "1.6.0" % scope,
-  "com.github.tomakehurst" % "wiremock" % "2.10.1" % scope,
+  "com.github.tomakehurst" % "wiremock" % "2.11.0" % scope,
   "com.typesafe.play" %% "play-test" % play.core.PlayVersion.current % scope
 )
 

@@ -70,7 +70,6 @@ lazy val microservice = Project(appName, file("."))
   )
   .settings(scoverageSettings)
 
-
 lazy val unitTestSettings =
   inConfig(Test)(Defaults.testTasks) ++
     Seq(
@@ -103,10 +102,8 @@ def oneForkedJvmPerTest(tests: Seq[TestDefinition]) =
 
 def forkedJvmPerTestConfig(tests: Seq[TestDefinition], packages: String*): Seq[Group] =
   tests.groupBy(_.name.takeWhile(_ != '.')).filter(packageAndTests => packages contains packageAndTests._1) map {
-    case (packg, theTests) =>
-      Group(packg, theTests, SubProcess(ForkOptions()))
+    case (packg, theTests) => Group(packg, theTests, SubProcess(ForkOptions()))
   } toSeq
-
 
 def onPackageName(rootPackage: String): (String => Boolean) = {
   testName => testName startsWith rootPackage

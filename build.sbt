@@ -26,9 +26,10 @@ import uk.gov.hmrc.versioning.SbtGitVersioning
 import scala.language.postfixOps
 
 val compile = Seq(
-  "uk.gov.hmrc" %% "play-reactivemongo" % "6.1.0",
   ws,
-  "uk.gov.hmrc" %% "microservice-bootstrap" % "6.13.0"
+  "uk.gov.hmrc" %% "play-reactivemongo" % "6.1.0",
+  "uk.gov.hmrc" %% "microservice-bootstrap" % "6.13.0",
+  "uk.gov.hmrc" %% "play-hmrc-api" % "2.0.0"
 )
 
 def test(scope: String = "test,acceptance") = Seq(
@@ -74,15 +75,21 @@ lazy val microservice = Project(appName, file("."))
 lazy val unitTestSettings =
   inConfig(Test)(Defaults.testTasks) ++
     Seq(
-      testOptions in Test := Seq(Tests.Filter(onPackageName("unit"))),
-      unmanagedSourceDirectories in Test := Seq((baseDirectory in Test).value  / "test"),
+      unmanagedSourceDirectories in Test := Seq(
+        baseDirectory.value  / "test" / "unit",
+        baseDirectory.value / "test" / "util"
+      ),
+      fork in Test := false,
       addTestReportOption(Test, "test-reports")
     )
 
 lazy val acceptanceTestSettings =
   inConfig(AcceptanceTest)(Defaults.testTasks) ++
     Seq(
-      testOptions in AcceptanceTest := Seq(Tests.Filter(onPackageName("acceptance"))),
+      unmanagedSourceDirectories in AcceptanceTest := Seq(
+        baseDirectory.value  / "test" / "acceptance",
+        baseDirectory.value / "test" / "util"
+      ),
       fork in AcceptanceTest := false,
       parallelExecution in AcceptanceTest := false,
       addTestReportOption(AcceptanceTest, "acceptance-reports")

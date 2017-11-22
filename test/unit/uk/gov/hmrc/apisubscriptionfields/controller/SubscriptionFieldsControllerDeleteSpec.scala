@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package unit.uk.gov.hmrc.apisubscriptionfields.controller
+package uk.gov.hmrc.apisubscriptionfields.controller
 
 import org.scalamock.scalatest.MockFactory
 import play.api.libs.json.{JsDefined, JsString}

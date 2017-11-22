@@ -14,11 +14,16 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.apisubscriptionfields.config
-
+import com.google.inject.AbstractModule
+import com.typesafe.config.{Config, ConfigFactory}
+import play.api.{Configuration, Environment}
+import uk.gov.hmrc.apisubscriptionfields.config.MicroserviceAuditConnector
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
-import uk.gov.hmrc.play.microservice.config.LoadAuditingConfig
 
-object MicroserviceAuditConnector extends AuditConnector {
-  override lazy val auditingConfig = LoadAuditingConfig(s"auditing")
+class Module(environment: Environment, configuration: Configuration) extends AbstractModule {
+
+  override def configure = {
+    bind(classOf[Config]).toInstance(ConfigFactory.load())
+    bind(classOf[AuditConnector]).toInstance(MicroserviceAuditConnector)
+  }
 }

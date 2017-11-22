@@ -27,8 +27,8 @@ import scala.language.postfixOps
 
 val compile = Seq(
   ws,
-  "uk.gov.hmrc" %% "play-reactivemongo" % "6.1.0",
   "uk.gov.hmrc" %% "microservice-bootstrap" % "6.13.0",
+  "uk.gov.hmrc" %% "play-reactivemongo" % "6.1.0",
   "uk.gov.hmrc" %% "play-hmrc-api" % "2.0.0"
 )
 

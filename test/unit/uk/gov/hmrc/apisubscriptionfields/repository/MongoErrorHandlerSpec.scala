@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package unit.uk.gov.hmrc.apisubscriptionfields.repository
+package uk.gov.hmrc.apisubscriptionfields.repository
 
 import reactivemongo.api.commands._
 import reactivemongo.bson.BSONInteger

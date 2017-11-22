@@ -20,7 +20,6 @@ import org.scalamock.scalatest.MockFactory
 import play.api.libs.json.{JsDefined, JsString}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import uk.gov.hmrc.apisubscriptionfields.controller.SubscriptionFieldsController
 import uk.gov.hmrc.apisubscriptionfields.model.JsonFormatters
 import uk.gov.hmrc.apisubscriptionfields.service.SubscriptionFieldsService
 import uk.gov.hmrc.play.test.UnitSpec

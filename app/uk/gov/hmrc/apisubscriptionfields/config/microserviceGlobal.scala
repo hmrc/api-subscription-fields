@@ -32,6 +32,9 @@ import uk.gov.hmrc.play.microservice.config.LoadAuditingConfig
 import uk.gov.hmrc.play.microservice.filters.{AuditFilter, LoggingFilter, MicroserviceFilterSupport}
 
 object MicroserviceGlobal extends DefaultMicroserviceGlobal with RunMode with ServiceLocatorRegistration with ServiceLocatorConfig {
+  lazy val injector = Play.current.injector
+  lazy val appContext = injector.instanceOf[AppContext]
+
   override lazy val auditConnector = MicroserviceAuditConnector
 
   override def microserviceMetricsConfig(implicit app: Application): Option[Configuration] = app.configuration.getConfig("microservice.metrics")
@@ -42,6 +45,7 @@ object MicroserviceGlobal extends DefaultMicroserviceGlobal with RunMode with Se
 
   override val hc = HeaderCarrier()
   override val slConnector = ServiceLocatorConnector(WSHttp)
+  override lazy val registrationEnabled = appContext.publishApiDefinition
 }
 
 object MicroserviceAuditConnector extends AuditConnector with RunMode {

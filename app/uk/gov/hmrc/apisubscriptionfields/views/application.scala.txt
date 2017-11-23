@@ -17,19 +17,34 @@ uses:
 /@apiContext:
   /definition:
     /context:
-      /{applicationContext}:
+      /{apiContext}:
+        uriParameters:
+          apiContext:
+            type: string
         /version:
           /{apiVersion}:
+            uriParameters:
+              apiVersion:
+                type: string
             get:
               is: [headers.acceptHeader]
               securedBy: [ sec.x-application ]
   /field:
     /application:
       /{clientId}:
+        uriParameters:
+          clientId:
+            type: string
         /context:
-          /{applicationContext}:
+          /{apiContext}:
+            uriParameters:
+              apiContext:
+                type: string
             /version:
               /{apiVersion}:
+                uriParameters:
+                  apiVersion:
+                    type: string
                 get:
                   is: [headers.acceptHeader]
                   securedBy: [ sec.x-application ]

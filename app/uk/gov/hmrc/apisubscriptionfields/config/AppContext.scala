@@ -22,17 +22,7 @@ import com.typesafe.config.Config
 import uk.gov.hmrc.play.config.ServicesConfig
 
 class AppContext @Inject()(val config: Config) extends ServicesConfig {
-
-  lazy val isExternalTestEnvironment: Boolean = runModeConfiguration.getBoolean("isExternalTestEnvironment").getOrElse(false)
-  lazy val devHubTitle: String = if (isExternalTestEnvironment) "Developer Sandbox" else "Developer Hub"
-
   lazy val publishApiDefinition = runModeConfiguration.getBoolean("publishApiDefinition").getOrElse(false)
   lazy val apiContext = runModeConfiguration.getString("api.context").getOrElse("api-subscription-fields")
   lazy val access = runModeConfiguration.getConfig("api.access")
-
-  override def toString() = {
-    "AppContext{" + (
-      Seq(s"isExternalTestEnvironment=$isExternalTestEnvironment"
-      ) mkString ",") +"}"
-  }
 }

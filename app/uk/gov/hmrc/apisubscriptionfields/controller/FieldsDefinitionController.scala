@@ -48,7 +48,7 @@ class FieldsDefinitionController @Inject() (service: FieldsDefinitionService) ex
   }
 
   def getAllFieldsDefinitions: Action[AnyContent] = Action.async { implicit request =>
-    Logger.debug(s"[getAllFieldsDefinitions]")
+    Logger.debug("[getAllFieldsDefinitions]")
     service.getAll map (defs => Ok(Json.toJson(defs))) recover recovery
   }
 

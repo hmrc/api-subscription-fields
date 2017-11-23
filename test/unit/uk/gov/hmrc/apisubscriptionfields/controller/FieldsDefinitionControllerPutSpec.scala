@@ -58,6 +58,13 @@ class FieldsDefinitionControllerPutSpec extends UnitSpec
         status(result) shouldBe OK
       }
     }
+
+    "error when request is invalid" in {
+      val json = Json.parse("{}")
+      testSubmitResult(mkRequest(json)) { result =>
+        status(result) shouldBe UNPROCESSABLE_ENTITY
+      }
+    }
   }
 
   private def testSubmitResult(request: Request[JsValue])(test: Future[Result] => Unit) {

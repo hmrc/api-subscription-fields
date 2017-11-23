@@ -1,0 +1,19 @@
+@import uk.gov.hmrc.apisubscriptionfields.model.APIAccess
+@import uk.gov.hmrc.apisubscriptionfields.model.APIDefinition._
+@import play.api.libs.json.Json
+@(apiContext: String, access: APIAccess)
+{
+  "scopes":[],
+  "api": {
+    "name": "API Subscription Fields",
+    "description": "Internal API for use by the developer hub",
+    "context": "@apiContext",
+    "versions": [
+      {
+        "version": "1.0",
+        "status": "PUBLISHED",
+        "access": @Json.toJson(access)
+      }
+    ]
+  }
+}

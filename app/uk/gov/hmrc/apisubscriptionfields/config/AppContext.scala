@@ -16,9 +16,13 @@
 
 package uk.gov.hmrc.apisubscriptionfields.config
 
-import uk.gov.hmrc.play.audit.http.connector.AuditConnector
-import uk.gov.hmrc.play.microservice.config.LoadAuditingConfig
+import javax.inject.Inject
 
-object MicroserviceAuditConnector extends AuditConnector {
-  override lazy val auditingConfig = LoadAuditingConfig(s"auditing")
+import com.typesafe.config.Config
+import uk.gov.hmrc.play.config.ServicesConfig
+
+class AppContext @Inject()(val config: Config) extends ServicesConfig {
+  lazy val publishApiDefinition = runModeConfiguration.getBoolean("publishApiDefinition").getOrElse(false)
+  lazy val apiContext = runModeConfiguration.getString("api.context").getOrElse("api-subscription-fields")
+  lazy val access = runModeConfiguration.getConfig("api.access")
 }

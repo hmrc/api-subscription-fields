@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-package acceptance
-
 import java.util.UUID
 
 import org.scalatest._

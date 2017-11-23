@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package unit.uk.gov.hmrc.apisubscriptionfields.service
+package uk.gov.hmrc.apisubscriptionfields.service
 
 import java.util.UUID
 

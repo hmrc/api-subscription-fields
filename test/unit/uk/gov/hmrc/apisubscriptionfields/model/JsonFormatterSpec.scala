@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 HM Revenue & Customs
+ * Copyright 2018 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,10 +38,9 @@ class JsonFormatterSpec extends WordSpec
   private def objectAsJsonString[A](a:A)(implicit t: Writes[A]) = Json.asciiStringify(Json.toJson(a))
 
   private val subscriptionFieldJson = s"""{"clientId":"$fakeRawClientId","apiContext":"$fakeRawContext","apiVersion":"$fakeRawVersion","fieldsId":"$FakeRawFieldsId","fields":{"f1":"v1"}}"""
-  private val fieldDefinitionJson = s"""{"apiContext":"$fakeRawContext","apiVersion":"$fakeRawVersion","fieldDefinitions":[{"name":"name1","description":"desc1","type":"URL"}]}"""
+  private val fieldDefinitionJson = s"""{"apiContext":"$fakeRawContext","apiVersion":"$fakeRawVersion","fieldDefinitions":[{"name":"name1","description":"desc1","hint":"hint1","type":"URL"}]}"""
 
   "SubscriptionFieldsResponse" should {
-
     "marshal json" in {
       objectAsJsonString(subscriptionFieldsResponse) shouldBe subscriptionFieldJson
     }
@@ -52,11 +51,9 @@ class JsonFormatterSpec extends WordSpec
         case JsError(e) => fail(s"Should have parsed json text but got $e")
       }
     }
-
   }
 
   "BulkSubscriptionFieldsResponse" should {
-
     val json = s"""{"subscriptions":[$subscriptionFieldJson]}"""
 
     "marshal json" in {
@@ -69,11 +66,9 @@ class JsonFormatterSpec extends WordSpec
         case JsError(e) => fail(s"Should have parsed json text but got $e")
       }
     }
-
   }
 
   "FieldsDefinitionResponse" should {
-
     "marshal json" in {
       objectAsJsonString(fakeFieldsDefinitionResponse) shouldBe fieldDefinitionJson
     }
@@ -84,11 +79,9 @@ class JsonFormatterSpec extends WordSpec
         case JsError(e) => fail(s"Should have parsed json text but got $e")
       }
     }
-
   }
 
   "BulkFieldsDefinitionsResponse" should {
-
     val json = s"""{"apis":[$fieldDefinitionJson]}"""
 
     "marshal json" in {
@@ -101,7 +94,5 @@ class JsonFormatterSpec extends WordSpec
         case JsError(e) => fail(s"Should have parsed json text but got $e")
       }
     }
-
   }
-
 }

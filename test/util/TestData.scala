@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 HM Revenue & Customs
+ * Copyright 2018 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,9 +64,9 @@ trait SubscriptionFieldsTestData extends TestData {
 }
 
 trait FieldsDefinitionTestData extends TestData {
-  final val FakeFieldDefinitionUrl = FieldDefinition("name1", "desc1", FieldDefinitionType.URL)
-  final val FakeFieldDefinitionString = FieldDefinition("name2", "desc2", FieldDefinitionType.STRING)
-  final val FakeFieldDefinitionSecureToken = FieldDefinition("name3", "desc3", FieldDefinitionType.SECURE_TOKEN)
+  final val FakeFieldDefinitionUrl = FieldDefinition("name1", "desc1", "hint1", FieldDefinitionType.URL)
+  final val FakeFieldDefinitionString = FieldDefinition("name2", "desc2", "hint2", FieldDefinitionType.STRING)
+  final val FakeFieldDefinitionSecureToken = FieldDefinition("name3", "desc3", "hint3", FieldDefinitionType.SECURE_TOKEN)
   final val FakeFieldsDefinitions = Seq(FakeFieldDefinitionUrl, FakeFieldDefinitionString, FakeFieldDefinitionSecureToken)
   final val FakeFieldsDefinition = FieldsDefinition(fakeRawContext, fakeRawVersion, FakeFieldsDefinitions)
   final val FakeFieldsDefinitionResponse = FieldsDefinitionResponse(fakeRawContext, fakeRawVersion, FakeFieldsDefinition.fieldDefinitions)

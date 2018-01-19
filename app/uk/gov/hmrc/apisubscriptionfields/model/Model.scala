@@ -36,4 +36,4 @@ object FieldDefinitionType extends Enumeration {
   val STRING = Value("STRING")
 }
 
-case class FieldDefinition(name: String, description: String, hint: String, `type`: FieldDefinitionType)
+case class FieldDefinition(name: String, description: String, hint: String = "", `type`: FieldDefinitionType)

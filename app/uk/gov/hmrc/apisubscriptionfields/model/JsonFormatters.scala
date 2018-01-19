@@ -19,6 +19,9 @@ package uk.gov.hmrc.apisubscriptionfields.model
 import java.util.UUID
 
 import play.api.libs.json._
+import play.api.libs.json.Reads._
+import play.api.libs.functional.syntax._
+import uk.gov.hmrc.apisubscriptionfields.model.FieldDefinitionType.FieldDefinitionType
 
 trait SharedJsonFormatters {
   implicit val SubscriptionFieldsIdJF = new Format[SubscriptionFieldsId] {
@@ -34,7 +37,15 @@ trait SharedJsonFormatters {
 trait JsonFormatters extends SharedJsonFormatters {
 
   implicit val FieldDefinitionTypeReads = Reads.enumNameReads(FieldDefinitionType)
-  implicit val FieldDefinitionJF = Json.format[FieldDefinition]
+
+  val fieldDefinitionReads: Reads[FieldDefinition] = (
+    (JsPath \ "name").read[String] and
+      (JsPath \ "description").read[String] and
+      ((JsPath \ "hint").read[String] or Reads.pure("")) and
+      (JsPath \ "type").read[FieldDefinitionType]
+  )(FieldDefinition.apply _)
+  val fieldDefinitionWrites = Json.writes[FieldDefinition]
+  implicit val FieldDefinitionJF = Format(fieldDefinitionReads, fieldDefinitionWrites)
 
   implicit val FieldsDefinitionRequestJF = Json.format[FieldsDefinitionRequest]
   implicit val SubscriptionFieldsRequestJF = Json.format[SubscriptionFieldsRequest]

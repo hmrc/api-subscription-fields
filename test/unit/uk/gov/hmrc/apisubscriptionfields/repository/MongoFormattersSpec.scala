@@ -22,12 +22,12 @@ import uk.gov.hmrc.play.test.UnitSpec
 
 class MongoFormattersSpec extends UnitSpec with JsonFormatters {
   "Field definition formatter" should {
-    "Correct unmarshall a well formed field definition" in {
+    "Correctly unmarshall a JSON field definition with all the necessary fields" in {
       val fieldDefinition = FieldDefinition("name", "description", "hint", FieldDefinitionType.STRING)
       Json.fromJson[FieldDefinition](Json.parse("""{ "name" : "name", "description" : "description", "hint": "hint", "type" : "STRING" }""")) shouldBe JsSuccess(fieldDefinition)
     }
 
-    "Correct unmarshall a badly formed field definition" in {
+    "Correctly unmarshall a JSON field definition without the hint field" in {
       val fieldDefinition = FieldDefinition("name", "description", "", FieldDefinitionType.STRING)
       Json.fromJson[FieldDefinition](Json.parse("""{ "name" : "name", "description" : "description", "type" : "STRING" }""")) shouldBe JsSuccess(fieldDefinition)
     }

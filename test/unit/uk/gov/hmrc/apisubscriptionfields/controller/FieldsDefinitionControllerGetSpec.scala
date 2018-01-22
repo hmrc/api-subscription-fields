@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 HM Revenue & Customs
+ * Copyright 2018 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,11 +40,13 @@ class FieldsDefinitionControllerGetSpec extends UnitSpec with FieldsDefinitionTe
       |     {
       |       "name": "callback-url",
       |       "description": "Callback URL",
+      |       "hint": "Description Hint",
       |       "type": "URL"
       |     },
       |     {
       |       "name": "token",
       |       "description": "Secure Token",
+      |       "hint": "Description Hint",
       |       "type": "SecureToken"
       |     }
       |   ]
@@ -62,11 +64,13 @@ class FieldsDefinitionControllerGetSpec extends UnitSpec with FieldsDefinitionTe
       |        {
       |          "name": "callback-url",
       |          "description": "Callback URL",
+      |          "hint": "Description Hint",
       |          "type": "URL"
       |        },
       |        {
       |          "name": "token",
       |          "description": "Secure Token",
+      |          "hint": "Description Hint",
       |          "type": "SecureToken"
       |        }
       |      ]
@@ -78,11 +82,13 @@ class FieldsDefinitionControllerGetSpec extends UnitSpec with FieldsDefinitionTe
       |        {
       |          "name": "address",
       |          "description": "where you live",
+      |          "hint": "Description Hint",
       |          "type": "STRING"
       |        },
       |        {
       |          "name": "number",
       |          "description": "telephone number",
+      |          "hint": "Description Hint",
       |          "type": "STRING"
       |        }
       |      ]

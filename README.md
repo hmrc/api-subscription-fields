@@ -38,7 +38,7 @@ Creates or updates the definitions of the subscriptions fields for an API
 
 ##### curl command
 ```
-curl -v -X PUT "http://localhost:9650/definition/context/hello/version/1.0" -H "Cache-Control: no-cache" -H "Content-Type: application/json" -d '{ "fieldDefinitions": [ { "name": "callback-url", "description": "Callback URL", "type": "URL" }, { "name": "token", "description": "Secure Token", "type": "SecureToken" } ] }' 
+curl -v -X PUT "http://localhost:9650/definition/context/hello/version/1.0" -H "Cache-Control: no-cache" -H "Content-Type: application/json" -d '{ "fieldDefinitions": [ { "name": "callback-url", "description": "Callback URL", "hint": "Callback URL Hint", "type": "URL" }, { "name": "token", "description": "Secure Token", "hint": "Secure Token Hint", "type": "SecureToken" } ] }'
 ```
 ##### Request body
 ```json
@@ -47,11 +47,13 @@ curl -v -X PUT "http://localhost:9650/definition/context/hello/version/1.0" -H "
     {
       "name": "callback-url",
       "description": "Callback URL",
+      "hint": "Callback URL Hint",
       "type": "URL"
     },
     {
       "name": "token",
       "description": "Secure Token",
+      "hint": "Secure Token Hint",
       "type": "SecureToken"
     }
   ]
@@ -66,11 +68,13 @@ curl -v -X PUT "http://localhost:9650/definition/context/hello/version/1.0" -H "
     {
       "name": "callback-url",
       "description": "Callback URL",
+      "hint": "Callback URL Hint",
       "type": "URL"
     },
     {
       "name": "token",
       "description": "Secure Token",
+      "hint": "Secure Token Hint",
       "type": "SecureToken"
     }
   ]
@@ -107,11 +111,13 @@ None
     {
       "name": "callback-url",
       "description": "Callback URL",
+      "hint": "Callback URL Hint",
       "type": "URL"
     },
     {
       "name": "token",
       "description": "Secure Token",
+      "hint": "Secure Token Hint",
       "type": "SecureToken"
     }
   ]
@@ -149,11 +155,13 @@ None
         {
           "name": "callback-url",
           "description": "Callback URL",
+          "hint": "Callback URL Hint",
           "type": "URL"
         },
         {
           "name": "token",
           "description": "Secure Token",
+          "hint": "Secure Token Hint",
           "type": "SecureToken"
         }
       ]
@@ -165,11 +173,13 @@ None
         {
           "name": "address",
           "description": "where you live",
+          "hint": "where you live hint",
           "type": "STRING"
         },
         {
           "name": "number",
           "description": "telephone number",
+          "hint": "telephone number hint",
           "type": "STRING"
         }
       ]
@@ -443,7 +453,7 @@ Thus, remember to start up MongoDB if you want to run the tests locally.
 There are unit tests, integration tests, acceptance tests and code coverage reports.
 In order to run them, use this command line:
 ```
-./precheck.sh
+./run_all_tests.sh
 ```
 
 ---

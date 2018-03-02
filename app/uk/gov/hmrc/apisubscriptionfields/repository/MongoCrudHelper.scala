@@ -31,8 +31,6 @@ trait MongoCrudHelper[T] extends MongoIndexCreator with MongoErrorHandler {
   protected val mongoCollection: JSONCollection
 
   def saveAtomic(selector: JsObject, updateOperations: JsObject)(implicit w: OFormat[T]): Future[(T, IsInsert)] = {
-    Logger.debug(s"[saveAtomic] selector: $selector updateOperations: $updateOperations")
-
     val updateOp = mongoCollection.updateModifier(
       update = updateOperations,
       fetchNewObject = true,

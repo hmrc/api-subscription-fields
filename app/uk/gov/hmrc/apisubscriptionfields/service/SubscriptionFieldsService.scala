@@ -19,7 +19,6 @@ package uk.gov.hmrc.apisubscriptionfields.service
 import java.util.UUID
 import javax.inject._
 
-import play.api.Logger
 import uk.gov.hmrc.apisubscriptionfields.model._
 import uk.gov.hmrc.apisubscriptionfields.repository.{SubscriptionFields, SubscriptionFieldsRepository}
 
@@ -40,26 +39,26 @@ class SubscriptionFieldsService @Inject()(repository: SubscriptionFieldsReposito
   }
 
   def delete(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion): Future[Boolean] = {
-    Logger.debug(s"[delete subscription fields] clientId: $clientId, apiContext: $apiVersion, apiVersion: $apiVersion")
     repository.delete(clientId, apiContext, apiVersion)
   }
 
+  def delete(clientId: ClientId): Future[Boolean] = {
+    repository.delete(clientId)
+  }
+
   def get(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion): Future[Option[SubscriptionFieldsResponse]] = {
-    Logger.debug(s"[get subscription fields] clientId: $clientId, apiContext: $apiVersion, apiVersion: $apiVersion")
     for {
       fetch <- repository.fetch(clientId, apiContext, apiVersion)
     } yield fetch.map(asResponse)
   }
 
   def get(subscriptionFieldsId: SubscriptionFieldsId): Future[Option[SubscriptionFieldsResponse]] = {
-    Logger.debug(s"[get subscription fields] fieldsId: $subscriptionFieldsId")
     for {
       fetch <- repository.fetchByFieldsId(subscriptionFieldsId)
     } yield fetch.map(asResponse)
   }
 
   def get(clientId: ClientId): Future[Option[BulkSubscriptionFieldsResponse]] = {
-    Logger.debug(s"[get subscription fields] clientId: $clientId")
     (for {
       fields <- repository.fetchByClientId(clientId)
     } yield fields.map(asResponse)) map {
@@ -69,7 +68,6 @@ class SubscriptionFieldsService @Inject()(repository: SubscriptionFieldsReposito
   }
 
   def getAll: Future[BulkSubscriptionFieldsResponse] = {
-    Logger.debug(s"[get all subscription fields]")
     (for {
       fields <- repository.fetchAll()
     } yield fields.map(asResponse)) map (BulkSubscriptionFieldsResponse(_))

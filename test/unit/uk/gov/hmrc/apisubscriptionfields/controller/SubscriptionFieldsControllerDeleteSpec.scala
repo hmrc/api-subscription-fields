@@ -20,7 +20,7 @@ import org.scalamock.scalatest.MockFactory
 import play.api.libs.json.{JsDefined, JsString}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import uk.gov.hmrc.apisubscriptionfields.model.JsonFormatters
+import uk.gov.hmrc.apisubscriptionfields.model.{ApiContext, ApiVersion, ClientId, JsonFormatters}
 import uk.gov.hmrc.apisubscriptionfields.service.SubscriptionFieldsService
 import uk.gov.hmrc.play.test.UnitSpec
 import util.SubscriptionFieldsTestData
@@ -34,7 +34,8 @@ class SubscriptionFieldsControllerDeleteSpec extends UnitSpec with SubscriptionF
 
   "DELETE /field/application/:clientId/context/:apiContext/version/:apiVersion" should {
     "return NO_CONTENT (204) when successfully deleted from repo" in {
-      (mockSubscriptionFieldsService.delete _).expects(FakeClientId, FakeContext, FakeVersion).returns(Future.successful(true))
+      (mockSubscriptionFieldsService.delete(_: ClientId, _: ApiContext, _: ApiVersion))
+        .expects(FakeClientId, FakeContext, FakeVersion).returns(Future.successful(true))
 
       val result = await(controller.deleteSubscriptionFields(fakeRawClientId, fakeRawContext, fakeRawVersion)(FakeRequest()))
 
@@ -42,13 +43,34 @@ class SubscriptionFieldsControllerDeleteSpec extends UnitSpec with SubscriptionF
     }
 
     "return NOT_FOUND (404) when failed to delete from repo" in {
-      (mockSubscriptionFieldsService.delete _).expects(FakeClientId, FakeContext, FakeVersion).returns(Future.successful(false))
+      (mockSubscriptionFieldsService.delete(_: ClientId, _: ApiContext, _: ApiVersion))
+        .expects(FakeClientId, FakeContext, FakeVersion).returns(Future.successful(false))
 
       val result = await(controller.deleteSubscriptionFields(fakeRawClientId, fakeRawContext, fakeRawVersion)(FakeRequest()))
 
       status(result) shouldBe NOT_FOUND
       (contentAsJson(result) \ "code") shouldBe JsDefined(JsString("NOT_FOUND"))
       (contentAsJson(result) \ "message") shouldBe JsDefined(JsString(s"Subscription fields not found for ($fakeRawClientId, $fakeRawContext, $fakeRawVersion)"))
+    }
+  }
+
+  "DELETE /field/application/:clientId" should {
+    "return NO_CONTENT (204) when successfully deleted from repo" in {
+      (mockSubscriptionFieldsService.delete(_: ClientId)).expects(FakeClientId).returns(Future.successful(true))
+
+      val result = await(controller.deleteAllSubscriptionFieldsForClient(fakeRawClientId)(FakeRequest()))
+
+      status(result) shouldBe NO_CONTENT
+    }
+
+    "return NOT_FOUND (404) when failed to delete from repo" in {
+      (mockSubscriptionFieldsService.delete(_: ClientId)).expects(FakeClientId).returns(Future.successful(false))
+
+      val result = await(controller.deleteAllSubscriptionFieldsForClient(fakeRawClientId)(FakeRequest()))
+
+      status(result) shouldBe NOT_FOUND
+      (contentAsJson(result) \ "code") shouldBe JsDefined(JsString("NOT_FOUND"))
+      (contentAsJson(result) \ "message") shouldBe JsDefined(JsString(s"ClientId ($fakeRawClientId) was not found"))
     }
   }
 

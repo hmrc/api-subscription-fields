@@ -19,7 +19,6 @@ package uk.gov.hmrc.apisubscriptionfields.controller
 import java.util.UUID
 import javax.inject.{Inject, Singleton}
 
-import play.api.Logger
 import play.api.libs.json.{JsValue, Json, Writes}
 import play.api.mvc._
 import uk.gov.hmrc.apisubscriptionfields.model.ErrorCode._
@@ -51,25 +50,21 @@ class SubscriptionFieldsController @Inject()(service: SubscriptionFieldsService)
   }
 
   def getSubscriptionFields(rawClientId: String, rawApiContext: String, rawApiVersion: String): Action[AnyContent] = Action.async { implicit request =>
-    Logger.debug(s"[getSubscriptionFields] clientId: $rawClientId apiContext: $rawApiContext apiVersion: $rawApiVersion")
     val eventualMaybeResponse = service.get(ClientId(rawClientId), ApiContext(rawApiContext), ApiVersion(rawApiVersion))
     asActionResult(eventualMaybeResponse, notFoundMessage(rawClientId, rawApiContext, rawApiVersion))
   }
 
   def getSubscriptionFieldsByFieldsId(rawFieldsId: UUID): Action[AnyContent] = Action.async { implicit request =>
-    Logger.debug(s"[getSubscriptionFieldsByFieldsId] fieldsId: $rawFieldsId")
     val eventualMaybeResponse = service.get(SubscriptionFieldsId(rawFieldsId))
     asActionResult(eventualMaybeResponse, notFoundMessage(rawFieldsId))
   }
 
   def getBulkSubscriptionFieldsByClientId(rawClientId: String): Action[AnyContent] = Action.async { implicit request =>
-    Logger.debug(s"[getBulkSubscriptionFieldsByClientId] clientId: $rawClientId")
     val eventualMaybeResponse = service.get(ClientId(rawClientId))
     asBulkActionResult(eventualMaybeResponse, notFoundMessage(rawClientId))
   }
 
   def getAllSubscriptionFields: Action[AnyContent] = Action.async { implicit request =>
-    Logger.debug("[getAllSubscriptionFields]")
     service.getAll map (fields => Ok(Json.toJson(fields))) recover recovery
   }
 
@@ -89,7 +84,6 @@ class SubscriptionFieldsController @Inject()(service: SubscriptionFieldsService)
 
   def upsertSubscriptionFields(rawClientId: String, rawApiContext: String, rawApiVersion: String): Action[JsValue] = Action.async(parse.json) { implicit request =>
     withJsonBody[SubscriptionFieldsRequest] { payload =>
-      Logger.debug(s"[upsertSubscriptionFields] clientId: $rawClientId apiContext: $rawApiContext apiVersion: $rawApiVersion")
       // TODO: ensure that `fields` is not empty (at least one subscription field)
       // TODO: ensure that each subscription field has a name (map key) matching a field definition and a non-empty value
       service.upsert(ClientId(rawClientId), ApiContext(rawApiContext), ApiVersion(rawApiVersion), payload.fields) map {
@@ -100,11 +94,16 @@ class SubscriptionFieldsController @Inject()(service: SubscriptionFieldsService)
   }
 
   def deleteSubscriptionFields(rawClientId: String, rawApiContext: String, rawApiVersion: String): Action[AnyContent] = Action.async { implicit request =>
-    Logger.debug(s"[deleteSubscriptionFields] clientId: $rawClientId apiContext: $rawApiContext apiVersion: $rawApiVersion")
-
     service.delete(ClientId(rawClientId), ApiContext(rawApiContext), ApiVersion(rawApiVersion)) map {
       case true => NoContent
       case false => notFoundResponse(notFoundMessage(rawClientId, rawApiContext, rawApiVersion))
+    } recover recovery
+  }
+
+  def deleteAllSubscriptionFieldsForClient(rawClientId: String): Action[AnyContent] = Action.async { implicit request =>
+    service.delete(ClientId(rawClientId)) map {
+      case true => NoContent
+      case false => notFoundResponse(notFoundMessage(rawClientId))
     } recover recovery
   }
 

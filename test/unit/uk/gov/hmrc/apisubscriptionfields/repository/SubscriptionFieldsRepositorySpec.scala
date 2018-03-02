@@ -202,6 +202,29 @@ class SubscriptionFieldsRepositorySpec extends UnitSpec
       await(repository.delete(ClientId("DOES_NOT_EXIST"), FakeContext, FakeVersion))
       collectionSize shouldBe 3
     }
+
+    "remove all of the records for a specific client ID" in {
+      val clientId = uniqueClientId
+      val context1 = "customs/declarations"
+      val context2 = "other-context"
+
+      await(repository.saveAtomic(createSubscriptionFieldsWithApiContext(clientId, context1)))
+      await(repository.saveAtomic(createSubscriptionFieldsWithApiContext(clientId, context2)))
+      collectionSize shouldBe 2
+
+      await(repository.delete(ClientId(clientId))) shouldBe true
+      collectionSize shouldBe 0
+    }
+
+    "not alter the collection for other client IDs" in {
+      for (i <- 1 to 3) {
+        await(repository.saveAtomic(createApiSubscriptionFields(clientId = uniqueClientId)))
+      }
+      collectionSize shouldBe 3
+
+      await(repository.delete(ClientId("DOES_NOT_EXIST")))
+      collectionSize shouldBe 3
+    }
   }
 
   "collection" should {

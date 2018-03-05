@@ -31,8 +31,6 @@ trait MongoCrudHelper[T] extends MongoIndexCreator with MongoErrorHandler {
   protected val mongoCollection: JSONCollection
 
   def saveAtomic(selector: JsObject, updateOperations: JsObject)(implicit w: OFormat[T]): Future[(T, IsInsert)] = {
-    Logger.debug(s"[saveAtomic] selector: $selector updateOperations: $updateOperations")
-
     val updateOp = mongoCollection.updateModifier(
       update = updateOperations,
       fetchNewObject = true,
@@ -58,25 +56,24 @@ trait MongoCrudHelper[T] extends MongoIndexCreator with MongoErrorHandler {
   }
 
   def save(entity: T, selector: JsObject)(implicit w: OWrites[T]): Future[(T, IsInsert)] = {
-    Logger.debug(s"[save] entity: $entity selector: $selector")
     mongoCollection.update(selector, entity, upsert = true).map {
       updateWriteResult => (entity, handleSaveError(updateWriteResult, s"Could not save entity: $entity"))
     }
   }
 
   def getMany(selector: JsObject)(implicit r: Reads[T]): Future[List[T]] = {
-    Logger.debug(s"[getMany] selector: $selector")
     mongoCollection.find(selector).cursor[T]().collect[List](Int.MaxValue, Cursor.FailOnError[List[T]]())
   }
 
   def getOne(selector: JsObject)(implicit r: Reads[T]): Future[Option[T]] = {
-    Logger.debug(s"[getOne] selector: $selector")
     mongoCollection.find(selector).one[T]
   }
 
   def deleteOne(selector: JsObject): Future[Boolean] = {
-    Logger.debug(s"[deleteOne] selector: $selector")
-    mongoCollection.remove(selector).map(handleDeleteError(_, s"Could not delete entity for selector: $selector"))
+    mongoCollection.remove(selector, firstMatchOnly = true).map(handleDeleteError(_, s"Could not delete entity for selector: $selector"))
   }
 
+  def deleteMany(selector: JsObject): Future[Boolean] = {
+    mongoCollection.remove(selector).map(handleDeleteError(_, s"Could not delete entity for selector: $selector"))
+  }
 }

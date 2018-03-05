@@ -29,7 +29,6 @@ import scala.concurrent.Future
 class FieldsDefinitionService @Inject() (repository: FieldsDefinitionRepository) {
 
   def upsert(apiContext: ApiContext, apiVersion: ApiVersion, fieldDefinitions: Seq[FieldDefinition]): Future[(FieldsDefinitionResponse, IsInsert)] = {
-    Logger.debug(s"[upsert fields definition] apiContext: $apiContext, apiVersion: $apiVersion, fieldDefinitions: $fieldDefinitions")
     val fieldsDefinition = FieldsDefinition(apiContext.value, apiVersion.value, fieldDefinitions)
     repository.save(fieldsDefinition).map {
       case (fd: FieldsDefinition, inserted: IsInsert) => (asResponse(fd), inserted)
@@ -37,19 +36,16 @@ class FieldsDefinitionService @Inject() (repository: FieldsDefinitionRepository)
   }
 
   def delete(apiContext: ApiContext, apiVersion: ApiVersion): Future[Boolean] = {
-    Logger.debug(s"[delete fields definition] apiContext: $apiVersion, apiVersion: $apiVersion")
     repository.delete(apiContext, apiVersion)
   }
 
   def get(apiContext: ApiContext, apiVersion: ApiVersion): Future[Option[FieldsDefinitionResponse]] = {
-    Logger.debug(s"[get fields definition] apiContext: $apiContext, apiVersion: $apiVersion")
     for {
       fetch <- repository.fetch(apiContext, apiVersion)
     } yield fetch.map(asResponse)
   }
 
   def getAll: Future[BulkFieldsDefinitionsResponse] = {
-    Logger.debug(s"[get all field definitions]")
     (for {
       defs <- repository.fetchAll()
     } yield defs.map(asResponse)) map (BulkFieldsDefinitionsResponse(_))

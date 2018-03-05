@@ -18,7 +18,6 @@ package uk.gov.hmrc.apisubscriptionfields.controller
 
 import javax.inject.{Inject, Singleton}
 
-import play.api.Logger
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc._
 import uk.gov.hmrc.apisubscriptionfields.model._
@@ -37,7 +36,6 @@ class FieldsDefinitionController @Inject() (service: FieldsDefinitionService) ex
 
   def upsertFieldsDefinition(rawApiContext: String, rawApiVersion: String): Action[JsValue] = Action.async(parse.json) { implicit request =>
     withJsonBody[FieldsDefinitionRequest] { payload =>
-      Logger.debug(s"[upsertFieldsDefinition] apiContext: $rawApiContext apiVersion: $rawApiVersion")
       // TODO: ensure that `fieldDefinitions` is not empty (at least one field definition must be defined)
       // TODO: ensure that each field definition has an allowed type and a non-empty name
       service.upsert(ApiContext(rawApiContext), ApiVersion(rawApiVersion), payload.fieldDefinitions) map {
@@ -48,18 +46,15 @@ class FieldsDefinitionController @Inject() (service: FieldsDefinitionService) ex
   }
 
   def getAllFieldsDefinitions: Action[AnyContent] = Action.async { implicit request =>
-    Logger.debug("[getAllFieldsDefinitions]")
     service.getAll map (defs => Ok(Json.toJson(defs))) recover recovery
   }
 
   def getFieldsDefinition(rawApiContext: String, rawApiVersion: String): Action[AnyContent] = Action.async { implicit request =>
-    Logger.debug(s"[getFieldsDefinition] apiContext: $rawApiContext apiVersion: $rawApiVersion")
     val eventualMaybeResponse = service.get(ApiContext(rawApiContext), ApiVersion(rawApiVersion))
     asActionResult(eventualMaybeResponse, rawApiContext, rawApiVersion)
   }
 
   def deleteFieldsDefinition(rawApiContext: String, rawApiVersion: String): Action[AnyContent] = Action.async { implicit request =>
-    Logger.debug(s"[deleteFieldsDefinition] apiContext: $rawApiContext apiVersion: $rawApiVersion")
     service.delete(ApiContext(rawApiContext), ApiVersion(rawApiVersion)) map {
       case true => NoContent
       case false => notFoundResponse(rawApiContext, rawApiVersion)

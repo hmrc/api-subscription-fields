@@ -152,6 +152,20 @@ class SubscriptionFieldsServiceSpec extends UnitSpec with SubscriptionFieldsTest
 
       await(service.delete(FakeClientId, FakeContext, FakeVersion)) shouldBe false
     }
+
+    "return true when the client ID exists in the database collection" in {
+      (mockSubscriptionFieldsIdRepository delete(_: ClientId))
+        .expects(FakeClientId).returns(true)
+
+      await(service.delete(FakeClientId)) shouldBe true
+    }
+
+    "return false when the client ID does not exist in the database collection" in {
+      (mockSubscriptionFieldsIdRepository delete(_: ClientId))
+        .expects(FakeClientId).returns(false)
+
+      await(service.delete(FakeClientId)) shouldBe false
+    }
   }
 
 }

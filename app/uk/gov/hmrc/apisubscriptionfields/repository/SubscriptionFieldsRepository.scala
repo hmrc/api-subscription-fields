@@ -16,10 +16,10 @@
 
 package uk.gov.hmrc.apisubscriptionfields.repository
 
+import java.util.UUID
 import javax.inject.{Inject, Singleton}
 
 import com.google.inject.ImplementedBy
-import play.api.Logger
 import play.api.libs.json._
 import reactivemongo.api.indexes.IndexType
 import reactivemongo.bson.BSONObjectID
@@ -42,6 +42,8 @@ trait SubscriptionFieldsRepository {
   def fetchAll(): Future[List[SubscriptionFields]]
 
   def delete(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion): Future[Boolean]
+
+  def delete(clientId: ClientId): Future[Boolean]
 }
 
 @Singleton
@@ -78,12 +80,8 @@ class SubscriptionFieldsMongoRepository @Inject()(mongoDbProvider: MongoDbProvid
   )
 
   override def saveAtomic(subscription: SubscriptionFields): Future[(SubscriptionFields, IsInsert)] = {
-
-    Logger.debug(s"[saveAtomic] entity: $subscription")
-
-    // Note that $setOnInsert operation will happen for inserts only, it is ignored for updates.
     saveAtomic(
-      selector = selectorForSubscriptionFields(subscription),
+      selector = subscriptionFieldsSelector(subscription),
       updateOperations = Json.obj(
         "$setOnInsert" -> Json.obj("fieldsId" -> subscription.fieldsId.toString),
         "$set" -> Json.obj("fields" -> Json.toJson(subscription.fields))
@@ -92,15 +90,15 @@ class SubscriptionFieldsMongoRepository @Inject()(mongoDbProvider: MongoDbProvid
   }
 
   override def fetch(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion): Future[Option[SubscriptionFields]] = {
-    getOne(selectorForSubscriptionFields(clientId.value, apiContext.value, apiVersion.value))
+    getOne(subscriptionFieldsSelector(clientId.value, apiContext.value, apiVersion.value))
   }
 
   override def fetchByFieldsId(fieldsId: SubscriptionFieldsId): Future[Option[SubscriptionFields]] = {
-    getOne(Json.obj("fieldsId" -> fieldsId.value))
+    getOne(fieldsIdSelector(fieldsId.value))
   }
 
   override def fetchByClientId(clientId: ClientId): Future[List[SubscriptionFields]] = {
-    getMany(Json.obj("clientId" -> clientId.value))
+    getMany(clientIdSelector(clientId.value))
   }
 
   override def fetchAll(): Future[List[SubscriptionFields]] = {
@@ -108,10 +106,18 @@ class SubscriptionFieldsMongoRepository @Inject()(mongoDbProvider: MongoDbProvid
   }
 
   override def delete(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion): Future[Boolean] = {
-    deleteOne(selectorForSubscriptionFields(clientId.value, apiContext.value, apiVersion.value))
+    deleteOne(subscriptionFieldsSelector(clientId.value, apiContext.value, apiVersion.value))
   }
 
-  private def selectorForSubscriptionFields(clientId: String, apiContext: String, apiVersion: String): JsObject = {
+  override def delete(clientId: ClientId): Future[Boolean] = {
+    deleteMany(clientIdSelector(clientId.value))
+  }
+
+  private def clientIdSelector(clientId: String) = Json.obj("clientId" -> clientId)
+
+  private def fieldsIdSelector(fieldsId: UUID) = Json.obj("fieldsId" -> fieldsId)
+
+  private def subscriptionFieldsSelector(clientId: String, apiContext: String, apiVersion: String): JsObject = {
     Json.obj(
       "clientId"   -> clientId,
       "apiContext" -> apiContext,
@@ -119,8 +125,8 @@ class SubscriptionFieldsMongoRepository @Inject()(mongoDbProvider: MongoDbProvid
     )
   }
 
-  private def selectorForSubscriptionFields(subscription: SubscriptionFields): JsObject = {
-    selectorForSubscriptionFields(subscription.clientId, subscription.apiContext, subscription.apiVersion)
+  private def subscriptionFieldsSelector(subscription: SubscriptionFields): JsObject = {
+    subscriptionFieldsSelector(subscription.clientId, subscription.apiContext, subscription.apiVersion)
   }
 
 }

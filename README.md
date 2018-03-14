@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.org/hmrc/api-subscription-fields.svg)](https://travis-ci.org/hmrc/api-subscription-fields) [ ![Download](https://api.bintray.com/packages/hmrc/releases/api-subscription-fields/images/download.svg) ](https://bintray.com/hmrc/releases/api-subscription-fields/_latestVersion)
 
-This microservice stores definitions and values for the HMRC Developer Hub.
+This microservice stores definitions and values relating to API subscriptions for the HMRC Developer Hub.
 
 ---
 

@@ -18,7 +18,6 @@ package uk.gov.hmrc.apisubscriptionfields.repository
 
 import reactivemongo.api.commands._
 import reactivemongo.bson.BSONInteger
-import uk.gov.hmrc.apisubscriptionfields.repository.MongoErrorHandler
 import uk.gov.hmrc.play.test.UnitSpec
 
 class MongoErrorHandlerSpec extends UnitSpec {

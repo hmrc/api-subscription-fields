@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 HM Revenue & Customs
+ * Copyright 2018 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package acceptance
+package uk.gov.hmrc.apisubscriptionfields.acceptance
 
 import org.scalatest.OptionValues
 import play.api.Logger
@@ -23,7 +23,7 @@ import play.api.mvc._
 import play.api.test.Helpers._
 import uk.gov.hmrc.apisubscriptionfields.model.ErrorCode.{INVALID_REQUEST_PAYLOAD, NOT_FOUND_CODE}
 import uk.gov.hmrc.apisubscriptionfields.model.JsErrorResponse
-import util.SubscriptionFieldsTestData
+import uk.gov.hmrc.apisubscriptionfields.util.SubscriptionFieldsTestData
 
 import scala.concurrent.Future
 

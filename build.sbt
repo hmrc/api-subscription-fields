@@ -27,7 +27,7 @@ import scala.language.postfixOps
 
 val compile = Seq(
   ws,
-  "uk.gov.hmrc" %% "microservice-bootstrap" % "6.17.0",
+  "uk.gov.hmrc" %% "microservice-bootstrap" % "6.18.0",
   "uk.gov.hmrc" %% "play-reactivemongo" % "6.2.0",
   "uk.gov.hmrc" %% "play-hmrc-api" % "2.0.0"
 )
@@ -54,9 +54,9 @@ lazy val plugins: Seq[Plugins] = Seq.empty
 lazy val playSettings: Seq[Setting[_]] = Seq.empty
 
 lazy val AcceptanceTest = config("acceptance") extend Test
-val testConfig = Seq(AcceptanceTest, Test)
-
 lazy val IntegrationTest = config("it") extend Test
+
+val testConfig = Seq(AcceptanceTest, Test, IntegrationTest)
 
 lazy val microservice = Project(appName, file("."))
   .enablePlugins(Seq(PlayScala, SbtAutoBuildPlugin, SbtGitVersioning, SbtDistributablesPlugin) ++ plugins: _*)
@@ -73,9 +73,9 @@ lazy val microservice = Project(appName, file("."))
     evictionWarningOptions in update := EvictionWarningOptions.default.withWarnScalaVersionEviction(false)
   )
   .settings(scoverageSettings)
-  .configs(IntegrationTest)
-  .settings(inConfig(IntegrationTest)(Defaults.itSettings): _*)
+  .settings(Defaults.itSettings)
   .settings(
+    testOptions in IntegrationTest := Seq(Tests.Filter(integrationFilter)),
     Keys.fork in IntegrationTest := false,
     unmanagedSourceDirectories in IntegrationTest <<= (baseDirectory in IntegrationTest) (base => Seq(base / "test" / "it")),
     addTestReportOption(IntegrationTest, "integration-reports"),
@@ -83,10 +83,11 @@ lazy val microservice = Project(appName, file("."))
     parallelExecution in IntegrationTest := false)
 
 lazy val unitTestSettings =
-  inConfig(Test)(Defaults.testTasks) ++
+  inConfig(Test)(Defaults.testSettings) ++
     Seq(
+      testOptions in Test := Seq(Tests.Filter(unitFilter)),
       unmanagedSourceDirectories in Test := Seq(
-        baseDirectory.value  / "test" / "unit",
+        baseDirectory.value / "test" / "unit",
         baseDirectory.value / "test" / "util"
       ),
       fork in Test := false,
@@ -94,10 +95,11 @@ lazy val unitTestSettings =
     )
 
 lazy val acceptanceTestSettings =
-  inConfig(AcceptanceTest)(Defaults.testTasks) ++
+  inConfig(AcceptanceTest)(Defaults.testSettings) ++
     Seq(
+      testOptions in AcceptanceTest := Seq(Tests.Filter(acceptanceFilter)),
       unmanagedSourceDirectories in AcceptanceTest := Seq(
-        baseDirectory.value  / "test" / "acceptance",
+        baseDirectory.value / "test" / "acceptance",
         baseDirectory.value / "test" / "util"
       ),
       fork in AcceptanceTest := false,
@@ -113,7 +115,11 @@ lazy val scoverageSettings: Seq[Setting[_]] = Seq(
   parallelExecution in Test := false
 )
 
-def oneForkedJvmPerTest(tests: Seq[TestDefinition]) =
+def unitFilter(name: String): Boolean = !integrationFilter(name) && !acceptanceFilter(name)
+def integrationFilter(name: String): Boolean = name contains "integration"
+def acceptanceFilter(name: String): Boolean = name contains "acceptance"
+
+def oneForkedJvmPerTest(tests: Seq[TestDefinition]): Seq[Group] =
   tests map {
     test => Group(test.name, Seq(test), SubProcess(ForkOptions(runJVMOptions = Seq("-Dtest.name=" + test.name))))
   }
@@ -123,6 +129,6 @@ def forkedJvmPerTestConfig(tests: Seq[TestDefinition], packages: String*): Seq[G
     case (packg, theTests) => Group(packg, theTests, SubProcess(ForkOptions()))
   } toSeq
 
-def onPackageName(rootPackage: String): (String => Boolean) = {
+def onPackageName(rootPackage: String): String => Boolean = {
   testName => testName startsWith rootPackage
 }

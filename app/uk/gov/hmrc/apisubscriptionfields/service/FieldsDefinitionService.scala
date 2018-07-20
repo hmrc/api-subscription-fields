@@ -17,8 +17,6 @@
 package uk.gov.hmrc.apisubscriptionfields.service
 
 import javax.inject.{Inject, Singleton}
-
-import play.api.Logger
 import uk.gov.hmrc.apisubscriptionfields.model._
 import uk.gov.hmrc.apisubscriptionfields.repository.{FieldsDefinition, FieldsDefinitionRepository}
 

@@ -23,7 +23,7 @@ import play.api.test.Helpers._
 import uk.gov.hmrc.apisubscriptionfields.model.{ApiContext, ApiVersion, ClientId, JsonFormatters}
 import uk.gov.hmrc.apisubscriptionfields.service.SubscriptionFieldsService
 import uk.gov.hmrc.play.test.UnitSpec
-import util.SubscriptionFieldsTestData
+import uk.gov.hmrc.apisubscriptionfields.util.SubscriptionFieldsTestData
 
 import scala.concurrent.Future
 

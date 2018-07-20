@@ -24,7 +24,7 @@ import play.api.test._
 import uk.gov.hmrc.apisubscriptionfields.model.{FieldsDefinitionRequest, JsonFormatters}
 import uk.gov.hmrc.apisubscriptionfields.service.FieldsDefinitionService
 import uk.gov.hmrc.play.test.UnitSpec
-import util.FieldsDefinitionTestData
+import uk.gov.hmrc.apisubscriptionfields.util.FieldsDefinitionTestData
 
 import scala.concurrent.Future
 

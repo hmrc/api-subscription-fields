@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 HM Revenue & Customs
+ * Copyright 2018 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+package uk.gov.hmrc.apisubscriptionfields.acceptance
+
 import java.util.UUID
 
 import org.scalatest._
@@ -24,9 +26,9 @@ import play.api.libs.json.Json
 import play.api.mvc.{AnyContentAsEmpty, AnyContentAsJson}
 import play.api.test.FakeRequest
 import play.modules.reactivemongo.MongoDbConnection
-import uk.gov.hmrc.apisubscriptionfields.model._
 import uk.gov.hmrc.apisubscriptionfields.model.JsonFormatters._
-import util.{ExternalServicesConfig, RequestHeaders}
+import uk.gov.hmrc.apisubscriptionfields.model._
+import uk.gov.hmrc.apisubscriptionfields.util.{ExternalServicesConfig, RequestHeaders}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._

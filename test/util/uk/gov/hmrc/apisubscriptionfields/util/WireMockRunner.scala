@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package util
+package uk.gov.hmrc.apisubscriptionfields.util
 
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration._
-import util.ExternalServicesConfig._
+import uk.gov.hmrc.apisubscriptionfields.util.ExternalServicesConfig._
 
 trait WireMockRunner {
 

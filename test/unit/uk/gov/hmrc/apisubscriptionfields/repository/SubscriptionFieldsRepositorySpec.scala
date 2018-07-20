@@ -23,10 +23,9 @@ import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach}
 import reactivemongo.api.DB
 import reactivemongo.bson._
 import uk.gov.hmrc.apisubscriptionfields.model._
-import uk.gov.hmrc.apisubscriptionfields.repository.{MongoDbProvider, MongoFormatters, SubscriptionFields, SubscriptionFieldsMongoRepository}
+import uk.gov.hmrc.apisubscriptionfields.util.SubscriptionFieldsTestData
 import uk.gov.hmrc.mongo.MongoSpecSupport
 import uk.gov.hmrc.play.test.UnitSpec
-import util.SubscriptionFieldsTestData
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future

@@ -21,9 +21,8 @@ import java.util.UUID
 import org.scalamock.scalatest.MockFactory
 import uk.gov.hmrc.apisubscriptionfields.model._
 import uk.gov.hmrc.apisubscriptionfields.repository._
-import uk.gov.hmrc.apisubscriptionfields.service.{SubscriptionFieldsService, UUIDCreator}
+import uk.gov.hmrc.apisubscriptionfields.util.SubscriptionFieldsTestData
 import uk.gov.hmrc.play.test.UnitSpec
-import util.SubscriptionFieldsTestData
 
 import scala.concurrent.Future
 

@@ -19,9 +19,8 @@ package uk.gov.hmrc.apisubscriptionfields.service
 import org.scalamock.scalatest.MockFactory
 import uk.gov.hmrc.apisubscriptionfields.model._
 import uk.gov.hmrc.apisubscriptionfields.repository.{FieldsDefinition, FieldsDefinitionRepository}
-import uk.gov.hmrc.apisubscriptionfields.service.FieldsDefinitionService
+import uk.gov.hmrc.apisubscriptionfields.util.FieldsDefinitionTestData
 import uk.gov.hmrc.play.test.UnitSpec
-import util.FieldsDefinitionTestData
 
 import scala.concurrent.Future
 

@@ -59,7 +59,7 @@ lazy val IntegrationTest = config("it") extend Test
 val testConfig = Seq(AcceptanceTest, Test, IntegrationTest)
 
 lazy val microservice = Project(appName, file("."))
-  .enablePlugins(Seq(PlayScala, SbtAutoBuildPlugin, SbtGitVersioning, SbtDistributablesPlugin) ++ plugins: _*)
+  .enablePlugins(Seq(PlayScala, SbtAutoBuildPlugin, SbtGitVersioning, SbtDistributablesPlugin, SbtArtifactory) ++ plugins: _*)
   .configs(testConfig: _*)
   .settings(playSettings: _*)
   .settings(scalaSettings: _*)
@@ -80,7 +80,9 @@ lazy val microservice = Project(appName, file("."))
     unmanagedSourceDirectories in IntegrationTest <<= (baseDirectory in IntegrationTest) (base => Seq(base / "test" / "it")),
     addTestReportOption(IntegrationTest, "integration-reports"),
     testGrouping in IntegrationTest := oneForkedJvmPerTest((definedTests in IntegrationTest).value),
-    parallelExecution in IntegrationTest := false)
+    parallelExecution in IntegrationTest := false
+  )
+  .settings(majorVersion := 0)
 
 lazy val unitTestSettings =
   inConfig(Test)(Defaults.testSettings) ++

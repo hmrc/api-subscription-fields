@@ -65,7 +65,6 @@ lazy val microservice = Project(appName, file("."))
   .settings(scalaSettings: _*)
   .settings(publishingSettings: _*)
   .settings(defaultSettings(): _*)
-  .settings(unitTestSettings: _*)
   .settings(acceptanceTestSettings: _*)
   .settings(scalaVersion := "2.11.11")
   .settings(
@@ -73,6 +72,11 @@ lazy val microservice = Project(appName, file("."))
     evictionWarningOptions in update := EvictionWarningOptions.default.withWarnScalaVersionEviction(false)
   )
   .settings(scoverageSettings)
+  .settings(
+    testOptions in Test := Seq(Tests.Filter(unitFilter)),
+    fork in Test := false,
+    addTestReportOption(Test, "test-reports")
+  )
   .settings(Defaults.itSettings)
   .settings(
     testOptions in IntegrationTest := Seq(Tests.Filter(integrationFilter)),
@@ -83,18 +87,6 @@ lazy val microservice = Project(appName, file("."))
     parallelExecution in IntegrationTest := false
   )
   .settings(majorVersion := 0)
-
-lazy val unitTestSettings =
-  inConfig(Test)(Defaults.testSettings) ++
-    Seq(
-      testOptions in Test := Seq(Tests.Filter(unitFilter)),
-      unmanagedSourceDirectories in Test := Seq(
-        baseDirectory.value / "test" / "unit",
-        baseDirectory.value / "test" / "util"
-      ),
-      fork in Test := false,
-      addTestReportOption(Test, "test-reports")
-    )
 
 lazy val acceptanceTestSettings =
   inConfig(AcceptanceTest)(Defaults.testSettings) ++

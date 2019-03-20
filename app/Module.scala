@@ -17,13 +17,10 @@
 import com.google.inject.AbstractModule
 import com.typesafe.config.{Config, ConfigFactory}
 import play.api.{Configuration, Environment}
-import uk.gov.hmrc.apisubscriptionfields.config.MicroserviceAuditConnector
-import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 
 class Module(environment: Environment, configuration: Configuration) extends AbstractModule {
 
-  override def configure = {
+  override def configure() : Unit = {
     bind(classOf[Config]).toInstance(ConfigFactory.load())
-    bind(classOf[AuditConnector]).toInstance(MicroserviceAuditConnector)
   }
 }

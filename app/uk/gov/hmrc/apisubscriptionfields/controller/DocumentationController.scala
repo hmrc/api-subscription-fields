@@ -23,7 +23,7 @@ import play.api.http.HttpErrorHandler
 import play.api.mvc.Action
 import uk.gov.hmrc.apisubscriptionfields.config.AppContext
 import uk.gov.hmrc.apisubscriptionfields.model.APIAccess
-import uk.gov.hmrc.play.microservice.controller.BaseController
+import uk.gov.hmrc.play.bootstrap.controller.BaseController
 import uk.gov.hmrc.apisubscriptionfields.views.txt
 
 class DocumentationController @Inject()(httpErrorHandler: HttpErrorHandler, appContext: AppContext) extends AssetsBuilder(httpErrorHandler) with BaseController {

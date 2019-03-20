@@ -83,21 +83,24 @@ trait AcceptanceTestSpec extends FeatureSpec
   override def fakeApplication(): Application = new GuiceApplicationBuilder().configure(Map(
     "run.mode" -> "Stub",
     "Test.microservice.services.api-subscription-fields.host" -> ExternalServicesConfig.Host,
-    "Test.microservice.services.api-subscription-fields.port" -> ExternalServicesConfig.Port
-    ))
+    "Test.microservice.services.api-subscription-fields.port" -> ExternalServicesConfig.Port,
+    "Test.microservice.services.service-locator.host" -> ExternalServicesConfig.Host,
+    "Test.microservice.services.service-locator.port" -> ExternalServicesConfig.Port,
+    "Test.microservice.services.service-locator.enabled" -> true
+  ))
     .build()
 
   protected def await[A](future: Future[A]): A = Await.result(future, 5.seconds)
 
-  override protected def beforeAll = {
+  override protected def beforeAll: Unit = {
     dropDatabase()
   }
 
-  override protected def afterAll = {
+  override protected def afterAll: Unit = {
     dropDatabase()
   }
 
-  private def dropDatabase() = {
-    await(new MongoDbConnection(){}.db().drop())
+  private def dropDatabase(): Unit = {
+    await(new MongoDbConnection() {}.db().drop())
   }
 }

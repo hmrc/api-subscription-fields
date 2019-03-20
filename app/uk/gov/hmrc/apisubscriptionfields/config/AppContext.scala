@@ -17,11 +17,13 @@
 package uk.gov.hmrc.apisubscriptionfields.config
 
 import javax.inject.Inject
-
-import com.typesafe.config.Config
+import play.api.{Configuration, Environment}
 import uk.gov.hmrc.play.config.ServicesConfig
 
-class AppContext @Inject()(val config: Config) extends ServicesConfig {
+class AppContext @Inject()(override val runModeConfiguration: Configuration, environment: Environment) extends ServicesConfig {
+
+  override protected def mode = environment.mode
+
   lazy val publishApiDefinition = runModeConfiguration.getBoolean("publishApiDefinition").getOrElse(false)
   lazy val apiContext = runModeConfiguration.getString("api.context").getOrElse("api-subscription-fields")
   lazy val access = runModeConfiguration.getConfig("api.access")

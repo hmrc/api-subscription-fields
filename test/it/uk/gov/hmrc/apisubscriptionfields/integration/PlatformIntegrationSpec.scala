@@ -16,6 +16,8 @@
 
 package uk.gov.hmrc.apisubscriptionfields.integration
 
+import akka.actor.ActorSystem
+import akka.stream.ActorMaterializer
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.client.WireMock._
@@ -33,7 +35,6 @@ import play.api.{Application, Mode}
 import uk.gov.hmrc.api.domain.Registration
 import uk.gov.hmrc.apisubscriptionfields.config.AppContext
 import uk.gov.hmrc.apisubscriptionfields.controller.DocumentationController
-import uk.gov.hmrc.play.microservice.filters.MicroserviceFilterSupport
 import uk.gov.hmrc.play.test.UnitSpec
 
 /**
@@ -79,10 +80,12 @@ trait PlatformIntegrationSpec extends UnitSpec with MockitoSugar with ScalaFutur
     wireMockServer.resetMappings()
   }
 
-  trait Setup extends MicroserviceFilterSupport {
-    val documentationController = new DocumentationController(LazyHttpErrorHandler, new AppContext(ConfigFactory.load())) {}
+  trait Setup {
+    implicit val mat = app.injector.instanceOf[akka.stream.Materializer]
+    val documentationController = app.injector.instanceOf[DocumentationController]
     val request = FakeRequest()
   }
+
 }
 
 class PublishApiDefinitionEnabledSpec extends PlatformIntegrationSpec {
@@ -100,7 +103,7 @@ class PublishApiDefinitionEnabledSpec extends PlatformIntegrationSpec {
     }
 
     "return the JSON definition" in new Setup {
-      val result =  await(documentationController.definition()(request))
+      val result = await(documentationController.definition()(request))
       status(result) shouldBe 200
       bodyOf(result) should include(""""context": "test-api-context"""")
     }

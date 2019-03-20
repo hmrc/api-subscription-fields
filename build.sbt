@@ -26,15 +26,14 @@ import uk.gov.hmrc.versioning.SbtGitVersioning
 import scala.language.postfixOps
 
 val compile = Seq(
-  ws,
-  "uk.gov.hmrc" %% "microservice-bootstrap" % "6.18.0",
-  "uk.gov.hmrc" %% "play-reactivemongo" % "6.2.0",
-  "uk.gov.hmrc" %% "play-hmrc-api" % "2.0.0"
+  "uk.gov.hmrc" %% "bootstrap-play-25" % "4.9.0",
+  "uk.gov.hmrc" %% "simple-reactivemongo" % "7.14.0-play-25",
+  "uk.gov.hmrc" %% "play-hmrc-api" % "3.4.0-play-25"
 )
 
 def test(scope: String = "test,acceptance") = Seq(
-  "uk.gov.hmrc" %% "hmrctest" % "3.0.0" % scope,
-  "uk.gov.hmrc" %% "reactivemongo-test" % "3.1.0" % scope,
+  "uk.gov.hmrc" %% "hmrctest" % "3.6.0-play-25" % scope,
+  "uk.gov.hmrc" %% "reactivemongo-test" % "4.9.0-play-25" % scope,
   "org.scalamock" %% "scalamock-scalatest-support" % "3.6.0" % scope,
   "org.scalatest" %% "scalatest" % "3.0.4" % scope,
   "org.scalatestplus.play" %% "scalatestplus-play" % "2.0.1" % scope,
@@ -73,13 +72,13 @@ lazy val microservice = Project(appName, file("."))
   )
   .settings(scoverageSettings)
   .settings(
-    testOptions in Test := Seq(Tests.Filter(unitFilter)),
+    testOptions in Test := Seq(Tests.Filter(unitFilter), Tests.Argument("-eT")),
     fork in Test := false,
     addTestReportOption(Test, "test-reports")
   )
   .settings(Defaults.itSettings)
   .settings(
-    testOptions in IntegrationTest := Seq(Tests.Filter(integrationFilter)),
+    testOptions in IntegrationTest := Seq(Tests.Filter(integrationFilter), Tests.Argument("-eT")),
     Keys.fork in IntegrationTest := false,
     unmanagedSourceDirectories in IntegrationTest <<= (baseDirectory in IntegrationTest) (base => Seq(base / "test" / "it")),
     addTestReportOption(IntegrationTest, "integration-reports"),

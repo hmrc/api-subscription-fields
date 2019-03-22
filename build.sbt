@@ -27,13 +27,13 @@ import scala.language.postfixOps
 
 val compile = Seq(
   "uk.gov.hmrc" %% "bootstrap-play-25" % "4.9.0",
-  "uk.gov.hmrc" %% "simple-reactivemongo" % "7.14.0-play-25",
+  "uk.gov.hmrc" %% "simple-reactivemongo" % "7.15.0-play-25",
   "uk.gov.hmrc" %% "play-hmrc-api" % "3.4.0-play-25"
 )
 
 def test(scope: String = "test,acceptance") = Seq(
   "uk.gov.hmrc" %% "hmrctest" % "3.6.0-play-25" % scope,
-  "uk.gov.hmrc" %% "reactivemongo-test" % "4.9.0-play-25" % scope,
+  "uk.gov.hmrc" %% "reactivemongo-test" % "4.10.0-play-25" % scope,
   "org.scalamock" %% "scalamock-scalatest-support" % "3.6.0" % scope,
   "org.scalatest" %% "scalatest" % "3.0.4" % scope,
   "org.scalatestplus.play" %% "scalatestplus-play" % "2.0.1" % scope,

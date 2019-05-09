@@ -83,10 +83,7 @@ trait AcceptanceTestSpec extends FeatureSpec
   override def fakeApplication(): Application = new GuiceApplicationBuilder().configure(Map(
     "run.mode" -> "Stub",
     "Test.microservice.services.api-subscription-fields.host" -> ExternalServicesConfig.Host,
-    "Test.microservice.services.api-subscription-fields.port" -> ExternalServicesConfig.Port,
-    "Test.microservice.services.service-locator.host" -> ExternalServicesConfig.Host,
-    "Test.microservice.services.service-locator.port" -> ExternalServicesConfig.Port,
-    "Test.microservice.services.service-locator.enabled" -> true
+    "Test.microservice.services.api-subscription-fields.port" -> ExternalServicesConfig.Port
   ))
     .build()
 

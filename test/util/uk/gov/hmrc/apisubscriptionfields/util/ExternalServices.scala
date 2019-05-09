@@ -17,6 +17,6 @@
 package uk.gov.hmrc.apisubscriptionfields.util
 
 object ExternalServicesConfig {
-  val Port: Int = sys.env.getOrElse("WIREMOCK_SERVICE_LOCATOR_PORT", "11111").toInt
+  val Port: Int = 11111
   val Host = "localhost"
 }

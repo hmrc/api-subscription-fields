@@ -30,6 +30,10 @@ val compile = Seq(
   "uk.gov.hmrc" %% "simple-reactivemongo" % "7.19.0-play-25"
 )
 
+val overrides = Seq(
+  "org.reactivemongo" %% "reactivemongo" % "0.16.6"
+)
+
 def test(scope: String = "test,acceptance") = Seq(
   "uk.gov.hmrc" %% "hmrctest" % "3.8.0-play-25" % scope,
   "uk.gov.hmrc" %% "reactivemongo-test" % "4.13.0-play-25" % scope,
@@ -44,7 +48,7 @@ def test(scope: String = "test,acceptance") = Seq(
 
 val appName = "api-subscription-fields"
 
-lazy val appDependencies: Seq[ModuleID] = compile ++ test()
+lazy val appDependencies: Seq[ModuleID] = compile ++ overrides ++ test()
 
 resolvers ++= Seq(Resolver.bintrayRepo("hmrc", "releases"), Resolver.jcenterRepo)
 

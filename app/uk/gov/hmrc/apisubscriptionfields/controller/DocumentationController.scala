@@ -31,12 +31,12 @@ class DocumentationController @Inject()(httpErrorHandler: HttpErrorHandler, appC
   def definition = Action {
     if(appContext.publishApiDefinition) {
       Ok(txt.definition(appContext.apiContext, APIAccess.build(appContext.access))).withHeaders(CONTENT_TYPE -> JSON)
-    } else NotFound
+    } else NoContent
   }
 
   def raml(version: String, file: String) = Action {
     if(appContext.publishApiDefinition) {
       Ok(txt.application(appContext.apiContext))
-    } else NotFound
+    } else NoContent
   }
 }

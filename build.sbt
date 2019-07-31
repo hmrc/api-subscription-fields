@@ -26,8 +26,8 @@ import uk.gov.hmrc.versioning.SbtGitVersioning
 import scala.language.postfixOps
 
 val compile = Seq(
-  "uk.gov.hmrc" %% "bootstrap-play-25" % "4.12.0",
-  "uk.gov.hmrc" %% "simple-reactivemongo" % "7.19.0-play-25"
+  "uk.gov.hmrc" %% "bootstrap-play-25" % "4.13.0",
+  "uk.gov.hmrc" %% "simple-reactivemongo" % "7.20.0-play-25"
 )
 
 val overrides = Seq(
@@ -36,7 +36,7 @@ val overrides = Seq(
 
 def test(scope: String = "test,acceptance") = Seq(
   "uk.gov.hmrc" %% "hmrctest" % "3.9.0-play-25" % scope,
-  "uk.gov.hmrc" %% "reactivemongo-test" % "4.14.0-play-25" % scope,
+  "uk.gov.hmrc" %% "reactivemongo-test" % "4.15.0-play-25" % scope,
   "org.scalamock" %% "scalamock-scalatest-support" % "3.6.0" % scope,
   "org.scalatest" %% "scalatest" % "3.0.4" % scope,
   "org.scalatestplus.play" %% "scalatestplus-play" % "2.0.1" % scope,

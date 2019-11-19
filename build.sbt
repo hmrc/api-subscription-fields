@@ -26,7 +26,7 @@ import uk.gov.hmrc.versioning.SbtGitVersioning
 import scala.language.postfixOps
 
 val compile = Seq(
-  "uk.gov.hmrc" %% "bootstrap-play-25" % "4.13.0",
+  "uk.gov.hmrc" %% "bootstrap-play-25" % "5.1.0",
   "uk.gov.hmrc" %% "simple-reactivemongo" % "7.20.0-play-25"
 )
 

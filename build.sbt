@@ -43,7 +43,7 @@ def test(scope: String = "test,acceptance") = Seq(
   "org.pegdown" % "pegdown" % "1.6.0" % scope,
   "com.github.tomakehurst" % "wiremock" % "2.11.0" % scope,
   "com.typesafe.play" %% "play-test" % play.core.PlayVersion.current % scope,
-  "org.mockito" % "mockito-core" % "1.9.5" % "test,it"
+  "org.mockito" % "mockito-core" % "1.9.5" % "test"
 )
 
 val appName = "api-subscription-fields"
@@ -56,9 +56,8 @@ lazy val plugins: Seq[Plugins] = Seq.empty
 lazy val playSettings: Seq[Setting[_]] = Seq.empty
 
 lazy val AcceptanceTest = config("acceptance") extend Test
-lazy val IntegrationTest = config("it") extend Test
 
-val testConfig = Seq(AcceptanceTest, Test, IntegrationTest)
+val testConfig = Seq(AcceptanceTest, Test)
 
 lazy val microservice = Project(appName, file("."))
   .enablePlugins(Seq(PlayScala, SbtAutoBuildPlugin, SbtGitVersioning, SbtDistributablesPlugin, SbtArtifactory) ++ plugins: _*)
@@ -78,15 +77,6 @@ lazy val microservice = Project(appName, file("."))
     testOptions in Test := Seq(Tests.Filter(unitFilter), Tests.Argument("-eT")),
     fork in Test := false,
     addTestReportOption(Test, "test-reports")
-  )
-  .settings(Defaults.itSettings)
-  .settings(
-    testOptions in IntegrationTest := Seq(Tests.Filter(integrationFilter), Tests.Argument("-eT")),
-    Keys.fork in IntegrationTest := false,
-    unmanagedSourceDirectories in IntegrationTest <<= (baseDirectory in IntegrationTest) (base => Seq(base / "test" / "it")),
-    addTestReportOption(IntegrationTest, "integration-reports"),
-    testGrouping in IntegrationTest := oneForkedJvmPerTest((definedTests in IntegrationTest).value),
-    parallelExecution in IntegrationTest := false
   )
   .settings(majorVersion := 0)
 
@@ -111,8 +101,7 @@ lazy val scoverageSettings: Seq[Setting[_]] = Seq(
   parallelExecution in Test := false
 )
 
-def unitFilter(name: String): Boolean = !integrationFilter(name) && !acceptanceFilter(name)
-def integrationFilter(name: String): Boolean = name contains "integration"
+def unitFilter(name: String): Boolean = !acceptanceFilter(name)
 def acceptanceFilter(name: String): Boolean = name contains "acceptance"
 
 def oneForkedJvmPerTest(tests: Seq[TestDefinition]): Seq[Group] =

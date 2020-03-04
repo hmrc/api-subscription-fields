@@ -18,7 +18,7 @@ package uk.gov.hmrc.apisubscriptionfields.controller
 
 import org.scalamock.scalatest.MockFactory
 import play.api.libs.json.{JsDefined, JsString}
-import play.api.test.FakeRequest
+import play.api.test.{FakeRequest, StubControllerComponentsFactory}
 import play.api.test.Helpers._
 import uk.gov.hmrc.apisubscriptionfields.model.{ApiContext, ApiVersion, ClientId, JsonFormatters}
 import uk.gov.hmrc.apisubscriptionfields.service.SubscriptionFieldsService
@@ -27,10 +27,10 @@ import uk.gov.hmrc.apisubscriptionfields.util.SubscriptionFieldsTestData
 
 import scala.concurrent.Future
 
-class SubscriptionFieldsControllerDeleteSpec extends UnitSpec with SubscriptionFieldsTestData with MockFactory with JsonFormatters {
+class SubscriptionFieldsControllerDeleteSpec extends UnitSpec with SubscriptionFieldsTestData with MockFactory with JsonFormatters with StubControllerComponentsFactory {
 
   private val mockSubscriptionFieldsService = mock[SubscriptionFieldsService]
-  private val controller = new SubscriptionFieldsController(mockSubscriptionFieldsService)
+  private val controller = new SubscriptionFieldsController(stubControllerComponents(), mockSubscriptionFieldsService)
 
   "DELETE /field/application/:clientId/context/:apiContext/version/:apiVersion" should {
     "return NO_CONTENT (204) when successfully deleted from repo" in {

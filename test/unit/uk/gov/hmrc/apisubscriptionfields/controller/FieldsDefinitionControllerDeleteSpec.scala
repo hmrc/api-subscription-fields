@@ -18,7 +18,7 @@ package uk.gov.hmrc.apisubscriptionfields.controller
 
 import org.scalamock.scalatest.MockFactory
 import play.api.libs.json.{JsDefined, JsString}
-import play.api.test.FakeRequest
+import play.api.test.{FakeRequest, StubControllerComponentsFactory}
 import play.api.test.Helpers._
 import uk.gov.hmrc.apisubscriptionfields.model.JsonFormatters
 import uk.gov.hmrc.apisubscriptionfields.service.FieldsDefinitionService
@@ -27,10 +27,10 @@ import uk.gov.hmrc.apisubscriptionfields.util.FieldsDefinitionTestData
 
 import scala.concurrent.Future
 
-class FieldsDefinitionControllerDeleteSpec extends UnitSpec with FieldsDefinitionTestData with MockFactory with JsonFormatters {
+class FieldsDefinitionControllerDeleteSpec extends UnitSpec with FieldsDefinitionTestData with MockFactory with JsonFormatters with StubControllerComponentsFactory {
 
   private val mockFieldsDefinitionService = mock[FieldsDefinitionService]
-  private val controller = new FieldsDefinitionController(mockFieldsDefinitionService)
+  private val controller = new FieldsDefinitionController(stubControllerComponents(), mockFieldsDefinitionService)
 
   "DELETE /definition/context/:apiContext/version/:apiVersion" should {
     "return NO_CONTENT (204) when successfully deleted from repo" in {

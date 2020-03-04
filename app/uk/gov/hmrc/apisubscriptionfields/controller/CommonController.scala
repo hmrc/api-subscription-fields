@@ -21,12 +21,12 @@ import play.api.libs.json._
 import play.api.mvc.{Request, Result}
 import uk.gov.hmrc.apisubscriptionfields.model.ErrorCode._
 import uk.gov.hmrc.apisubscriptionfields.model.JsErrorResponse
-import uk.gov.hmrc.play.bootstrap.controller.BaseController
+import uk.gov.hmrc.play.bootstrap.controller.BackendBaseController
 
 import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
 
-trait CommonController extends BaseController {
+trait CommonController extends BackendBaseController {
 
   override protected def withJsonBody[T]
   (f: (T) => Future[Result])(implicit request: Request[JsValue], m: Manifest[T], reads: Reads[T]): Future[Result] = {

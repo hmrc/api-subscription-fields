@@ -27,10 +27,10 @@ import uk.gov.hmrc.apisubscriptionfields.util.FieldsDefinitionTestData
 
 import scala.concurrent.Future
 
-class FieldsDefinitionControllerGetSpec extends UnitSpec with FieldsDefinitionTestData with MockFactory with JsonFormatters {
+class FieldsDefinitionControllerGetSpec extends UnitSpec with FieldsDefinitionTestData with MockFactory with JsonFormatters with StubControllerComponentsFactory {
 
   private val mockFieldsDefinitionService = mock[FieldsDefinitionService]
-  private val controller = new FieldsDefinitionController(mockFieldsDefinitionService)
+  private val controller = new FieldsDefinitionController(stubControllerComponents(), mockFieldsDefinitionService)
 
   private val responseJsonString =
     """{

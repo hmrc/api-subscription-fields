@@ -28,10 +28,10 @@ import uk.gov.hmrc.play.test.UnitSpec
 
 import scala.concurrent.Future
 
-class SubscriptionFieldsControllerGetSpec extends UnitSpec with SubscriptionFieldsTestData with MockFactory with JsonFormatters {
+class SubscriptionFieldsControllerGetSpec extends UnitSpec with SubscriptionFieldsTestData with MockFactory with JsonFormatters with StubControllerComponentsFactory {
 
   private val mockSubscriptionFieldsService = mock[SubscriptionFieldsService]
-  private val controller = new SubscriptionFieldsController(mockSubscriptionFieldsService)
+  private val controller = new SubscriptionFieldsController(stubControllerComponents(), mockSubscriptionFieldsService)
 
   private val responseJsonString =
     """{

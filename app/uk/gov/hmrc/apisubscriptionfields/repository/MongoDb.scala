@@ -16,10 +16,9 @@
 
 package uk.gov.hmrc.apisubscriptionfields.repository
 
-import javax.inject.Singleton
-
 import com.google.inject.ImplementedBy
-import play.modules.reactivemongo.MongoDbConnection
+import javax.inject.{Inject, Singleton}
+import play.modules.reactivemongo.ReactiveMongoComponent
 import reactivemongo.api.DB
 
 @ImplementedBy(classOf[MongoDb])
@@ -28,6 +27,6 @@ trait MongoDbProvider {
 }
 
 @Singleton
-class MongoDb extends MongoDbConnection with MongoDbProvider {
-  override val mongo: () => DB = db
+class MongoDb @Inject()(component: ReactiveMongoComponent) extends MongoDbProvider {
+  override val mongo: () => DB = component.mongoConnector.db
 }

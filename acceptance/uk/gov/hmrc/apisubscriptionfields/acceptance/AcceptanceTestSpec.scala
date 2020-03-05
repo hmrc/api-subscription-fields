@@ -19,16 +19,18 @@ package uk.gov.hmrc.apisubscriptionfields.acceptance
 import java.util.UUID
 
 import org.scalatest._
-import org.scalatestplus.play.guice.{ GuiceOneServerPerSuite}
+import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
-import play.api.mvc.{AnyContentAsEmpty, AnyContentAsJson}
+import play.api.mvc._
+import play.api.mvc.request.RequestTarget
 import play.api.test.FakeRequest
-import play.modules.reactivemongo.MongoDbConnection
+import play.api.test.Helpers._
+import play.modules.reactivemongo.ReactiveMongoComponent
+import uk.gov.hmrc.apisubscriptionfields.RequestHeaders
 import uk.gov.hmrc.apisubscriptionfields.model.JsonFormatters._
 import uk.gov.hmrc.apisubscriptionfields.model._
-import uk.gov.hmrc.apisubscriptionfields.RequestHeaders
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
@@ -65,13 +67,13 @@ trait AcceptanceTestSpec extends FeatureSpec
     validSubscriptionPutRequest(SubscriptionFieldsRequest(fields))
 
   protected def validSubscriptionPutRequest(contents: SubscriptionFieldsRequest): FakeRequest[AnyContentAsJson] =
-    fakeRequestWithHeaders.withJsonBody(Json.toJson(contents))
+    fakeRequestWithHeaders.withMethod(PUT).withJsonBody(Json.toJson(contents))
 
   protected def validDefinitionPutRequest(fieldDefinitions: Seq[FieldDefinition]): FakeRequest[AnyContentAsJson] =
     validDefinitionPutRequest(FieldsDefinitionRequest(fieldDefinitions))
 
   protected def validDefinitionPutRequest(contents: FieldsDefinitionRequest): FakeRequest[AnyContentAsJson] =
-    fakeRequestWithHeaders.withJsonBody(Json.toJson(contents))
+    fakeRequestWithHeaders.withMethod(PUT).withJsonBody(Json.toJson(contents))
 
   protected def fakeRequestWithHeaders: FakeRequest[AnyContentAsEmpty.type] = {
     FakeRequest().withHeaders(RequestHeaders.ACCEPT_HMRC_JSON_HEADER, RequestHeaders.CONTENT_TYPE_HEADER)
@@ -98,6 +100,11 @@ trait AcceptanceTestSpec extends FeatureSpec
   }
 
   private def dropDatabase(): Unit = {
-    await(new MongoDbConnection() {}.db().drop())
+   await( app.injector.instanceOf[ReactiveMongoComponent].mongoConnector.db().drop())
   }
+
+  def createRequest(method: String, path: String) =
+    ValidRequest
+      .withMethod(method)
+      .withTarget( RequestTarget(uriString ="", path= path, queryString = Map.empty))
 }

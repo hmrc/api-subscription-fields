@@ -18,6 +18,7 @@ package uk.gov.hmrc.apisubscriptionfields.acceptance
 
 import org.scalatest.OptionValues
 import play.api.mvc._
+import play.api.mvc.request.RequestTarget
 import play.api.test.Helpers._
 import uk.gov.hmrc.apisubscriptionfields.model._
 import uk.gov.hmrc.apisubscriptionfields.{FieldsDefinitionTestData, SubscriptionFieldsTestData}
@@ -33,22 +34,26 @@ class SubscriptionFieldDefinitionsHappySpec extends AcceptanceTestSpec
   feature("Fields-Definition") {
 
     scenario("the API is called to store some new fields definitions") {
+      createDefinitions()
+    }
 
-      Given("a request with valid payload")
-      val request = validDefinitionPutRequest(FakeFieldsDefinitions)
-        .copyFakeRequest(method = PUT, uri = definitionEndpoint(fakeRawContext, fakeRawVersion))
+
+    def createDefinitions(): Unit ={
+      Given("Definitiions are created ")
+      val putRequest = validDefinitionPutRequest(FakeFieldsDefinitions)
+        .withTarget( RequestTarget(uriString="", path=definitionEndpoint(fakeRawContext, fakeRawVersion), queryString = Map.empty))
 
       When("a PUT request with data is sent to the API")
-      val result: Option[Future[Result]] = route(app, request)
+      val putResult: Option[Future[Result]] = route(app, putRequest)
 
       Then(s"a response with a 201 status is received")
-      result shouldBe 'defined
-      val resultFuture = result.value
+      putResult shouldBe 'defined
+      val putResultFuture = putResult.value
 
-      status(resultFuture) shouldBe CREATED
+      status(putResultFuture) shouldBe CREATED
 
       And("the response body should be a valid response")
-      val sfr = contentAsJson(resultFuture).validate[FieldsDefinitionResponse]
+      val sfr = contentAsJson(putResultFuture).validate[FieldsDefinitionResponse]
 
       sfr.isSuccess shouldBe true
       sfr.get shouldBe FieldsDefinitionResponse(fakeRawContext, fakeRawVersion, FakeFieldsDefinitions)
@@ -56,8 +61,12 @@ class SubscriptionFieldDefinitionsHappySpec extends AcceptanceTestSpec
 
     scenario("the API is called to GET a known fields definition") {
 
-      Given("a request with a known fields definition")
-      val request = ValidRequest.copyFakeRequest(method = GET, uri = definitionEndpoint(fakeRawContext, fakeRawVersion))
+      //createDefinitions()
+
+      Then("a request with a known fields definition")
+      val request = ValidRequest
+          .withMethod(GET)
+        .withTarget(RequestTarget(uriString = "", path = definitionEndpoint(fakeRawContext, fakeRawVersion), queryString = Map.empty))
 
       When("a GET request with data is sent to the API")
       val result: Option[Future[Result]] = route(app, request)
@@ -77,8 +86,12 @@ class SubscriptionFieldDefinitionsHappySpec extends AcceptanceTestSpec
 
     scenario("the API is called to GET all fields definitions") {
 
+     // createDefinitions()
+
       Given("a request for all fields definition")
-      val request = ValidRequest.copyFakeRequest(method = GET, uri = allDefinitionsEndpoint)
+      val request = ValidRequest
+        .withMethod(GET)
+        .withTarget(RequestTarget(uriString = allDefinitionsEndpoint, path = allDefinitionsEndpoint, queryString = Map.empty))
 
       When("a GET request is sent to the API")
       val result: Option[Future[Result]] = route(app, request)
@@ -98,9 +111,11 @@ class SubscriptionFieldDefinitionsHappySpec extends AcceptanceTestSpec
 
     scenario("the API is called to update some existing fields definitions") {
 
+      //createDefinitions()
+
       Given("a request with valid payload")
-      val request = validDefinitionPutRequest(Seq.empty)
-        .copyFakeRequest(method = PUT, uri = definitionEndpoint(fakeRawContext, fakeRawVersion))
+      val request =  validDefinitionPutRequest(Seq.empty)
+        .withTarget( RequestTarget(uriString="", path=definitionEndpoint(fakeRawContext, fakeRawVersion), queryString = Map.empty))
 
       When("a PUT request with data is sent to the API")
       val result: Option[Future[Result]] = route(app, request)
@@ -120,9 +135,12 @@ class SubscriptionFieldDefinitionsHappySpec extends AcceptanceTestSpec
 
     scenario("the API is called to delete some existing fields definitions") {
 
+      //createDefinitions()
+
       Given("a request with valid payload")
-      val request = validDefinitionPutRequest(Seq.empty)
-        .copyFakeRequest(method = DELETE, uri = definitionEndpoint(fakeRawContext, fakeRawVersion))
+      val request = ValidRequest
+        .withMethod(DELETE)
+        .withTarget( RequestTarget(uriString="", path=definitionEndpoint(fakeRawContext, fakeRawVersion), queryString = Map.empty))
 
       When("a DELETE request sent to the API")
       val result: Option[Future[Result]] = route(app, request)

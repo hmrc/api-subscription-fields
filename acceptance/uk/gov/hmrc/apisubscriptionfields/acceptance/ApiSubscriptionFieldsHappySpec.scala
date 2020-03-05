@@ -18,7 +18,10 @@ package uk.gov.hmrc.apisubscriptionfields.acceptance
 
 import org.scalatest.OptionValues
 import play.api.Logger
+import play.api.libs.json.Json
 import play.api.mvc._
+import play.api.mvc.request.RequestTarget
+import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.apisubscriptionfields.model._
 import uk.gov.hmrc.apisubscriptionfields.{FieldsDefinitionTestData, SubscriptionFieldsTestData}
@@ -37,10 +40,9 @@ class ApiSubscriptionFieldsHappySpec extends AcceptanceTestSpec
 
     scenario("the API is called to store some values for a new subscription field") {
       Given("a request with valid payload")
-      val request = validSubscriptionPutRequest(SampleFields1)
-        .copyFakeRequest(method = PUT, uri = subscriptionFieldsEndpoint(fakeRawClientId, fakeRawContext, fakeRawVersion))
+      val request = createSubscriptionFieldsRequest()
 
-      When("a PUT request with data is sent to the API")
+        When("a PUT request with data is sent to the API")
       val result: Option[Future[Result]] = route(app, request)
 
       Then(s"a response with a 201 status is received")
@@ -57,11 +59,21 @@ class ApiSubscriptionFieldsHappySpec extends AcceptanceTestSpec
       sfr.get shouldBe SubscriptionFieldsResponse(fakeRawClientId, "acontext", "1.0.2", fieldsId, SampleFields1)
     }
 
+    def createSubscriptionFieldsRequest(): FakeRequest[AnyContentAsJson] = {
+      createRequest(PUT, subscriptionFieldsEndpoint(fakeRawClientId, fakeRawContext, fakeRawVersion))
+        .withJsonBody(Json.toJson(SubscriptionFieldsRequest(SampleFields1)))
+    }
+
+    def createSubscriptionFields()= {
+      route(app, createSubscriptionFieldsRequest())
+    }
+
     scenario("the API is called to GET some existing subscription fields") {
 
       Given("a request with a known subscription field")
-      val request = ValidRequest
-        .copyFakeRequest(method = GET, uri = subscriptionFieldsEndpoint(fakeRawClientId, fakeRawContext, fakeRawVersion))
+      createSubscriptionFields()
+
+      val request = createRequest(GET, subscriptionFieldsEndpoint(fakeRawClientId, fakeRawContext, fakeRawVersion))
 
       When("a GET request with data is sent to the API")
       val result: Option[Future[Result]] = route(app, request)
@@ -83,8 +95,9 @@ class ApiSubscriptionFieldsHappySpec extends AcceptanceTestSpec
     scenario("the API is called to GET all existing subscription fields") {
 
       Given("a request with a known subscription field")
-      val request = ValidRequest
-        .copyFakeRequest(method = GET, uri = allSubscriptionFieldsEndpoint)
+      createSubscriptionFields()
+
+      val request = createRequest(GET, allSubscriptionFieldsEndpoint)
 
       When("a GET request with data is sent to the API")
       val result: Option[Future[Result]] = route(app, request)
@@ -106,8 +119,10 @@ class ApiSubscriptionFieldsHappySpec extends AcceptanceTestSpec
     scenario("the API is called to GET with a known fieldsId") {
 
       Given("a request with a known fieldsId")
-      val requestId = ValidRequest
-        .copyFakeRequest(method = GET, uri = subscriptionFieldsEndpoint(fakeRawClientId, fakeRawContext, fakeRawVersion))
+
+      createSubscriptionFields()
+
+      val requestId =  createRequest(GET, subscriptionFieldsEndpoint(fakeRawClientId, fakeRawContext, fakeRawVersion))
 
       When("an id GET request with data is sent to the API")
       val result: Option[Future[Result]] = route(app, requestId)
@@ -123,7 +138,9 @@ class ApiSubscriptionFieldsHappySpec extends AcceptanceTestSpec
 
       Given("a request with a known fieldsId")
       val fieldsId = sfr.get.fieldsId
-      val requestFieldsId = ValidRequest.copyFakeRequest(method = GET, uri = fieldsIdEndpoint(fieldsId.value))
+
+      val requestFieldsId = createRequest(GET, fieldsIdEndpoint(fieldsId.value))
+
 
       When("a fieldsId GET request with data is sent to the API")
       val resultFieldsId: Option[Future[Result]] = route(app, requestFieldsId)
@@ -142,7 +159,9 @@ class ApiSubscriptionFieldsHappySpec extends AcceptanceTestSpec
     scenario("the API is called to GET existing subscription fields by application clientId") {
 
       Given("a request with a known client identifier")
-      val request = ValidRequest.copyFakeRequest(method = GET, uri = byClientIdEndpoint(fakeRawClientId))
+      createSubscriptionFields()
+
+      val request = createRequest(GET, byClientIdEndpoint(fakeRawClientId))
 
       When("a GET request with data is sent to the API")
       val result: Option[Future[Result]] = route(app, request)
@@ -164,8 +183,9 @@ class ApiSubscriptionFieldsHappySpec extends AcceptanceTestSpec
     scenario("the API is called to update existing subscription fields") {
 
       Given("a request with valid payload")
+      createSubscriptionFields()
       val request = validSubscriptionPutRequest(SampleFields2)
-        .copyFakeRequest(method = PUT, uri = subscriptionFieldsEndpoint(fakeRawClientId, fakeRawContext, fakeRawVersion))
+        .withTarget(RequestTarget(uriString = "", path = subscriptionFieldsEndpoint(fakeRawClientId, fakeRawContext, fakeRawVersion), queryString = Map.empty))
 
       When("a PUT request with data is sent to the API")
       val result: Option[Future[Result]] = route(app, request)
@@ -187,8 +207,9 @@ class ApiSubscriptionFieldsHappySpec extends AcceptanceTestSpec
     scenario("the API is called to DELETE existing subscription fields") {
 
       Given("a request with existing subscription fields")
-      val request = ValidRequest
-        .copyFakeRequest(method = DELETE, uri = subscriptionFieldsEndpoint(fakeRawClientId, fakeRawContext, fakeRawVersion))
+      createSubscriptionFields()
+
+      val request = createRequest(DELETE, subscriptionFieldsEndpoint(fakeRawClientId, fakeRawContext, fakeRawVersion))
 
       When("a GET request with data is sent to the API")
       val result: Option[Future[Result]] = route(app, request)

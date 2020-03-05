@@ -19,6 +19,7 @@ package uk.gov.hmrc.apisubscriptionfields.acceptance
 import org.scalatest.OptionValues
 import play.api.libs.json.Json
 import play.api.mvc._
+import play.api.mvc.request.RequestTarget
 import play.api.test.Helpers._
 import uk.gov.hmrc.apisubscriptionfields.SubscriptionFieldsTestData
 import uk.gov.hmrc.apisubscriptionfields.model.ErrorCode.{INVALID_REQUEST_PAYLOAD, NOT_FOUND_CODE}
@@ -34,7 +35,7 @@ class SubscriptionFieldDefinitionsUnhappySpec extends AcceptanceTestSpec
     scenario("the API is called to GET an unknown fields definition") {
 
       Given("the API is called to GET an unknown fields definition")
-      val request = ValidRequest.copyFakeRequest(method = GET, uri = definitionEndpoint(fakeRawContext, "unknown"))
+      val request = ValidRequest.withTarget(RequestTarget(uriString = "", path = definitionEndpoint(fakeRawContext, "unknown"), queryString = Map.empty))
 
       When("a GET request with data is sent to the API")
       val result: Option[Future[Result]] = route(app, request)
@@ -53,7 +54,9 @@ class SubscriptionFieldDefinitionsUnhappySpec extends AcceptanceTestSpec
 
       Given("the API is called to PUT a fields definition with an invalid JSON payload")
       val request = ValidRequest
-        .copyFakeRequest(method = PUT, uri = definitionEndpoint(fakeRawContext, fakeRawVersion), body = Json.parse("{}"))
+        .withMethod(PUT)
+        .withTarget(RequestTarget(uriString = "", path = definitionEndpoint(fakeRawContext, fakeRawVersion), queryString = Map.empty))
+        .withJsonBody(Json.parse("{}"))
 
       When("a PUT request with data is sent to the API")
       val result: Option[Future[Result]] = route(app, request)
@@ -83,8 +86,12 @@ class SubscriptionFieldDefinitionsUnhappySpec extends AcceptanceTestSpec
           |""".stripMargin
 
       Given("the API is called to PUT a fields definition with an invalid JSON payload")
-      val request = ValidRequest.copyFakeRequest(method = PUT, uri = definitionEndpoint(fakeRawContext, fakeRawVersion))
+
+      val request = ValidRequest
+        .withMethod(PUT)
+        .withTarget(RequestTarget(uriString = "", path = definitionEndpoint(fakeRawContext, fakeRawVersion), queryString = Map.empty))
         .withJsonBody(Json.parse(invalidFieldDefinition))
+
 
       When("a PUT request with data is sent to the API")
       val result: Option[Future[Result]] = route(app, request)
@@ -102,8 +109,11 @@ class SubscriptionFieldDefinitionsUnhappySpec extends AcceptanceTestSpec
     scenario("the API is called to PUT a fields definition with an invalid non JSON payload") {
 
       Given("the API is called to PUT a fields definition with an invalid non JSON payload")
+
       val request = ValidRequest
-        .copyFakeRequest(method = PUT, uri = definitionEndpoint(fakeRawContext, fakeRawVersion), body = InvalidNonJsonPayload)
+        .withMethod(PUT)
+        .withTarget(RequestTarget(uriString = "", path = definitionEndpoint(fakeRawContext, fakeRawVersion), queryString = Map.empty))
+        .withBody(InvalidNonJsonPayload)
 
       When("a PUT request with data is sent to the API")
       val result: Option[Future[Result]] = route(app, request)
@@ -121,8 +131,11 @@ class SubscriptionFieldDefinitionsUnhappySpec extends AcceptanceTestSpec
     scenario("the API is called to DELETE an unknown fields definition") {
 
       Given("a request with an unknown fields definition")
+
       val request = ValidRequest
-        .copyFakeRequest(method = DELETE, uri = definitionEndpoint(fakeRawContext, "unknown"))
+        .withMethod(DELETE)
+        .withTarget(RequestTarget(uriString = "", path = definitionEndpoint(fakeRawContext, "unknown"), queryString = Map.empty))
+
 
       When("a GET request with data is sent to the API")
       val result: Option[Future[Result]] = route(app, request)

@@ -37,9 +37,7 @@ class ApiSubscriptionFieldsUnhappySpec extends AcceptanceTestSpec
     scenario("the API is called to GET non-existing subscription fields") {
 
       Given("the API is called to GET non-existing subscription fields")
-      val request = ValidRequest
-        .copyFakeRequest(method = GET, uri = subscriptionFieldsEndpoint(fakeRawClientId, fakeRawContext, fakeRawVersion))
-
+      val request =  createRequest(GET, subscriptionFieldsEndpoint(fakeRawClientId, fakeRawContext, fakeRawVersion))
       When("a GET request with data is sent to the API")
       val result: Option[Future[Result]] = route(app, request)
 
@@ -56,7 +54,7 @@ class ApiSubscriptionFieldsUnhappySpec extends AcceptanceTestSpec
     scenario("the API is called to GET with an unknown fieldsId") {
 
       Given("the API is called to GET with an unknown fieldsId")
-      val request = ValidRequest.copyFakeRequest(method = GET, uri = fieldsIdEndpoint(FakeRawFieldsId))
+      val request = createRequest(GET, fieldsIdEndpoint(FakeRawFieldsId))
 
       When("a GET request with data is sent to the API")
       val result: Option[Future[Result]] = route(app, request)
@@ -74,7 +72,7 @@ class ApiSubscriptionFieldsUnhappySpec extends AcceptanceTestSpec
     scenario("the API is called to GET an unknown application clientId") {
 
       Given("the API is called to GET an unknown application clientId")
-      val request = ValidRequest.copyFakeRequest(method = GET, uri = byClientIdEndpoint(fakeRawClientId))
+      val request = createRequest(GET, byClientIdEndpoint(fakeRawClientId))
 
       When("a GET request with data is sent to the API")
       val result: Option[Future[Result]] = route(app, request)
@@ -92,8 +90,7 @@ class ApiSubscriptionFieldsUnhappySpec extends AcceptanceTestSpec
     scenario("the API is called to DELETE an unknown subscription field") {
 
       Given("a request with an unknown subscription field")
-      val request = ValidRequest
-        .copyFakeRequest(method = DELETE, uri = subscriptionFieldsEndpoint(fakeRawClientId, fakeRawContext, fakeRawVersion))
+      val request = createRequest(DELETE, subscriptionFieldsEndpoint(fakeRawClientId, fakeRawContext, fakeRawVersion))
 
       When("a GET request with data is sent to the API")
       val result: Option[Future[Result]] = route(app, request)
@@ -111,8 +108,8 @@ class ApiSubscriptionFieldsUnhappySpec extends AcceptanceTestSpec
     scenario("the API is called to PUT subscription fields with an invalid JSON payload") {
 
       Given("the API is called to PUT subscription fields with an invalid JSON payload")
-      val request = ValidRequest
-        .copyFakeRequest(method = PUT, uri = subscriptionFieldsEndpoint(fakeRawClientId, fakeRawContext, fakeRawVersion), body = Json.parse("{}"))
+      val request = createRequest(PUT, subscriptionFieldsEndpoint(fakeRawClientId, fakeRawContext, fakeRawVersion))
+        .withJsonBody(Json.parse("{}"))
 
       When("a PUT request with data is sent to the API")
       val result: Option[Future[Result]] = route(app, request)
@@ -130,8 +127,8 @@ class ApiSubscriptionFieldsUnhappySpec extends AcceptanceTestSpec
     scenario("the API is called to PUT subscription fields with an invalid non JSON payload") {
 
       Given("the API is called to PUT subscription fields with an invalid non JSON payload")
-      val request = ValidRequest
-        .copyFakeRequest(method = PUT, uri = subscriptionFieldsEndpoint(fakeRawClientId, fakeRawContext, fakeRawVersion), body = InvalidNonJsonPayload)
+      val request =  createRequest(PUT, subscriptionFieldsEndpoint(fakeRawClientId, fakeRawContext, fakeRawVersion))
+        .withBody(InvalidNonJsonPayload)
 
       When("a PUT request with data is sent to the API")
       val result: Option[Future[Result]] = route(app, request)

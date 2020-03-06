@@ -34,11 +34,6 @@ class SubscriptionFieldDefinitionsHappySpec extends AcceptanceTestSpec
   feature("Fields-Definition") {
 
     scenario("the API is called to store some new fields definitions") {
-      createDefinitions()
-    }
-
-
-    def createDefinitions(): Unit ={
       Given("Definitiions are created ")
       val putRequest = validDefinitionPutRequest(FakeFieldsDefinitions)
         .withTarget( RequestTarget(uriString="", path=definitionEndpoint(fakeRawContext, fakeRawVersion), queryString = Map.empty))
@@ -59,9 +54,10 @@ class SubscriptionFieldDefinitionsHappySpec extends AcceptanceTestSpec
       sfr.get shouldBe FieldsDefinitionResponse(fakeRawContext, fakeRawVersion, FakeFieldsDefinitions)
     }
 
-    scenario("the API is called to GET a known fields definition") {
 
-      //createDefinitions()
+
+
+    scenario("the API is called to GET a known fields definition") {
 
       Then("a request with a known fields definition")
       val request = ValidRequest
@@ -86,8 +82,6 @@ class SubscriptionFieldDefinitionsHappySpec extends AcceptanceTestSpec
 
     scenario("the API is called to GET all fields definitions") {
 
-     // createDefinitions()
-
       Given("a request for all fields definition")
       val request = ValidRequest
         .withMethod(GET)
@@ -111,8 +105,6 @@ class SubscriptionFieldDefinitionsHappySpec extends AcceptanceTestSpec
 
     scenario("the API is called to update some existing fields definitions") {
 
-      //createDefinitions()
-
       Given("a request with valid payload")
       val request =  validDefinitionPutRequest(Seq.empty)
         .withTarget( RequestTarget(uriString="", path=definitionEndpoint(fakeRawContext, fakeRawVersion), queryString = Map.empty))
@@ -134,8 +126,6 @@ class SubscriptionFieldDefinitionsHappySpec extends AcceptanceTestSpec
     }
 
     scenario("the API is called to delete some existing fields definitions") {
-
-      //createDefinitions()
 
       Given("a request with valid payload")
       val request = ValidRequest

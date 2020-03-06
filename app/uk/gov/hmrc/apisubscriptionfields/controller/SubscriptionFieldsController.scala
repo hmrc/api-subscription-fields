@@ -29,7 +29,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 @Singleton
-class SubscriptionFieldsController @Inject()(service: SubscriptionFieldsService) extends CommonController {
+class SubscriptionFieldsController @Inject()(cc: ControllerComponents, service: SubscriptionFieldsService) extends CommonController {
 
   import JsonFormatters._
 
@@ -107,4 +107,5 @@ class SubscriptionFieldsController @Inject()(service: SubscriptionFieldsService)
     } recover recovery
   }
 
+  override protected def controllerComponents: ControllerComponents = cc
 }

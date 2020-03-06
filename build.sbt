@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import sbt.Keys._
-import sbt.Tests.{Group, SubProcess}
+import sbt.Keys.{parallelExecution, _}
 import sbt._
 import uk.gov.hmrc.DefaultBuildSettings.{addTestReportOption, defaultSettings, scalaSettings}
 import uk.gov.hmrc.SbtAutoBuildPlugin
@@ -26,72 +25,76 @@ import uk.gov.hmrc.versioning.SbtGitVersioning
 import scala.language.postfixOps
 
 val compile = Seq(
-  "uk.gov.hmrc" %% "bootstrap-play-25" % "5.1.0",
-  "uk.gov.hmrc" %% "simple-reactivemongo" % "7.22.0-play-25"
+  "uk.gov.hmrc" %% "bootstrap-play-26" % "1.4.0",
+  "uk.gov.hmrc" %% "simple-reactivemongo" % "7.22.0-play-26"
 )
 
-val overrides = Seq(
-  "org.reactivemongo" %% "reactivemongo" % "0.16.6"
+// we need to override the akka version for now as newer versions are not compatible with reactivemongo
+lazy val akkaVersion = "2.5.23"
+lazy val akkaHttpVersion = "10.0.15"
+
+val overrides: Seq[ModuleID] = Seq(
+  "com.typesafe.akka" %% "akka-stream" % akkaVersion,
+  "com.typesafe.akka" %% "akka-protobuf" % akkaVersion,
+  "com.typesafe.akka" %% "akka-slf4j" % akkaVersion,
+  "com.typesafe.akka" %% "akka-actor" % akkaVersion,
+  "com.typesafe.akka" %% "akka-http-core" % akkaHttpVersion
 )
 
 def test(scope: String = "test,acceptance") = Seq(
-  "uk.gov.hmrc" %% "hmrctest" % "3.9.0-play-25" % scope,
-  "uk.gov.hmrc" %% "reactivemongo-test" % "4.15.0-play-25" % scope,
+  "uk.gov.hmrc" %% "hmrctest" % "3.9.0-play-26" % scope,
+  "uk.gov.hmrc" %% "reactivemongo-test" % "4.16.0-play-26" % scope,
   "org.scalamock" %% "scalamock-scalatest-support" % "3.6.0" % scope,
-  "org.scalatest" %% "scalatest" % "3.0.4" % scope,
-  "org.scalatestplus.play" %% "scalatestplus-play" % "2.0.1" % scope,
+  "org.scalatest" %% "scalatest" % "3.0.5" % scope,
+  "org.scalatestplus.play" %% "scalatestplus-play" % "3.1.2" % scope,
   "org.pegdown" % "pegdown" % "1.6.0" % scope,
-  "com.github.tomakehurst" % "wiremock" % "2.11.0" % scope,
   "com.typesafe.play" %% "play-test" % play.core.PlayVersion.current % scope,
-  "org.mockito" % "mockito-core" % "1.9.5" % "test"
+  "org.mockito" % "mockito-core" % "1.10.19" % "test"
 )
 
 val appName = "api-subscription-fields"
 
-lazy val appDependencies: Seq[ModuleID] = compile ++ overrides ++ test()
+lazy val appDependencies: Seq[ModuleID] = compile  ++ test()
 
 resolvers ++= Seq(Resolver.bintrayRepo("hmrc", "releases"), Resolver.jcenterRepo)
 
-lazy val plugins: Seq[Plugins] = Seq.empty
+lazy val plugins: Seq[Plugins] = Seq(PlayScala, SbtAutoBuildPlugin, SbtGitVersioning, SbtDistributablesPlugin, SbtArtifactory)
 lazy val playSettings: Seq[Setting[_]] = Seq.empty
+
 
 lazy val AcceptanceTest = config("acceptance") extend Test
 
-val testConfig = Seq(AcceptanceTest, Test)
-
 lazy val microservice = Project(appName, file("."))
-  .enablePlugins(Seq(PlayScala, SbtAutoBuildPlugin, SbtGitVersioning, SbtDistributablesPlugin, SbtArtifactory) ++ plugins: _*)
-  .configs(testConfig: _*)
+  .enablePlugins(plugins: _*)
+  .configs(AcceptanceTest)
   .settings(playSettings: _*)
   .settings(scalaSettings: _*)
   .settings(publishingSettings: _*)
   .settings(defaultSettings(): _*)
   .settings(acceptanceTestSettings: _*)
-  .settings(scalaVersion := "2.11.11")
+  .settings(scalaVersion := "2.12.10")
   .settings(
     libraryDependencies ++= appDependencies,
+    dependencyOverrides ++= overrides,
     evictionWarningOptions in update := EvictionWarningOptions.default.withWarnScalaVersionEviction(false)
   )
   .settings(scoverageSettings)
   .settings(
-    testOptions in Test := Seq(Tests.Filter(unitFilter), Tests.Argument("-eT")),
     fork in Test := false,
-    addTestReportOption(Test, "test-reports")
+    addTestReportOption(Test, "test-reports"),
+    parallelExecution in Test := false
   )
   .settings(majorVersion := 0)
 
 lazy val acceptanceTestSettings =
   inConfig(AcceptanceTest)(Defaults.testSettings) ++
     Seq(
-      testOptions in AcceptanceTest := Seq(Tests.Filter(acceptanceFilter)),
-      unmanagedSourceDirectories in AcceptanceTest := Seq(
-        baseDirectory.value / "test" / "acceptance",
-        baseDirectory.value / "test" / "util"
-      ),
+      unmanagedSourceDirectories in AcceptanceTest := Seq(baseDirectory.value / "acceptance"),
       fork in AcceptanceTest := false,
       parallelExecution in AcceptanceTest := false,
       addTestReportOption(AcceptanceTest, "acceptance-reports")
     )
+
 
 lazy val scoverageSettings: Seq[Setting[_]] = Seq(
   coverageExcludedPackages := "<empty>;Reverse.*;.*model.*;.*config.*;.*(AuthService|BuildInfo|Routes).*;.*.application;.*.definition",
@@ -101,18 +104,7 @@ lazy val scoverageSettings: Seq[Setting[_]] = Seq(
   parallelExecution in Test := false
 )
 
-def unitFilter(name: String): Boolean = !acceptanceFilter(name)
-def acceptanceFilter(name: String): Boolean = name contains "acceptance"
 
-def oneForkedJvmPerTest(tests: Seq[TestDefinition]): Seq[Group] =
-  tests map {
-    test => Group(test.name, Seq(test), SubProcess(ForkOptions(runJVMOptions = Seq("-Dtest.name=" + test.name))))
-  }
-
-def forkedJvmPerTestConfig(tests: Seq[TestDefinition], packages: String*): Seq[Group] =
-  tests.groupBy(_.name.takeWhile(_ != '.')).filter(packageAndTests => packages contains packageAndTests._1) map {
-    case (packg, theTests) => Group(packg, theTests, SubProcess(ForkOptions()))
-  } toSeq
 
 def onPackageName(rootPackage: String): String => Boolean = {
   testName => testName startsWith rootPackage

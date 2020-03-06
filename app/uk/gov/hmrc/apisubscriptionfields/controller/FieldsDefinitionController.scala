@@ -27,7 +27,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 @Singleton
-class FieldsDefinitionController @Inject() (service: FieldsDefinitionService) extends CommonController {
+class FieldsDefinitionController @Inject() (cc: ControllerComponents, service: FieldsDefinitionService) extends CommonController {
 
   import JsonFormatters._
 
@@ -67,4 +67,6 @@ class FieldsDefinitionController @Inject() (service: FieldsDefinitionService) ex
       case None => notFoundResponse(rawApiContext, rawApiVersion)
     } recover recovery
   }
+
+  override protected def controllerComponents: ControllerComponents = cc
 }

@@ -42,7 +42,8 @@ trait JsonFormatters extends SharedJsonFormatters {
     (JsPath \ "name").read[String] and
       (JsPath \ "description").read[String] and
       ((JsPath \ "hint").read[String] or Reads.pure("")) and
-      (JsPath \ "type").read[FieldDefinitionType]
+      (JsPath \ "type").read[FieldDefinitionType] and
+      ((JsPath \ "shortDescription").read[String] or Reads.pure(""))
   )(FieldDefinition.apply _)
   val fieldDefinitionWrites = Json.writes[FieldDefinition]
   implicit val FieldDefinitionJF = Format(fieldDefinitionReads, fieldDefinitionWrites)

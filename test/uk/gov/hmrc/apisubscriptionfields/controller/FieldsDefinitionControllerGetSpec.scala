@@ -41,13 +41,15 @@ class FieldsDefinitionControllerGetSpec extends UnitSpec with FieldsDefinitionTe
       |       "name": "callback-url",
       |       "description": "Callback URL",
       |       "hint": "Description Hint",
-      |       "type": "URL"
+      |       "type": "URL",
+      |       "shortDescription": "short desc"
       |     },
       |     {
       |       "name": "token",
       |       "description": "Secure Token",
       |       "hint": "Description Hint",
-      |       "type": "SecureToken"
+      |       "type": "SecureToken",
+      |       "shortDescription": ""
       |     }
       |   ]
       |}""".stripMargin
@@ -65,13 +67,15 @@ class FieldsDefinitionControllerGetSpec extends UnitSpec with FieldsDefinitionTe
       |          "name": "callback-url",
       |          "description": "Callback URL",
       |          "hint": "Description Hint",
-      |          "type": "URL"
+      |          "type": "URL",
+      |          "shortDescription": "short desc"
       |        },
       |        {
       |          "name": "token",
       |          "description": "Secure Token",
       |          "hint": "Description Hint",
-      |          "type": "SecureToken"
+      |          "type": "SecureToken",
+      |          "shortDescription": ""
       |        }
       |      ]
       |    },
@@ -83,13 +87,15 @@ class FieldsDefinitionControllerGetSpec extends UnitSpec with FieldsDefinitionTe
       |          "name": "address",
       |          "description": "where you live",
       |          "hint": "Description Hint",
-      |          "type": "STRING"
+      |          "type": "STRING",
+      |          "shortDescription": ""
       |        },
       |        {
       |          "name": "number",
       |          "description": "telephone number",
       |          "hint": "Description Hint",
-      |          "type": "STRING"
+      |          "type": "STRING",
+      |          "shortDescription": ""
       |        }
       |      ]
       |    }

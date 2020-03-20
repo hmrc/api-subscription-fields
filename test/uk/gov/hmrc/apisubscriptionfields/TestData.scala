@@ -64,9 +64,9 @@ trait SubscriptionFieldsTestData extends TestData {
 }
 
 trait FieldsDefinitionTestData extends TestData {
-  final val FakeFieldDefinitionUrl = FieldDefinition("name1", "desc1", "hint1", FieldDefinitionType.URL)
-  final val FakeFieldDefinitionString = FieldDefinition("name2", "desc2", "hint2", FieldDefinitionType.STRING)
-  final val FakeFieldDefinitionSecureToken = FieldDefinition("name3", "desc3", "hint3", FieldDefinitionType.SECURE_TOKEN)
+  final val FakeFieldDefinitionUrl = FieldDefinition("name1", "desc1", "hint1", FieldDefinitionType.URL, "short description")
+  final val FakeFieldDefinitionString = FieldDefinition("name2", "desc2", "hint2", FieldDefinitionType.STRING, "short description")
+  final val FakeFieldDefinitionSecureToken = FieldDefinition("name3", "desc3", "hint3", FieldDefinitionType.SECURE_TOKEN, "short description")
   final val FakeFieldsDefinitions = Seq(FakeFieldDefinitionUrl, FakeFieldDefinitionString, FakeFieldDefinitionSecureToken)
   final val FakeFieldsDefinition = FieldsDefinition(fakeRawContext, fakeRawVersion, FakeFieldsDefinitions)
   final val FakeFieldsDefinitionResponse = FieldsDefinitionResponse(fakeRawContext, fakeRawVersion, FakeFieldsDefinition.fieldDefinitions)

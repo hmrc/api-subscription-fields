@@ -37,7 +37,8 @@ class JsonFormatterSpec extends WordSpec
   private def objectAsJsonString[A](a:A)(implicit t: Writes[A]) = Json.asciiStringify(Json.toJson(a))
 
   private val subscriptionFieldJson = s"""{"clientId":"$fakeRawClientId","apiContext":"$fakeRawContext","apiVersion":"$fakeRawVersion","fieldsId":"$FakeRawFieldsId","fields":{"f1":"v1"}}"""
-  private val fieldDefinitionJson = s"""{"apiContext":"$fakeRawContext","apiVersion":"$fakeRawVersion","fieldDefinitions":[{"name":"name1","description":"desc1","hint":"hint1","type":"URL"}]}"""
+  private val fieldDefinitionJson =
+    s"""{"apiContext":"$fakeRawContext","apiVersion":"$fakeRawVersion","fieldDefinitions":[{"name":"name1","description":"desc1","hint":"hint1","type":"URL","shortDescription":"short description"}]}"""
 
   "SubscriptionFieldsResponse" should {
     "marshal json" in {

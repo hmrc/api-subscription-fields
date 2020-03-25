@@ -19,6 +19,7 @@ package uk.gov.hmrc.apisubscriptionfields.model
 import java.util.UUID
 
 import uk.gov.hmrc.apisubscriptionfields.model.FieldDefinitionType.FieldDefinitionType
+import uk.gov.hmrc.apisubscriptionfields.model.ValidationRuleType.ValidationRuleType
 
 case class ClientId(value: String) extends AnyVal
 
@@ -28,6 +29,17 @@ case class ApiVersion(value: String) extends AnyVal
 
 case class SubscriptionFieldsId(value: UUID) extends AnyVal
 
+object ValidationRuleType extends Enumeration {
+  type ValidationRuleType = Value
+
+  val REGEX = Value("REGEX")
+  val NONE = Value("")
+}
+
+case class ValidationRule(validationRuleType: ValidationRuleType, value: String)
+
+case class Validation(errorMessage: String, rules: Seq[ValidationRule])
+
 object FieldDefinitionType extends Enumeration {
   type FieldDefinitionType = Value
 
@@ -36,4 +48,4 @@ object FieldDefinitionType extends Enumeration {
   val STRING = Value("STRING")
 }
 
-case class FieldDefinition(name: String, description: String, hint: String = "", `type`: FieldDefinitionType, shortDescription: String)
+case class FieldDefinition(name: String, description: String, hint: String = "", `type`: FieldDefinitionType, shortDescription: String, validation: Validation)

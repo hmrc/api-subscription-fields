@@ -33,7 +33,6 @@ object ValidationRuleType extends Enumeration {
   type ValidationRuleType = Value
 
   val REGEX = Value("REGEX")
-  val NONE = Value("")
 }
 
 case class ValidationRule(validationRuleType: ValidationRuleType, value: String)
@@ -48,4 +47,4 @@ object FieldDefinitionType extends Enumeration {
   val STRING = Value("STRING")
 }
 
-case class FieldDefinition(name: String, description: String, hint: String = "", `type`: FieldDefinitionType, shortDescription: String, validation: Validation)
+case class FieldDefinition(name: String, description: String, hint: String = "", `type`: FieldDefinitionType, shortDescription: String, validation: Option[Validation] = None)

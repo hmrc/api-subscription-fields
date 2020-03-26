@@ -42,16 +42,7 @@ class FieldsDefinitionControllerGetSpec extends UnitSpec with FieldsDefinitionTe
       |      "description": "Callback URL",
       |      "hint": "Description Hint",
       |      "type": "URL",
-      |      "shortDescription": "short desc",
-      |      "validation": {
-      |        "errorMessage": "",
-      |        "rules": [
-      |          {
-      |            "validationRuleType": "",
-      |            "value": "test regex"
-      |          }
-      |        ]
-      |      }
+      |      "shortDescription": "short desc"
       |    },
       |    {
       |      "name": "token",
@@ -65,6 +56,10 @@ class FieldsDefinitionControllerGetSpec extends UnitSpec with FieldsDefinitionTe
       |          {
       |            "validationRuleType": "REGEX",
       |            "value": "test regex"
+      |          },
+      |          {
+      |            "validationRuleType": "REGEX",
+      |            "value": "test regex2"
       |          }
       |        ]
       |      }
@@ -107,7 +102,7 @@ class FieldsDefinitionControllerGetSpec extends UnitSpec with FieldsDefinitionTe
       |             "errorMessage": "",
       |             "rules": [
       |                {
-      |                "validationRuleType": "",
+      |                "validationRuleType": "REGEX",
       |                "value": "test regex"
       |                }
       |             ]
@@ -140,16 +135,7 @@ class FieldsDefinitionControllerGetSpec extends UnitSpec with FieldsDefinitionTe
       |          "description": "telephone number",
       |          "hint": "Description Hint",
       |          "type": "STRING",
-      |          "shortDescription": "",
-      |           "validation": {
-      |             "errorMessage": "",
-      |             "rules": [
-      |                {
-      |                "validationRuleType": "",
-      |                "value": "test regex"
-      |                }
-      |             ]
-      |           }
+      |          "shortDescription": ""
       |        }
       |      ]
       |    }

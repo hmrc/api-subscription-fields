@@ -41,8 +41,7 @@ class JsonFormatterSpec extends WordSpec
   private val fieldDefinitionJson =
     s"""{"apiContext":"$fakeRawContext","apiVersion":"$fakeRawVersion","fieldDefinitions":[{"name":"name1","description":"desc1","hint":"hint1","type":"URL","shortDescription":"short description","validation":{"errorMessage":"error message","rules":[{"validationRuleType":"REGEX","value":"test regex"}]}}]}"""
   private val fieldDefinitionEmptyValidationJson =
-    s"""{"apiContext":"$fakeRawContext","apiVersion":"$fakeRawVersion","fieldDefinitions":[{"name":"name1","description":"desc1","hint":"hint1","type":"URL","shortDescription":"short description","validation":{"errorMessage":"","rules":[]}}]}"""
-
+    s"""{"apiContext":"$fakeRawContext","apiVersion":"$fakeRawVersion","fieldDefinitions":[{"name":"name1","description":"desc1","hint":"hint1","type":"URL","shortDescription":"short description"}]}"""
 
 
   "SubscriptionFieldsResponse" should {

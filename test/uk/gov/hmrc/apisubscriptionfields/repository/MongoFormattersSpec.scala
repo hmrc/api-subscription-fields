@@ -25,23 +25,23 @@ class MongoFormattersSpec extends UnitSpec with JsonFormatters {
   final val validation = Validation("error message", Seq(validationRule))
   "Field definition formatter" should {
     "Correctly unmarshall a JSON field definition with all the necessary fields" in {
-      val fieldDefinition = FieldDefinition("name", "description", "hint", FieldDefinitionType.STRING, "short description", validation)
+      val fieldDefinition = FieldDefinition("name", "description", "hint", FieldDefinitionType.STRING, "short description", Some(validation))
       Json.fromJson[FieldDefinition](Json.parse("""{ "name" : "name", "description" : "description", "hint": "hint", "type" : "STRING", "shortDescription" : "short description","validation":{"errorMessage":"error message","rules":[{"validationRuleType":"REGEX","value":"test regex"}]}}""")) shouldBe JsSuccess(fieldDefinition)
     }
 
     "Correctly unmarshall a JSON field definition without the hint field" in {
-      val fieldDefinition = FieldDefinition("name", "description", "", FieldDefinitionType.STRING, "short description", validation)
+      val fieldDefinition = FieldDefinition("name", "description", "", FieldDefinitionType.STRING, "short description", Some(validation))
       Json.fromJson[FieldDefinition](Json.parse("""{ "name" : "name", "description" : "description", "type" : "STRING", "shortDescription" : "short description","validation":{"errorMessage":"error message","rules":[{"validationRuleType":"REGEX","value":"test regex"}]}}""")) shouldBe JsSuccess(fieldDefinition)
     }
 
     "Correctly unmarshall a JSON field definition without the shortDescription field" in {
-      val fieldDefinition = FieldDefinition("name", "description", "hint", FieldDefinitionType.STRING, "", validation)
+      val fieldDefinition = FieldDefinition("name", "description", "hint", FieldDefinitionType.STRING, "", Some(validation))
       Json.fromJson[FieldDefinition](Json.parse("""{ "name" : "name", "description" : "description", "hint": "hint", "type" : "STRING","validation":{"errorMessage":"error message","rules":[{"validationRuleType":"REGEX","value":"test regex"}]}}""")) shouldBe JsSuccess(fieldDefinition)
     }
 
     "Correctly unmarshall a JSON field definition with empty validation field" in {
-      val fieldDefinition = FieldDefinition("name", "description", "hint", FieldDefinitionType.STRING, "short description", Validation("", Seq.empty))
-      Json.fromJson[FieldDefinition](Json.parse("""{ "name" : "name", "description" : "description", "hint": "hint", "type" : "STRING", "shortDescription" : "short description","validation":{"errorMessage":"","rules":[]}}""")) shouldBe JsSuccess(fieldDefinition)
+      val fieldDefinition = FieldDefinition("name", "description", "hint", FieldDefinitionType.STRING, "short description", None)
+      Json.fromJson[FieldDefinition](Json.parse("""{ "name" : "name", "description" : "description", "hint": "hint", "type" : "STRING", "shortDescription" : "short description"}""")) shouldBe JsSuccess(fieldDefinition)
     }
   }
 }

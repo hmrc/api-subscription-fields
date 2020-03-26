@@ -61,10 +61,18 @@ trait JsonFormatters extends SharedJsonFormatters {
       ((JsPath \ "hint").read[String] or Reads.pure("")) and
       (JsPath \ "type").read[FieldDefinitionType] and
       ((JsPath \ "shortDescription").read[String] or Reads.pure("")) and
-      //TODO: What happens if validation does not exist in json?? Should have an 'or'
-      (JsPath \ "validation").read[Validation]
+      (JsPath \ "validation").readNullable[Validation]
     )(FieldDefinition.apply _)
-  val fieldDefinitionWrites = Json.writes[FieldDefinition]
+
+  implicit val fieldDefinitionWrites: Writes[FieldDefinition] = (
+    (JsPath \ "name").write[String] and
+      (JsPath \ "description").write[String] and
+      (JsPath \ "hint").write[String] and
+      (JsPath \ "type").write[FieldDefinitionType] and
+      (JsPath \ "shortDescription").write[String] and
+      (JsPath \ "validation").writeNullable[Validation]
+  )(unlift(FieldDefinition.unapply))
+
   implicit val FieldDefinitionJF = Format(fieldDefinitionReads, fieldDefinitionWrites)
 
   implicit val FieldsDefinitionRequestJF = Json.format[FieldsDefinitionRequest]

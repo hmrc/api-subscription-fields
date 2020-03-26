@@ -35,12 +35,12 @@ class FieldsDefinitionController @Inject() (cc: ControllerComponents, service: F
     NotFound(JsErrorResponse(ErrorCode.NOT_FOUND_CODE, s"Fields definition not found for ($rawApiContext, $rawApiVersion)"))
 
   def upsertFieldsDefinition(rawApiContext: String, rawApiVersion: String): Action[JsValue] = Action.async(parse.json) { implicit request =>
-    withJsonBody[FieldsDefinitionRequest] { payload =>
-      // TODO: ensure that `fieldDefinitions` is not empty (at least one field definition must be defined)
-      // TODO: ensure that each field definition has an allowed type and a non-empty name
-      service.upsert(ApiContext(rawApiContext), ApiVersion(rawApiVersion), payload.fieldDefinitions) map {
-        case (response, true) => Created(Json.toJson(response))
-        case (response, false) => Ok(Json.toJson(response))
+          withJsonBody[FieldsDefinitionRequest] { payload =>
+            // TODO: ensure that `fieldDefinitions` is not empty (at least one field definition must be defined)
+            // TODO: ensure that each field definition has an allowed type and a non-empty name
+            service.upsert(ApiContext(rawApiContext), ApiVersion(rawApiVersion), payload.fieldDefinitions) map {
+              case (response, true) => Created(Json.toJson(response))
+              case (response, false) => Ok(Json.toJson(response))
       }
     } recover recovery
   }

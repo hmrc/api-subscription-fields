@@ -26,7 +26,8 @@ import scala.language.postfixOps
 
 val compile = Seq(
   "uk.gov.hmrc" %% "bootstrap-play-26" % "1.4.0",
-  "uk.gov.hmrc" %% "simple-reactivemongo" % "7.22.0-play-26"
+  "uk.gov.hmrc" %% "simple-reactivemongo" % "7.22.0-play-26",
+  "org.julienrf" %% "play-json-derived-codecs" % "4.0.0-RC1"
 )
 
 // we need to override the akka version for now as newer versions are not compatible with reactivemongo
@@ -56,7 +57,8 @@ val appName = "api-subscription-fields"
 
 lazy val appDependencies: Seq[ModuleID] = compile  ++ test()
 
-resolvers ++= Seq(Resolver.bintrayRepo("hmrc", "releases"), Resolver.jcenterRepo)
+resolvers ++= Seq(Resolver.bintrayRepo("hmrc", "releases"),
+  Resolver.jcenterRepo, Resolver.sonatypeRepo("releases"), Resolver.sonatypeRepo("snapshots"))
 
 lazy val plugins: Seq[Plugins] = Seq(PlayScala, SbtAutoBuildPlugin, SbtGitVersioning, SbtDistributablesPlugin, SbtArtifactory)
 lazy val playSettings: Seq[Setting[_]] = Seq.empty

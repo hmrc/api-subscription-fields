@@ -22,7 +22,6 @@ import play.api.libs.json._
 import play.api.libs.json.Reads._
 import play.api.libs.functional.syntax._
 import uk.gov.hmrc.apisubscriptionfields.model.FieldDefinitionType.FieldDefinitionType
-import uk.gov.hmrc.apisubscriptionfields.model.ValidationRuleType.ValidationRuleType
 
 trait SharedJsonFormatters {
   implicit val SubscriptionFieldsIdJF = new Format[SubscriptionFieldsId] {
@@ -37,24 +36,17 @@ trait SharedJsonFormatters {
 
 trait JsonFormatters extends SharedJsonFormatters {
 
-  implicit val ValidationRuleTypeReads = Reads.enumNameReads(ValidationRuleType)
-
-  val validationRuleReads: Reads[ValidationRule] = (
-    ((JsPath \ "validationRuleType").read[ValidationRuleType]) and
-      ((JsPath \ "value").read[String] or Reads.pure(""))
-  )(ValidationRule.apply _)
-  val validationRuleWrites = Json.writes[ValidationRule]
-  implicit val ValidationRuleJF = Format(validationRuleReads, validationRuleWrites)
+  implicit val regexvalidationRuleFormat = Json.format[RegexValidationRule]
+  implicit val validationRuleFormat = Json.format[ValidationRule]
 
   val validationReads: Reads[Validation] = (
-    ((JsPath \ "errorMessage").read[String] or Reads.pure("")) and
+    (JsPath \ "errorMessage").read[String] and
       (JsPath \ "rules").read[Seq[ValidationRule]]
   )(Validation.apply _)
   val validationWrites = Json.writes[Validation]
   implicit val ValidationJF = Format(validationReads, validationWrites)
 
   implicit val FieldDefinitionTypeReads = Reads.enumNameReads(FieldDefinitionType)
-
   val fieldDefinitionReads: Reads[FieldDefinition] = (
     (JsPath \ "name").read[String] and
       (JsPath \ "description").read[String] and
@@ -64,14 +56,7 @@ trait JsonFormatters extends SharedJsonFormatters {
       (JsPath \ "validation").readNullable[Validation]
     )(FieldDefinition.apply _)
 
-  implicit val fieldDefinitionWrites: Writes[FieldDefinition] = (
-    (JsPath \ "name").write[String] and
-      (JsPath \ "description").write[String] and
-      (JsPath \ "hint").write[String] and
-      (JsPath \ "type").write[FieldDefinitionType] and
-      (JsPath \ "shortDescription").write[String] and
-      (JsPath \ "validation").writeNullable[Validation]
-  )(unlift(FieldDefinition.unapply))
+  val fieldDefinitionWrites = Json.writes[FieldDefinition]
 
   implicit val FieldDefinitionJF = Format(fieldDefinitionReads, fieldDefinitionWrites)
 

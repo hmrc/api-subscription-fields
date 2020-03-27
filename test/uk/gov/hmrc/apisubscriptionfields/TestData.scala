@@ -65,7 +65,7 @@ trait SubscriptionFieldsTestData extends TestData {
 }
 
 trait FieldsDefinitionTestData extends TestData {
-  val FakeValidationRule = ValidationRule(ValidationRuleType.REGEX, "test regex")
+  val FakeValidationRule = RegexValidationRule("test regex")
   val FakeValidation = Validation("error message", Seq(FakeValidationRule))
   val FakeValidationEmpty = Validation("", Seq.empty)
   final val FakeFieldDefinitionUrl = FieldDefinition("name1", "desc1", "hint1", FieldDefinitionType.URL, "short description", Some(FakeValidation))

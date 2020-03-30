@@ -18,6 +18,7 @@ package uk.gov.hmrc.apisubscriptionfields.model
 
 import java.util.UUID
 
+import cats.data.{NonEmptyList => NEL}
 import uk.gov.hmrc.apisubscriptionfields.model.FieldDefinitionType.FieldDefinitionType
 
 case class ClientId(value: String) extends AnyVal
@@ -32,10 +33,7 @@ sealed trait ValidationRule
 
 case class RegexValidationRule(regex: String) extends ValidationRule
 
-case class Validation(errorMessage: String, rules: Seq[ValidationRule])
-
-object Validation {
-}
+case class Validation(errorMessage: String, rules: NEL[ValidationRule])
 
 object FieldDefinitionType extends Enumeration {
   type FieldDefinitionType = Value

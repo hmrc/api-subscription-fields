@@ -28,7 +28,8 @@ val compile = Seq(
   "uk.gov.hmrc" %% "bootstrap-play-26" % "1.4.0",
   "uk.gov.hmrc" %% "simple-reactivemongo" % "7.22.0-play-26",
   "org.julienrf" %% "play-json-derived-codecs" % "6.0.0",
-  "com.typesafe.play" %% "play-json" % "2.7.1"
+  "com.typesafe.play" %% "play-json" % "2.7.1",
+  "org.typelevel" %% "cats-core" % "2.0.0"
 )
 
 // we need to override the akka version for now as newer versions are not compatible with reactivemongo
@@ -88,6 +89,7 @@ lazy val microservice = Project(appName, file("."))
     parallelExecution in Test := false
   )
   .settings(majorVersion := 0)
+  .settings(scalacOptions ++= Seq("-Ypartial-unification"))
 
 lazy val acceptanceTestSettings =
   inConfig(AcceptanceTest)(Defaults.testSettings) ++

@@ -18,6 +18,7 @@ package uk.gov.hmrc.apisubscriptionfields
 
 import java.util.UUID
 
+import cats.data.NonEmptyList
 import org.scalatest.TestData
 import play.api.http.HeaderNames.{ACCEPT, CONTENT_TYPE}
 import play.api.http.MimeTypes
@@ -65,9 +66,8 @@ trait SubscriptionFieldsTestData extends TestData {
 }
 
 trait FieldsDefinitionTestData extends TestData {
-  val FakeValidationRule = RegexValidationRule("test regex")
-  val FakeValidation = Validation("error message", Seq(FakeValidationRule))
-  val FakeValidationEmpty = Validation("", Seq.empty)
+  val FakeValidationRule: RegexValidationRule = RegexValidationRule("test regex")
+  val FakeValidation: Validation = Validation("error message", NonEmptyList.one(FakeValidationRule))
   final val FakeFieldDefinitionUrl = FieldDefinition("name1", "desc1", "hint1", FieldDefinitionType.URL, "short description", Some(FakeValidation))
   final val FakeFieldDefinitionUrlValidationEmpty = FieldDefinition("name1", "desc1", "hint1", FieldDefinitionType.URL, "short description", None)
   final val FakeFieldDefinitionString = FieldDefinition("name2", "desc2", "hint2", FieldDefinitionType.STRING, "short description", Some(FakeValidation))

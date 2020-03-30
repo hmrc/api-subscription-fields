@@ -54,12 +54,14 @@ class FieldsDefinitionControllerGetSpec extends UnitSpec with FieldsDefinitionTe
       |        "errorMessage": "error message",
       |        "rules": [
       |          {
-      |            "validationRuleType": "REGEX",
-      |            "value": "test regex"
-      |          },
+      |            "RegexValidationRule": {
+      |                 "regex": "test regex"
+      |            }
+      |           },
       |          {
-      |            "validationRuleType": "REGEX",
-      |            "value": "test regex2"
+      |            "RegexValidationRule": {
+      |            "regex": "test regex"
+      |            }
       |          }
       |        ]
       |      }
@@ -85,11 +87,12 @@ class FieldsDefinitionControllerGetSpec extends UnitSpec with FieldsDefinitionTe
       |          "validation": {
       |             "errorMessage": "",
       |             "rules": [
-      |                {
-      |                "validationRuleType": "REGEX",
-      |                "value": "test regex"
-      |                }
-      |             ]
+      |               {
+      |                 "RegexValidationRule": {
+      |                 "regex": "test regex"
+      |               }
+      |             }
+      |           ]
       |           }
       |        },
       |        {
@@ -102,9 +105,10 @@ class FieldsDefinitionControllerGetSpec extends UnitSpec with FieldsDefinitionTe
       |             "errorMessage": "",
       |             "rules": [
       |                {
-      |                "validationRuleType": "REGEX",
-      |                "value": "test regex"
-      |                }
+      |                 "RegexValidationRule": {
+      |                 "regex": "test regex"
+      |               }
+      |              }
       |             ]
       |           }
       |        }
@@ -124,9 +128,10 @@ class FieldsDefinitionControllerGetSpec extends UnitSpec with FieldsDefinitionTe
       |             "errorMessage": "",
       |             "rules": [
       |                {
-      |                "validationRuleType": "REGEX",
-      |                "value": "test regex"
-      |                }
+      |                 "RegexValidationRule": {
+      |                 "regex": "test regex"
+      |               }
+      |              }
       |             ]
       |           }
       |        },

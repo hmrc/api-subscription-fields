@@ -39,7 +39,7 @@ class JsonFormatterSpec extends WordSpec
 
   private val subscriptionFieldJson = s"""{"clientId":"$fakeRawClientId","apiContext":"$fakeRawContext","apiVersion":"$fakeRawVersion","fieldsId":"$FakeRawFieldsId","fields":{"f1":"v1"}}"""
   private val fieldDefinitionJson =
-    s"""{"apiContext":"$fakeRawContext","apiVersion":"$fakeRawVersion","fieldDefinitions":[{"name":"name1","description":"desc1","hint":"hint1","type":"URL","shortDescription":"short description","validation":{"errorMessage":"error message","rules":[{"validationRuleType":"REGEX","value":"test regex"}]}}]}"""
+    s"""{"apiContext":"$fakeRawContext","apiVersion":"$fakeRawVersion","fieldDefinitions":[{"name":"name1","description":"desc1","hint":"hint1","type":"URL","shortDescription":"short description","validation":{"errorMessage":"error message","rules":[{"RegexValidationRule":{"regex":"test regex"}}]}}]}"""
   private val fieldDefinitionEmptyValidationJson =
     s"""{"apiContext":"$fakeRawContext","apiVersion":"$fakeRawVersion","fieldDefinitions":[{"name":"name1","description":"desc1","hint":"hint1","type":"URL","shortDescription":"short description"}]}"""
 

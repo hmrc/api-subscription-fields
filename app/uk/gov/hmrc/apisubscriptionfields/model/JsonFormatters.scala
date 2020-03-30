@@ -18,6 +18,8 @@ package uk.gov.hmrc.apisubscriptionfields.model
 
 import java.util.UUID
 
+import cats.data.{NonEmptyList => NEL}
+import cats.implicits._
 import julienrf.json.derived
 import julienrf.json.derived.TypeTagSetting
 import play.api.libs.json._
@@ -38,11 +40,33 @@ trait SharedJsonFormatters {
 
 trait JsonFormatters extends SharedJsonFormatters {
 
+  object NonEmptyListOps {
+    def reads[T: Reads]: Reads[NEL[T]] =
+      Reads
+        .of[List[T]]
+        .collect(
+          JsonValidationError("expected a NonEmptyList but got an empty list")
+        ) {
+          case head :: tail => NEL(head, tail)
+        }
+
+    def writes[T: Writes]: Writes[NEL[T]] =
+      Writes
+        .of[List[T]]
+        .contramap(_.toList)
+
+    def format[T: Format]: Format[NEL[T]] =
+      Format(reads, writes)
+  }
+
+
   implicit val validationRuleFormat: OFormat[ValidationRule] = derived.withTypeTag.oformat(TypeTagSetting.ShortClassName)
+
+  implicit val nelValidationRuleFormat: Format[NEL[ValidationRule]] = NonEmptyListOps.format[ValidationRule]
 
   val validationReads: Reads[Validation] = (
     (JsPath \ "errorMessage").read[String] and
-      (JsPath \ "rules").read[Seq[ValidationRule]]
+      (JsPath \ "rules").read[NEL[ValidationRule]]
   )(Validation.apply _)
   val validationWrites = Json.writes[Validation]
   implicit val ValidationJF = Format(validationReads, validationWrites)

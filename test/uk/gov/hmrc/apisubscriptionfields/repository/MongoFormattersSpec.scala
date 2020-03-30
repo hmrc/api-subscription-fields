@@ -16,13 +16,14 @@
 
 package uk.gov.hmrc.apisubscriptionfields.repository
 
+import cats.data.NonEmptyList
 import play.api.libs.json.{JsSuccess, Json}
 import uk.gov.hmrc.apisubscriptionfields.model.{FieldDefinition, FieldDefinitionType, JsonFormatters, RegexValidationRule, Validation}
 import uk.gov.hmrc.play.test.UnitSpec
 
 class MongoFormattersSpec extends UnitSpec with JsonFormatters {
   val validationRule = RegexValidationRule("test regex")
-  final val validation = Validation("error message", Seq(validationRule))
+  final val validation = Validation("error message", NonEmptyList.one(validationRule))
   "Field definition formatter" should {
     "Correctly unmarshall a JSON field definition with all the necessary fields" in {
       val fieldDefinition = FieldDefinition("name", "description", "hint", FieldDefinitionType.STRING, "short description", Some(validation))

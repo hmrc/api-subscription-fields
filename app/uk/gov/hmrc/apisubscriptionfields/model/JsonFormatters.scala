@@ -18,6 +18,8 @@ package uk.gov.hmrc.apisubscriptionfields.model
 
 import java.util.UUID
 
+import julienrf.json.derived
+import julienrf.json.derived.TypeTagSetting
 import play.api.libs.json._
 import play.api.libs.json.Reads._
 import play.api.libs.functional.syntax._
@@ -36,8 +38,7 @@ trait SharedJsonFormatters {
 
 trait JsonFormatters extends SharedJsonFormatters {
 
-  implicit val regexvalidationRuleFormat = Json.format[RegexValidationRule]
-  implicit val validationRuleFormat = Json.format[ValidationRule]
+  implicit val validationRuleFormat: OFormat[ValidationRule] = derived.withTypeTag.oformat(TypeTagSetting.ShortClassName)
 
   val validationReads: Reads[Validation] = (
     (JsPath \ "errorMessage").read[String] and

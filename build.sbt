@@ -27,7 +27,8 @@ import scala.language.postfixOps
 val compile = Seq(
   "uk.gov.hmrc" %% "bootstrap-play-26" % "1.4.0",
   "uk.gov.hmrc" %% "simple-reactivemongo" % "7.22.0-play-26",
-  "org.julienrf" %% "play-json-derived-codecs" % "4.0.0-RC1"
+  "org.julienrf" %% "play-json-derived-codecs" % "6.0.0",
+  "com.typesafe.play" %% "play-json" % "2.7.1"
 )
 
 // we need to override the akka version for now as newer versions are not compatible with reactivemongo

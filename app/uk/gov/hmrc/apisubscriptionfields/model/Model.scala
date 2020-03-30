@@ -18,8 +18,6 @@ package uk.gov.hmrc.apisubscriptionfields.model
 
 import java.util.UUID
 
-import julienrf.json.derived
-import play.api.libs.json.{JsPath, OFormat, OWrites}
 import uk.gov.hmrc.apisubscriptionfields.model.FieldDefinitionType.FieldDefinitionType
 
 case class ClientId(value: String) extends AnyVal
@@ -32,27 +30,7 @@ case class SubscriptionFieldsId(value: UUID) extends AnyVal
 
 sealed trait ValidationRule
 
-object ValidationRule {
-
-  implicit val validationRuleFormat: OWrites[ValidationRule] = derived.flat.owrites((_ \ "_type").write[String])
-
-}
-
-//object ValidationRule {
-//  implicit lazy val drawingFormat = new Format[ValidationRule] {
-//    override def writes(o: ValidationRule): JsValue = o match {
-//      case a: RegexValidationRule => Json.toJson(a)
-//    }
-//    override def reads(json: JsValue): JsResult[ValidationRule] =
-//      RegexValidationRule.regexValidationRuleFormat.reads(json)
-//  }
-//}
-
 case class RegexValidationRule(regex: String) extends ValidationRule
-
-//object RegexValidationRule {
-//  implicit lazy val regexValidationRuleFormat = Json.format[RegexValidationRule]
-//}
 
 case class Validation(errorMessage: String, rules: Seq[ValidationRule])
 

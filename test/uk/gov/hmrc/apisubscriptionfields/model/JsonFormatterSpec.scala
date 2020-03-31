@@ -32,13 +32,17 @@ class JsonFormatterSpec extends WordSpec
   private val bulkSubscriptionFieldsResponse = BulkSubscriptionFieldsResponse(Seq(subscriptionFieldsResponse))
 
   private val fakeFieldsDefinitionResponse = FieldsDefinitionResponse(fakeRawContext, fakeRawVersion, Seq(FakeFieldDefinitionUrl))
+  private val fakeFieldsDefinitionResponseEmptyValidation = FieldsDefinitionResponse(fakeRawContext, fakeRawVersion, Seq(FakeFieldDefinitionUrlValidationEmpty))
   private val bulkFieldsDefinitionResponse = BulkFieldsDefinitionsResponse(Seq(fakeFieldsDefinitionResponse))
 
   private def objectAsJsonString[A](a:A)(implicit t: Writes[A]) = Json.asciiStringify(Json.toJson(a))
 
   private val subscriptionFieldJson = s"""{"clientId":"$fakeRawClientId","apiContext":"$fakeRawContext","apiVersion":"$fakeRawVersion","fieldsId":"$FakeRawFieldsId","fields":{"f1":"v1"}}"""
   private val fieldDefinitionJson =
+    s"""{"apiContext":"$fakeRawContext","apiVersion":"$fakeRawVersion","fieldDefinitions":[{"name":"name1","description":"desc1","hint":"hint1","type":"URL","shortDescription":"short description","validation":{"errorMessage":"error message","rules":[{"RegexValidationRule":{"regex":"test regex"}}]}}]}"""
+  private val fieldDefinitionEmptyValidationJson =
     s"""{"apiContext":"$fakeRawContext","apiVersion":"$fakeRawVersion","fieldDefinitions":[{"name":"name1","description":"desc1","hint":"hint1","type":"URL","shortDescription":"short description"}]}"""
+
 
   "SubscriptionFieldsResponse" should {
     "marshal json" in {
@@ -73,9 +77,20 @@ class JsonFormatterSpec extends WordSpec
       objectAsJsonString(fakeFieldsDefinitionResponse) shouldBe fieldDefinitionJson
     }
 
+    "marshal json when Validation is empty" in {
+      objectAsJsonString(fakeFieldsDefinitionResponseEmptyValidation) shouldBe fieldDefinitionEmptyValidationJson
+    }
+
     "unmarshal text" in {
       Json.parse(fieldDefinitionJson).validate[FieldsDefinitionResponse] match {
         case JsSuccess(r, _) => r shouldBe fakeFieldsDefinitionResponse
+        case JsError(e) => fail(s"Should have parsed json text but got $e")
+      }
+    }
+
+    "unmarshal text  when Validation is empty" in {
+      Json.parse(fieldDefinitionEmptyValidationJson).validate[FieldsDefinitionResponse] match {
+        case JsSuccess(r, _) => r shouldBe fakeFieldsDefinitionResponseEmptyValidation
         case JsError(e) => fail(s"Should have parsed json text but got $e")
       }
     }

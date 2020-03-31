@@ -18,6 +18,8 @@ package uk.gov.hmrc.apisubscriptionfields
 
 import java.util.UUID
 
+import cats.data.NonEmptyList
+import org.scalatest.TestData
 import play.api.http.HeaderNames.{ACCEPT, CONTENT_TYPE}
 import play.api.http.MimeTypes
 import uk.gov.hmrc.apisubscriptionfields.model._
@@ -64,9 +66,12 @@ trait SubscriptionFieldsTestData extends TestData {
 }
 
 trait FieldsDefinitionTestData extends TestData {
-  final val FakeFieldDefinitionUrl = FieldDefinition("name1", "desc1", "hint1", FieldDefinitionType.URL, "short description")
-  final val FakeFieldDefinitionString = FieldDefinition("name2", "desc2", "hint2", FieldDefinitionType.STRING, "short description")
-  final val FakeFieldDefinitionSecureToken = FieldDefinition("name3", "desc3", "hint3", FieldDefinitionType.SECURE_TOKEN, "short description")
+  val FakeValidationRule: RegexValidationRule = RegexValidationRule("test regex")
+  val FakeValidation: Validation = Validation("error message", NonEmptyList.one(FakeValidationRule))
+  final val FakeFieldDefinitionUrl = FieldDefinition("name1", "desc1", "hint1", FieldDefinitionType.URL, "short description", Some(FakeValidation))
+  final val FakeFieldDefinitionUrlValidationEmpty = FieldDefinition("name1", "desc1", "hint1", FieldDefinitionType.URL, "short description", None)
+  final val FakeFieldDefinitionString = FieldDefinition("name2", "desc2", "hint2", FieldDefinitionType.STRING, "short description", Some(FakeValidation))
+  final val FakeFieldDefinitionSecureToken = FieldDefinition("name3", "desc3", "hint3", FieldDefinitionType.SECURE_TOKEN, "short description", Some(FakeValidation))
   final val FakeFieldsDefinitions = Seq(FakeFieldDefinitionUrl, FakeFieldDefinitionString, FakeFieldDefinitionSecureToken)
   final val FakeFieldsDefinition = FieldsDefinition(fakeRawContext, fakeRawVersion, FakeFieldsDefinitions)
   final val FakeFieldsDefinitionResponse = FieldsDefinitionResponse(fakeRawContext, fakeRawVersion, FakeFieldsDefinition.fieldDefinitions)

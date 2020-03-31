@@ -34,24 +34,39 @@ class FieldsDefinitionControllerGetSpec extends UnitSpec with FieldsDefinitionTe
 
   private val responseJsonString =
     """{
-      |   "apiContext": "hello",
-      |   "apiVersion": "1.0",
-      |   "fieldDefinitions": [
-      |     {
-      |       "name": "callback-url",
-      |       "description": "Callback URL",
-      |       "hint": "Description Hint",
-      |       "type": "URL",
-      |       "shortDescription": "short desc"
-      |     },
-      |     {
-      |       "name": "token",
-      |       "description": "Secure Token",
-      |       "hint": "Description Hint",
-      |       "type": "SecureToken",
-      |       "shortDescription": ""
-      |     }
-      |   ]
+      |  "apiContext": "hello",
+      |  "apiVersion": "1.0",
+      |  "fieldDefinitions": [
+      |    {
+      |      "name": "callback-url",
+      |      "description": "Callback URL",
+      |      "hint": "Description Hint",
+      |      "type": "URL",
+      |      "shortDescription": "short desc"
+      |    },
+      |    {
+      |      "name": "token",
+      |      "description": "Secure Token",
+      |      "hint": "Description Hint",
+      |      "type": "SecureToken",
+      |      "shortDescription": "",
+      |      "validation": {
+      |        "errorMessage": "error message",
+      |        "rules": [
+      |          {
+      |            "RegexValidationRule": {
+      |                 "regex": "test regex"
+      |            }
+      |           },
+      |          {
+      |            "RegexValidationRule": {
+      |            "regex": "test regex"
+      |            }
+      |          }
+      |        ]
+      |      }
+      |    }
+      |  ]
       |}""".stripMargin
   private val responseJson = Json.parse(responseJsonString)
   private val responseModel = responseJson.as[FieldsDefinitionResponse]
@@ -68,14 +83,34 @@ class FieldsDefinitionControllerGetSpec extends UnitSpec with FieldsDefinitionTe
       |          "description": "Callback URL",
       |          "hint": "Description Hint",
       |          "type": "URL",
-      |          "shortDescription": "short desc"
+      |          "shortDescription": "short desc",
+      |          "validation": {
+      |             "errorMessage": "",
+      |             "rules": [
+      |               {
+      |                 "RegexValidationRule": {
+      |                 "regex": "test regex"
+      |               }
+      |             }
+      |           ]
+      |           }
       |        },
       |        {
       |          "name": "token",
       |          "description": "Secure Token",
       |          "hint": "Description Hint",
       |          "type": "SecureToken",
-      |          "shortDescription": ""
+      |          "shortDescription": "",
+      |          "validation": {
+      |             "errorMessage": "",
+      |             "rules": [
+      |                {
+      |                 "RegexValidationRule": {
+      |                 "regex": "test regex"
+      |               }
+      |              }
+      |             ]
+      |           }
       |        }
       |      ]
       |    },
@@ -88,7 +123,17 @@ class FieldsDefinitionControllerGetSpec extends UnitSpec with FieldsDefinitionTe
       |          "description": "where you live",
       |          "hint": "Description Hint",
       |          "type": "STRING",
-      |          "shortDescription": ""
+      |          "shortDescription": "",
+      |           "validation": {
+      |             "errorMessage": "",
+      |             "rules": [
+      |                {
+      |                 "RegexValidationRule": {
+      |                 "regex": "test regex"
+      |               }
+      |              }
+      |             ]
+      |           }
       |        },
       |        {
       |          "name": "number",

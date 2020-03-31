@@ -18,6 +18,10 @@ package uk.gov.hmrc.apisubscriptionfields.model
 
 import java.util.UUID
 
+import cats.data.{NonEmptyList => NEL}
+import cats.implicits._
+import julienrf.json.derived
+import julienrf.json.derived.TypeTagSetting
 import play.api.libs.json._
 import play.api.libs.json.Reads._
 import play.api.libs.functional.syntax._
@@ -36,16 +40,43 @@ trait SharedJsonFormatters {
 
 trait JsonFormatters extends SharedJsonFormatters {
 
-  implicit val FieldDefinitionTypeReads = Reads.enumNameReads(FieldDefinitionType)
+  object NonEmptyListOps {
+    def reads[T: Reads]: Reads[NEL[T]] =
+      Reads
+        .of[List[T]]
+        .collect(
+          JsonValidationError("expected a NonEmptyList but got an empty list")
+        ) {
+          case head :: tail => NEL(head, tail)
+        }
 
+    def writes[T: Writes]: Writes[NEL[T]] =
+      Writes
+        .of[List[T]]
+        .contramap(_.toList)
+
+    def format[T: Format]: Format[NEL[T]] =
+      Format(reads, writes)
+  }
+
+  implicit val validationRuleFormat: OFormat[ValidationRule] = derived.withTypeTag.oformat(TypeTagSetting.ShortClassName)
+
+  implicit val nelValidationRuleFormat: Format[NEL[ValidationRule]] = NonEmptyListOps.format[ValidationRule]
+
+  implicit val ValidationJF = Json.format[Validation]
+
+  implicit val FieldDefinitionTypeReads = Reads.enumNameReads(FieldDefinitionType)
   val fieldDefinitionReads: Reads[FieldDefinition] = (
     (JsPath \ "name").read[String] and
       (JsPath \ "description").read[String] and
       ((JsPath \ "hint").read[String] or Reads.pure("")) and
       (JsPath \ "type").read[FieldDefinitionType] and
-      ((JsPath \ "shortDescription").read[String] or Reads.pure(""))
-  )(FieldDefinition.apply _)
+      ((JsPath \ "shortDescription").read[String] or Reads.pure("")) and
+      (JsPath \ "validation").readNullable[Validation]
+    )(FieldDefinition.apply _)
+
   val fieldDefinitionWrites = Json.writes[FieldDefinition]
+
   implicit val FieldDefinitionJF = Format(fieldDefinitionReads, fieldDefinitionWrites)
 
   implicit val FieldsDefinitionRequestJF = Json.format[FieldsDefinitionRequest]
@@ -54,8 +85,8 @@ trait JsonFormatters extends SharedJsonFormatters {
   implicit val FieldsDefinitionResponseJF = Json.format[FieldsDefinitionResponse]
   implicit val BulkFieldsDefinitionsResponseJF = Json.format[BulkFieldsDefinitionsResponse]
   implicit val SubscriptionFieldsResponseJF = Json.format[SubscriptionFieldsResponse]
-  implicit val BulkSubscriptionFieldsResponseJF = Json.format[BulkSubscriptionFieldsResponse]
 
+  implicit val BulkSubscriptionFieldsResponseJF = Json.format[BulkSubscriptionFieldsResponse]
 }
 
 object JsonFormatters extends JsonFormatters

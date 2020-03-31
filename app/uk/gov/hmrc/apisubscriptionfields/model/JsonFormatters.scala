@@ -59,17 +59,11 @@ trait JsonFormatters extends SharedJsonFormatters {
       Format(reads, writes)
   }
 
-
   implicit val validationRuleFormat: OFormat[ValidationRule] = derived.withTypeTag.oformat(TypeTagSetting.ShortClassName)
 
   implicit val nelValidationRuleFormat: Format[NEL[ValidationRule]] = NonEmptyListOps.format[ValidationRule]
 
-  val validationReads: Reads[Validation] = (
-    (JsPath \ "errorMessage").read[String] and
-      (JsPath \ "rules").read[NEL[ValidationRule]]
-  )(Validation.apply _)
-  val validationWrites = Json.writes[Validation]
-  implicit val ValidationJF = Format(validationReads, validationWrites)
+  implicit val ValidationJF = Json.format[Validation]
 
   implicit val FieldDefinitionTypeReads = Reads.enumNameReads(FieldDefinitionType)
   val fieldDefinitionReads: Reads[FieldDefinition] = (

@@ -17,7 +17,6 @@
 package uk.gov.hmrc.apisubscriptionfields.model
 
 import java.util.UUID
-
 import cats.data.{NonEmptyList => NEL}
 import uk.gov.hmrc.apisubscriptionfields.model.FieldDefinitionType.FieldDefinitionType
 
@@ -45,3 +44,12 @@ object FieldDefinitionType extends Enumeration {
 
 case class FieldDefinition(name: String, description: String, hint: String = "", `type`: FieldDefinitionType,
                            shortDescription: String, validation: Option[Validation] = None)
+
+sealed trait SubsFieldValiationResponse
+
+case object ValidSubsFieldValiationResponse extends SubsFieldValiationResponse
+
+case class InvalidSubsFieldValiationResponse(errorResponses: Set[InvalidSubsFieldResponse]) extends SubsFieldValiationResponse
+
+case class InvalidSubsFieldResponse(subsFieldName: String, errorMessage: String)
+

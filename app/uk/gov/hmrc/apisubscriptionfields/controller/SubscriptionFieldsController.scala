@@ -86,10 +86,23 @@ class SubscriptionFieldsController @Inject()(cc: ControllerComponents, service: 
     withJsonBody[SubscriptionFieldsRequest] { payload =>
       // TODO: ensure that `fields` is not empty (at least one subscription field)
       // TODO: ensure that each subscription field has a name (map key) matching a field definition and a non-empty value
-      service.upsert(ClientId(rawClientId), ApiContext(rawApiContext), ApiVersion(rawApiVersion), payload.fields) map {
-        case (response, true) => Created(Json.toJson(response))
-        case (response, false) => Ok(Json.toJson(response))
+     // if (!isValid(service.validate(ClientId(rawClientId), ApiContext(rawApiContext), ApiVersion(rawApiVersion), payload.fields)))
+       // {
+          // return validation response
+       // }
+      // else continue
+
+      service.validate(ClientId(rawClientId), ApiContext(rawApiContext), ApiVersion(rawApiVersion), payload.fields) match {
+        case ValidSubsFieldValiationResponse =>
+          service.upsert(ClientId(rawClientId), ApiContext(rawApiContext), ApiVersion(rawApiVersion), payload.fields) map {
+            case (response, true) => Created(Json.toJson(response))
+            case (response, false) => Ok(Json.toJson(response))
+          }
+
       }
+
+
+
     } recover recovery
   }
 
@@ -108,4 +121,6 @@ class SubscriptionFieldsController @Inject()(cc: ControllerComponents, service: 
   }
 
   override protected def controllerComponents: ControllerComponents = cc
+
+  private def isValid(subsFieldValiationResponse: SubsFieldValiationResponse) : Boolean = ???
 }

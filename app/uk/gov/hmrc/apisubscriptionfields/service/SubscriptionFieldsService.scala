@@ -31,7 +31,27 @@ class UUIDCreator {
 }
 
 @Singleton
-class SubscriptionFieldsService @Inject()(repository: SubscriptionFieldsRepository, uuidCreator: UUIDCreator) {
+class SubscriptionFieldsService @Inject()(repository: SubscriptionFieldsRepository,
+                                          uuidCreator: UUIDCreator,
+                                          fieldsDefinitionService: FieldsDefinitionService) {
+
+  def validate(id: ClientId, context: ApiContext, version: ApiVersion, fields: Fields): SubsFieldValiationResponse = {
+    val fieldDefinition = fieldsDefinitionService.get(context, version)
+    fieldDefinition.map(_.map
+      {
+        fieldDefinitionActual =>
+        val regexMap = getRegex(fieldDefinitionActual)
+          val validatableKeys = fields.filterKeys(regexMap.keySet)
+      }
+
+    )
+
+    // for every field in fields
+    // if there any regex validation
+    // then match the field names; map the name
+    // else return the correct Valid type
+  }
+
 
   def upsert(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion, subscriptionFields: Fields): Future[(SubscriptionFieldsResponse, IsInsert)] = {
     val fields = SubscriptionFields(clientId.value, apiContext.value, apiVersion.value, uuidCreator.uuid(), subscriptionFields)
@@ -81,5 +101,9 @@ class SubscriptionFieldsService @Inject()(repository: SubscriptionFieldsReposito
       fieldsId = SubscriptionFieldsId(apiSubscription.fieldsId),
       fields = apiSubscription.fields)
   }
+
+  private def getRegex(fieldDefinition: FieldsDefinitionResponse): Map[String, String] = ???
+
+  private def evaluateRegex(value: String, regex: String): Boolean = ???
 
 }

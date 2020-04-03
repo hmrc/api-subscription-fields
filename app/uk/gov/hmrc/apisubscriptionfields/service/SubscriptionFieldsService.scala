@@ -17,8 +17,9 @@
 package uk.gov.hmrc.apisubscriptionfields.service
 
 import java.util.UUID
-import javax.inject._
 
+import cats.data.NonEmptyList
+import javax.inject._
 import uk.gov.hmrc.apisubscriptionfields.model._
 import uk.gov.hmrc.apisubscriptionfields.repository.{SubscriptionFields, SubscriptionFieldsRepository}
 
@@ -36,42 +37,32 @@ class SubscriptionFieldsService @Inject()(repository: SubscriptionFieldsReposito
                                           fieldsDefinitionService: FieldsDefinitionService) {
 
   def validate(id: ClientId, context: ApiContext, version: ApiVersion, fields: Fields): SubsFieldValiationResponse = {
-    val fieldDefinition = fieldsDefinitionService.get(context, version)
-    val unpackedFieldDefinitions = fieldDefinition.map(_.map(_.fieldDefinitions))
-//    val errorMessage = unpackedFieldDefinition.map(_.map(_.map(_.validation.map(x => InvalidSubsFieldResponse(subsFieldName, x.errorMessage)))))
-//    val errorMessageMap = Map(fieldDefinition.map(_.map(_.fieldDefinitions.map(_.name)) ->
-//      unpackedFieldDefinition)))
-
-    //End goal of validate method (Invalidation part) put errorMessage inside invalidPArt(OBJECT) with the name of it
+    val fieldDefinitionResponse: Future[Option[FieldsDefinitionResponse]] = fieldsDefinitionService.get(context, version)
+    val fieldDefinitions: Future[Option[Seq[FieldDefinition]]] = fieldDefinitionResponse.map(_.map(_.fieldDefinitions))
 
 
-    fieldDefinition.map(
+    fieldDefinitions.map(
       _.map
         {
-          fieldDefinitionActual =>
-            val regex = getRegex(fieldDefinitionActual)
-            fields.map {case (key, value) => (key, value.matches(regex))}.filterKeys(_ == false) match {
+          unpackedFieldDefinitions => unpackedFieldDefinitions.map {
+            unpackedFieldDefinition =>
+            val regexs: Seq[Option[String]] = getRegexs(unpackedFieldDefinition)
+            fields.map { case (key, value) => (key, matchAllRegexs(regexs, value)) }.filterKeys(_ == false) match {
               case Map.empty => ValidSubsFieldValiationResponse
               case mapOfFieldsWithErrors => {
                 val response = InvalidSubsFieldValiationResponse(Set.empty)
                 mapOfFieldsWithErrors.keys
-                  .map(subsFieldName => unpackedFieldDefinitions
+                  .map(subsFieldName => fieldDefinitions
                     .map(_.map(_.map(_.validation
-                      .map(x =>
-                        {
-                          response.errorResponses += InvalidSubsFieldResponse(subsFieldName, x.errorMessage)
-                        }
+                      .map(x => {
+                        response.errorResponses += InvalidSubsFieldResponse(subsFieldName, x.errorMessage)
+                      }
                       )))))
               }
             }
+          }
         }
-
     )
-
-    // for every field in fields
-    // if there any regex validation
-    // then match the field names; map the name
-    // else return the correct Valid type
   }
 
 
@@ -124,12 +115,22 @@ class SubscriptionFieldsService @Inject()(repository: SubscriptionFieldsReposito
       fields = apiSubscription.fields)
   }
 
-  private def getRegex(fieldDefinition: FieldsDefinitionResponse): Seq[String] = {
-    fieldDefinition
-      .fieldDefinitions
-        .map(_.validation
-          .map(regEx => regEx.rules.asInstanceOf[RegexValidationRule].regex)
-            .map(_ => Seq[String]() += _))
+  private def getRegexs(fieldDefinition: FieldDefinition) = {
+
+    val x: Option[NonEmptyList[Any]] = fieldDefinition.validation
+      .map((validation: Validation) => validation.rules.asInstanceOf[NonEmptyList[RegexValidationRule]]
+        .map((rule: RegexValidationRule) => Seq[String]() += rule.regex)
+      )
   }
+
+
+  private def matchAllRegexs(regexs: Seq[Option[String]], value: String): Boolean = {
+    var matches = false
+   regexs.foreach(regex => {
+     matches = value.matches(regex.get)
+   })
+    matches
+  }
+
 
 }

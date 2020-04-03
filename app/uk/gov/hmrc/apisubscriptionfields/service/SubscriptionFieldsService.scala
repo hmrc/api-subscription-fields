@@ -37,12 +37,34 @@ class SubscriptionFieldsService @Inject()(repository: SubscriptionFieldsReposito
 
   def validate(id: ClientId, context: ApiContext, version: ApiVersion, fields: Fields): SubsFieldValiationResponse = {
     val fieldDefinition = fieldsDefinitionService.get(context, version)
-    fieldDefinition.map(_.map
-      {
-        fieldDefinitionActual =>
-        val regexMap = getRegex(fieldDefinitionActual)
-          val validatableKeys = fields.filterKeys(regexMap.keySet)
-      }
+    val unpackedFieldDefinitions = fieldDefinition.map(_.map(_.fieldDefinitions))
+//    val errorMessage = unpackedFieldDefinition.map(_.map(_.map(_.validation.map(x => InvalidSubsFieldResponse(subsFieldName, x.errorMessage)))))
+//    val errorMessageMap = Map(fieldDefinition.map(_.map(_.fieldDefinitions.map(_.name)) ->
+//      unpackedFieldDefinition)))
+
+    //End goal of validate method (Invalidation part) put errorMessage inside invalidPArt(OBJECT) with the name of it
+
+
+    fieldDefinition.map(
+      _.map
+        {
+          fieldDefinitionActual =>
+            val regex = getRegex(fieldDefinitionActual)
+            fields.map {case (key, value) => (key, value.matches(regex))}.filterKeys(_ == false) match {
+              case Map.empty => ValidSubsFieldValiationResponse
+              case mapOfFieldsWithErrors => {
+                val response = InvalidSubsFieldValiationResponse(Set.empty)
+                mapOfFieldsWithErrors.keys
+                  .map(subsFieldName => unpackedFieldDefinitions
+                    .map(_.map(_.map(_.validation
+                      .map(x =>
+                        {
+                          response.errorResponses += InvalidSubsFieldResponse(subsFieldName, x.errorMessage)
+                        }
+                      )))))
+              }
+            }
+        }
 
     )
 
@@ -102,8 +124,12 @@ class SubscriptionFieldsService @Inject()(repository: SubscriptionFieldsReposito
       fields = apiSubscription.fields)
   }
 
-  private def getRegex(fieldDefinition: FieldsDefinitionResponse): Map[String, String] = ???
-
-  private def evaluateRegex(value: String, regex: String): Boolean = ???
+  private def getRegex(fieldDefinition: FieldsDefinitionResponse): Seq[String] = {
+    fieldDefinition
+      .fieldDefinitions
+        .map(_.validation
+          .map(regEx => regEx.rules.asInstanceOf[RegexValidationRule].regex)
+            .map(_ => Seq[String]() += _))
+  }
 
 }

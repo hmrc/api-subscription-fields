@@ -77,6 +77,10 @@ class FieldsDefinitionMongoRepository @Inject()(mongoDbProvider: MongoDbProvider
     deleteOne(selectorForFieldsDefinition(apiContext, apiVersion))
   }
 
+  def fetchRegexsForFields(apiContext: ApiContext, apiVersion: ApiVersion) = {
+
+  }
+
   private def selectorForFieldsDefinition(apiContext: ApiContext, apiVersion: ApiVersion): JsObject = {
     selector(apiContext.value, apiVersion.value)
   }

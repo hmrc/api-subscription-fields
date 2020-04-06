@@ -36,35 +36,67 @@ class SubscriptionFieldsService @Inject()(repository: SubscriptionFieldsReposito
                                           uuidCreator: UUIDCreator,
                                           fieldsDefinitionService: FieldsDefinitionService) {
 
-  def validate(id: ClientId, context: ApiContext, version: ApiVersion, fields: Fields): SubsFieldValiationResponse = {
-    val fieldNames = fields.keys
+  type FieldName = String
+  type ErrorMessage = String
+  type FieldError = (FieldName, ErrorMessage)
+                                            
+  // True - passed
+  private def validate(rule: ValidationRule, value: String): Boolean = rule match {
+    case RegexValidationRule(regex) => value.matches(regex)
+  }
+    
+  // True - passed
+  private def validate(validation: Validation, value: String): Boolean = {
+    validation.rules.foldLeft(true)( (acc, rule) => (acc && validate(rule, value)) )
+  }
+
+  // Some is Some(error)
+  private def validate(fieldDefinition: FieldDefinition, value: String): Option[FieldError] = {
+    fieldDefinition.validation.fold[Option[FieldError]](None)(v => if(validate(v, value)) None else Some((fieldDefinition.name, v.errorMessage)))
+  }
+
+  private def validate(fieldDefinitions: Seq[FieldDefinition], fields: Fields): Seq[FieldError] =
+    fieldDefinitions
+      .map(fd => validate(fd, fields.get(fd.name).getOrElse("")))
+      .foldLeft(Seq.empty[FieldError]){
+        case (acc, None) => acc
+        case (acc, Some(fe)) => fe +: acc
+      }
+
+  def validate(context: ApiContext, version: ApiVersion, fields: Fields): Future[SubsFieldValiationResponse] = {
     val fieldDefinitionResponse: Future[Option[FieldsDefinitionResponse]] = fieldsDefinitionService.get(context, version)
     val fieldDefinitions: Future[Option[Seq[FieldDefinition]]] = fieldDefinitionResponse.map(_.map(_.fieldDefinitions))
 
-
     fieldDefinitions.map(
-      _.map
-        {
-          unpackedFieldDefinitions => unpackedFieldDefinitions.map {
-            unpackedFieldDefinition =>
-            val regexs: Seq[Option[String]] = getRegexs(unpackedFieldDefinition)
-            fields.map { case (key, value) => (key, matchAllRegexs(regexs, value)) }.filterKeys(_ == false) match {
-              case Map.empty => ValidSubsFieldValiationResponse
-              case mapOfFieldsWithErrors => {
-                val response = InvalidSubsFieldValiationResponse(Set.empty)
-                mapOfFieldsWithErrors.keys
-                  .map(subsFieldName => fieldDefinitions
-                    .map(_.map(_.map(_.validation
-                      .map(x => {
-                        response.errorResponses += InvalidSubsFieldResponse(subsFieldName, x.errorMessage)
-                      }
-                      )))))
-              }
-            }
-          }
+      _.fold[SubsFieldValiationResponse](throw new RuntimeException)(fieldDefinitions =>
+        validate(fieldDefinitions, fields) match {
+          case Nil => ValidSubsFieldValiationResponse
+          case errs: Seq[FieldError] => InvalidSubsFieldValiationResponse(errorResponses = errs.map { case (name, msg) => InvalidSubsFieldResponse(name,msg) }.toSet)
         }
+      )
     )
   }
+    //     {
+    //       unpackedFieldDefinitions: Seq[FieldDefinition] => unpackedFieldDefinitions.map {
+    //         unpackedFieldDefinition: FieldDefinition =>
+    //         val regexs: Seq[Option[String]] = getRegexs(unpackedFieldDefinition)
+    //         fields.map { case (key, value) => (key, matchAllRegexs(regexs, value)) }.filterKeys(_ == false) match {
+    //           case Map.empty => ValidSubsFieldValiationResponse
+    //           case mapOfFieldsWithErrors => {
+    //             val response = InvalidSubsFieldValiationResponse(Set.empty)
+    //             mapOfFieldsWithErrors.keys
+    //               .map(subsFieldName => fieldDefinitions
+    //                 .map(_.map(_.map(_.validation
+    //                   .map(x => {
+    //                     response.errorResponses += InvalidSubsFieldResponse(subsFieldName, x.errorMessage)
+    //                   }
+    //                   )))))
+    //           }
+    //         }
+    //       }
+    //     }
+    // )
+  // }
 
 
   def upsert(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion, subscriptionFields: Fields): Future[(SubscriptionFieldsResponse, IsInsert)] = {
@@ -125,11 +157,9 @@ class SubscriptionFieldsService @Inject()(repository: SubscriptionFieldsReposito
 
 
   private def matchAllRegexs(regexs: Seq[Option[String]], value: String): Boolean = {
-    var matches = false
-   regexs.foreach(regex => {
-     matches = value.matches(regex.get)
-   })
-    matches
+     regexs.foreach(regex => {
+       value.matches(regex.get)
+     })
   }
 
 

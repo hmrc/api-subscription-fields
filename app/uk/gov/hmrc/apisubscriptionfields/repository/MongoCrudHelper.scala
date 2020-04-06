@@ -69,6 +69,10 @@ trait MongoCrudHelper[T] extends MongoIndexCreator with MongoErrorHandler {
     mongoCollection.find(selector).one[T]
   }
 
+  def getRegex(selector: JsObject, projection: JsObject)(implicit r: Reads[T]): Future[Option[T]] = {
+    mongoCollection.find(selector, projection).one[T]
+  }
+
   def deleteOne(selector: JsObject): Future[Boolean] = {
     mongoCollection.remove(selector, firstMatchOnly = true).map(handleDeleteError(_, s"Could not delete entity for selector: $selector"))
   }

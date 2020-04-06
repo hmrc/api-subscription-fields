@@ -37,6 +37,7 @@ class SubscriptionFieldsService @Inject()(repository: SubscriptionFieldsReposito
                                           fieldsDefinitionService: FieldsDefinitionService) {
 
   def validate(id: ClientId, context: ApiContext, version: ApiVersion, fields: Fields): SubsFieldValiationResponse = {
+    val fieldNames = fields.keys
     val fieldDefinitionResponse: Future[Option[FieldsDefinitionResponse]] = fieldsDefinitionService.get(context, version)
     val fieldDefinitions: Future[Option[Seq[FieldDefinition]]] = fieldDefinitionResponse.map(_.map(_.fieldDefinitions))
 
@@ -117,8 +118,7 @@ class SubscriptionFieldsService @Inject()(repository: SubscriptionFieldsReposito
 
   private def getRegexs(fieldDefinition: FieldDefinition) = {
 
-    val x: Option[NonEmptyList[Any]] = fieldDefinition.validation
-      .map((validation: Validation) => validation.rules.asInstanceOf[NonEmptyList[RegexValidationRule]]
+    fieldDefinition.validation.map((validation: Validation) => validation.rules.asInstanceOf[NonEmptyList[RegexValidationRule]]
         .map((rule: RegexValidationRule) => Seq[String]() += rule.regex)
       )
   }

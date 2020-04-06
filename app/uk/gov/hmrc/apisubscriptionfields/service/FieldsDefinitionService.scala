@@ -43,6 +43,12 @@ class FieldsDefinitionService @Inject() (repository: FieldsDefinitionRepository)
     } yield fetch.map(asResponse)
   }
 
+  def getRegex(apiContext: ApiContext, apiVersion: ApiVersion) = {
+    for {
+      fetch <- repository.fetch(apiContext, apiVersion)
+    } yield fetch.map(asResponse)
+  }
+
   def getAll: Future[BulkFieldsDefinitionsResponse] = {
     (for {
       defs <- repository.fetchAll()

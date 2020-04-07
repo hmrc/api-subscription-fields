@@ -17,14 +17,15 @@
 package uk.gov.hmrc.apisubscriptionfields.controller
 
 import java.util.UUID
-import javax.inject.{Inject, Singleton}
 
+import javax.inject.{Inject, Singleton}
 import play.api.libs.json.{JsValue, Json, Writes}
 import play.api.mvc._
 import uk.gov.hmrc.apisubscriptionfields.model.ErrorCode._
 import uk.gov.hmrc.apisubscriptionfields.model._
 import uk.gov.hmrc.apisubscriptionfields.service.SubscriptionFieldsService
 
+import scala.collection.Set
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
@@ -86,23 +87,20 @@ class SubscriptionFieldsController @Inject()(cc: ControllerComponents, service: 
     withJsonBody[SubscriptionFieldsRequest] { payload =>
       // TODO: ensure that `fields` is not empty (at least one subscription field)
       // TODO: ensure that each subscription field has a name (map key) matching a field definition and a non-empty value
-     // if (!isValid(service.validate(ClientId(rawClientId), ApiContext(rawApiContext), ApiVersion(rawApiVersion), payload.fields)))
-       // {
-          // return validation response
-       // }
-      // else continue
 
-      service.validate(ClientId(rawClientId), ApiContext(rawApiContext), ApiVersion(rawApiVersion), payload.fields) match {
-        case ValidSubsFieldValiationResponse =>
-          service.upsert(ClientId(rawClientId), ApiContext(rawApiContext), ApiVersion(rawApiVersion), payload.fields) map {
-            case (response, true) => Created(Json.toJson(response))
-            case (response, false) => Ok(Json.toJson(response))
+
+      val x: Future[SubsFieldValidationResponse] = service.validate(ApiContext(rawApiContext), ApiVersion(rawApiVersion), payload.fields)
+      val y: Future[(SubscriptionFieldsResponse, IsInsert)] = service.upsert(ClientId(rawClientId), ApiContext(rawApiContext), ApiVersion(rawApiVersion), payload.fields)
+
+      service.validate(ApiContext(rawApiContext), ApiVersion(rawApiVersion), payload.fields) flatMap {
+          case ValidSubsFieldValidationResponse => {
+            service.upsert(ClientId(rawClientId), ApiContext(rawApiContext), ApiVersion(rawApiVersion), payload.fields) map {
+              case (response, true) => Created(Json.toJson(response))
+              case (response, false) => Ok(Json.toJson(response))
+            }
           }
-
-      }
-
-
-
+          case InvalidSubsFieldValidationResponse(fieldErrorMessages) => Ok(Json.toJson(fieldErrorMessages))
+        }
     } recover recovery
   }
 
@@ -122,5 +120,5 @@ class SubscriptionFieldsController @Inject()(cc: ControllerComponents, service: 
 
   override protected def controllerComponents: ControllerComponents = cc
 
-  private def isValid(subsFieldValiationResponse: SubsFieldValiationResponse) : Boolean = ???
+  private def isValid(subsFieldValiationResponse: SubsFieldValidationResponse) : Boolean = ???
 }

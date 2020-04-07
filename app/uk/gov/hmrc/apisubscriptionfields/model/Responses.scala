@@ -27,6 +27,12 @@ case class FieldsDefinitionResponse(apiContext: String, apiVersion: String, fiel
 
 case class BulkFieldsDefinitionsResponse(apis: Seq[FieldsDefinitionResponse])
 
+sealed trait SubsFieldValidationResponse
+
+case object ValidSubsFieldValidationResponse extends SubsFieldValidationResponse
+
+case class InvalidSubsFieldValidationResponse(errorResponses: Set[FieldErrorMessage]) extends SubsFieldValidationResponse
+
 object ErrorCode extends Enumeration {
   type ErrorCode = Value
 

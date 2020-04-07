@@ -18,7 +18,6 @@ package uk.gov.hmrc.apisubscriptionfields.service
 
 import java.util.UUID
 
-import cats.data.NonEmptyList
 import javax.inject._
 import uk.gov.hmrc.apisubscriptionfields.model._
 import uk.gov.hmrc.apisubscriptionfields.repository.{SubscriptionFields, SubscriptionFieldsRepository}
@@ -36,68 +35,19 @@ class SubscriptionFieldsService @Inject()(repository: SubscriptionFieldsReposito
                                           uuidCreator: UUIDCreator,
                                           fieldsDefinitionService: FieldsDefinitionService) {
 
-  type FieldName = String
-  type ErrorMessage = String
-  type FieldError = (FieldName, ErrorMessage)
-                                            
-  // True - passed
-  private def validate(rule: ValidationRule, value: String): Boolean = rule match {
-    case RegexValidationRule(regex) => value.matches(regex)
-  }
-    
-  // True - passed
-  private def validate(validation: Validation, value: String): Boolean = {
-    validation.rules.foldLeft(true)( (acc, rule) => (acc && validate(rule, value)) )
-  }
-
-  // Some is Some(error)
-  private def validate(fieldDefinition: FieldDefinition, value: String): Option[FieldError] = {
-    fieldDefinition.validation.fold[Option[FieldError]](None)(v => if(validate(v, value)) None else Some((fieldDefinition.name, v.errorMessage)))
-  }
-
-  private def validate(fieldDefinitions: Seq[FieldDefinition], fields: Fields): Seq[FieldError] =
-    fieldDefinitions
-      .map(fd => validate(fd, fields.get(fd.name).getOrElse("")))
-      .foldLeft(Seq.empty[FieldError]){
-        case (acc, None) => acc
-        case (acc, Some(fe)) => fe +: acc
-      }
-
-  def validate(context: ApiContext, version: ApiVersion, fields: Fields): Future[SubsFieldValiationResponse] = {
+  def validate(context: ApiContext, version: ApiVersion, fields: Fields): Future[SubsFieldValidationResponse] = {
     val fieldDefinitionResponse: Future[Option[FieldsDefinitionResponse]] = fieldsDefinitionService.get(context, version)
     val fieldDefinitions: Future[Option[Seq[FieldDefinition]]] = fieldDefinitionResponse.map(_.map(_.fieldDefinitions))
 
     fieldDefinitions.map(
-      _.fold[SubsFieldValiationResponse](throw new RuntimeException)(fieldDefinitions =>
-        validate(fieldDefinitions, fields) match {
-          case Nil => ValidSubsFieldValiationResponse
-          case errs: Seq[FieldError] => InvalidSubsFieldValiationResponse(errorResponses = errs.map { case (name, msg) => InvalidSubsFieldResponse(name,msg) }.toSet)
+      _.fold[SubsFieldValidationResponse](throw new RuntimeException)(fieldDefinitions =>
+        SubscriptionFieldsService.validate(fieldDefinitions, fields) match {
+          case Nil => ValidSubsFieldValidationResponse
+          case errs: Seq[SubscriptionFieldsService.FieldError] => InvalidSubsFieldValidationResponse(errorResponses = errs.map { case (name, msg) => FieldErrorMessage(name,msg) }.toSet)
         }
       )
     )
   }
-    //     {
-    //       unpackedFieldDefinitions: Seq[FieldDefinition] => unpackedFieldDefinitions.map {
-    //         unpackedFieldDefinition: FieldDefinition =>
-    //         val regexs: Seq[Option[String]] = getRegexs(unpackedFieldDefinition)
-    //         fields.map { case (key, value) => (key, matchAllRegexs(regexs, value)) }.filterKeys(_ == false) match {
-    //           case Map.empty => ValidSubsFieldValiationResponse
-    //           case mapOfFieldsWithErrors => {
-    //             val response = InvalidSubsFieldValiationResponse(Set.empty)
-    //             mapOfFieldsWithErrors.keys
-    //               .map(subsFieldName => fieldDefinitions
-    //                 .map(_.map(_.map(_.validation
-    //                   .map(x => {
-    //                     response.errorResponses += InvalidSubsFieldResponse(subsFieldName, x.errorMessage)
-    //                   }
-    //                   )))))
-    //           }
-    //         }
-    //       }
-    //     }
-    // )
-  // }
-
 
   def upsert(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion, subscriptionFields: Fields): Future[(SubscriptionFieldsResponse, IsInsert)] = {
     val fields = SubscriptionFields(clientId.value, apiContext.value, apiVersion.value, uuidCreator.uuid(), subscriptionFields)
@@ -148,19 +98,33 @@ class SubscriptionFieldsService @Inject()(repository: SubscriptionFieldsReposito
       fields = apiSubscription.fields)
   }
 
-  private def getRegexs(fieldDefinition: FieldDefinition) = {
+  object SubscriptionFieldsService {
 
-    fieldDefinition.validation.map((validation: Validation) => validation.rules.asInstanceOf[NonEmptyList[RegexValidationRule]]
-        .map((rule: RegexValidationRule) => Seq[String]() += rule.regex)
-      )
+    type FieldName = String
+    type ErrorMessage = String
+    type FieldError = (FieldName, ErrorMessage)
+
+    // True - passed
+    def validate(rule: ValidationRule, value: String): Boolean = rule match {
+      case RegexValidationRule(regex) => value.matches(regex)
+    }
+
+    // True - passed
+    def validate(validation: Validation, value: String): Boolean = {
+      validation.rules.foldLeft(true)( (acc, rule) => (acc && validate(rule, value)) )
+    }
+
+    // Some is Some(error)
+    def validate(fieldDefinition: FieldDefinition, value: String): Option[FieldError] = {
+      fieldDefinition.validation.flatMap(v => if(validate(v, value)) None else Some((fieldDefinition.name, v.errorMessage)))
+    }
+
+    def validate(fieldDefinitions: Seq[FieldDefinition], fields: Fields): Seq[FieldError] =
+      fieldDefinitions
+        .map(fd => validate(fd, fields.get(fd.name).getOrElse("")))
+        .foldLeft(Seq.empty[FieldError]){
+          case (acc, None) => acc
+          case (acc, Some(fe)) => fe +: acc
+        }
   }
-
-
-  private def matchAllRegexs(regexs: Seq[Option[String]], value: String): Boolean = {
-     regexs.foreach(regex => {
-       value.matches(regex.get)
-     })
-  }
-
-
 }

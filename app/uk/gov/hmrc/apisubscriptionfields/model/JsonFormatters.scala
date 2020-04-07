@@ -26,6 +26,7 @@ import play.api.libs.json._
 import play.api.libs.json.Reads._
 import play.api.libs.functional.syntax._
 import uk.gov.hmrc.apisubscriptionfields.model.FieldDefinitionType.FieldDefinitionType
+import uk.gov.hmrc.apisubscriptionfields.model._
 
 trait SharedJsonFormatters {
   implicit val SubscriptionFieldsIdJF = new Format[SubscriptionFieldsId] {
@@ -79,6 +80,10 @@ trait JsonFormatters extends SharedJsonFormatters {
 
   implicit val FieldDefinitionJF = Format(fieldDefinitionReads, fieldDefinitionWrites)
 
+  val fieldErrorMessageReads = Json.reads[FieldErrorMessage]
+  val fieldErrorMessageWrites = Json.writes[FieldErrorMessage]
+  implicit val FieldErrorMessageJF = Format(fieldErrorMessageReads, fieldErrorMessageWrites)
+
   implicit val FieldsDefinitionRequestJF = Json.format[FieldsDefinitionRequest]
   implicit val SubscriptionFieldsRequestJF = Json.format[SubscriptionFieldsRequest]
 
@@ -87,6 +92,9 @@ trait JsonFormatters extends SharedJsonFormatters {
   implicit val SubscriptionFieldsResponseJF = Json.format[SubscriptionFieldsResponse]
 
   implicit val BulkSubscriptionFieldsResponseJF = Json.format[BulkSubscriptionFieldsResponse]
+
+  implicit val SubsFieldValidationResponseJF: OFormat[SubsFieldValidationResponse] = derived.withTypeTag.oformat(TypeTagSetting.ShortClassName)
+  implicit val InvalidSubsFieldValidationResponseJF = Json.format[InvalidSubsFieldValidationResponse]
 }
 
 object JsonFormatters extends JsonFormatters

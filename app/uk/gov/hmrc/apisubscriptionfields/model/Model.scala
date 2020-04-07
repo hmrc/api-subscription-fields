@@ -34,6 +34,8 @@ case class RegexValidationRule(regex: String) extends ValidationRule
 
 case class Validation(errorMessage: String, rules: NEL[ValidationRule])
 
+case class FieldErrorMessage(subsFieldName: String, errorMessage: String)
+
 object FieldDefinitionType extends Enumeration {
   type FieldDefinitionType = Value
 
@@ -44,12 +46,4 @@ object FieldDefinitionType extends Enumeration {
 
 case class FieldDefinition(name: String, description: String, hint: String = "", `type`: FieldDefinitionType,
                            shortDescription: String, validation: Option[Validation] = None)
-
-sealed trait SubsFieldValiationResponse
-
-case object ValidSubsFieldValiationResponse extends SubsFieldValiationResponse
-
-case class InvalidSubsFieldValiationResponse(errorResponses: Set[InvalidSubsFieldResponse]) extends SubsFieldValiationResponse
-
-case class InvalidSubsFieldResponse(subsFieldName: String, errorMessage: String)
 

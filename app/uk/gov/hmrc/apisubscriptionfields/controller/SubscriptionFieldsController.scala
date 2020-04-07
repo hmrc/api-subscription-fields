@@ -88,10 +88,6 @@ class SubscriptionFieldsController @Inject()(cc: ControllerComponents, service: 
       // TODO: ensure that `fields` is not empty (at least one subscription field)
       // TODO: ensure that each subscription field has a name (map key) matching a field definition and a non-empty value
 
-
-      val x: Future[SubsFieldValidationResponse] = service.validate(ApiContext(rawApiContext), ApiVersion(rawApiVersion), payload.fields)
-      val y: Future[(SubscriptionFieldsResponse, IsInsert)] = service.upsert(ClientId(rawClientId), ApiContext(rawApiContext), ApiVersion(rawApiVersion), payload.fields)
-
       service.validate(ApiContext(rawApiContext), ApiVersion(rawApiVersion), payload.fields) flatMap {
           case ValidSubsFieldValidationResponse => {
             service.upsert(ClientId(rawClientId), ApiContext(rawApiContext), ApiVersion(rawApiVersion), payload.fields) map {
@@ -99,7 +95,7 @@ class SubscriptionFieldsController @Inject()(cc: ControllerComponents, service: 
               case (response, false) => Ok(Json.toJson(response))
             }
           }
-          case InvalidSubsFieldValidationResponse(fieldErrorMessages) => Ok(Json.toJson(fieldErrorMessages))
+          case InvalidSubsFieldValidationResponse(fieldErrorMessages) => Future.successful(Ok(Json.toJson(fieldErrorMessages)))
         }
     } recover recovery
   }

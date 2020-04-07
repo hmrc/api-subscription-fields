@@ -29,10 +29,11 @@ import scala.concurrent.Future
 class SubscriptionFieldsServiceSpec extends UnitSpec with SubscriptionFieldsTestData with MockFactory {
 
   private val mockSubscriptionFieldsIdRepository = mock[SubscriptionFieldsRepository]
+  private val mockFieldsDefinitionService = mock[FieldsDefinitionService]
   private val mockUuidCreator = new UUIDCreator {
     override def uuid(): UUID = FakeRawFieldsId
   }
-  private val service = new SubscriptionFieldsService(mockSubscriptionFieldsIdRepository, mockUuidCreator)
+  private val service = new SubscriptionFieldsService(mockSubscriptionFieldsIdRepository, mockUuidCreator, mockFieldsDefinitionService)
 
   "getAll" should {
     "return an empty list when no entry exists in the database collection" in {

@@ -56,6 +56,7 @@ trait SubscriptionFieldsTestData extends TestData {
   final val FakeApiSubscription = SubscriptionFields(fakeRawClientId, fakeRawContext, fakeRawVersion, FakeRawFieldsId, subscriptionFields)
   final val FakeSubscriptionFieldsId = SubscriptionFieldsId(FakeRawFieldsId)
   final val FakeSubscriptionFieldsResponse: SubscriptionFieldsResponse = SubscriptionFieldsResponse(fakeRawClientId, fakeRawContext, fakeRawVersion, FakeSubscriptionFieldsId, subscriptionFields)
+  final val FakeSubsFieldValidationResponse: SubsFieldValidationResponse = ValidSubsFieldValidationResponse
 
   def createSubscriptionFieldsWithApiContext(clientId: String = fakeRawClientId, rawContext: String = fakeRawContext) = {
     val subscriptionFields = Map("field_1" -> "value_1", "field_2" -> "value_2", "field_3" -> "value_3")

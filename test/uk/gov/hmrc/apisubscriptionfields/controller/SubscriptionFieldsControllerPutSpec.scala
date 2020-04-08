@@ -38,10 +38,10 @@ class SubscriptionFieldsControllerPutSpec extends UnitSpec
   private val controller = new SubscriptionFieldsController(stubControllerComponents(), mockSubscriptionFieldsService)
 
   "PUT /field/application/:clientId/context/:apiContext/version/:apiVersion" should {
-    "return CREATED when created in the repo" in {
+    "return CREATED when Field values are Valid and created in the repo" in {
       (mockSubscriptionFieldsService.validate(_: ApiContext, _: ApiVersion, _: Fields)).
         expects(FakeContext, FakeVersion, subscriptionFields).
-        returns(Future.successful(FakeSubsFieldValidationResponse))
+        returns(Future.successful(FakeValidSubsFieldValidationResponse))
 
       (mockSubscriptionFieldsService.upsert(_: ClientId, _: ApiContext, _: ApiVersion, _: Fields)).
         expects(FakeClientId, FakeContext, FakeVersion, subscriptionFields).
@@ -53,10 +53,10 @@ class SubscriptionFieldsControllerPutSpec extends UnitSpec
       }
     }
 
-    "return OK when updated in the repo" in {
+    "return OK when Field values are Valid and updated in the repo" in {
       (mockSubscriptionFieldsService.validate(_: ApiContext, _: ApiVersion, _: Fields)).
         expects(FakeContext, FakeVersion, subscriptionFields).
-        returns(Future.successful(FakeSubsFieldValidationResponse))
+        returns(Future.successful(FakeValidSubsFieldValidationResponse))
 
       (mockSubscriptionFieldsService.upsert (_: ClientId, _: ApiContext, _: ApiVersion, _: Fields)).
         expects(FakeClientId, FakeContext, FakeVersion, subscriptionFields).
@@ -65,6 +65,18 @@ class SubscriptionFieldsControllerPutSpec extends UnitSpec
       val json = mkJson(SubscriptionFieldsRequest(subscriptionFields))
       testSubmitResult(mkRequest(json)) { result =>
         status(result) shouldBe OK
+      }
+    }
+
+    "return OK with FieldErrorMessages when Field values are Invalid" in {
+      (mockSubscriptionFieldsService.validate(_: ApiContext, _: ApiVersion, _: Fields)).
+        expects(FakeContext, FakeVersion, subscriptionFields).
+        returns(Future.successful(FakeInvalidSubsFieldValidationResponse))
+
+      val json = mkJson(SubscriptionFieldsRequest(subscriptionFields))
+      testSubmitResult(mkRequest(json)) { result =>
+        status(result) shouldBe OK
+
       }
     }
   }

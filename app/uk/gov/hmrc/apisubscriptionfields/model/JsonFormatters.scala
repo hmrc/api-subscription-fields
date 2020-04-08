@@ -19,7 +19,6 @@ package uk.gov.hmrc.apisubscriptionfields.model
 import java.util.UUID
 
 import cats.data.{NonEmptyList => NEL}
-import cats.implicits._
 import julienrf.json.derived
 import julienrf.json.derived.TypeTagSetting
 import play.api.libs.json._
@@ -80,9 +79,12 @@ trait JsonFormatters extends SharedJsonFormatters {
 
   implicit val FieldDefinitionJF = Format(fieldDefinitionReads, fieldDefinitionWrites)
 
-  val fieldErrorMessageReads = Json.reads[FieldErrorMessage]
-  val fieldErrorMessageWrites = Json.writes[FieldErrorMessage]
-  implicit val FieldErrorMessageJF = Format(fieldErrorMessageReads, fieldErrorMessageWrites)
+  // 
+  // val fieldErrorMessageReads = Json.reads[FieldErrorMessage]
+  // val fieldErrorMessageWrites = Json.writes[FieldErrorMessage]
+  // implicit val FieldErrorMessageJF = Format(fieldErrorMessageReads, fieldErrorMessageWrites)
+
+  implicit val FieldErrorMessageJF = Json.format[FieldErrorMessage]
 
   implicit val FieldsDefinitionRequestJF = Json.format[FieldsDefinitionRequest]
   implicit val SubscriptionFieldsRequestJF = Json.format[SubscriptionFieldsRequest]

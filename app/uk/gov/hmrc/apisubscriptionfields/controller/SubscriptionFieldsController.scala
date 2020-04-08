@@ -19,18 +19,18 @@ package uk.gov.hmrc.apisubscriptionfields.controller
 import java.util.UUID
 
 import javax.inject.{Inject, Singleton}
-import play.api.libs.json.{JsValue, Json, Writes}
+import play.api.libs.json._
+import uk.gov.hmrc.apisubscriptionfields.model.JsonFormatters._
 import play.api.mvc._
 import uk.gov.hmrc.apisubscriptionfields.model.ErrorCode._
 import uk.gov.hmrc.apisubscriptionfields.model._
 import uk.gov.hmrc.apisubscriptionfields.service.SubscriptionFieldsService
 
-import scala.collection.Set
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import scala.concurrent.ExecutionContext
 
 @Singleton
-class SubscriptionFieldsController @Inject()(cc: ControllerComponents, service: SubscriptionFieldsService) extends CommonController {
+class SubscriptionFieldsController @Inject()(cc: ControllerComponents, service: SubscriptionFieldsService)(implicit ec: ExecutionContext) extends CommonController {
 
   import JsonFormatters._
 
@@ -84,6 +84,8 @@ class SubscriptionFieldsController @Inject()(cc: ControllerComponents, service: 
   }
 
   def upsertSubscriptionFields(rawClientId: String, rawApiContext: String, rawApiVersion: String): Action[JsValue] = Action.async(parse.json) { implicit request =>
+    import JsonFormatters._
+
     withJsonBody[SubscriptionFieldsRequest] { payload =>
       // TODO: ensure that `fields` is not empty (at least one subscription field)
       // TODO: ensure that each subscription field has a name (map key) matching a field definition and a non-empty value
@@ -95,7 +97,7 @@ class SubscriptionFieldsController @Inject()(cc: ControllerComponents, service: 
               case (response, false) => Ok(Json.toJson(response))
             }
           }
-          case InvalidSubsFieldValidationResponse(fieldErrorMessages) => Future.successful(Ok(Json.toJson(fieldErrorMessages)))
+          case InvalidSubsFieldValidationResponse(fieldErrorMessages) => Future.successful(BadRequest(Json.toJson(fieldErrorMessages)))
         }
     } recover recovery
   }

@@ -22,20 +22,29 @@ import play.api.mvc._
 import play.api.test.{FakeRequest, StubControllerComponentsFactory}
 import play.api.test.Helpers._
 import uk.gov.hmrc.apisubscriptionfields.SubscriptionFieldsTestData
-import uk.gov.hmrc.apisubscriptionfields.model.{ApiContext, ApiVersion, ClientId, Fields, JsonFormatters, SubsFieldValidationResponse, SubscriptionFieldsRequest}
+import uk.gov.hmrc.apisubscriptionfields.model._
 import uk.gov.hmrc.apisubscriptionfields.service.SubscriptionFieldsService
 import uk.gov.hmrc.play.test.UnitSpec
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import akka.stream.Materializer
+import akka.actor.ActorSystem
+import akka.stream.ActorMaterializer
+import scala.concurrent.Await
+import org.scalatest.concurrent.ScalaFutures
 
 class SubscriptionFieldsControllerPutSpec extends UnitSpec
   with SubscriptionFieldsTestData
+  with ScalaFutures
   with MockFactory
   with JsonFormatters
   with StubControllerComponentsFactory {
 
   private val mockSubscriptionFieldsService = mock[SubscriptionFieldsService]
   private val controller = new SubscriptionFieldsController(stubControllerComponents(), mockSubscriptionFieldsService)
+  implicit private val actorSystem = ActorSystem("test")
+  implicit private val mat: Materializer = ActorMaterializer.create(actorSystem)
 
   "PUT /field/application/:clientId/context/:apiContext/version/:apiVersion" should {
     "return CREATED when Field values are Valid and created in the repo" in {
@@ -75,8 +84,8 @@ class SubscriptionFieldsControllerPutSpec extends UnitSpec
 
       val json = mkJson(SubscriptionFieldsRequest(subscriptionFields))
       testSubmitResult(mkRequest(json)) { result =>
-        status(result) shouldBe OK
-
+        status(result) shouldBe BAD_REQUEST
+        jsonBodyOf(Await.result(result, implicitly)) shouldBe (Json.toJson(FakeFieldErrorMessages))
       }
     }
   }

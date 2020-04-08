@@ -19,7 +19,6 @@ package uk.gov.hmrc.apisubscriptionfields
 import java.util.UUID
 
 import cats.data.NonEmptyList
-import org.scalatest.TestData
 import play.api.http.HeaderNames.{ACCEPT, CONTENT_TYPE}
 import play.api.http.MimeTypes
 import uk.gov.hmrc.apisubscriptionfields.model._
@@ -39,6 +38,8 @@ trait TestData {
   final val FakeContext = ApiContext(fakeRawContext)
   final val FakeContext2 = ApiContext(fakeRawContext2)
   final val FakeVersion = ApiVersion(fakeRawVersion)
+
+  def fieldN(id: Int): String = s"field_$id"
 }
 
 
@@ -51,7 +52,7 @@ trait SubscriptionFieldsTestData extends TestData {
   final val FakeFieldsId = SubscriptionFieldsId(FakeRawFieldsId)
 
   final val EmptyResponse: Future[Option[SubscriptionFieldsResponse]] = Future.successful(None)
-  final val subscriptionFields = Map("A" -> "X", "B" -> "Y")
+  final val subscriptionFields = Map(fieldN(1) -> "X", fieldN(2) -> "Y")
 
   final val FakeApiSubscription = SubscriptionFields(fakeRawClientId, fakeRawContext, fakeRawVersion, FakeRawFieldsId, subscriptionFields)
   final val FakeSubscriptionFieldsId = SubscriptionFieldsId(FakeRawFieldsId)
@@ -63,7 +64,7 @@ trait SubscriptionFieldsTestData extends TestData {
   final val FakeInvalidSubsFieldValidationResponse: SubsFieldValidationResponse = InvalidSubsFieldValidationResponse(FakeFieldErrorMessages)
 
   def createSubscriptionFieldsWithApiContext(clientId: String = fakeRawClientId, rawContext: String = fakeRawContext) = {
-    val subscriptionFields = Map("field_1" -> "value_1", "field_2" -> "value_2", "field_3" -> "value_3")
+    val subscriptionFields = Map(fieldN(1) -> "value_1", fieldN(2) -> "value_2", fieldN(3) -> "value_3")
     SubscriptionFields(clientId, rawContext, fakeRawVersion,  UUID.randomUUID(), subscriptionFields)
   }
 
@@ -73,10 +74,10 @@ trait SubscriptionFieldsTestData extends TestData {
 trait FieldsDefinitionTestData extends TestData {
   val FakeValidationRule: RegexValidationRule = RegexValidationRule("test regex")
   val FakeValidation: Validation = Validation("error message", NonEmptyList.one(FakeValidationRule))
-  final val FakeFieldDefinitionUrl = FieldDefinition("name1", "desc1", "hint1", FieldDefinitionType.URL, "short description", Some(FakeValidation))
-  final val FakeFieldDefinitionUrlValidationEmpty = FieldDefinition("name1", "desc1", "hint1", FieldDefinitionType.URL, "short description", None)
-  final val FakeFieldDefinitionString = FieldDefinition("name2", "desc2", "hint2", FieldDefinitionType.STRING, "short description", Some(FakeValidation))
-  final val FakeFieldDefinitionSecureToken = FieldDefinition("name3", "desc3", "hint3", FieldDefinitionType.SECURE_TOKEN, "short description", Some(FakeValidation))
+  final val FakeFieldDefinitionUrl = FieldDefinition(fieldN(1), "desc1", "hint1", FieldDefinitionType.URL, "short description", Some(FakeValidation))
+  final val FakeFieldDefinitionUrlValidationEmpty = FieldDefinition(fieldN(1), "desc1", "hint1", FieldDefinitionType.URL, "short description", None)
+  final val FakeFieldDefinitionString = FieldDefinition(fieldN(2), "desc2", "hint2", FieldDefinitionType.STRING, "short description", Some(FakeValidation))
+  final val FakeFieldDefinitionSecureToken = FieldDefinition(fieldN(3), "desc3", "hint3", FieldDefinitionType.SECURE_TOKEN, "short description", Some(FakeValidation))
   final val FakeFieldsDefinitions = Seq(FakeFieldDefinitionUrl, FakeFieldDefinitionString, FakeFieldDefinitionSecureToken)
   final val FakeFieldsDefinition = FieldsDefinition(fakeRawContext, fakeRawVersion, FakeFieldsDefinitions)
   final val FakeFieldsDefinitionResponse = FieldsDefinitionResponse(fakeRawContext, fakeRawVersion, FakeFieldsDefinition.fieldDefinitions)

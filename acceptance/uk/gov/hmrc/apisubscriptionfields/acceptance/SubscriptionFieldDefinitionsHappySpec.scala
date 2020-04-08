@@ -30,8 +30,10 @@ class SubscriptionFieldDefinitionsHappySpec extends AcceptanceTestSpec
   with SubscriptionFieldsTestData
   with FieldsDefinitionTestData
   with JsonFormatters {
-
+    
+  
   feature("Fields-Definition") {
+
 
     scenario("the API is called to store some new fields definitions") {
       Given("Definitiions are created ")

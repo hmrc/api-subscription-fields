@@ -35,12 +35,14 @@ import uk.gov.hmrc.apisubscriptionfields.model._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
+import uk.gov.hmrc.apisubscriptionfields.TestData
 
 trait AcceptanceTestSpec extends FeatureSpec
   with GivenWhenThen
   with BeforeAndAfterAll
   with Matchers
-  with GuiceOneServerPerSuite {
+  with GuiceOneServerPerSuite
+  with TestData {
 
   protected val ValidRequest = FakeRequest()
     .withHeaders(RequestHeaders.ACCEPT_HMRC_JSON_HEADER)
@@ -60,8 +62,8 @@ trait AcceptanceTestSpec extends FeatureSpec
 
   protected def fieldsIdEndpoint(fieldsId: UUID) = s"/field/$fieldsId"
 
-  protected val SampleFields1 = Map("field1" -> "value1", "field2" -> "value2")
-  protected val SampleFields2 = Map("field1" -> "value1b", "field3" -> "value3")
+  protected val SampleFields1 = Map(fieldN(1) -> "value1", fieldN(2) -> "value2")
+  protected val SampleFields2 = Map(fieldN(1) -> "value1b", fieldN(3) -> "value3")
 
   protected def validSubscriptionPutRequest(fields: Fields): FakeRequest[AnyContentAsJson] =
     validSubscriptionPutRequest(SubscriptionFieldsRequest(fields))

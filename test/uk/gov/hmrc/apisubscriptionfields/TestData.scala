@@ -59,7 +59,8 @@ trait SubscriptionFieldsTestData extends TestData {
   final val FakeValidSubsFieldValidationResponse: SubsFieldValidationResponse = ValidSubsFieldValidationResponse
   final val FakeFieldErrorMessage1: FieldErrorMessage = FieldErrorMessage("callbackUrl", "Invalid Callback URL")
   final val FakeFieldErrorMessage2: FieldErrorMessage = FieldErrorMessage("EORI", "Invalid EORI")
-  final val FakeInvalidSubsFieldValidationResponse: SubsFieldValidationResponse = InvalidSubsFieldValidationResponse(Set(FakeFieldErrorMessage1, FakeFieldErrorMessage2))
+  final val FakeFieldErrorMessages: Set[FieldErrorMessage] = Set(FakeFieldErrorMessage1, FakeFieldErrorMessage2)
+  final val FakeInvalidSubsFieldValidationResponse: SubsFieldValidationResponse = InvalidSubsFieldValidationResponse(FakeFieldErrorMessages)
 
   def createSubscriptionFieldsWithApiContext(clientId: String = fakeRawClientId, rawContext: String = fakeRawContext) = {
     val subscriptionFields = Map("field_1" -> "value_1", "field_2" -> "value_2", "field_3" -> "value_3")

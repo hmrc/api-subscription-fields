@@ -45,7 +45,7 @@ trait MongoCrudHelper[T] extends MongoIndexCreator with MongoErrorHandler {
 
       maybeTuple.fold[(T, IsInsert)] {
         handleError(selector, findAndModifyResult)
-      } (tuple => tuple)
+      }(tuple => tuple)
     }
   }
 
@@ -56,9 +56,7 @@ trait MongoCrudHelper[T] extends MongoIndexCreator with MongoErrorHandler {
   }
 
   def save(entity: T, selector: JsObject)(implicit w: OWrites[T]): Future[(T, IsInsert)] = {
-    mongoCollection.update(selector, entity, upsert = true).map {
-      updateWriteResult => (entity, handleSaveError(updateWriteResult, s"Could not save entity: $entity"))
-    }
+    mongoCollection.update(selector, entity, upsert = true).map { updateWriteResult => (entity, handleSaveError(updateWriteResult, s"Could not save entity: $entity")) }
   }
 
   def getMany(selector: JsObject)(implicit r: Reads[T]): Future[List[T]] = {
@@ -67,10 +65,6 @@ trait MongoCrudHelper[T] extends MongoIndexCreator with MongoErrorHandler {
 
   def getOne(selector: JsObject)(implicit r: Reads[T]): Future[Option[T]] = {
     mongoCollection.find(selector).one[T]
-  }
-
-  def getRegex(selector: JsObject, projection: JsObject)(implicit r: Reads[T]): Future[Option[T]] = {
-    mongoCollection.find(selector, projection).one[T]
   }
 
   def deleteOne(selector: JsObject): Future[Boolean] = {

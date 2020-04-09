@@ -53,6 +53,8 @@ trait SubscriptionFieldsTestData extends TestData {
 
   final val EmptyResponse: Future[Option[SubscriptionFieldsResponse]] = Future.successful(None)
   final val subscriptionFields = Map(fieldN(1) -> "X", fieldN(2) -> "Y")
+  final val subscriptionFieldsMatchRegexValidation = Map("alphanumericField" -> "ABC123abc", "password" -> "Qw12@erty")
+  final val subscriptionFieldsDoNotMatchRegexValidation = Map("alphanumericField" -> "ABC123abc=", "password" -> "Qw12erty")
 
   final val FakeApiSubscription = SubscriptionFields(fakeRawClientId, fakeRawContext, fakeRawVersion, FakeRawFieldsId, subscriptionFields)
   final val FakeSubscriptionFieldsId = SubscriptionFieldsId(FakeRawFieldsId)
@@ -63,6 +65,10 @@ trait SubscriptionFieldsTestData extends TestData {
   final val FakeFieldErrorMessages: Set[FieldErrorMessage] = Set(FakeFieldErrorMessage1, FakeFieldErrorMessage2)
   final val FakeInvalidSubsFieldValidationResponse: SubsFieldValidationResponse = InvalidSubsFieldValidationResponse(FakeFieldErrorMessages)
 
+  final val FakeFieldErrorForAlphanumeric = FieldErrorMessage("alphanumericField", "Needs to be alpha numeric")
+  final val FakeFieldErrorForPassword = FieldErrorMessage("password", "Needs to be at least 8 chars with at least one lowercase, uppercase and special char")
+  final val FakeInvalidSubsFieldValidationResponse2 = InvalidSubsFieldValidationResponse(errorResponses = Set(FakeFieldErrorForAlphanumeric, FakeFieldErrorForPassword))
+
   def createSubscriptionFieldsWithApiContext(clientId: String = fakeRawClientId, rawContext: String = fakeRawContext) = {
     val subscriptionFields = Map(fieldN(1) -> "value_1", fieldN(2) -> "value_2", fieldN(3) -> "value_3")
     SubscriptionFields(clientId, rawContext, fakeRawVersion,  UUID.randomUUID(), subscriptionFields)
@@ -72,8 +78,8 @@ trait SubscriptionFieldsTestData extends TestData {
 }
 
 trait FieldsDefinitionTestData extends TestData {
-  val FakeValidationRule: RegexValidationRule = RegexValidationRule("test regex")
-  val FakeValidation: Validation = Validation("error message", NonEmptyList.one(FakeValidationRule))
+  val FakeValidationRule: RegexValidationRule = RegexValidationRule("^.*$")
+  val FakeValidation: Validation = Validation("Needs to be alpha numeric", NonEmptyList.one(FakeValidationRule))
   final val FakeFieldDefinitionUrl = FieldDefinition(fieldN(1), "desc1", "hint1", FieldDefinitionType.URL, "short description", Some(FakeValidation))
   final val FakeFieldDefinitionUrlValidationEmpty = FieldDefinition(fieldN(1), "desc1", "hint1", FieldDefinitionType.URL, "short description", None)
   final val FakeFieldDefinitionString = FieldDefinition(fieldN(2), "desc2", "hint2", FieldDefinitionType.STRING, "short description", Some(FakeValidation))
@@ -81,6 +87,16 @@ trait FieldsDefinitionTestData extends TestData {
   final val FakeFieldsDefinitions = Seq(FakeFieldDefinitionUrl, FakeFieldDefinitionString, FakeFieldDefinitionSecureToken)
   final val FakeFieldsDefinition = FieldsDefinition(fakeRawContext, fakeRawVersion, FakeFieldsDefinitions)
   final val FakeFieldsDefinitionResponse = FieldsDefinitionResponse(fakeRawContext, fakeRawVersion, FakeFieldsDefinition.fieldDefinitions)
+
+  final val alphaNumericRegexRule: RegexValidationRule = RegexValidationRule("^[a-zA-Z0-9]+$")
+  final val passwordRegexRule: RegexValidationRule = RegexValidationRule("^(?=.{8,})(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=]).*$")
+  final val FakeValidationForAlphanumeric: Validation = Validation("Needs to be alpha numeric", NonEmptyList.one(alphaNumericRegexRule))
+  final val FakeValidationForPassword: Validation = Validation("Needs to be at least 8 chars with at least one lowercase, uppercase and special char", NonEmptyList.one(passwordRegexRule))
+  final val FakeFieldDefinitionAlphnumericField = FieldDefinition("alphanumericField", "an alphanumeric filed", "this is an alphanumeric value", FieldDefinitionType.STRING, "an alphanumeric field", Some(FakeValidationForAlphanumeric))
+  final val FakeFieldDefinitionPassword = FieldDefinition("password", "password", "this is your password", FieldDefinitionType.SECURE_TOKEN, "password", Some(FakeValidationForPassword))
+  final val FakeFieldsDefinitionsWithRegex = Seq(FakeFieldDefinitionAlphnumericField, FakeFieldDefinitionPassword)
+  final val FakeFieldsDefinitionWithRegex = FieldsDefinition(fakeRawContext, fakeRawVersion, FakeFieldsDefinitionsWithRegex)
+  final val FakeFieldsDefinitionResponseWithRegex: FieldsDefinitionResponse = FieldsDefinitionResponse(fakeRawContext, fakeRawVersion, FakeFieldsDefinitionsWithRegex)
 
   def createFieldsDefinition(apiContext: String = fakeRawContext, apiVersion: String = fakeRawVersion, fieldDefinitions: Seq[FieldDefinition] = FakeFieldsDefinitions) =
     FieldsDefinition(apiContext, apiVersion, fieldDefinitions)

@@ -19,14 +19,14 @@ package uk.gov.hmrc.apisubscriptionfields.service
 import java.util.UUID
 
 import org.scalamock.scalatest.MockFactory
-import uk.gov.hmrc.apisubscriptionfields.model._
+import uk.gov.hmrc.apisubscriptionfields.model.{SubsFieldValidationResponse, _}
 import uk.gov.hmrc.apisubscriptionfields.repository._
-import uk.gov.hmrc.apisubscriptionfields.SubscriptionFieldsTestData
+import uk.gov.hmrc.apisubscriptionfields.{FieldsDefinitionTestData, SubscriptionFieldsTestData, model}
 import uk.gov.hmrc.play.test.UnitSpec
 
 import scala.concurrent.Future
 
-class SubscriptionFieldsServiceSpec extends UnitSpec with SubscriptionFieldsTestData with MockFactory {
+class SubscriptionFieldsServiceSpec extends UnitSpec with SubscriptionFieldsTestData with FieldsDefinitionTestData with MockFactory {
 
   private val mockSubscriptionFieldsIdRepository = mock[SubscriptionFieldsRepository]
   private val mockFieldsDefinitionService = mock[FieldsDefinitionService]
@@ -167,5 +167,19 @@ class SubscriptionFieldsServiceSpec extends UnitSpec with SubscriptionFieldsTest
       await(service.delete(FakeClientId)) shouldBe false
     }
   }
+  "validate" should {
+    "returns ValidSubsFieldValidationResponse when fields are Valid " in {
+      (mockFieldsDefinitionService get( _: ApiContext, _: ApiVersion))
+          .expects(FakeContext, FakeVersion).returns(Some(FakeFieldsDefinitionResponseWithRegex))
 
+      await(service.validate(FakeContext, FakeVersion, subscriptionFieldsMatchRegexValidation)) shouldBe ValidSubsFieldValidationResponse
+    }
+
+    "returns InvalidSubsFieldValidationResponse when fields are Invalid " in {
+      (mockFieldsDefinitionService get( _: ApiContext, _: ApiVersion))
+        .expects(FakeContext, FakeVersion).returns(Some(FakeFieldsDefinitionResponseWithRegex))
+
+      await(service.validate(FakeContext, FakeVersion, subscriptionFieldsDoNotMatchRegexValidation)) shouldBe FakeInvalidSubsFieldValidationResponse2
+    }
+  }
 }

@@ -38,30 +38,26 @@ trait SharedJsonFormatters {
   }
 }
 
-trait JsonFormatters extends SharedJsonFormatters {
+trait NonEmptyListFormatters {
 
-  object NonEmptyListOps {
-    def reads[T: Reads]: Reads[NEL[T]] =
-      Reads
-        .of[List[T]]
-        .collect(
-          JsonValidationError("expected a NonEmptyList but got an empty list")
-        ) {
-          case head :: tail => NEL(head, tail)
-        }
+  implicit def nelReads[A](implicit r: Reads[A]): Reads[NEL[A]] =
+    Reads
+      .of[List[A]]
+      .collect(
+        JsonValidationError("expected a NonEmptyList but got an empty list")
+      ) {
+        case head :: tail => NEL(head, tail)
+      }
 
-    def writes[T: Writes]: Writes[NEL[T]] =
-      Writes
-        .of[List[T]]
-        .contramap(_.toList)
+  implicit def nelWrites[A](implicit w: Writes[A]): Writes[NEL[A]] =
+    Writes
+      .of[List[A]]
+      .contramap(_.toList)
+}
 
-    def format[T: Format]: Format[NEL[T]] =
-      Format(reads, writes)
-  }
+trait JsonFormatters extends SharedJsonFormatters with NonEmptyListFormatters {
 
   implicit val validationRuleFormat: OFormat[ValidationRule] = derived.withTypeTag.oformat(TypeTagSetting.ShortClassName)
-
-  implicit val nelValidationRuleFormat: Format[NEL[ValidationRule]] = NonEmptyListOps.format[ValidationRule]
 
   implicit val ValidationJF = Json.format[ValidationGroup]
 
@@ -78,11 +74,6 @@ trait JsonFormatters extends SharedJsonFormatters {
   val fieldDefinitionWrites = Json.writes[FieldDefinition]
 
   implicit val FieldDefinitionJF = Format(fieldDefinitionReads, fieldDefinitionWrites)
-
-  //
-  // val fieldErrorMessageReads = Json.reads[FieldErrorMessage]
-  // val fieldErrorMessageWrites = Json.writes[FieldErrorMessage]
-  // implicit val FieldErrorMessageJF = Format(fieldErrorMessageReads, fieldErrorMessageWrites)
 
   implicit val FieldErrorMessageJF = Json.format[FieldErrorMessage]
 

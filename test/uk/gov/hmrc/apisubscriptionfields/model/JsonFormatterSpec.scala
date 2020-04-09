@@ -19,15 +19,11 @@ package uk.gov.hmrc.apisubscriptionfields.model
 import org.scalatest.{Matchers, WordSpec}
 import uk.gov.hmrc.apisubscriptionfields.{FieldsDefinitionTestData, SubscriptionFieldsTestData}
 
-class JsonFormatterSpec extends WordSpec
-  with Matchers
-  with JsonFormatters
-  with SubscriptionFieldsTestData
-  with FieldsDefinitionTestData {
+class JsonFormatterSpec extends WordSpec with Matchers with JsonFormatters with SubscriptionFieldsTestData with FieldsDefinitionTestData {
 
   import play.api.libs.json._
 
-  private val fakeFields = Map( "f1" -> "v1" )
+  private val fakeFields = Map("f1" -> "v1")
   private val subscriptionFieldsResponse = SubscriptionFieldsResponse(fakeRawClientId, fakeRawContext, fakeRawVersion, FakeFieldsId, fakeFields)
   private val bulkSubscriptionFieldsResponse = BulkSubscriptionFieldsResponse(Seq(subscriptionFieldsResponse))
 
@@ -35,14 +31,14 @@ class JsonFormatterSpec extends WordSpec
   private val fakeFieldsDefinitionResponseEmptyValidation = FieldsDefinitionResponse(fakeRawContext, fakeRawVersion, Seq(FakeFieldDefinitionUrlValidationEmpty))
   private val bulkFieldsDefinitionResponse = BulkFieldsDefinitionsResponse(Seq(fakeFieldsDefinitionResponse))
 
-  private def objectAsJsonString[A](a:A)(implicit t: Writes[A]) = Json.asciiStringify(Json.toJson(a))
+  private def objectAsJsonString[A](a: A)(implicit t: Writes[A]) = Json.asciiStringify(Json.toJson(a))
 
-  private val subscriptionFieldJson = s"""{"clientId":"$fakeRawClientId","apiContext":"$fakeRawContext","apiVersion":"$fakeRawVersion","fieldsId":"$FakeRawFieldsId","fields":{"f1":"v1"}}"""
+  private val subscriptionFieldJson =
+    s"""{"clientId":"$fakeRawClientId","apiContext":"$fakeRawContext","apiVersion":"$fakeRawVersion","fieldsId":"$FakeRawFieldsId","fields":{"f1":"v1"}}"""
   private val fieldDefinitionJson =
-    s"""{"apiContext":"$fakeRawContext","apiVersion":"$fakeRawVersion","fieldDefinitions":[{"name":"${fieldN(1)}","description":"desc1","hint":"hint1","type":"URL","shortDescription":"short description","validation":{"errorMessage":"error message","rules":[{"RegexValidationRule":{"regex":"test regex"}}]}}]}"""
+    s"""{"apiContext":"$fakeRawContext","apiVersion":"$fakeRawVersion","fieldDefinitions":[{"name":"${fieldN(1)}","description":"desc1","hint":"hint1","type":"URL","shortDescription":"short description","validation":{"errorMessage":"error message","rules":[{"RegexValidationRule":{"regex":".*"}}]}}]}"""
   private val fieldDefinitionEmptyValidationJson =
     s"""{"apiContext":"$fakeRawContext","apiVersion":"$fakeRawVersion","fieldDefinitions":[{"name":"${fieldN(1)}","description":"desc1","hint":"hint1","type":"URL","shortDescription":"short description"}]}"""
-
 
   "SubscriptionFieldsResponse" should {
     "marshal json" in {
@@ -52,7 +48,7 @@ class JsonFormatterSpec extends WordSpec
     "unmarshal text" in {
       Json.parse(subscriptionFieldJson).validate[SubscriptionFieldsResponse] match {
         case JsSuccess(r, _) => r shouldBe subscriptionFieldsResponse
-        case JsError(e) => fail(s"Should have parsed json text but got $e")
+        case JsError(e)      => fail(s"Should have parsed json text but got $e")
       }
     }
   }
@@ -67,7 +63,7 @@ class JsonFormatterSpec extends WordSpec
     "unmarshal text" in {
       Json.parse(json).validate[BulkSubscriptionFieldsResponse] match {
         case JsSuccess(r, _) => r shouldBe bulkSubscriptionFieldsResponse
-        case JsError(e) => fail(s"Should have parsed json text but got $e")
+        case JsError(e)      => fail(s"Should have parsed json text but got $e")
       }
     }
   }
@@ -77,21 +73,21 @@ class JsonFormatterSpec extends WordSpec
       objectAsJsonString(fakeFieldsDefinitionResponse) shouldBe fieldDefinitionJson
     }
 
-    "marshal json when Validation is empty" in {
+    "marshal json when ValidationGroup is empty" in {
       objectAsJsonString(fakeFieldsDefinitionResponseEmptyValidation) shouldBe fieldDefinitionEmptyValidationJson
     }
 
     "unmarshal text" in {
       Json.parse(fieldDefinitionJson).validate[FieldsDefinitionResponse] match {
         case JsSuccess(r, _) => r shouldBe fakeFieldsDefinitionResponse
-        case JsError(e) => fail(s"Should have parsed json text but got $e")
+        case JsError(e)      => fail(s"Should have parsed json text but got $e")
       }
     }
 
-    "unmarshal text  when Validation is empty" in {
+    "unmarshal text  when ValidationGroup is empty" in {
       Json.parse(fieldDefinitionEmptyValidationJson).validate[FieldsDefinitionResponse] match {
         case JsSuccess(r, _) => r shouldBe fakeFieldsDefinitionResponseEmptyValidation
-        case JsError(e) => fail(s"Should have parsed json text but got $e")
+        case JsError(e)      => fail(s"Should have parsed json text but got $e")
       }
     }
   }
@@ -106,7 +102,7 @@ class JsonFormatterSpec extends WordSpec
     "unmarshal text" in {
       Json.parse(json).validate[BulkFieldsDefinitionsResponse] match {
         case JsSuccess(r, _) => r shouldBe bulkFieldsDefinitionResponse
-        case JsError(e) => fail(s"Should have parsed json text but got $e")
+        case JsError(e)      => fail(s"Should have parsed json text but got $e")
       }
     }
   }

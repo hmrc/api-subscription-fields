@@ -33,7 +33,7 @@ trait SharedJsonFormatters {
 
     def reads(json: JsValue) = json match {
       case JsNull => JsError()
-      case _ => JsSuccess(SubscriptionFieldsId(json.as[UUID]))
+      case _      => JsSuccess(SubscriptionFieldsId(json.as[UUID]))
     }
   }
 }
@@ -63,7 +63,7 @@ trait JsonFormatters extends SharedJsonFormatters {
 
   implicit val nelValidationRuleFormat: Format[NEL[ValidationRule]] = NonEmptyListOps.format[ValidationRule]
 
-  implicit val ValidationJF = Json.format[Validation]
+  implicit val ValidationJF = Json.format[ValidationGroup]
 
   implicit val FieldDefinitionTypeReads = Reads.enumNameReads(FieldDefinitionType)
   val fieldDefinitionReads: Reads[FieldDefinition] = (
@@ -72,14 +72,14 @@ trait JsonFormatters extends SharedJsonFormatters {
       ((JsPath \ "hint").read[String] or Reads.pure("")) and
       (JsPath \ "type").read[FieldDefinitionType] and
       ((JsPath \ "shortDescription").read[String] or Reads.pure("")) and
-      (JsPath \ "validation").readNullable[Validation]
-    )(FieldDefinition.apply _)
+      (JsPath \ "validation").readNullable[ValidationGroup]
+  )(FieldDefinition.apply _)
 
   val fieldDefinitionWrites = Json.writes[FieldDefinition]
 
   implicit val FieldDefinitionJF = Format(fieldDefinitionReads, fieldDefinitionWrites)
 
-  // 
+  //
   // val fieldErrorMessageReads = Json.reads[FieldErrorMessage]
   // val fieldErrorMessageWrites = Json.writes[FieldErrorMessage]
   // implicit val FieldErrorMessageJF = Format(fieldErrorMessageReads, fieldErrorMessageWrites)

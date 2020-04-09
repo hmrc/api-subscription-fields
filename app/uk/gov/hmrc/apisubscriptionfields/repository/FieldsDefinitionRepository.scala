@@ -22,7 +22,7 @@ import play.api.libs.json._
 import reactivemongo.api.indexes.IndexType
 import reactivemongo.bson.BSONObjectID
 import reactivemongo.play.json.collection.JSONCollection
-import uk.gov.hmrc.apisubscriptionfields.model.{ApiContext, ApiVersion, IsInsert, RegexValidationRule}
+import uk.gov.hmrc.apisubscriptionfields.model.{ApiContext, ApiVersion, IsInsert}
 import uk.gov.hmrc.mongo.ReactiveRepository
 import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
 
@@ -36,17 +36,14 @@ trait FieldsDefinitionRepository {
   def fetch(apiContext: ApiContext, apiVersion: ApiVersion): Future[Option[FieldsDefinition]]
   def fetchAll(): Future[List[FieldsDefinition]]
 
-  def fetchRegexsForFields(apiContext: ApiContext, apiVersion: ApiVersion): Future[Option[FieldsDefinition]]
-
   def delete(apiContext: ApiContext, apiVersion: ApiVersion): Future[Boolean]
 }
 
 @Singleton
-class FieldsDefinitionMongoRepository @Inject()(mongoDbProvider: MongoDbProvider)
-  extends ReactiveRepository[FieldsDefinition, BSONObjectID]("fieldsDefinitions", mongoDbProvider.mongo,
-    MongoFormatters.FieldsDefinitionJF, ReactiveMongoFormats.objectIdFormats)
-  with FieldsDefinitionRepository
-  with MongoCrudHelper[FieldsDefinition] {
+class FieldsDefinitionMongoRepository @Inject() (mongoDbProvider: MongoDbProvider)
+    extends ReactiveRepository[FieldsDefinition, BSONObjectID]("fieldsDefinitions", mongoDbProvider.mongo, MongoFormatters.FieldsDefinitionJF, ReactiveMongoFormats.objectIdFormats)
+    with FieldsDefinitionRepository
+    with MongoCrudHelper[FieldsDefinition] {
 
   override val mongoCollection: JSONCollection = collection
   private implicit val format = MongoFormatters.FieldsDefinitionJF
@@ -78,10 +75,6 @@ class FieldsDefinitionMongoRepository @Inject()(mongoDbProvider: MongoDbProvider
     deleteOne(selectorForFieldsDefinition(apiContext, apiVersion))
   }
 
-  override def fetchRegexsForFields(apiContext: ApiContext, apiVersion: ApiVersion) = {
-    getRegex(selector(apiContext.value, apiVersion.value), projectionForRegex(apiContext.value, apiVersion.value))
-  }
-
   private def selectorForFieldsDefinition(apiContext: ApiContext, apiVersion: ApiVersion): JsObject = {
     selector(apiContext.value, apiVersion.value)
   }
@@ -96,11 +89,4 @@ class FieldsDefinitionMongoRepository @Inject()(mongoDbProvider: MongoDbProvider
       "apiVersion" -> apiVersion
     )
   }
-
-  private def projectionForRegex(apiContext: String, apiVersion: String): JsObject = {
-    Json.obj(
-      "fieldDefinitions.validation.rules" -> 1
-    )
-  }
-
 }

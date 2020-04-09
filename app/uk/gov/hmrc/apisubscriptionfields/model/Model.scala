@@ -32,7 +32,7 @@ sealed trait ValidationRule
 
 case class RegexValidationRule(regex: String) extends ValidationRule
 
-case class Validation(errorMessage: String, rules: NEL[ValidationRule])
+case class ValidationGroup(errorMessage: String, rules: NEL[ValidationRule])
 
 case class FieldErrorMessage(subsFieldName: String, errorMessage: String)
 
@@ -44,6 +44,4 @@ object FieldDefinitionType extends Enumeration {
   val STRING = Value("STRING")
 }
 
-case class FieldDefinition(name: String, description: String, hint: String = "", `type`: FieldDefinitionType,
-                           shortDescription: String, validation: Option[Validation] = None)
-
+case class FieldDefinition(name: String, description: String, hint: String = "", `type`: FieldDefinitionType, shortDescription: String, validation: Option[ValidationGroup] = None)

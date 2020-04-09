@@ -31,9 +31,7 @@ class UUIDCreator {
 }
 
 @Singleton
-class SubscriptionFieldsService @Inject()(repository: SubscriptionFieldsRepository,
-                                          uuidCreator: UUIDCreator,
-                                          fieldsDefinitionService: FieldsDefinitionService) {
+class SubscriptionFieldsService @Inject() (repository: SubscriptionFieldsRepository, uuidCreator: UUIDCreator, fieldsDefinitionService: FieldsDefinitionService) {
 
   def validate(context: ApiContext, version: ApiVersion, fields: Fields): Future[SubsFieldValidationResponse] = {
     val fieldDefinitionResponse: Future[Option[FieldsDefinitionResponse]] = fieldsDefinitionService.get(context, version)
@@ -43,7 +41,8 @@ class SubscriptionFieldsService @Inject()(repository: SubscriptionFieldsReposito
       _.fold[SubsFieldValidationResponse](throw new RuntimeException)(fieldDefinitions =>
         SubscriptionFieldsService.validate(fieldDefinitions, fields) match {
           case Nil => ValidSubsFieldValidationResponse
-          case errs: Seq[SubscriptionFieldsService.FieldError] => InvalidSubsFieldValidationResponse(errorResponses = errs.map { case (name, msg) => FieldErrorMessage(name,msg) }.toSet)
+          case errs: Seq[SubscriptionFieldsService.FieldError] =>
+            InvalidSubsFieldValidationResponse(errorResponses = errs.map { case (name, msg) => FieldErrorMessage(name, msg) }.toSet)
         }
       )
     )
@@ -79,7 +78,7 @@ class SubscriptionFieldsService @Inject()(repository: SubscriptionFieldsReposito
       fields <- repository.fetchByClientId(clientId)
     } yield fields.map(asResponse)) map {
       case Nil => None
-      case fs => Some(BulkSubscriptionFieldsResponse(subscriptions = fs))
+      case fs  => Some(BulkSubscriptionFieldsResponse(subscriptions = fs))
     }
   }
 
@@ -95,36 +94,37 @@ class SubscriptionFieldsService @Inject()(repository: SubscriptionFieldsReposito
       apiContext = apiSubscription.apiContext,
       apiVersion = apiSubscription.apiVersion,
       fieldsId = SubscriptionFieldsId(apiSubscription.fieldsId),
-      fields = apiSubscription.fields)
+      fields = apiSubscription.fields
+    )
+  }
+}
+
+object SubscriptionFieldsService {
+
+  type FieldName = String
+  type ErrorMessage = String
+  type FieldError = (FieldName, ErrorMessage)
+
+  // True - passed
+  def validateAgainstRule(rule: ValidationRule, value: String): Boolean = rule match {
+    case RegexValidationRule(regex) => value.matches(regex)
   }
 
-  object SubscriptionFieldsService {
-
-    type FieldName = String
-    type ErrorMessage = String
-    type FieldError = (FieldName, ErrorMessage)
-
-    // True - passed
-    def validate(rule: ValidationRule, value: String): Boolean = rule match {
-      case RegexValidationRule(regex) => value.matches(regex)
-    }
-
-    // True - passed
-    def validate(validation: Validation, value: String): Boolean = {
-      validation.rules.foldLeft(true)( (acc, rule) => (acc && validate(rule, value)) )
-    }
-
-    // Some is Some(error)
-    def validate(fieldDefinition: FieldDefinition, value: String): Option[FieldError] = {
-      fieldDefinition.validation.flatMap(v => if(validate(v, value)) None else Some((fieldDefinition.name, v.errorMessage)))
-    }
-
-    def validate(fieldDefinitions: Seq[FieldDefinition], fields: Fields): Seq[FieldError] =
-      fieldDefinitions
-        .map(fd => validate(fd, fields.get(fd.name).getOrElse("")))
-        .foldLeft(Seq.empty[FieldError]){
-          case (acc, None) => acc
-          case (acc, Some(fe)) => fe +: acc
-        }
+  // True - passed
+  def validateAgainstGroup(group: ValidationGroup, value: String): Boolean = {
+    group.rules.foldLeft(true)((acc, rule) => (acc && validateAgainstRule(rule, value)))
   }
+
+  // Some is Some(error)
+  def validateAgainstDefinition(fieldDefinition: FieldDefinition, value: String): Option[FieldError] = {
+    fieldDefinition.validation.flatMap(group => if (validateAgainstGroup(group, value)) None else Some((fieldDefinition.name, group.errorMessage)))
+  }
+
+  def validate(fieldDefinitions: Seq[FieldDefinition], fields: Fields): Seq[FieldError] =
+    fieldDefinitions
+      .map(fd => validateAgainstDefinition(fd, fields.get(fd.name).getOrElse("")))
+      .foldLeft(Seq.empty[FieldError]) {
+        case (acc, None)     => acc
+        case (acc, Some(fe)) => fe +: acc
+      }
 }

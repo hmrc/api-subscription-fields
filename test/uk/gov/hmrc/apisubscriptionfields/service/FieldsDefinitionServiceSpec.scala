@@ -21,7 +21,7 @@ import uk.gov.hmrc.apisubscriptionfields.FieldsDefinitionTestData
 import uk.gov.hmrc.apisubscriptionfields.model.{ApiContext, ApiVersion, BulkFieldsDefinitionsResponse, FieldsDefinitionResponse}
 import uk.gov.hmrc.apisubscriptionfields.repository.{FieldsDefinition, FieldsDefinitionRepository}
 import uk.gov.hmrc.play.test.UnitSpec
-
+import cats.data.{NonEmptyList => NEL}
 import scala.concurrent.Future
 
 class FieldsDefinitionServiceSpec extends UnitSpec with FieldsDefinitionTestData with MockFactory {
@@ -39,23 +39,27 @@ class FieldsDefinitionServiceSpec extends UnitSpec with FieldsDefinitionTestData
     }
 
     "return a list of all entries" in {
-      val fd1 = createFieldsDefinition(apiContext = "api-1", fieldDefinitions = Seq(FakeFieldDefinitionUrl))
-      val fd2 = createFieldsDefinition(apiContext = "api-2", fieldDefinitions = Seq(FakeFieldDefinitionString))
+      val fd1 = createFieldsDefinition(apiContext = "api-1", fieldDefinitions = NEL.one(FakeFieldDefinitionUrl))
+      val fd2 = createFieldsDefinition(apiContext = "api-2", fieldDefinitions = NEL.one(FakeFieldDefinitionString))
 
       (mockFieldsDefinitionRepository.fetchAll _).expects().returns(List(fd1, fd2))
 
       val result = await(service.getAll)
 
-      val expectedResponse = BulkFieldsDefinitionsResponse(apis = Seq(
-        FieldsDefinitionResponse("api-1", fakeRawVersion, Seq(FakeFieldDefinitionUrl)),
-        FieldsDefinitionResponse("api-2", fakeRawVersion, Seq(FakeFieldDefinitionString))))
+      val expectedResponse = BulkFieldsDefinitionsResponse(apis =
+        Seq(
+          FieldsDefinitionResponse("api-1", fakeRawVersion, NEL.one(FakeFieldDefinitionUrl)),
+          FieldsDefinitionResponse("api-2", fakeRawVersion, NEL.one(FakeFieldDefinitionString))
+        )
+      )
       result shouldBe expectedResponse
     }
   }
 
   "get" should {
     "return None when no definition exists in the database collection" in {
-      (mockFieldsDefinitionRepository fetch(_: ApiContext, _: ApiVersion)).expects(FakeContext, FakeVersion)
+      (mockFieldsDefinitionRepository fetch (_: ApiContext, _: ApiVersion))
+        .expects(FakeContext, FakeVersion)
         .returns(None)
 
       val result = await(service.get(FakeContext, FakeVersion))
@@ -64,7 +68,8 @@ class FieldsDefinitionServiceSpec extends UnitSpec with FieldsDefinitionTestData
     }
 
     "return the expected definition" in {
-      (mockFieldsDefinitionRepository fetch(_: ApiContext, _: ApiVersion)).expects(FakeContext, FakeVersion)
+      (mockFieldsDefinitionRepository fetch (_: ApiContext, _: ApiVersion))
+        .expects(FakeContext, FakeVersion)
         .returns(Some(FakeFieldsDefinition))
 
       val result = await(service.get(FakeContext, FakeVersion))
@@ -91,7 +96,7 @@ class FieldsDefinitionServiceSpec extends UnitSpec with FieldsDefinitionTestData
     }
 
     "propagate the error" in {
-      (mockFieldsDefinitionRepository save(_: FieldsDefinition)) expects * returns Future.failed(emulatedFailure)
+      (mockFieldsDefinitionRepository save (_: FieldsDefinition)) expects * returns Future.failed(emulatedFailure)
 
       val caught = intercept[EmulatedFailure] {
         await(service.upsert(FakeContext, FakeVersion, FakeFieldsDefinitions))
@@ -103,14 +108,16 @@ class FieldsDefinitionServiceSpec extends UnitSpec with FieldsDefinitionTestData
 
   "delete" should {
     "return true when the record is removed from the database collection" in {
-      (mockFieldsDefinitionRepository delete (_:ApiContext, _:ApiVersion)).expects(FakeContext, FakeVersion)
+      (mockFieldsDefinitionRepository delete (_: ApiContext, _: ApiVersion))
+        .expects(FakeContext, FakeVersion)
         .returns(true)
 
       await(service.delete(FakeContext, FakeVersion)) shouldBe true
     }
 
     "return false when the record is not found in the database collection" in {
-      (mockFieldsDefinitionRepository delete (_:ApiContext, _:ApiVersion)).expects(FakeContext, FakeVersion)
+      (mockFieldsDefinitionRepository delete (_: ApiContext, _: ApiVersion))
+        .expects(FakeContext, FakeVersion)
         .returns(false)
 
       await(service.delete(FakeContext, FakeVersion)) shouldBe false

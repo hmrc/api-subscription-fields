@@ -18,6 +18,7 @@ package uk.gov.hmrc.apisubscriptionfields.model
 
 import org.scalatest.{Matchers, WordSpec}
 import uk.gov.hmrc.apisubscriptionfields.{FieldsDefinitionTestData, SubscriptionFieldsTestData}
+import cats.data.{NonEmptyList => NEL}
 
 class JsonFormatterSpec extends WordSpec with Matchers with JsonFormatters with SubscriptionFieldsTestData with FieldsDefinitionTestData {
 
@@ -27,8 +28,8 @@ class JsonFormatterSpec extends WordSpec with Matchers with JsonFormatters with 
   private val subscriptionFieldsResponse = SubscriptionFieldsResponse(fakeRawClientId, fakeRawContext, fakeRawVersion, FakeFieldsId, fakeFields)
   private val bulkSubscriptionFieldsResponse = BulkSubscriptionFieldsResponse(Seq(subscriptionFieldsResponse))
 
-  private val fakeFieldsDefinitionResponse = FieldsDefinitionResponse(fakeRawContext, fakeRawVersion, Seq(FakeFieldDefinitionUrl))
-  private val fakeFieldsDefinitionResponseEmptyValidation = FieldsDefinitionResponse(fakeRawContext, fakeRawVersion, Seq(FakeFieldDefinitionUrlValidationEmpty))
+  private val fakeFieldsDefinitionResponse = FieldsDefinitionResponse(fakeRawContext, fakeRawVersion, NEL.one(FakeFieldDefinitionUrl))
+  private val fakeFieldsDefinitionResponseEmptyValidation = FieldsDefinitionResponse(fakeRawContext, fakeRawVersion, NEL.one(FakeFieldDefinitionUrlValidationEmpty))
   private val bulkFieldsDefinitionResponse = BulkFieldsDefinitionsResponse(Seq(fakeFieldsDefinitionResponse))
 
   private def objectAsJsonString[A](a: A)(implicit t: Writes[A]) = Json.asciiStringify(Json.toJson(a))
@@ -104,6 +105,37 @@ class JsonFormatterSpec extends WordSpec with Matchers with JsonFormatters with 
         case JsSuccess(r, _) => r shouldBe bulkFieldsDefinitionResponse
         case JsError(e)      => fail(s"Should have parsed json text but got $e")
       }
+    }
+  }
+
+  "testing" should {
+    "work" in {
+      import cats.data.NonEmptyMap
+      import cats.implicits._
+      import scala.collection.immutable.SortedMap
+
+      val m1: Map[String, String] = Map("a" -> "1", "b" -> "2")
+      println(Json.prettyPrint(Json.toJson(m1)))
+
+      val m1s: SortedMap[String, String] = SortedMap("a" -> "1", "b" -> "2")
+      println(Json.prettyPrint(Json.toJson(m1s)))
+
+      val m2 = NonEmptyMap.fromMap(m1s).get
+      val jm2 = Json.prettyPrint(Json.toJson(m2))
+      println(jm2)
+      val m2JsValue = Json.parse(jm2)
+      println(m2JsValue)
+
+      type MyNEM = NonEmptyMap[String, String]
+
+      val m2Rev: JsResult[MyNEM] = m2JsValue.validate[MyNEM]
+      m2Rev.map(println)
+
+      val m3Res = Json
+        .parse("{}")
+        .validate[MyNEM]
+      println(m3Res)
+
     }
   }
 }

@@ -18,6 +18,8 @@ package uk.gov.hmrc.apisubscriptionfields
 
 package object model {
 
+  import cats.data.NonEmptyMap
+
   type Fields = Map[String, String]
 
   type IsInsert = Boolean

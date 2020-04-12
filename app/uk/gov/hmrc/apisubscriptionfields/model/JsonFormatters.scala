@@ -18,7 +18,7 @@ package uk.gov.hmrc.apisubscriptionfields.model
 
 import java.util.UUID
 
-import cats.data.{NonEmptyList => NEL}
+import cats.data.{NonEmptyList => NEL, NonEmptyMap => NEM}
 import julienrf.json.derived
 import julienrf.json.derived.TypeTagSetting
 import play.api.libs.json._
@@ -26,6 +26,8 @@ import play.api.libs.json.Reads._
 import play.api.libs.functional.syntax._
 import uk.gov.hmrc.apisubscriptionfields.model.FieldDefinitionType.FieldDefinitionType
 import uk.gov.hmrc.apisubscriptionfields.model._
+import cats.kernel.Order
+import scala.collection.immutable.SortedMap
 
 trait SharedJsonFormatters {
   implicit val SubscriptionFieldsIdJF = new Format[SubscriptionFieldsId] {
@@ -38,7 +40,7 @@ trait SharedJsonFormatters {
   }
 }
 
-trait NonEmptyListFormatters {
+trait NonEmptyFormatters {
 
   implicit def nelReads[A](implicit r: Reads[A]): Reads[NEL[A]] =
     Reads
@@ -53,9 +55,25 @@ trait NonEmptyListFormatters {
     Writes
       .of[List[A]]
       .contramap(_.toList)
+
+  implicit def nemReads[K, V](implicit r: Reads[Map[K, V]], ordK: Order[K]): Reads[NEM[K, V]] =
+    Reads
+      .of[Map[K, V]]
+      .collect(
+        JsonValidationError("expected at least one entry but got none")
+      ) {
+        case kvs if kvs.size > 1 => NEM.fromMapUnsafe(SortedMap(kvs.toList: _*)(ordK.toOrdering))
+      }
+
+  implicit def nemWrites[K, V](implicit m: Writes[SortedMap[K, V]]): Writes[NEM[K, V]] =
+    Writes
+      .of[SortedMap[K, V]]
+      .contramap(_.toSortedMap)
 }
 
-trait JsonFormatters extends SharedJsonFormatters with NonEmptyListFormatters {
+object NonEmptyFormatters extends NonEmptyFormatters
+
+trait JsonFormatters extends SharedJsonFormatters with NonEmptyFormatters {
 
   implicit val validationRuleFormat: OFormat[ValidationRule] = derived.withTypeTag.oformat(TypeTagSetting.ShortClassName)
 
@@ -70,6 +88,9 @@ trait JsonFormatters extends SharedJsonFormatters with NonEmptyListFormatters {
       ((JsPath \ "shortDescription").read[String] or Reads.pure("")) and
       (JsPath \ "validation").readNullable[ValidationGroup]
   )(FieldDefinition.apply _)
+
+  implicit val FieldsOrd = Order.fromOrdering(scala.math.Ordering.String)
+  implicit val FieldsJF = Format(nemReads[String, String], nemWrites[String, String])
 
   val fieldDefinitionWrites = Json.writes[FieldDefinition]
 

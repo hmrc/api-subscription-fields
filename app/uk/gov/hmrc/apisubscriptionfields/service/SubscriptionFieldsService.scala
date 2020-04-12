@@ -24,6 +24,7 @@ import uk.gov.hmrc.apisubscriptionfields.repository.{SubscriptionFields, Subscri
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import cats.data.NonEmptyList
 
 @Singleton
 class UUIDCreator {
@@ -35,11 +36,11 @@ class SubscriptionFieldsService @Inject() (repository: SubscriptionFieldsReposit
 
   def validate(context: ApiContext, version: ApiVersion, fields: Fields): Future[SubsFieldValidationResponse] = {
     val fieldDefinitionResponse: Future[Option[FieldsDefinitionResponse]] = fieldsDefinitionService.get(context, version)
-    val fieldDefinitions: Future[Option[Seq[FieldDefinition]]] = fieldDefinitionResponse.map(_.map(_.fieldDefinitions))
+    val fieldDefinitions: Future[Option[NonEmptyList[FieldDefinition]]] = fieldDefinitionResponse.map(_.map(_.fieldDefinitions))
 
     fieldDefinitions.map(
       _.fold[SubsFieldValidationResponse](throw new RuntimeException)(fieldDefinitions =>
-        SubscriptionFieldsService.validate(fieldDefinitions, fields) match {
+        SubscriptionFieldsService.validate(fieldDefinitions.toList.toSeq, fields) match {
           case Nil => ValidSubsFieldValidationResponse
           case errs: Seq[SubscriptionFieldsService.FieldError] =>
             InvalidSubsFieldValidationResponse(errorResponses = errs.map { case (name, msg) => FieldErrorMessage(name, msg) }.toSet)
@@ -122,7 +123,7 @@ object SubscriptionFieldsService {
 
   def validate(fieldDefinitions: Seq[FieldDefinition], fields: Fields): Seq[FieldError] =
     fieldDefinitions
-      .map(fd => validateAgainstDefinition(fd, fields.get(fd.name).getOrElse("")))
+      .map(fd => validateAgainstDefinition(fd, fields.applyOrElse(fd.name, (_: String) => ""))) //.appplyOrElse(fd.name, "")))
       .foldLeft(Seq.empty[FieldError]) {
         case (acc, None)     => acc
         case (acc, Some(fe)) => fe +: acc

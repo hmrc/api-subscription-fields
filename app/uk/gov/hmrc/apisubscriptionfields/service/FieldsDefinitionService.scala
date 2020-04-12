@@ -22,11 +22,12 @@ import uk.gov.hmrc.apisubscriptionfields.repository.{FieldsDefinition, FieldsDef
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import cats.data.NonEmptyList
 
 @Singleton
 class FieldsDefinitionService @Inject() (repository: FieldsDefinitionRepository) {
 
-  def upsert(apiContext: ApiContext, apiVersion: ApiVersion, fieldDefinitions: Seq[FieldDefinition]): Future[(FieldsDefinitionResponse, IsInsert)] = {
+  def upsert(apiContext: ApiContext, apiVersion: ApiVersion, fieldDefinitions: NonEmptyList[FieldDefinition]): Future[(FieldsDefinitionResponse, IsInsert)] = {
     val fieldsDefinition = FieldsDefinition(apiContext.value, apiVersion.value, fieldDefinitions)
     repository.save(fieldsDefinition).map {
       case (fd: FieldsDefinition, inserted: IsInsert) => (asResponse(fd), inserted)

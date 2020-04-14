@@ -42,7 +42,6 @@ class ApiSubscriptionFieldsHappySpec extends AcceptanceTestSpec
       .withTarget( RequestTarget(uriString="", path=definitionEndpoint(fakeRawContext, fakeRawVersion), queryString = Map.empty))
 
     val r = Await.result(route(app, putRequest).get, 10.seconds)
-    Console.println(s"******$r***********")
   }
 
   override def afterAll() {
@@ -53,7 +52,7 @@ class ApiSubscriptionFieldsHappySpec extends AcceptanceTestSpec
     route(app, request)
   }
 
-  
+
   feature("Subscription-Fields") {
 
     Logger.logger.info(s"App.mode = ${app.mode.toString}")
@@ -69,8 +68,7 @@ class ApiSubscriptionFieldsHappySpec extends AcceptanceTestSpec
       val resultFuture = result.value
 
       val r = Await.result(resultFuture, 10.seconds)
-      Console.println(s"******$r***********")
-    
+
       status(resultFuture) shouldBe CREATED
       And("the response body should be a valid response")
       val sfr = contentAsJson(resultFuture).validate[SubscriptionFieldsResponse]

@@ -45,16 +45,16 @@ class FieldsDefinitionController @Inject() (cc: ControllerComponents, service: F
     } recover recovery
   }
 
-  def getAllFieldsDefinitions: Action[AnyContent] = Action.async { implicit request =>
+  def getAllFieldsDefinitions: Action[AnyContent] = Action.async {  _ =>
     service.getAll map (defs => Ok(Json.toJson(defs))) recover recovery
   }
 
-  def getFieldsDefinition(rawApiContext: String, rawApiVersion: String): Action[AnyContent] = Action.async { implicit request =>
+  def getFieldsDefinition(rawApiContext: String, rawApiVersion: String): Action[AnyContent] = Action.async { _ =>
     val eventualMaybeResponse = service.get(ApiContext(rawApiContext), ApiVersion(rawApiVersion))
     asActionResult(eventualMaybeResponse, rawApiContext, rawApiVersion)
   }
 
-  def deleteFieldsDefinition(rawApiContext: String, rawApiVersion: String): Action[AnyContent] = Action.async { implicit request =>
+  def deleteFieldsDefinition(rawApiContext: String, rawApiVersion: String): Action[AnyContent] = Action.async { _ =>
     service.delete(ApiContext(rawApiContext), ApiVersion(rawApiVersion)) map {
       case true => NoContent
       case false => notFoundResponse(rawApiContext, rawApiVersion)

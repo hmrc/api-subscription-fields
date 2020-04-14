@@ -25,6 +25,7 @@ import uk.gov.hmrc.apisubscriptionfields.repository.{SubscriptionFields, Subscri
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import cats.data.NonEmptyList
+import uk.gov.hmrc.apisubscriptionfields.service.SubscriptionFieldsService.FieldErrorMap
 
 @Singleton
 class UUIDCreator {
@@ -41,9 +42,9 @@ class SubscriptionFieldsService @Inject() (repository: SubscriptionFieldsReposit
     fieldDefinitions.map(
       _.fold[SubsFieldValidationResponse](throw new RuntimeException)(fieldDefinitions =>
         SubscriptionFieldsService.validate(fieldDefinitions, fields) ++ SubscriptionFieldsService.validateFieldNamesAreDefined(fieldDefinitions,fields) match {
-          case Nil => ValidSubsFieldValidationResponse
-          case errs: Seq[SubscriptionFieldsService.FieldError] =>
-            InvalidSubsFieldValidationResponse(errorResponses = errs.map { case (name, msg) => FieldErrorMessage(name, msg) }.toSet)
+          case FieldErrorMap.empty => ValidSubsFieldValidationResponse
+          case errs: FieldErrorMap =>
+            InvalidSubsFieldValidationResponse(errorResponses = errs)
         }
       )
     )
@@ -105,6 +106,10 @@ object SubscriptionFieldsService {
   type FieldName = String
   type ErrorMessage = String
   type FieldError = (FieldName, ErrorMessage)
+  type FieldErrorMap = Map[FieldName, ErrorMessage]
+  object FieldErrorMap {
+    val empty = Map.empty[FieldName, ErrorMessage]
+  }
 
   // True - passed
   def validateAgainstRule(rule: ValidationRule, value: String): Boolean = rule match {
@@ -121,16 +126,16 @@ object SubscriptionFieldsService {
     fieldDefinition.validation.flatMap(group => if (validateAgainstGroup(group, value)) None else Some((fieldDefinition.name, group.errorMessage)))
   }
 
-  def validate(fieldDefinitions: NonEmptyList[FieldDefinition], fields: Fields): Seq[FieldError] =
+  def validate(fieldDefinitions: NonEmptyList[FieldDefinition], fields: Fields): FieldErrorMap =
     fieldDefinitions
       .map(fd => validateAgainstDefinition(fd, fields.get(fd.name).getOrElse("")))
-      .foldLeft(Seq.empty[FieldError]) {
+      .foldLeft(FieldErrorMap.empty) {
         case (acc, None)     => acc
-        case (acc, Some(fe)) => fe +: acc
+        case (acc, Some((name,msg))) => acc + (name -> msg)
       }
 
-  def validateFieldNamesAreDefined(fieldDefinitions: NonEmptyList[FieldDefinition], fields: Fields): Seq[FieldError] = {
+  def validateFieldNamesAreDefined(fieldDefinitions: NonEmptyList[FieldDefinition], fields: Fields): FieldErrorMap = {
     val illegalNames = fields.keySet -- (fieldDefinitions.map(_.name).toList)
-    illegalNames.map(n => (n, "Is not a valid field for this definition")).toSeq
+    illegalNames.foldLeft(FieldErrorMap.empty)( (acc, name) => acc + (name -> "No Field Definition found for this Field"))
   }
 }

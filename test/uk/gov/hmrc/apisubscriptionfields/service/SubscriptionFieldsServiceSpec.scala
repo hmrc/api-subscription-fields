@@ -21,11 +21,10 @@ import java.util.UUID
 import org.scalamock.scalatest.MockFactory
 import uk.gov.hmrc.apisubscriptionfields.model._
 import uk.gov.hmrc.apisubscriptionfields.repository._
-import uk.gov.hmrc.apisubscriptionfields.{FieldsDefinitionTestData, SubscriptionFieldsTestData, model}
+import uk.gov.hmrc.apisubscriptionfields.{FieldsDefinitionTestData, SubscriptionFieldsTestData}
 import uk.gov.hmrc.play.test.UnitSpec
 
 import scala.concurrent.Future
-import uk.gov.hmrc.apisubscriptionfields.service.SubscriptionFieldsService
 import cats.data.NonEmptyList
 
 class SubscriptionFieldsServiceSpec extends UnitSpec with SubscriptionFieldsTestData with FieldsDefinitionTestData with MockFactory {

@@ -32,8 +32,7 @@ sealed trait SubsFieldValidationResponse
 
 case object ValidSubsFieldValidationResponse extends SubsFieldValidationResponse
 
-//TODO: errorResponses needs to changed to a Map to ensure the fieldNames are unique
-case class InvalidSubsFieldValidationResponse(errorResponses: Set[FieldErrorMessage]) extends SubsFieldValidationResponse
+case class InvalidSubsFieldValidationResponse(errorResponses: Map[String, String]) extends SubsFieldValidationResponse
 
 object ErrorCode extends Enumeration {
   type ErrorCode = Value

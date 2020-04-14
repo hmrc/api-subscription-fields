@@ -60,14 +60,20 @@ trait SubscriptionFieldsTestData extends TestData {
   final val FakeSubscriptionFieldsResponse: SubscriptionFieldsResponse =
     SubscriptionFieldsResponse(fakeRawClientId, fakeRawContext, fakeRawVersion, FakeSubscriptionFieldsId, subscriptionFields)
   final val FakeValidSubsFieldValidationResponse: SubsFieldValidationResponse = ValidSubsFieldValidationResponse
-  final val FakeFieldErrorMessage1: FieldErrorMessage = FieldErrorMessage("callbackUrl", "Invalid Callback URL")
-  final val FakeFieldErrorMessage2: FieldErrorMessage = FieldErrorMessage("EORI", "Invalid EORI")
-  final val FakeFieldErrorMessages: Set[FieldErrorMessage] = Set(FakeFieldErrorMessage1, FakeFieldErrorMessage2)
+  final val FakeFieldErrorMessage1 = (("callbackUrl", "Invalid Callback URL"))
+  final val FakeFieldErrorMessage2 = (("EORI", "Invalid EORI"))
+  final val FakeFieldErrorMessages = Map(
+    (FakeFieldErrorMessage1._1 -> FakeFieldErrorMessage1._2),
+    (FakeFieldErrorMessage2._1 -> FakeFieldErrorMessage2._2)
+  )
   final val FakeInvalidSubsFieldValidationResponse: SubsFieldValidationResponse = InvalidSubsFieldValidationResponse(FakeFieldErrorMessages)
 
-  final val FakeFieldErrorForAlphanumeric = FieldErrorMessage("alphanumericField", "Needs to be alpha numeric")
-  final val FakeFieldErrorForPassword = FieldErrorMessage("password", "Needs to be at least 8 chars with at least one lowercase, uppercase and special char")
-  final val FakeInvalidSubsFieldValidationResponse2 = InvalidSubsFieldValidationResponse(errorResponses = Set(FakeFieldErrorForAlphanumeric, FakeFieldErrorForPassword))
+  final val FakeFieldErrorForAlphanumeric = (("alphanumericField", "Needs to be alpha numeric"))
+  final val FakeFieldErrorForPassword = (("password", "Needs to be at least 8 chars with at least one lowercase, uppercase and special char"))
+  final val FakeInvalidSubsFieldValidationResponse2 = InvalidSubsFieldValidationResponse(errorResponses = Map(
+    (FakeFieldErrorForAlphanumeric._1 -> FakeFieldErrorForAlphanumeric._2),
+    (FakeFieldErrorForPassword._1 -> FakeFieldErrorForPassword._2)
+  ))
 
   def createSubscriptionFieldsWithApiContext(clientId: String = fakeRawClientId, rawContext: String = fakeRawContext) = {
     val subscriptionFields = Map(fieldN(1) -> "value_1", fieldN(2) -> "value_2", fieldN(3) -> "value_3")

@@ -74,8 +74,6 @@ trait JsonFormatters extends SharedJsonFormatters with NonEmptyListFormatters {
 
   implicit val FieldDefinitionJF = Format(fieldDefinitionReads, fieldDefinitionWrites)
 
-  implicit val FieldErrorMessageJF = Json.format[FieldErrorMessage]
-
   implicit val FieldsDefinitionRequestJF = Json.format[FieldsDefinitionRequest]
   implicit val SubscriptionFieldsRequestJF = Json.format[SubscriptionFieldsRequest]
 

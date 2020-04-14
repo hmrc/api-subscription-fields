@@ -21,6 +21,7 @@ import uk.gov.hmrc.SbtAutoBuildPlugin
 import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin
 import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin._
 import uk.gov.hmrc.versioning.SbtGitVersioning
+import bloop.integrations.sbt.BloopDefaults
 
 import scala.language.postfixOps
 
@@ -76,6 +77,9 @@ lazy val microservice = Project(appName, file("."))
   .settings(acceptanceTestSettings: _*)
   .settings(scalaVersion := "2.12.11")
   .settings(
+    inConfig(AcceptanceTest)(BloopDefaults.configSettings)
+  )
+  .settings(
     libraryDependencies ++= appDependencies,
     dependencyOverrides ++= overrides,
     evictionWarningOptions in update := EvictionWarningOptions.default.withWarnScalaVersionEviction(false)
@@ -107,3 +111,6 @@ lazy val scoverageSettings: Seq[Setting[_]] = Seq(
 )
 
 def onPackageName(rootPackage: String): String => Boolean = { testName => testName startsWith rootPackage }
+
+// Note that this task has to be scoped globally
+bloopAggregateSourceDependencies in Global := true

@@ -86,19 +86,21 @@ class SubscriptionFieldsController @Inject()(cc: ControllerComponents, service: 
     import JsonFormatters._
 
     withJsonBody[SubscriptionFieldsRequest] { payload =>
-      // TODO: ensure that `fields` is not empty (at least one subscription field)
-      // TODO: ensure that each subscription field has a name (map key) matching a field definition and a non-empty value
-
-      service.validate(ApiContext(rawApiContext), ApiVersion(rawApiVersion), payload.fields) flatMap {
-          case ValidSubsFieldValidationResponse => {
-            service.upsert(ClientId(rawClientId), ApiContext(rawApiContext), ApiVersion(rawApiVersion), payload.fields) map {
-              case (response, true) => Created(Json.toJson(response))
-              case (response, false) => Ok(Json.toJson(response))
+      if(payload.fields.isEmpty) {
+        Future.successful(UnprocessableEntity(JsErrorResponse(INVALID_REQUEST_PAYLOAD, "At least one field must be specified")))
+      }
+      else {
+        service.validate(ApiContext(rawApiContext), ApiVersion(rawApiVersion), payload.fields) flatMap {
+            case ValidSubsFieldValidationResponse => {
+              service.upsert(ClientId(rawClientId), ApiContext(rawApiContext), ApiVersion(rawApiVersion), payload.fields) map {
+                case (response, true) => Created(Json.toJson(response))
+                case (response, false) => Ok(Json.toJson(response))
+              }
             }
+            case InvalidSubsFieldValidationResponse(fieldErrorMessages) => Future.successful(BadRequest(Json.toJson(fieldErrorMessages)))
           }
-          case InvalidSubsFieldValidationResponse(fieldErrorMessages) => Future.successful(BadRequest(Json.toJson(fieldErrorMessages)))
-        }
-    } recover recovery
+        } recover recovery
+      }
   }
 
   def deleteSubscriptionFields(rawClientId: String, rawApiContext: String, rawApiVersion: String): Action[AnyContent] = Action.async { _ =>

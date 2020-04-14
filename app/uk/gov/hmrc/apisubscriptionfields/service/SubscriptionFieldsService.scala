@@ -40,7 +40,7 @@ class SubscriptionFieldsService @Inject() (repository: SubscriptionFieldsReposit
 
     fieldDefinitions.map(
       _.fold[SubsFieldValidationResponse](throw new RuntimeException)(fieldDefinitions =>
-        SubscriptionFieldsService.validate(fieldDefinitions, fields) match {
+        SubscriptionFieldsService.validate(fieldDefinitions, fields) ++ SubscriptionFieldsService.validateFieldNamesAreDefined(fieldDefinitions,fields) match {
           case Nil => ValidSubsFieldValidationResponse
           case errs: Seq[SubscriptionFieldsService.FieldError] =>
             InvalidSubsFieldValidationResponse(errorResponses = errs.map { case (name, msg) => FieldErrorMessage(name, msg) }.toSet)
@@ -128,4 +128,9 @@ object SubscriptionFieldsService {
         case (acc, None)     => acc
         case (acc, Some(fe)) => fe +: acc
       }
+
+  def validateFieldNamesAreDefined(fieldDefinitions: NonEmptyList[FieldDefinition], fields: Fields): Seq[FieldError] = {
+    val illegalNames = fields.keySet -- (fieldDefinitions.map(_.name).toList)
+    illegalNames.map(n => (n, "Is not a valid field for this definition")).toSeq
+  }
 }

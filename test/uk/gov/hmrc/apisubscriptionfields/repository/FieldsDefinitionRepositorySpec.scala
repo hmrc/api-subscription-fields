@@ -59,7 +59,7 @@ class FieldsDefinitionRepositorySpec extends UnitSpec
   private def createFieldsDefinition = FieldsDefinition(fakeRawContext, fakeRawVersion, FakeFieldsDefinitions)
 
   private trait Setup {
-    val fieldsDefinition = createFieldsDefinition
+    val fieldsDefinition: FieldsDefinition = createFieldsDefinition
   }
 
   "save" should {
@@ -79,7 +79,7 @@ class FieldsDefinitionRepositorySpec extends UnitSpec
       await(repository.save(fieldsDefinition)) shouldBe ((fieldsDefinition, true))
       collectionSize shouldBe 1
 
-      val edited = fieldsDefinition.copy(fieldDefinitions = Seq.empty)
+      val edited = fieldsDefinition.copy(fieldDefinitions = FakeFieldsDefinitions)
       await(repository.save(edited)) shouldBe ((edited, false))
       collectionSize shouldBe 1
       await(repository.collection.find(selector(edited)).one[FieldsDefinition]) shouldBe Some(edited)

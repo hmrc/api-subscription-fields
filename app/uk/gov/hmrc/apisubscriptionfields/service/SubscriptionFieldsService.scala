@@ -24,6 +24,7 @@ import uk.gov.hmrc.apisubscriptionfields.repository.{SubscriptionFields, Subscri
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import cats.data.NonEmptyList
 
 @Singleton
 class UUIDCreator {
@@ -35,7 +36,7 @@ class SubscriptionFieldsService @Inject() (repository: SubscriptionFieldsReposit
 
   def validate(context: ApiContext, version: ApiVersion, fields: Fields): Future[SubsFieldValidationResponse] = {
     val fieldDefinitionResponse: Future[Option[FieldsDefinitionResponse]] = fieldsDefinitionService.get(context, version)
-    val fieldDefinitions: Future[Option[Seq[FieldDefinition]]] = fieldDefinitionResponse.map(_.map(_.fieldDefinitions))
+    val fieldDefinitions: Future[Option[NonEmptyList[FieldDefinition]]] = fieldDefinitionResponse.map(_.map(_.fieldDefinitions))
 
     fieldDefinitions.map(
       _.fold[SubsFieldValidationResponse](throw new RuntimeException)(fieldDefinitions =>
@@ -120,7 +121,7 @@ object SubscriptionFieldsService {
     fieldDefinition.validation.flatMap(group => if (validateAgainstGroup(group, value)) None else Some((fieldDefinition.name, group.errorMessage)))
   }
 
-  def validate(fieldDefinitions: Seq[FieldDefinition], fields: Fields): Seq[FieldError] =
+  def validate(fieldDefinitions: NonEmptyList[FieldDefinition], fields: Fields): Seq[FieldError] =
     fieldDefinitions
       .map(fd => validateAgainstDefinition(fd, fields.get(fd.name).getOrElse("")))
       .foldLeft(Seq.empty[FieldError]) {

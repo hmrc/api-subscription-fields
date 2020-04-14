@@ -84,7 +84,7 @@ trait FieldsDefinitionTestData extends TestData {
   final val FakeFieldDefinitionUrlValidationEmpty = FieldDefinition(fieldN(1), "desc1", "hint1", FieldDefinitionType.URL, "short description", None)
   final val FakeFieldDefinitionString = FieldDefinition(fieldN(2), "desc2", "hint2", FieldDefinitionType.STRING, "short description", Some(FakeValidation))
   final val FakeFieldDefinitionSecureToken = FieldDefinition(fieldN(3), "desc3", "hint3", FieldDefinitionType.SECURE_TOKEN, "short description", Some(FakeValidation))
-  final val FakeFieldsDefinitions = Seq(FakeFieldDefinitionUrl, FakeFieldDefinitionString, FakeFieldDefinitionSecureToken)
+  final val FakeFieldsDefinitions = NonEmptyList.fromListUnsafe(List(FakeFieldDefinitionUrl, FakeFieldDefinitionString, FakeFieldDefinitionSecureToken))
   final val FakeFieldsDefinition = FieldsDefinition(fakeRawContext, fakeRawVersion, FakeFieldsDefinitions)
   final val FakeFieldsDefinitionResponse = FieldsDefinitionResponse(fakeRawContext, fakeRawVersion, FakeFieldsDefinition.fieldDefinitions)
 
@@ -103,11 +103,11 @@ trait FieldsDefinitionTestData extends TestData {
   )
   final val FakeFieldDefinitionPassword =
     FieldDefinition("password", "password", "this is your password", FieldDefinitionType.SECURE_TOKEN, "password", Some(FakeValidationForPassword))
-  final val FakeFieldsDefinitionsWithRegex = Seq(FakeFieldDefinitionAlphnumericField, FakeFieldDefinitionPassword)
+  final val FakeFieldsDefinitionsWithRegex = NonEmptyList.fromListUnsafe(List(FakeFieldDefinitionAlphnumericField, FakeFieldDefinitionPassword))
   final val FakeFieldsDefinitionWithRegex = FieldsDefinition(fakeRawContext, fakeRawVersion, FakeFieldsDefinitionsWithRegex)
   final val FakeFieldsDefinitionResponseWithRegex: FieldsDefinitionResponse = FieldsDefinitionResponse(fakeRawContext, fakeRawVersion, FakeFieldsDefinitionsWithRegex)
 
-  def createFieldsDefinition(apiContext: String = fakeRawContext, apiVersion: String = fakeRawVersion, fieldDefinitions: Seq[FieldDefinition] = FakeFieldsDefinitions) =
+  def createFieldsDefinition(apiContext: String = fakeRawContext, apiVersion: String = fakeRawVersion, fieldDefinitions: NonEmptyList[FieldDefinition] = FakeFieldsDefinitions) =
     FieldsDefinition(apiContext, apiVersion, fieldDefinitions)
 
   def uniqueApiContext = UUID.randomUUID().toString

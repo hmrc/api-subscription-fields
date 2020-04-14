@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.apisubscriptionfields.model
 
+import cats.data.NonEmptyList
 import org.scalatest.{Matchers, WordSpec}
 import uk.gov.hmrc.apisubscriptionfields.{FieldsDefinitionTestData, SubscriptionFieldsTestData}
 
@@ -27,8 +28,8 @@ class JsonFormatterSpec extends WordSpec with Matchers with JsonFormatters with 
   private val subscriptionFieldsResponse = SubscriptionFieldsResponse(fakeRawClientId, fakeRawContext, fakeRawVersion, FakeFieldsId, fakeFields)
   private val bulkSubscriptionFieldsResponse = BulkSubscriptionFieldsResponse(Seq(subscriptionFieldsResponse))
 
-  private val fakeFieldsDefinitionResponse = FieldsDefinitionResponse(fakeRawContext, fakeRawVersion, Seq(FakeFieldDefinitionUrl))
-  private val fakeFieldsDefinitionResponseEmptyValidation = FieldsDefinitionResponse(fakeRawContext, fakeRawVersion, Seq(FakeFieldDefinitionUrlValidationEmpty))
+  private val fakeFieldsDefinitionResponse = FieldsDefinitionResponse(fakeRawContext, fakeRawVersion, NonEmptyList.one(FakeFieldDefinitionUrl))
+  private val fakeFieldsDefinitionResponseEmptyValidation = FieldsDefinitionResponse(fakeRawContext, fakeRawVersion, NonEmptyList.one(FakeFieldDefinitionUrlValidationEmpty))
   private val bulkFieldsDefinitionResponse = BulkFieldsDefinitionsResponse(Seq(fakeFieldsDefinitionResponse))
 
   private def objectAsJsonString[A](a: A)(implicit t: Writes[A]) = Json.asciiStringify(Json.toJson(a))

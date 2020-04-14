@@ -36,6 +36,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
 import uk.gov.hmrc.apisubscriptionfields.TestData
+import cats.data.NonEmptyList
 
 trait AcceptanceTestSpec extends FeatureSpec
   with GivenWhenThen
@@ -71,7 +72,7 @@ trait AcceptanceTestSpec extends FeatureSpec
   protected def validSubscriptionPutRequest(contents: SubscriptionFieldsRequest): FakeRequest[AnyContentAsJson] =
     fakeRequestWithHeaders.withMethod(PUT).withJsonBody(Json.toJson(contents))
 
-  protected def validDefinitionPutRequest(fieldDefinitions: Seq[FieldDefinition]): FakeRequest[AnyContentAsJson] =
+  protected def validDefinitionPutRequest(fieldDefinitions: NonEmptyList[FieldDefinition]): FakeRequest[AnyContentAsJson] =
     validDefinitionPutRequest(FieldsDefinitionRequest(fieldDefinitions))
 
   protected def validDefinitionPutRequest(contents: FieldsDefinitionRequest): FakeRequest[AnyContentAsJson] =

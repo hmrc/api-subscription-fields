@@ -36,7 +36,6 @@ class FieldsDefinitionController @Inject() (cc: ControllerComponents, service: F
 
   def upsertFieldsDefinition(rawApiContext: String, rawApiVersion: String): Action[JsValue] = Action.async(parse.json) { implicit request =>
     withJsonBody[FieldsDefinitionRequest] { payload =>
-      // TODO: ensure that `fieldDefinitions` is not empty (at least one field definition must be defined)
       // TODO: ensure that each field definition has an allowed type and a non-empty name
       service.upsert(ApiContext(rawApiContext), ApiVersion(rawApiVersion), payload.fieldDefinitions) map {
         case (response, true) => Created(Json.toJson(response))

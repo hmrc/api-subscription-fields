@@ -16,6 +16,8 @@
 
 package uk.gov.hmrc.apisubscriptionfields.model
 
+import cats.data.NonEmptyList
+
 case class SubscriptionFieldsRequest(fields: Fields)
 
-case class FieldsDefinitionRequest(fieldDefinitions: Seq[FieldDefinition])
+case class FieldsDefinitionRequest(fieldDefinitions: NonEmptyList[FieldDefinition])

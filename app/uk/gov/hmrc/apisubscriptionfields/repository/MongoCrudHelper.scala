@@ -16,15 +16,16 @@
 
 package uk.gov.hmrc.apisubscriptionfields.repository
 
-import play.api.Logger
-import play.api.libs.json.{JsObject, OFormat, OWrites, Reads}
-import reactivemongo.api.Cursor
-import reactivemongo.play.json.ImplicitBSONHandlers._
+import play.api.libs.json._
+import reactivemongo.play.json._
 import reactivemongo.play.json.collection.JSONCollection
-import uk.gov.hmrc.apisubscriptionfields.model.IsInsert
+
+import play.api.Logger
+import reactivemongo.api.Cursor
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import uk.gov.hmrc.apisubscriptionfields.model.IsInsert
 
 trait MongoCrudHelper[T] extends MongoIndexCreator with MongoErrorHandler {
 
@@ -56,22 +57,22 @@ trait MongoCrudHelper[T] extends MongoIndexCreator with MongoErrorHandler {
   }
 
   def save(entity: T, selector: JsObject)(implicit w: OWrites[T]): Future[(T, IsInsert)] = {
-    mongoCollection.update(selector, entity, upsert = true).map { updateWriteResult => (entity, handleSaveError(updateWriteResult, s"Could not save entity: $entity")) }
+    mongoCollection.update(ordered=false).one(selector, entity, upsert = true).map { updateWriteResult => (entity, handleSaveError(updateWriteResult, s"Could not save entity: $entity")) }
   }
 
   def getMany(selector: JsObject)(implicit r: Reads[T]): Future[List[T]] = {
-    mongoCollection.find(selector).cursor[T]().collect[List](Int.MaxValue, Cursor.FailOnError[List[T]]())
+    mongoCollection.find[JsObject, JsObject](selector, None).cursor[T]().collect[List](Int.MaxValue, Cursor.FailOnError[List[T]]())
   }
 
   def getOne(selector: JsObject)(implicit r: Reads[T]): Future[Option[T]] = {
-    mongoCollection.find(selector).one[T]
+    mongoCollection.find[JsObject, JsObject](selector, None).one[T]
   }
 
   def deleteOne(selector: JsObject): Future[Boolean] = {
-    mongoCollection.remove(selector, firstMatchOnly = true).map(handleDeleteError(_, s"Could not delete entity for selector: $selector"))
+    mongoCollection.delete(ordered=false).one(selector, limit = Some(1)).map(handleDeleteError(_, s"Could not delete entity for selector: $selector"))
   }
 
   def deleteMany(selector: JsObject): Future[Boolean] = {
-    mongoCollection.remove(selector).map(handleDeleteError(_, s"Could not delete entity for selector: $selector"))
+    mongoCollection.delete().one(selector).map(handleDeleteError(_, s"Could not delete entity for selector: $selector"))
   }
 }

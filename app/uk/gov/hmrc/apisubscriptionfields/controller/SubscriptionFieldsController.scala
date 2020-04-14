@@ -20,7 +20,6 @@ import java.util.UUID
 
 import javax.inject.{Inject, Singleton}
 import play.api.libs.json._
-import uk.gov.hmrc.apisubscriptionfields.model.JsonFormatters._
 import play.api.mvc._
 import uk.gov.hmrc.apisubscriptionfields.model.ErrorCode._
 import uk.gov.hmrc.apisubscriptionfields.model._
@@ -50,22 +49,22 @@ class SubscriptionFieldsController @Inject()(cc: ControllerComponents, service: 
     s"ClientId ($rawClientId) was not found"
   }
 
-  def getSubscriptionFields(rawClientId: String, rawApiContext: String, rawApiVersion: String): Action[AnyContent] = Action.async { implicit request =>
+  def getSubscriptionFields(rawClientId: String, rawApiContext: String, rawApiVersion: String): Action[AnyContent] = Action.async { _ =>
     val eventualMaybeResponse = service.get(ClientId(rawClientId), ApiContext(rawApiContext), ApiVersion(rawApiVersion))
     asActionResult(eventualMaybeResponse, notFoundMessage(rawClientId, rawApiContext, rawApiVersion))
   }
 
-  def getSubscriptionFieldsByFieldsId(rawFieldsId: UUID): Action[AnyContent] = Action.async { implicit request =>
+  def getSubscriptionFieldsByFieldsId(rawFieldsId: UUID): Action[AnyContent] = Action.async { _ =>
     val eventualMaybeResponse = service.get(SubscriptionFieldsId(rawFieldsId))
     asActionResult(eventualMaybeResponse, notFoundMessage(rawFieldsId))
   }
 
-  def getBulkSubscriptionFieldsByClientId(rawClientId: String): Action[AnyContent] = Action.async { implicit request =>
+  def getBulkSubscriptionFieldsByClientId(rawClientId: String): Action[AnyContent] = Action.async { _ =>
     val eventualMaybeResponse = service.get(ClientId(rawClientId))
     asBulkActionResult(eventualMaybeResponse, notFoundMessage(rawClientId))
   }
 
-  def getAllSubscriptionFields: Action[AnyContent] = Action.async { implicit request =>
+  def getAllSubscriptionFields: Action[AnyContent] = Action.async { _ =>
     service.getAll map (fields => Ok(Json.toJson(fields))) recover recovery
   }
 
@@ -102,14 +101,14 @@ class SubscriptionFieldsController @Inject()(cc: ControllerComponents, service: 
     } recover recovery
   }
 
-  def deleteSubscriptionFields(rawClientId: String, rawApiContext: String, rawApiVersion: String): Action[AnyContent] = Action.async { implicit request =>
+  def deleteSubscriptionFields(rawClientId: String, rawApiContext: String, rawApiVersion: String): Action[AnyContent] = Action.async { _ =>
     service.delete(ClientId(rawClientId), ApiContext(rawApiContext), ApiVersion(rawApiVersion)) map {
       case true => NoContent
       case false => notFoundResponse(notFoundMessage(rawClientId, rawApiContext, rawApiVersion))
     } recover recovery
   }
 
-  def deleteAllSubscriptionFieldsForClient(rawClientId: String): Action[AnyContent] = Action.async { implicit request =>
+  def deleteAllSubscriptionFieldsForClient(rawClientId: String): Action[AnyContent] = Action.async { _ =>
     service.delete(ClientId(rawClientId)) map {
       case true => NoContent
       case false => notFoundResponse(notFoundMessage(rawClientId))
@@ -118,5 +117,4 @@ class SubscriptionFieldsController @Inject()(cc: ControllerComponents, service: 
 
   override protected def controllerComponents: ControllerComponents = cc
 
-  private def isValid(subsFieldValiationResponse: SubsFieldValidationResponse) : Boolean = ???
 }

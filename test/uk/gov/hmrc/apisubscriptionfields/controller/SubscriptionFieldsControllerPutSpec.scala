@@ -32,7 +32,7 @@ import akka.stream.Materializer
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 
-class SubscriptionFieldsControllerPutSpec 
+class SubscriptionFieldsControllerPutSpec
     extends HmrcPlaySpec
   with SubscriptionFieldsTestData
   with MockFactory
@@ -84,6 +84,15 @@ class SubscriptionFieldsControllerPutSpec
       testSubmitResult(mkRequest(json)) { result =>
         status(result) shouldBe BAD_REQUEST
         contentAsJson(result) shouldBe (Json.toJson(FakeFieldErrorMessages))
+      }
+    }
+
+    "return UnprocessableEntity when no Fields are specified" in {
+      val json = mkJson(SubscriptionFieldsRequest(Map.empty))
+      testSubmitResult(mkRequest(json)) { result =>
+        status(result) shouldBe UNPROCESSABLE_ENTITY
+        val errorPayload = JsErrorResponse(ErrorCode.INVALID_REQUEST_PAYLOAD, "At least one field must be specified")
+        contentAsJson(result) shouldBe (Json.toJson(errorPayload))
       }
     }
   }

@@ -254,4 +254,22 @@ class SubscriptionFieldsServiceSpec extends UnitSpec with SubscriptionFieldsTest
         Some((fieldDefinitionWithValidation.name, validationGroup1.errorMessage))
     }
   }
+
+  "validate Field Names Are Defined" should {
+    val fieldDefintionWithoutValidation = FieldDefinition(fieldN(1), "desc1", "hint1", FieldDefinitionType.URL, "short description", None)
+    val fields = Map(fieldN(1) -> "Emily")
+
+    "succeed when Fields match Field Definitions" in {
+      SubscriptionFieldsService.validateFieldNamesAreDefined(NonEmptyList.one(fieldDefintionWithoutValidation), fields) shouldBe empty
+    }
+
+    "fail when when Fields are not present in the Field Definitions" in {
+      val errs = SubscriptionFieldsService.validateFieldNamesAreDefined(NonEmptyList.one(fieldDefintionWithoutValidation), Map(fieldN(5) -> "Bob", fieldN(1) -> "Fred"))
+      errs should not be empty
+      errs.head match {
+        case (name, msg) if name == fieldN(5)=> succeed
+        case _ => fail("Not the field we expected")
+      }
+    }
+  }
 }

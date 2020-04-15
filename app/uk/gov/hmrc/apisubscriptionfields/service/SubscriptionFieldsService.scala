@@ -41,7 +41,7 @@ class SubscriptionFieldsService @Inject() (repository: SubscriptionFieldsReposit
 
     fieldDefinitions.map(
       _.fold[SubsFieldValidationResponse](throw new RuntimeException)(fieldDefinitions =>
-        SubscriptionFieldsService.validate(fieldDefinitions, fields) ++ SubscriptionFieldsService.validateFieldNamesAreDefined(fieldDefinitions,fields) match {
+        SubscriptionFieldsService.validateAgainstValidationRules(fieldDefinitions, fields) ++ SubscriptionFieldsService.validateFieldNamesAreDefined(fieldDefinitions,fields) match {
           case FieldErrorMap.empty => ValidSubsFieldValidationResponse
           case errs: FieldErrorMap =>
             InvalidSubsFieldValidationResponse(errorResponses = errs)
@@ -126,7 +126,7 @@ object SubscriptionFieldsService {
     fieldDefinition.validation.flatMap(group => if (validateAgainstGroup(group, value)) None else Some((fieldDefinition.name, group.errorMessage)))
   }
 
-  def validate(fieldDefinitions: NonEmptyList[FieldDefinition], fields: Fields): FieldErrorMap =
+  def validateAgainstValidationRules(fieldDefinitions: NonEmptyList[FieldDefinition], fields: Fields): FieldErrorMap =
     fieldDefinitions
       .map(fd => validateAgainstDefinition(fd, fields.get(fd.name).getOrElse("")))
       .foldLeft(FieldErrorMap.empty) {

@@ -17,7 +17,6 @@
 package uk.gov.hmrc.apisubscriptionfields.repository
 
 import javax.inject.{Inject, Singleton}
-
 import com.google.inject.ImplementedBy
 import play.api.libs.json._
 import reactivemongo.api.indexes.IndexType
@@ -41,11 +40,10 @@ trait FieldsDefinitionRepository {
 }
 
 @Singleton
-class FieldsDefinitionMongoRepository @Inject()(mongoDbProvider: MongoDbProvider)
-  extends ReactiveRepository[FieldsDefinition, BSONObjectID]("fieldsDefinitions", mongoDbProvider.mongo,
-    MongoFormatters.FieldsDefinitionJF, ReactiveMongoFormats.objectIdFormats)
-  with FieldsDefinitionRepository
-  with MongoCrudHelper[FieldsDefinition] {
+class FieldsDefinitionMongoRepository @Inject() (mongoDbProvider: MongoDbProvider)
+    extends ReactiveRepository[FieldsDefinition, BSONObjectID]("fieldsDefinitions", mongoDbProvider.mongo, MongoFormatters.FieldsDefinitionJF, ReactiveMongoFormats.objectIdFormats)
+    with FieldsDefinitionRepository
+    with MongoCrudHelper[FieldsDefinition] {
 
   override val mongoCollection: JSONCollection = collection
   private implicit val format = MongoFormatters.FieldsDefinitionJF

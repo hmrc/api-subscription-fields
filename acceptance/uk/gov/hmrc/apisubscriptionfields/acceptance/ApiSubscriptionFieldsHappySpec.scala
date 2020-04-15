@@ -17,6 +17,7 @@
 package uk.gov.hmrc.apisubscriptionfields.acceptance
 
 import org.scalatest.OptionValues
+import org.scalatest.BeforeAndAfterAll
 import play.api.Logger
 import play.api.libs.json.Json
 import play.api.mvc._
@@ -25,32 +26,50 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.apisubscriptionfields.model._
 import uk.gov.hmrc.apisubscriptionfields.{FieldsDefinitionTestData, SubscriptionFieldsTestData}
-
 import scala.concurrent.Future
+    import scala.concurrent.Await
+    import scala.concurrent.duration._
 
 class ApiSubscriptionFieldsHappySpec extends AcceptanceTestSpec
   with OptionValues
   with JsonFormatters
   with SubscriptionFieldsTestData
-  with FieldsDefinitionTestData {
+  with FieldsDefinitionTestData
+  with BeforeAndAfterAll {
+
+  override def beforeAll() {
+    val putRequest = validDefinitionPutRequest(FieldsDefinitionRequest(FakeFieldsDefinitions))
+      .withTarget( RequestTarget(uriString="", path=definitionEndpoint(fakeRawContext, fakeRawVersion), queryString = Map.empty))
+
+    val r = Await.result(route(app, putRequest).get, 10.seconds)
+  }
+
+  override def afterAll() {
+    val request = ValidRequest
+      .withMethod(DELETE)
+      .withTarget( RequestTarget(uriString="", path=definitionEndpoint(fakeRawContext, fakeRawVersion), queryString = Map.empty))
+
+    route(app, request)
+  }
+
 
   feature("Subscription-Fields") {
 
     Logger.logger.info(s"App.mode = ${app.mode.toString}")
 
     scenario("the API is called to store some values for a new subscription field") {
-      Given("a request with valid payload")
-      val request = createSubscriptionFieldsRequest()
+      val request: Request[AnyContentAsJson] =  createSubscriptionFieldsRequest()
 
-        When("a PUT request with data is sent to the API")
+      When("a PUT request with data is sent to the API")
       val result: Option[Future[Result]] = route(app, request)
 
       Then(s"a response with a 201 status is received")
       result shouldBe 'defined
       val resultFuture = result.value
 
-      status(resultFuture) shouldBe CREATED
+      val r = Await.result(resultFuture, 10.seconds)
 
+      status(resultFuture) shouldBe CREATED
       And("the response body should be a valid response")
       val sfr = contentAsJson(resultFuture).validate[SubscriptionFieldsResponse]
       val fieldsId = sfr.get.fieldsId

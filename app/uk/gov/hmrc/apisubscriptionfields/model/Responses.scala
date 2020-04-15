@@ -18,14 +18,21 @@ package uk.gov.hmrc.apisubscriptionfields.model
 
 import play.api.libs.json.Json.JsValueWrapper
 import play.api.libs.json.{JsObject, Json}
+import cats.data.NonEmptyList
 
 case class SubscriptionFieldsResponse(clientId: String, apiContext: String, apiVersion: String, fieldsId: SubscriptionFieldsId, fields: Fields)
 
 case class BulkSubscriptionFieldsResponse(subscriptions: Seq[SubscriptionFieldsResponse])
 
-case class FieldsDefinitionResponse(apiContext: String, apiVersion: String, fieldDefinitions: Seq[FieldDefinition])
+case class FieldsDefinitionResponse(apiContext: String, apiVersion: String, fieldDefinitions: NonEmptyList[FieldDefinition])
 
 case class BulkFieldsDefinitionsResponse(apis: Seq[FieldsDefinitionResponse])
+
+sealed trait SubsFieldValidationResponse
+
+case object ValidSubsFieldValidationResponse extends SubsFieldValidationResponse
+
+case class InvalidSubsFieldValidationResponse(errorResponses: Map[String, String]) extends SubsFieldValidationResponse
 
 object ErrorCode extends Enumeration {
   type ErrorCode = Value

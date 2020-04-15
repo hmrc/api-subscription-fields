@@ -17,13 +17,15 @@
 package uk.gov.hmrc.apisubscriptionfields.service
 
 import java.util.UUID
-import javax.inject._
 
+import javax.inject._
 import uk.gov.hmrc.apisubscriptionfields.model._
 import uk.gov.hmrc.apisubscriptionfields.repository.{SubscriptionFields, SubscriptionFieldsRepository}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import cats.data.NonEmptyList
+import uk.gov.hmrc.apisubscriptionfields.service.SubscriptionFieldsService.FieldErrorMap
 
 @Singleton
 class UUIDCreator {
@@ -31,7 +33,22 @@ class UUIDCreator {
 }
 
 @Singleton
-class SubscriptionFieldsService @Inject()(repository: SubscriptionFieldsRepository, uuidCreator: UUIDCreator) {
+class SubscriptionFieldsService @Inject() (repository: SubscriptionFieldsRepository, uuidCreator: UUIDCreator, fieldsDefinitionService: FieldsDefinitionService) {
+
+  def validate(context: ApiContext, version: ApiVersion, fields: Fields): Future[SubsFieldValidationResponse] = {
+    val fieldDefinitionResponse: Future[Option[FieldsDefinitionResponse]] = fieldsDefinitionService.get(context, version)
+    val fieldDefinitions: Future[Option[NonEmptyList[FieldDefinition]]] = fieldDefinitionResponse.map(_.map(_.fieldDefinitions))
+
+    fieldDefinitions.map(
+      _.fold[SubsFieldValidationResponse](throw new RuntimeException)(fieldDefinitions =>
+        SubscriptionFieldsService.validate(fieldDefinitions, fields) ++ SubscriptionFieldsService.validateFieldNamesAreDefined(fieldDefinitions,fields) match {
+          case FieldErrorMap.empty => ValidSubsFieldValidationResponse
+          case errs: FieldErrorMap =>
+            InvalidSubsFieldValidationResponse(errorResponses = errs)
+        }
+      )
+    )
+  }
 
   def upsert(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion, subscriptionFields: Fields): Future[(SubscriptionFieldsResponse, IsInsert)] = {
     val fields = SubscriptionFields(clientId.value, apiContext.value, apiVersion.value, uuidCreator.uuid(), subscriptionFields)
@@ -63,7 +80,7 @@ class SubscriptionFieldsService @Inject()(repository: SubscriptionFieldsReposito
       fields <- repository.fetchByClientId(clientId)
     } yield fields.map(asResponse)) map {
       case Nil => None
-      case fs => Some(BulkSubscriptionFieldsResponse(subscriptions = fs))
+      case fs  => Some(BulkSubscriptionFieldsResponse(subscriptions = fs))
     }
   }
 
@@ -79,7 +96,46 @@ class SubscriptionFieldsService @Inject()(repository: SubscriptionFieldsReposito
       apiContext = apiSubscription.apiContext,
       apiVersion = apiSubscription.apiVersion,
       fieldsId = SubscriptionFieldsId(apiSubscription.fieldsId),
-      fields = apiSubscription.fields)
+      fields = apiSubscription.fields
+    )
+  }
+}
+
+object SubscriptionFieldsService {
+
+  type FieldName = String
+  type ErrorMessage = String
+  type FieldError = (FieldName, ErrorMessage)
+  type FieldErrorMap = Map[FieldName, ErrorMessage]
+  object FieldErrorMap {
+    val empty = Map.empty[FieldName, ErrorMessage]
   }
 
+  // True - passed
+  def validateAgainstRule(rule: ValidationRule, value: String): Boolean = rule match {
+    case RegexValidationRule(regex) => value.matches(regex)
+  }
+
+  // True - passed
+  def validateAgainstGroup(group: ValidationGroup, value: String): Boolean = {
+    group.rules.foldLeft(true)((acc, rule) => (acc && validateAgainstRule(rule, value)))
+  }
+
+  // Some is Some(error)
+  def validateAgainstDefinition(fieldDefinition: FieldDefinition, value: String): Option[FieldError] = {
+    fieldDefinition.validation.flatMap(group => if (validateAgainstGroup(group, value)) None else Some((fieldDefinition.name, group.errorMessage)))
+  }
+
+  def validate(fieldDefinitions: NonEmptyList[FieldDefinition], fields: Fields): FieldErrorMap =
+    fieldDefinitions
+      .map(fd => validateAgainstDefinition(fd, fields.get(fd.name).getOrElse("")))
+      .foldLeft(FieldErrorMap.empty) {
+        case (acc, None)     => acc
+        case (acc, Some((name,msg))) => acc + (name -> msg)
+      }
+
+  def validateFieldNamesAreDefined(fieldDefinitions: NonEmptyList[FieldDefinition], fields: Fields): FieldErrorMap = {
+    val illegalNames = fields.keySet -- (fieldDefinitions.map(_.name).toList)
+    illegalNames.foldLeft(FieldErrorMap.empty)( (acc, name) => acc + (name -> "No Field Definition found for this Field"))
+  }
 }

@@ -30,12 +30,14 @@ class SubscriptionFieldDefinitionsHappySpec extends AcceptanceTestSpec
   with SubscriptionFieldsTestData
   with FieldsDefinitionTestData
   with JsonFormatters {
-
+    
+  
   feature("Fields-Definition") {
+
 
     scenario("the API is called to store some new fields definitions") {
       Given("Definitiions are created ")
-      val putRequest = validDefinitionPutRequest(FakeFieldsDefinitions)
+      val putRequest = validDefinitionPutRequest(FieldsDefinitionRequest(FakeFieldsDefinitions))
         .withTarget( RequestTarget(uriString="", path=definitionEndpoint(fakeRawContext, fakeRawVersion), queryString = Map.empty))
 
       When("a PUT request with data is sent to the API")
@@ -106,7 +108,7 @@ class SubscriptionFieldDefinitionsHappySpec extends AcceptanceTestSpec
     scenario("the API is called to update some existing fields definitions") {
 
       Given("a request with valid payload")
-      val request =  validDefinitionPutRequest(Seq.empty)
+      val request =  validDefinitionPutRequest(FieldsDefinitionRequest(FakeFieldsDefinitions))
         .withTarget( RequestTarget(uriString="", path=definitionEndpoint(fakeRawContext, fakeRawVersion), queryString = Map.empty))
 
       When("a PUT request with data is sent to the API")
@@ -122,7 +124,7 @@ class SubscriptionFieldDefinitionsHappySpec extends AcceptanceTestSpec
       val sfr = contentAsJson(resultFuture).validate[FieldsDefinitionResponse]
 
       sfr.isSuccess shouldBe true
-      sfr.get shouldBe FieldsDefinitionResponse(fakeRawContext, fakeRawVersion, Seq.empty)
+      sfr.get shouldBe FieldsDefinitionResponse(fakeRawContext, fakeRawVersion, FakeFieldsDefinitions)
     }
 
     scenario("the API is called to delete some existing fields definitions") {

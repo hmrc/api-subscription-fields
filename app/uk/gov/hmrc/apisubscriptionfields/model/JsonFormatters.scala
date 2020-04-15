@@ -19,7 +19,6 @@ package uk.gov.hmrc.apisubscriptionfields.model
 import java.util.UUID
 
 import cats.data.{NonEmptyList => NEL}
-import cats.implicits._
 import julienrf.json.derived
 import julienrf.json.derived.TypeTagSetting
 import play.api.libs.json._
@@ -33,48 +32,44 @@ trait SharedJsonFormatters {
 
     def reads(json: JsValue) = json match {
       case JsNull => JsError()
-      case _ => JsSuccess(SubscriptionFieldsId(json.as[UUID]))
+      case _      => JsSuccess(SubscriptionFieldsId(json.as[UUID]))
     }
   }
 }
 
-trait JsonFormatters extends SharedJsonFormatters {
+trait NonEmptyListFormatters {
 
-  object NonEmptyListOps {
-    def reads[T: Reads]: Reads[NEL[T]] =
-      Reads
-        .of[List[T]]
-        .collect(
-          JsonValidationError("expected a NonEmptyList but got an empty list")
-        ) {
-          case head :: tail => NEL(head, tail)
-        }
+  implicit def nelReads[A](implicit r: Reads[A]): Reads[NEL[A]] =
+    Reads
+      .of[List[A]]
+      .collect(
+        JsonValidationError("expected a NonEmptyList but got an empty list")
+      ) {
+        case head :: tail => NEL(head, tail)
+      }
 
-    def writes[T: Writes]: Writes[NEL[T]] =
-      Writes
-        .of[List[T]]
-        .contramap(_.toList)
+  implicit def nelWrites[A](implicit w: Writes[A]): Writes[NEL[A]] =
+    Writes
+      .of[List[A]]
+      .contramap(_.toList)
+}
 
-    def format[T: Format]: Format[NEL[T]] =
-      Format(reads, writes)
-  }
+trait JsonFormatters extends SharedJsonFormatters with NonEmptyListFormatters {
 
   implicit val validationRuleFormat: OFormat[ValidationRule] = derived.withTypeTag.oformat(TypeTagSetting.ShortClassName)
 
-  implicit val nelValidationRuleFormat: Format[NEL[ValidationRule]] = NonEmptyListOps.format[ValidationRule]
-
-  implicit val ValidationJF = Json.format[Validation]
+  implicit val ValidationJF = Json.format[ValidationGroup]
 
   implicit val FieldDefinitionTypeReads = Reads.enumNameReads(FieldDefinitionType)
+
   val fieldDefinitionReads: Reads[FieldDefinition] = (
     (JsPath \ "name").read[String] and
       (JsPath \ "description").read[String] and
       ((JsPath \ "hint").read[String] or Reads.pure("")) and
       (JsPath \ "type").read[FieldDefinitionType] and
       ((JsPath \ "shortDescription").read[String] or Reads.pure("")) and
-      (JsPath \ "validation").readNullable[Validation]
-    )(FieldDefinition.apply _)
-
+      (JsPath \ "validation").readNullable[ValidationGroup]
+  )(FieldDefinition.apply _)
   val fieldDefinitionWrites = Json.writes[FieldDefinition]
 
   implicit val FieldDefinitionJF = Format(fieldDefinitionReads, fieldDefinitionWrites)
@@ -87,6 +82,9 @@ trait JsonFormatters extends SharedJsonFormatters {
   implicit val SubscriptionFieldsResponseJF = Json.format[SubscriptionFieldsResponse]
 
   implicit val BulkSubscriptionFieldsResponseJF = Json.format[BulkSubscriptionFieldsResponse]
+
+  implicit val SubsFieldValidationResponseJF: OFormat[SubsFieldValidationResponse] = derived.withTypeTag.oformat(TypeTagSetting.ShortClassName)
+  implicit val InvalidSubsFieldValidationResponseJF = Json.format[InvalidSubsFieldValidationResponse]
 }
 
 object JsonFormatters extends JsonFormatters

@@ -21,6 +21,7 @@ import uk.gov.hmrc.SbtAutoBuildPlugin
 import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin
 import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin._
 import uk.gov.hmrc.versioning.SbtGitVersioning
+import bloop.integrations.sbt.BloopDefaults
 
 import scala.language.postfixOps
 
@@ -57,14 +58,12 @@ def test(scope: String = "test,acceptance") = Seq(
 
 val appName = "api-subscription-fields"
 
-lazy val appDependencies: Seq[ModuleID] = compile  ++ test()
+lazy val appDependencies: Seq[ModuleID] = compile ++ test()
 
-resolvers ++= Seq(Resolver.bintrayRepo("hmrc", "releases"),
-  Resolver.jcenterRepo, Resolver.sonatypeRepo("releases"), Resolver.sonatypeRepo("snapshots"))
+resolvers ++= Seq(Resolver.bintrayRepo("hmrc", "releases"), Resolver.jcenterRepo, Resolver.sonatypeRepo("releases"), Resolver.sonatypeRepo("snapshots"))
 
 lazy val plugins: Seq[Plugins] = Seq(PlayScala, SbtAutoBuildPlugin, SbtGitVersioning, SbtDistributablesPlugin, SbtArtifactory)
 lazy val playSettings: Seq[Setting[_]] = Seq.empty
-
 
 lazy val AcceptanceTest = config("acceptance") extend Test
 
@@ -76,7 +75,10 @@ lazy val microservice = Project(appName, file("."))
   .settings(publishingSettings: _*)
   .settings(defaultSettings(): _*)
   .settings(acceptanceTestSettings: _*)
-  .settings(scalaVersion := "2.12.10")
+  .settings(scalaVersion := "2.12.11")
+  .settings(
+    inConfig(AcceptanceTest)(BloopDefaults.configSettings)
+  )
   .settings(
     libraryDependencies ++= appDependencies,
     dependencyOverrides ++= overrides,
@@ -100,7 +102,6 @@ lazy val acceptanceTestSettings =
       addTestReportOption(AcceptanceTest, "acceptance-reports")
     )
 
-
 lazy val scoverageSettings: Seq[Setting[_]] = Seq(
   coverageExcludedPackages := "<empty>;Reverse.*;.*model.*;.*config.*;.*(AuthService|BuildInfo|Routes).*;.*.application;.*.definition",
   coverageMinimum := 97,
@@ -109,8 +110,7 @@ lazy val scoverageSettings: Seq[Setting[_]] = Seq(
   parallelExecution in Test := false
 )
 
+def onPackageName(rootPackage: String): String => Boolean = { testName => testName startsWith rootPackage }
 
-
-def onPackageName(rootPackage: String): String => Boolean = {
-  testName => testName startsWith rootPackage
-}
+// Note that this task has to be scoped globally
+bloopAggregateSourceDependencies in Global := true

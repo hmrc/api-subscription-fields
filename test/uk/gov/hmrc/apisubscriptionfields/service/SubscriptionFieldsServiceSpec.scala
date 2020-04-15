@@ -21,18 +21,20 @@ import java.util.UUID
 import org.scalamock.scalatest.MockFactory
 import uk.gov.hmrc.apisubscriptionfields.model._
 import uk.gov.hmrc.apisubscriptionfields.repository._
-import uk.gov.hmrc.apisubscriptionfields.SubscriptionFieldsTestData
+import uk.gov.hmrc.apisubscriptionfields.{FieldsDefinitionTestData, SubscriptionFieldsTestData}
 import uk.gov.hmrc.play.test.UnitSpec
 
 import scala.concurrent.Future
+import cats.data.NonEmptyList
 
-class SubscriptionFieldsServiceSpec extends UnitSpec with SubscriptionFieldsTestData with MockFactory {
+class SubscriptionFieldsServiceSpec extends UnitSpec with SubscriptionFieldsTestData with FieldsDefinitionTestData with MockFactory {
 
   private val mockSubscriptionFieldsIdRepository = mock[SubscriptionFieldsRepository]
+  private val mockFieldsDefinitionService = mock[FieldsDefinitionService]
   private val mockUuidCreator = new UUIDCreator {
     override def uuid(): UUID = FakeRawFieldsId
   }
-  private val service = new SubscriptionFieldsService(mockSubscriptionFieldsIdRepository, mockUuidCreator)
+  private val service = new SubscriptionFieldsService(mockSubscriptionFieldsIdRepository, mockUuidCreator, mockFieldsDefinitionService)
 
   "getAll" should {
     "return an empty list when no entry exists in the database collection" in {
@@ -47,10 +49,12 @@ class SubscriptionFieldsServiceSpec extends UnitSpec with SubscriptionFieldsTest
 
       (mockSubscriptionFieldsIdRepository.fetchAll _).expects().returns(List(sf1, sf2))
 
-      val expectedResponse = BulkSubscriptionFieldsResponse(subscriptions = List(
-        SubscriptionFieldsResponse(sf1.clientId, sf1.apiContext, sf1.apiVersion, SubscriptionFieldsId(sf1.fieldsId), sf1.fields),
-        SubscriptionFieldsResponse(sf2.clientId, sf2.apiContext, sf2.apiVersion, SubscriptionFieldsId(sf2.fieldsId), sf2.fields)
-      ))
+      val expectedResponse = BulkSubscriptionFieldsResponse(subscriptions =
+        List(
+          SubscriptionFieldsResponse(sf1.clientId, sf1.apiContext, sf1.apiVersion, SubscriptionFieldsId(sf1.fieldsId), sf1.fields),
+          SubscriptionFieldsResponse(sf2.clientId, sf2.apiContext, sf2.apiVersion, SubscriptionFieldsId(sf2.fieldsId), sf2.fields)
+        )
+      )
 
       await(service.getAll) shouldBe expectedResponse
     }
@@ -70,23 +74,30 @@ class SubscriptionFieldsServiceSpec extends UnitSpec with SubscriptionFieldsTest
 
       val result = await(service.get(FakeClientId))
 
-      result shouldBe Some(BulkSubscriptionFieldsResponse(subscriptions = Seq(
-        SubscriptionFieldsResponse(sf1.clientId, sf1.apiContext, sf1.apiVersion, SubscriptionFieldsId(sf1.fieldsId), sf1.fields),
-        SubscriptionFieldsResponse(sf2.clientId, sf2.apiContext, sf2.apiVersion, SubscriptionFieldsId(sf2.fieldsId), sf2.fields))))
+      result shouldBe Some(
+        BulkSubscriptionFieldsResponse(subscriptions =
+          Seq(
+            SubscriptionFieldsResponse(sf1.clientId, sf1.apiContext, sf1.apiVersion, SubscriptionFieldsId(sf1.fieldsId), sf1.fields),
+            SubscriptionFieldsResponse(sf2.clientId, sf2.apiContext, sf2.apiVersion, SubscriptionFieldsId(sf2.fieldsId), sf2.fields)
+          )
+        )
+      )
     }
   }
 
   "get" should {
     "return None when no entry exists in the repo" in {
-      (mockSubscriptionFieldsIdRepository fetch(_: ClientId, _: ApiContext, _: ApiVersion))
-        .expects(FakeClientId, FakeContext, FakeVersion).returns(None)
+      (mockSubscriptionFieldsIdRepository fetch (_: ClientId, _: ApiContext, _: ApiVersion))
+        .expects(FakeClientId, FakeContext, FakeVersion)
+        .returns(None)
 
       await(service.get(FakeClientId, FakeContext, FakeVersion)) shouldBe None
     }
 
     "return the expected response when the entry exists in the database collection" in {
-      (mockSubscriptionFieldsIdRepository fetch(_: ClientId, _: ApiContext, _: ApiVersion))
-        .expects(FakeClientId, FakeContext, FakeVersion).returns(Some(FakeApiSubscription))
+      (mockSubscriptionFieldsIdRepository fetch (_: ClientId, _: ApiContext, _: ApiVersion))
+        .expects(FakeClientId, FakeContext, FakeVersion)
+        .returns(Some(FakeApiSubscription))
 
       val result = await(service.get(FakeClientId, FakeContext, FakeVersion))
 
@@ -102,7 +113,8 @@ class SubscriptionFieldsServiceSpec extends UnitSpec with SubscriptionFieldsTest
     }
 
     "return the expected response when the entry exists in the database collection" in {
-      (mockSubscriptionFieldsIdRepository fetchByFieldsId _).expects(SubscriptionFieldsId(FakeRawFieldsId))
+      (mockSubscriptionFieldsIdRepository fetchByFieldsId _)
+        .expects(SubscriptionFieldsId(FakeRawFieldsId))
         .returns(Some(FakeApiSubscription))
 
       await(service.get(FakeFieldsId)) shouldBe Some(FakeSubscriptionFieldsResponse)
@@ -139,32 +151,125 @@ class SubscriptionFieldsServiceSpec extends UnitSpec with SubscriptionFieldsTest
 
   "delete" should {
     "return true when the entry exists in the database collection" in {
-      (mockSubscriptionFieldsIdRepository delete(_: ClientId, _: ApiContext, _: ApiVersion))
-        .expects(FakeClientId, FakeContext, FakeVersion).returns(true)
+      (mockSubscriptionFieldsIdRepository delete (_: ClientId, _: ApiContext, _: ApiVersion))
+        .expects(FakeClientId, FakeContext, FakeVersion)
+        .returns(true)
 
       await(service.delete(FakeClientId, FakeContext, FakeVersion)) shouldBe true
     }
 
     "return false when the entry does not exist in the database collection" in {
-      (mockSubscriptionFieldsIdRepository delete(_: ClientId, _: ApiContext, _: ApiVersion))
-        .expects(FakeClientId, FakeContext, FakeVersion).returns(false)
+      (mockSubscriptionFieldsIdRepository delete (_: ClientId, _: ApiContext, _: ApiVersion))
+        .expects(FakeClientId, FakeContext, FakeVersion)
+        .returns(false)
 
       await(service.delete(FakeClientId, FakeContext, FakeVersion)) shouldBe false
     }
 
     "return true when the client ID exists in the database collection" in {
-      (mockSubscriptionFieldsIdRepository delete(_: ClientId))
-        .expects(FakeClientId).returns(true)
+      (mockSubscriptionFieldsIdRepository delete (_: ClientId))
+        .expects(FakeClientId)
+        .returns(true)
 
       await(service.delete(FakeClientId)) shouldBe true
     }
 
     "return false when the client ID does not exist in the database collection" in {
-      (mockSubscriptionFieldsIdRepository delete(_: ClientId))
-        .expects(FakeClientId).returns(false)
+      (mockSubscriptionFieldsIdRepository delete (_: ClientId))
+        .expects(FakeClientId)
+        .returns(false)
 
       await(service.delete(FakeClientId)) shouldBe false
     }
   }
+  "validate" should {
+    "returns ValidSubsFieldValidationResponse when fields are Valid " in {
+      (mockFieldsDefinitionService get (_: ApiContext, _: ApiVersion))
+        .expects(FakeContext, FakeVersion)
+        .returns(Some(FakeFieldsDefinitionResponseWithRegex))
 
+      await(service.validate(FakeContext, FakeVersion, subscriptionFieldsMatchRegexValidation)) shouldBe ValidSubsFieldValidationResponse
+    }
+
+    "returns InvalidSubsFieldValidationResponse when fields are Invalid " in {
+      (mockFieldsDefinitionService get (_: ApiContext, _: ApiVersion))
+        .expects(FakeContext, FakeVersion)
+        .returns(Some(FakeFieldsDefinitionResponseWithRegex))
+
+      await(service.validate(FakeContext, FakeVersion, subscriptionFieldsDoNotMatchRegexValidation)) shouldBe FakeInvalidSubsFieldValidationResponse2
+    }
+  }
+
+  val lowerCaseValue = "bob"
+  val mixedCaseValue = "Bob"
+
+  val lowerCaseRule: ValidationRule = RegexValidationRule("""^[a-z]+$""")
+  val mixedCaseRule: ValidationRule = RegexValidationRule("""^[a-zA-Z]+$""")
+
+  val atLeastThreeLongRule: ValidationRule = RegexValidationRule("""^.{3}.*$""")
+  val atLeastTenLongRule: ValidationRule = RegexValidationRule("""^.{10}.*$""")
+
+  def theErrorMessage(i: Int) = s"error message $i"
+  val validationGroup1: ValidationGroup = ValidationGroup(theErrorMessage(1), NonEmptyList(mixedCaseRule, List(atLeastThreeLongRule)))
+
+  "validate value against rule" should {
+
+    "return true when the value is valid - correct case" in {
+      SubscriptionFieldsService.validateAgainstRule(lowerCaseRule, lowerCaseValue) shouldBe true
+    }
+    "return true when the value is valid - long enough" in {
+      SubscriptionFieldsService.validateAgainstRule(atLeastThreeLongRule, lowerCaseValue) shouldBe true
+    }
+    "return false when the value is invalid - wrong case" in {
+      SubscriptionFieldsService.validateAgainstRule(lowerCaseRule, mixedCaseValue) shouldBe false
+    }
+    "return false when the value is invalid - too short" in {
+      SubscriptionFieldsService.validateAgainstRule(atLeastTenLongRule, mixedCaseValue) shouldBe false
+    }
+  }
+
+  "validate value against group" should {
+
+    "return true when the value is both mixed case and at least 3 long" in {
+      SubscriptionFieldsService.validateAgainstGroup(validationGroup1, mixedCaseValue) shouldBe true
+    }
+    "return false when the value is not mixed case or not at least 3 long" in {
+      val hasNumeralsValue = "A345"
+      val veryShortMixedCase = "Ab"
+      SubscriptionFieldsService.validateAgainstGroup(validationGroup1, hasNumeralsValue) shouldBe false
+      SubscriptionFieldsService.validateAgainstGroup(validationGroup1, veryShortMixedCase) shouldBe false
+    }
+  }
+
+  "validate value against field defintion" should {
+    val fieldDefintionWithoutValidation = FieldDefinition(fieldN(1), "desc1", "hint1", FieldDefinitionType.URL, "short description", None)
+    val fieldDefinitionWithValidation = fieldDefintionWithoutValidation.copy(validation = Some(validationGroup1))
+
+    "succeed when no validation is present on the field defintion" in {
+      SubscriptionFieldsService.validateAgainstDefinition(fieldDefintionWithoutValidation, lowerCaseValue) shouldBe None
+    }
+    "return FieldError when validation on the field defintion does not match the value" in {
+      val hasNumeralsValue = "A345"
+      SubscriptionFieldsService.validateAgainstDefinition(fieldDefinitionWithValidation, hasNumeralsValue) shouldBe
+        Some((fieldDefinitionWithValidation.name, validationGroup1.errorMessage))
+    }
+  }
+
+  "validate Field Names Are Defined" should {
+    val fieldDefintionWithoutValidation = FieldDefinition(fieldN(1), "desc1", "hint1", FieldDefinitionType.URL, "short description", None)
+    val fields = Map(fieldN(1) -> "Emily")
+
+    "succeed when Fields match Field Definitions" in {
+      SubscriptionFieldsService.validateFieldNamesAreDefined(NonEmptyList.one(fieldDefintionWithoutValidation), fields) shouldBe empty
+    }
+
+    "fail when when Fields are not present in the Field Definitions" in {
+      val errs = SubscriptionFieldsService.validateFieldNamesAreDefined(NonEmptyList.one(fieldDefintionWithoutValidation), Map(fieldN(5) -> "Bob", fieldN(1) -> "Fred"))
+      errs should not be empty
+      errs.head match {
+        case (name, msg) if name == fieldN(5)=> succeed
+        case _ => fail("Not the field we expected")
+      }
+    }
+  }
 }

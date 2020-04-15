@@ -22,13 +22,18 @@ import play.api.mvc._
 import play.api.test.{FakeRequest, StubControllerComponentsFactory}
 import play.api.test.Helpers._
 import uk.gov.hmrc.apisubscriptionfields.SubscriptionFieldsTestData
-import uk.gov.hmrc.apisubscriptionfields.model.{ApiContext, ApiVersion, ClientId, Fields, JsonFormatters, SubscriptionFieldsRequest}
+import uk.gov.hmrc.apisubscriptionfields.model._
 import uk.gov.hmrc.apisubscriptionfields.service.SubscriptionFieldsService
-import uk.gov.hmrc.play.test.UnitSpec
+import uk.gov.hmrc.apisubscriptionfields.HmrcPlaySpec
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import akka.stream.Materializer
+import akka.actor.ActorSystem
+import akka.stream.ActorMaterializer
 
-class SubscriptionFieldsControllerPutSpec extends UnitSpec
+class SubscriptionFieldsControllerPutSpec
+    extends HmrcPlaySpec
   with SubscriptionFieldsTestData
   with MockFactory
   with JsonFormatters
@@ -36,9 +41,15 @@ class SubscriptionFieldsControllerPutSpec extends UnitSpec
 
   private val mockSubscriptionFieldsService = mock[SubscriptionFieldsService]
   private val controller = new SubscriptionFieldsController(stubControllerComponents(), mockSubscriptionFieldsService)
+  implicit private val actorSystem = ActorSystem("test")
+  implicit private val mat: Materializer = ActorMaterializer.create(actorSystem)
 
   "PUT /field/application/:clientId/context/:apiContext/version/:apiVersion" should {
-    "return CREATED when created in the repo" in {
+    "return CREATED when Field values are Valid and created in the repo" in {
+      (mockSubscriptionFieldsService.validate(_: ApiContext, _: ApiVersion, _: Fields)).
+        expects(FakeContext, FakeVersion, subscriptionFields).
+        returns(Future.successful(FakeValidSubsFieldValidationResponse))
+
       (mockSubscriptionFieldsService.upsert(_: ClientId, _: ApiContext, _: ApiVersion, _: Fields)).
         expects(FakeClientId, FakeContext, FakeVersion, subscriptionFields).
         returns(Future.successful((FakeSubscriptionFieldsResponse, true)))
@@ -49,7 +60,11 @@ class SubscriptionFieldsControllerPutSpec extends UnitSpec
       }
     }
 
-    "return OK when updated in the repo" in {
+    "return OK when Field values are Valid and updated in the repo" in {
+      (mockSubscriptionFieldsService.validate(_: ApiContext, _: ApiVersion, _: Fields)).
+        expects(FakeContext, FakeVersion, subscriptionFields).
+        returns(Future.successful(FakeValidSubsFieldValidationResponse))
+
       (mockSubscriptionFieldsService.upsert (_: ClientId, _: ApiContext, _: ApiVersion, _: Fields)).
         expects(FakeClientId, FakeContext, FakeVersion, subscriptionFields).
         returns(Future.successful((FakeSubscriptionFieldsResponse, false)))
@@ -57,6 +72,27 @@ class SubscriptionFieldsControllerPutSpec extends UnitSpec
       val json = mkJson(SubscriptionFieldsRequest(subscriptionFields))
       testSubmitResult(mkRequest(json)) { result =>
         status(result) shouldBe OK
+      }
+    }
+
+    "return OK with FieldErrorMessages when Field values are Invalid" in {
+      (mockSubscriptionFieldsService.validate(_: ApiContext, _: ApiVersion, _: Fields)).
+        expects(FakeContext, FakeVersion, subscriptionFields).
+        returns(Future.successful(FakeInvalidSubsFieldValidationResponse))
+
+      val json = mkJson(SubscriptionFieldsRequest(subscriptionFields))
+      testSubmitResult(mkRequest(json)) { result =>
+        status(result) shouldBe BAD_REQUEST
+        contentAsJson(result) shouldBe (Json.toJson(FakeFieldErrorMessages))
+      }
+    }
+
+    "return UnprocessableEntity when no Fields are specified" in {
+      val json = mkJson(SubscriptionFieldsRequest(Map.empty))
+      testSubmitResult(mkRequest(json)) { result =>
+        status(result) shouldBe UNPROCESSABLE_ENTITY
+        val errorPayload = JsErrorResponse(ErrorCode.INVALID_REQUEST_PAYLOAD, "At least one field must be specified")
+        contentAsJson(result) shouldBe (Json.toJson(errorPayload))
       }
     }
   }

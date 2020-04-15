@@ -14,9 +14,17 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.apisubscriptionfields.repository
+package uk.gov.hmrc.apisubscriptionfields
 
-import uk.gov.hmrc.apisubscriptionfields.model.FieldDefinition
-import cats.data.NonEmptyList
+import org.scalatest._
+import org.scalatestplus.play.WsScalaTestClient
+import play.api.test.{DefaultAwaitTimeout,FutureAwaits}
 
-case class FieldsDefinition(apiContext: String, apiVersion: String, fieldDefinitions: NonEmptyList[FieldDefinition])
+abstract class HmrcPlaySpec 
+    extends WordSpec 
+    with Matchers 
+    with OptionValues 
+    with WsScalaTestClient
+    with DefaultAwaitTimeout
+    with FutureAwaits
+

@@ -64,7 +64,7 @@ class SubscriptionFieldsRepositorySpec extends UnitSpec
   }
 
   private def createApiSubscriptionFields(clientId: String = fakeRawClientId): SubscriptionFields = {
-    val fields = Map("field_1" -> "value_1", "field_2" -> "value_2", "field_3" -> "value_3")
+    val fields = Map(fieldN(1) -> "value_1", fieldN(2) -> "value_2", fieldN(3) -> "value_3")
     SubscriptionFields(clientId, fakeRawContext, fakeRawVersion, UUID.randomUUID(), fields)
   }
 
@@ -95,7 +95,7 @@ class SubscriptionFieldsRepositorySpec extends UnitSpec
       await(repository.saveAtomic(apiSubscriptionFields)) shouldBe ((apiSubscriptionFields, true))
       collectionSize shouldBe 1
 
-      val edited = apiSubscriptionFields.copy(fields = Map("field4" -> "value_4"))
+      val edited = apiSubscriptionFields.copy(fields = Map(fieldN(4) -> "value_4"))
       await(repository.saveAtomic(edited)) shouldBe ((edited, false))
       collectionSize shouldBe 1
       await(repository.collection.find(selector(edited)).one[SubscriptionFields]) shouldBe Some(edited)

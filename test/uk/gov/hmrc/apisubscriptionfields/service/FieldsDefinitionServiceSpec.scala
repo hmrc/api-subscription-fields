@@ -23,6 +23,7 @@ import uk.gov.hmrc.apisubscriptionfields.repository.{FieldsDefinition, FieldsDef
 import uk.gov.hmrc.play.test.UnitSpec
 
 import scala.concurrent.Future
+import cats.data.NonEmptyList
 
 class FieldsDefinitionServiceSpec extends UnitSpec with FieldsDefinitionTestData with MockFactory {
 
@@ -39,16 +40,16 @@ class FieldsDefinitionServiceSpec extends UnitSpec with FieldsDefinitionTestData
     }
 
     "return a list of all entries" in {
-      val fd1 = createFieldsDefinition(apiContext = "api-1", fieldDefinitions = Seq(FakeFieldDefinitionUrl))
-      val fd2 = createFieldsDefinition(apiContext = "api-2", fieldDefinitions = Seq(FakeFieldDefinitionString))
+      val fd1 = createFieldsDefinition(apiContext = "api-1", fieldDefinitions = NonEmptyList.one(FakeFieldDefinitionUrl))
+      val fd2 = createFieldsDefinition(apiContext = "api-2", fieldDefinitions = NonEmptyList.one(FakeFieldDefinitionString))
 
       (mockFieldsDefinitionRepository.fetchAll _).expects().returns(List(fd1, fd2))
 
       val result = await(service.getAll)
 
       val expectedResponse = BulkFieldsDefinitionsResponse(apis = Seq(
-        FieldsDefinitionResponse("api-1", fakeRawVersion, Seq(FakeFieldDefinitionUrl)),
-        FieldsDefinitionResponse("api-2", fakeRawVersion, Seq(FakeFieldDefinitionString))))
+        FieldsDefinitionResponse("api-1", fakeRawVersion, NonEmptyList.one(FakeFieldDefinitionUrl)),
+        FieldsDefinitionResponse("api-2", fakeRawVersion, NonEmptyList.one(FakeFieldDefinitionString))))
       result shouldBe expectedResponse
     }
   }

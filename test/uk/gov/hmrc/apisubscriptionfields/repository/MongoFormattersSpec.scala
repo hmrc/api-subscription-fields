@@ -18,31 +18,45 @@ package uk.gov.hmrc.apisubscriptionfields.repository
 
 import cats.data.NonEmptyList
 import play.api.libs.json.{JsSuccess, Json}
-import uk.gov.hmrc.apisubscriptionfields.model.{FieldDefinition, FieldDefinitionType, JsonFormatters, RegexValidationRule, Validation}
+import uk.gov.hmrc.apisubscriptionfields.model.{FieldDefinition, FieldDefinitionType, JsonFormatters, RegexValidationRule, ValidationGroup}
 import uk.gov.hmrc.play.test.UnitSpec
 
 class MongoFormattersSpec extends UnitSpec with JsonFormatters {
   val validationRule = RegexValidationRule("test regex")
-  final val validation = Validation("error message", NonEmptyList.one(validationRule))
+  final val validation = ValidationGroup("error message", NonEmptyList.one(validationRule))
   "Field definition formatter" should {
     "Correctly unmarshall a JSON field definition with all the necessary fields" in {
       val fieldDefinition = FieldDefinition("name", "description", "hint", FieldDefinitionType.STRING, "short description", Some(validation))
-      Json.fromJson[FieldDefinition](Json.parse("""{ "name" : "name", "description" : "description", "hint": "hint", "type" : "STRING", "shortDescription" : "short description","validation":{"errorMessage":"error message","rules":[{"RegexValidationRule":{"regex":"test regex"}}]}}""")) shouldBe JsSuccess(fieldDefinition)
+      Json.fromJson[FieldDefinition](
+        Json.parse(
+          """{ "name" : "name", "description" : "description", "hint": "hint", "type" : "STRING", "shortDescription" : "short description","validation":{"errorMessage":"error message","rules":[{"RegexValidationRule":{"regex":"test regex"}}]}}"""
+        )
+      ) shouldBe JsSuccess(fieldDefinition)
     }
 
     "Correctly unmarshall a JSON field definition without the hint field" in {
       val fieldDefinition = FieldDefinition("name", "description", "", FieldDefinitionType.STRING, "short description", Some(validation))
-      Json.fromJson[FieldDefinition](Json.parse("""{ "name" : "name", "description" : "description", "type" : "STRING", "shortDescription" : "short description","validation":{"errorMessage":"error message","rules":[{"RegexValidationRule":{"regex":"test regex"}}]}}""")) shouldBe JsSuccess(fieldDefinition)
+      Json.fromJson[FieldDefinition](
+        Json.parse(
+          """{ "name" : "name", "description" : "description", "type" : "STRING", "shortDescription" : "short description","validation":{"errorMessage":"error message","rules":[{"RegexValidationRule":{"regex":"test regex"}}]}}"""
+        )
+      ) shouldBe JsSuccess(fieldDefinition)
     }
 
     "Correctly unmarshall a JSON field definition without the shortDescription field" in {
       val fieldDefinition = FieldDefinition("name", "description", "hint", FieldDefinitionType.STRING, "", Some(validation))
-      Json.fromJson[FieldDefinition](Json.parse("""{ "name" : "name", "description" : "description", "hint": "hint", "type" : "STRING","validation":{"errorMessage":"error message","rules":[{"RegexValidationRule":{"regex":"test regex"}}]}}""")) shouldBe JsSuccess(fieldDefinition)
+      Json.fromJson[FieldDefinition](
+        Json.parse(
+          """{ "name" : "name", "description" : "description", "hint": "hint", "type" : "STRING","validation":{"errorMessage":"error message","rules":[{"RegexValidationRule":{"regex":"test regex"}}]}}"""
+        )
+      ) shouldBe JsSuccess(fieldDefinition)
     }
 
     "Correctly unmarshall a JSON field definition with empty validation field" in {
       val fieldDefinition = FieldDefinition("name", "description", "hint", FieldDefinitionType.STRING, "short description", None)
-      Json.fromJson[FieldDefinition](Json.parse("""{ "name" : "name", "description" : "description", "hint": "hint", "type" : "STRING", "shortDescription" : "short description"}""")) shouldBe JsSuccess(fieldDefinition)
+      Json.fromJson[FieldDefinition](
+        Json.parse("""{ "name" : "name", "description" : "description", "hint": "hint", "type" : "STRING", "shortDescription" : "short description"}""")
+      ) shouldBe JsSuccess(fieldDefinition)
     }
   }
 }

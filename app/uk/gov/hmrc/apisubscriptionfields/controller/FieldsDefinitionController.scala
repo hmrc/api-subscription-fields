@@ -36,8 +36,6 @@ class FieldsDefinitionController @Inject() (cc: ControllerComponents, service: F
 
   def upsertFieldsDefinition(rawApiContext: String, rawApiVersion: String): Action[JsValue] = Action.async(parse.json) { implicit request =>
     withJsonBody[FieldsDefinitionRequest] { payload =>
-      // TODO: ensure that `fieldDefinitions` is not empty (at least one field definition must be defined)
-      // TODO: ensure that each field definition has an allowed type and a non-empty name
       service.upsert(ApiContext(rawApiContext), ApiVersion(rawApiVersion), payload.fieldDefinitions) map {
         case (response, true) => Created(Json.toJson(response))
         case (response, false) => Ok(Json.toJson(response))
@@ -45,16 +43,16 @@ class FieldsDefinitionController @Inject() (cc: ControllerComponents, service: F
     } recover recovery
   }
 
-  def getAllFieldsDefinitions: Action[AnyContent] = Action.async { implicit request =>
+  def getAllFieldsDefinitions: Action[AnyContent] = Action.async {  _ =>
     service.getAll map (defs => Ok(Json.toJson(defs))) recover recovery
   }
 
-  def getFieldsDefinition(rawApiContext: String, rawApiVersion: String): Action[AnyContent] = Action.async { implicit request =>
+  def getFieldsDefinition(rawApiContext: String, rawApiVersion: String): Action[AnyContent] = Action.async { _ =>
     val eventualMaybeResponse = service.get(ApiContext(rawApiContext), ApiVersion(rawApiVersion))
     asActionResult(eventualMaybeResponse, rawApiContext, rawApiVersion)
   }
 
-  def deleteFieldsDefinition(rawApiContext: String, rawApiVersion: String): Action[AnyContent] = Action.async { implicit request =>
+  def deleteFieldsDefinition(rawApiContext: String, rawApiVersion: String): Action[AnyContent] = Action.async { _ =>
     service.delete(ApiContext(rawApiContext), ApiVersion(rawApiVersion)) map {
       case true => NoContent
       case false => notFoundResponse(rawApiContext, rawApiVersion)

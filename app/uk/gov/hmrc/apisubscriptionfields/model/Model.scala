@@ -28,9 +28,21 @@ case class ApiVersion(value: String) extends AnyVal
 
 case class SubscriptionFieldsId(value: UUID) extends AnyVal
 
-sealed trait ValidationRule
+sealed trait ValidationRule {
+  def validate(value: String): Boolean
+}
 
-case class RegexValidationRule(regex: String) extends ValidationRule
+case class RegexValidationRule(regex: String) extends ValidationRule {
+  def validate(value: String): Boolean = value.matches(regex)
+}
+
+// TODO - check if we can use an object here (see derived json formatter docs)
+case class UrlValidationRule() extends ValidationRule {
+  import eu.timepit.refined.string._
+  import eu.timepit.refined._
+
+  def validate(value: String): Boolean = refineV[Url](value).isRight
+}
 
 case class ValidationGroup(errorMessage: String, rules: NEL[ValidationRule])
 

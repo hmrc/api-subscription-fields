@@ -37,7 +37,7 @@ class JsonFormatterSpec extends WordSpec with Matchers with JsonFormatters with 
   private val subscriptionFieldJson =
     s"""{"clientId":"$fakeRawClientId","apiContext":"$fakeRawContext","apiVersion":"$fakeRawVersion","fieldsId":"$FakeRawFieldsId","fields":{"f1":"v1"}}"""
   private val fieldDefinitionJson =
-    s"""{"apiContext":"$fakeRawContext","apiVersion":"$fakeRawVersion","fieldDefinitions":[{"name":"${fieldN(1)}","description":"desc1","hint":"hint1","type":"URL","shortDescription":"short description","validation":{"errorMessage":"error message","rules":[{"RegexValidationRule":{"regex":".*"}}]}}]}"""
+    s"""{"apiContext":"$fakeRawContext","apiVersion":"$fakeRawVersion","fieldDefinitions":[{"name":"${fieldN(1)}","description":"desc1","hint":"hint1","type":"URL","shortDescription":"short description","validation":{"errorMessage":"error message","rules":[{"UrlValidationRule":{}}]}}]}"""
   private val fieldDefinitionEmptyValidationJson =
     s"""{"apiContext":"$fakeRawContext","apiVersion":"$fakeRawVersion","fieldDefinitions":[{"name":"${fieldN(1)}","description":"desc1","hint":"hint1","type":"URL","shortDescription":"short description"}]}"""
 

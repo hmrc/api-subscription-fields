@@ -55,6 +55,7 @@ trait NonEmptyListFormatters {
 }
 
 trait JsonFormatters extends SharedJsonFormatters with NonEmptyListFormatters {
+  import be.venneborg.refined.play.RefinedJsonFormats._
 
   implicit val validationRuleFormat: OFormat[ValidationRule] = derived.withTypeTag.oformat(TypeTagSetting.ShortClassName)
 

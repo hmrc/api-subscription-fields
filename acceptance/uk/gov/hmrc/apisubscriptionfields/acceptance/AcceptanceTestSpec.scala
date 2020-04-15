@@ -63,8 +63,8 @@ trait AcceptanceTestSpec extends FeatureSpec
 
   protected def fieldsIdEndpoint(fieldsId: UUID) = s"/field/$fieldsId"
 
-  protected val SampleFields1 = Map(fieldN(1) -> "value1", fieldN(2) -> "value2")
-  protected val SampleFields2 = Map(fieldN(1) -> "value1b", fieldN(3) -> "value3")
+  protected val SampleFields1 = Map(fieldN(1) -> "http://www.example.com/some-endpoint", fieldN(2) -> "value2")
+  protected val SampleFields2 = Map(fieldN(1) -> "https://www.example2.com/updated", fieldN(3) -> "value3")
 
   protected def validSubscriptionPutRequest(fields: Fields): FakeRequest[AnyContentAsJson] =
     validSubscriptionPutRequest(SubscriptionFieldsRequest(fields))

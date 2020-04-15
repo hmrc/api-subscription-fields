@@ -103,6 +103,9 @@ class SubscriptionFieldsService @Inject() (repository: SubscriptionFieldsReposit
 
 object SubscriptionFieldsService {
 
+import eu.timepit.refined.string._
+import eu.timepit.refined._
+
   type FieldName = String
   type ErrorMessage = String
   type FieldError = (FieldName, ErrorMessage)
@@ -112,18 +115,13 @@ object SubscriptionFieldsService {
   }
 
   // True - passed
-  def validateAgainstRule(rule: ValidationRule, value: String): Boolean = rule match {
-    case RegexValidationRule(regex) => value.matches(regex)
-  }
-
-  // True - passed
   def validateAgainstGroup(group: ValidationGroup, value: String): Boolean = {
-    group.rules.foldLeft(true)((acc, rule) => (acc && validateAgainstRule(rule, value)))
+    group.rules.foldLeft(true)((acc, rule) => (acc && rule.validate(value)))
   }
 
   // Some is Some(error)
   def validateAgainstDefinition(fieldDefinition: FieldDefinition, value: String): Option[FieldError] = {
-    fieldDefinition.validation.flatMap(group => if (validateAgainstGroup(group, value)) None else Some((fieldDefinition.name, group.errorMessage)))
+    fieldDefinition.validation .flatMap(group => if (validateAgainstGroup(group, value)) None else Some((fieldDefinition.name, group.errorMessage)))
   }
 
   def validateAgainstValidationRules(fieldDefinitions: NonEmptyList[FieldDefinition], fields: Fields): FieldErrorMap =

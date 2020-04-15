@@ -42,7 +42,7 @@ trait TestData {
   def fieldN(id: Int): String = s"field_$id"
 }
 
-trait SubscriptionFieldsTestData extends TestData {
+trait SubscriptionFieldsTestData extends TestData with ValidationRuleTestData {
 
   final val FakeClientId = ClientId(fakeRawClientId)
   final val FakeClientId2 = ClientId(fakeRawClientId2)
@@ -86,7 +86,8 @@ trait SubscriptionFieldsTestData extends TestData {
 trait FieldsDefinitionTestData extends TestData {
   val FakeValidationRule: RegexValidationRule = RegexValidationRule(".*")
   val FakeValidation: ValidationGroup = ValidationGroup("error message", NonEmptyList.one(FakeValidationRule))
-  final val FakeFieldDefinitionUrl = FieldDefinition(fieldN(1), "desc1", "hint1", FieldDefinitionType.URL, "short description", Some(FakeValidation))
+  val FakeUrlValidation: ValidationGroup = ValidationGroup("error message", NonEmptyList.one(UrlValidationRule()))
+  final val FakeFieldDefinitionUrl = FieldDefinition(fieldN(1), "desc1", "hint1", FieldDefinitionType.URL, "short description", Some(FakeUrlValidation))
   final val FakeFieldDefinitionUrlValidationEmpty = FieldDefinition(fieldN(1), "desc1", "hint1", FieldDefinitionType.URL, "short description", None)
   final val FakeFieldDefinitionString = FieldDefinition(fieldN(2), "desc2", "hint2", FieldDefinitionType.STRING, "short description", Some(FakeValidation))
   final val FakeFieldDefinitionSecureToken = FieldDefinition(fieldN(3), "desc3", "hint3", FieldDefinitionType.SECURE_TOKEN, "short description", Some(FakeValidation))

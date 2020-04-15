@@ -61,6 +61,7 @@ trait JsonFormatters extends SharedJsonFormatters with NonEmptyListFormatters {
   implicit val ValidationJF = Json.format[ValidationGroup]
 
   implicit val FieldDefinitionTypeReads = Reads.enumNameReads(FieldDefinitionType)
+
   val fieldDefinitionReads: Reads[FieldDefinition] = (
     (JsPath \ "name").read[String] and
       (JsPath \ "description").read[String] and
@@ -69,7 +70,6 @@ trait JsonFormatters extends SharedJsonFormatters with NonEmptyListFormatters {
       ((JsPath \ "shortDescription").read[String] or Reads.pure("")) and
       (JsPath \ "validation").readNullable[ValidationGroup]
   )(FieldDefinition.apply _)
-
   val fieldDefinitionWrites = Json.writes[FieldDefinition]
 
   implicit val FieldDefinitionJF = Format(fieldDefinitionReads, fieldDefinitionWrites)

@@ -40,10 +40,10 @@ class ModelSpec extends UnitSpec with SubscriptionFieldsTestData with FieldsDefi
 
   "UrlValidationRule" should {
     "pass for a matching value" in {
-      UrlValidationRule().validate(validUrl) shouldBe true
+      UrlValidationRule.validate(validUrl) shouldBe true
       }
       "fail for a value that does not match" in {
-        UrlValidationRule().validate(invalidUrl) shouldBe false
+        UrlValidationRule.validate(invalidUrl) shouldBe false
     }
   }
 }

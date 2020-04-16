@@ -36,8 +36,7 @@ case class RegexValidationRule(regex: String) extends ValidationRule {
   def validate(value: String): Boolean = value.matches(regex)
 }
 
-// TODO - check if we can use an object here (see derived json formatter docs)
-case class UrlValidationRule() extends ValidationRule {
+case object UrlValidationRule extends ValidationRule {
   import eu.timepit.refined.string._
   import eu.timepit.refined._
 

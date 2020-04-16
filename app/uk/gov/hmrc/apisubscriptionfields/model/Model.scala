@@ -19,6 +19,9 @@ package uk.gov.hmrc.apisubscriptionfields.model
 import java.util.UUID
 import cats.data.{NonEmptyList => NEL}
 import uk.gov.hmrc.apisubscriptionfields.model.FieldDefinitionType.FieldDefinitionType
+import eu.timepit.refined._
+import eu.timepit.refined.api.Refined
+import eu.timepit.refined.string._
 
 case class ClientId(value: String) extends AnyVal
 
@@ -32,14 +35,16 @@ sealed trait ValidationRule {
   def validate(value: String): Boolean
 }
 
-case class RegexValidationRule(regex: String) extends ValidationRule {
-  def validate(value: String): Boolean = value.matches(regex)
+object RegexValidationRule {
+  type RegexExpr = String Refined Regex
+}
+
+
+case class RegexValidationRule(regex: RegexValidationRule.RegexExpr) extends ValidationRule {
+  def validate(value: String): Boolean = value.matches(regex.value)
 }
 
 case object UrlValidationRule extends ValidationRule {
-  import eu.timepit.refined.string._
-  import eu.timepit.refined._
-
   def validate(value: String): Boolean = refineV[Url](value).isRight
 }
 

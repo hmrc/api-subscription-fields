@@ -84,6 +84,8 @@ trait SubscriptionFieldsTestData extends TestData with ValidationRuleTestData {
 }
 
 trait FieldsDefinitionTestData extends TestData {
+    import eu.timepit.refined.auto._
+
   val FakeValidationRule: RegexValidationRule = RegexValidationRule(".*")
   val FakeValidation: ValidationGroup = ValidationGroup("error message", NonEmptyList.one(FakeValidationRule))
   val FakeUrlValidation: ValidationGroup = ValidationGroup("error message", NonEmptyList.one(UrlValidationRule))

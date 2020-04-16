@@ -22,6 +22,8 @@ import uk.gov.hmrc.apisubscriptionfields.model.{FieldDefinition, FieldDefinition
 import uk.gov.hmrc.play.test.UnitSpec
 
 class MongoFormattersSpec extends UnitSpec with JsonFormatters {
+  import eu.timepit.refined.auto._
+
   val validationRule = RegexValidationRule("test regex")
   final val validation = ValidationGroup("error message", NonEmptyList.one(validationRule))
   "Field definition formatter" should {

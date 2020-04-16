@@ -32,7 +32,6 @@ val compile = Seq(
   "com.typesafe.play" %% "play-json" % "2.7.1",
   "org.typelevel" %% "cats-core" % "2.1.0",
   "eu.timepit" %% "refined"                 % "0.9.13",
-  // "eu.timepit" %% "refined-cats"            % "0.9.13"
   "be.venneborg" %% "play26-refined" % "0.5.0"
 )
 

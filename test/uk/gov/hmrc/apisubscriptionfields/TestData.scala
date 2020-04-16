@@ -25,6 +25,7 @@ import uk.gov.hmrc.apisubscriptionfields.model._
 import uk.gov.hmrc.apisubscriptionfields.repository.{FieldsDefinition, SubscriptionFields}
 
 import scala.concurrent.Future
+import eu.timepit.refined.auto._
 
 trait TestData {
   final val unit = ()
@@ -84,6 +85,7 @@ trait SubscriptionFieldsTestData extends TestData with ValidationRuleTestData {
 }
 
 trait FieldsDefinitionTestData extends TestData {
+
   val FakeValidationRule: RegexValidationRule = RegexValidationRule(".*")
   val FakeValidation: ValidationGroup = ValidationGroup("error message", NonEmptyList.one(FakeValidationRule))
   val FakeUrlValidation: ValidationGroup = ValidationGroup("error message", NonEmptyList.one(UrlValidationRule))

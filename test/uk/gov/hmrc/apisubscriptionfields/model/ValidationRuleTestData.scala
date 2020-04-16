@@ -17,6 +17,7 @@
 package uk.gov.hmrc.apisubscriptionfields.model
 
 trait ValidationRuleTestData {
+  import eu.timepit.refined.auto._
 
   val lowerCaseValue = "bob"
   val mixedCaseValue = "Bob"

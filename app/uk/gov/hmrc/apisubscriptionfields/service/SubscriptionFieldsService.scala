@@ -103,9 +103,6 @@ class SubscriptionFieldsService @Inject() (repository: SubscriptionFieldsReposit
 
 object SubscriptionFieldsService {
 
-import eu.timepit.refined.string._
-import eu.timepit.refined._
-
   type FieldName = String
   type ErrorMessage = String
   type FieldError = (FieldName, ErrorMessage)
@@ -126,7 +123,7 @@ import eu.timepit.refined._
 
   def validateAgainstValidationRules(fieldDefinitions: NonEmptyList[FieldDefinition], fields: Fields): FieldErrorMap =
     fieldDefinitions
-      .map(fd => validateAgainstDefinition(fd, fields.get(fd.name).getOrElse("")))
+      .map(fd => validateAgainstDefinition(fd, fields.getOrElse(fd.name,"")))
       .foldLeft(FieldErrorMap.empty) {
         case (acc, None)     => acc
         case (acc, Some((name,msg))) => acc + (name -> msg)

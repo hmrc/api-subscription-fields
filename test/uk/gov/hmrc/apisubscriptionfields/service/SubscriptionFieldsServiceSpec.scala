@@ -200,33 +200,8 @@ class SubscriptionFieldsServiceSpec extends UnitSpec with SubscriptionFieldsTest
     }
   }
 
-  val lowerCaseValue = "bob"
-  val mixedCaseValue = "Bob"
-
-  val lowerCaseRule: ValidationRule = RegexValidationRule("""^[a-z]+$""")
-  val mixedCaseRule: ValidationRule = RegexValidationRule("""^[a-zA-Z]+$""")
-
-  val atLeastThreeLongRule: ValidationRule = RegexValidationRule("""^.{3}.*$""")
-  val atLeastTenLongRule: ValidationRule = RegexValidationRule("""^.{10}.*$""")
-
   def theErrorMessage(i: Int) = s"error message $i"
   val validationGroup1: ValidationGroup = ValidationGroup(theErrorMessage(1), NonEmptyList(mixedCaseRule, List(atLeastThreeLongRule)))
-
-  "validate value against rule" should {
-
-    "return true when the value is valid - correct case" in {
-      SubscriptionFieldsService.validateAgainstRule(lowerCaseRule, lowerCaseValue) shouldBe true
-    }
-    "return true when the value is valid - long enough" in {
-      SubscriptionFieldsService.validateAgainstRule(atLeastThreeLongRule, lowerCaseValue) shouldBe true
-    }
-    "return false when the value is invalid - wrong case" in {
-      SubscriptionFieldsService.validateAgainstRule(lowerCaseRule, mixedCaseValue) shouldBe false
-    }
-    "return false when the value is invalid - too short" in {
-      SubscriptionFieldsService.validateAgainstRule(atLeastTenLongRule, mixedCaseValue) shouldBe false
-    }
-  }
 
   "validate value against group" should {
 

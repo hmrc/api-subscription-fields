@@ -28,15 +28,28 @@ case class ApiVersion(value: String) extends AnyVal
 
 case class SubscriptionFieldsId(value: UUID) extends AnyVal
 
-sealed trait ValidationRule
+sealed trait ValidationRule {
+  def validate(value: String): Boolean
+}
 
-case class RegexValidationRule(regex: String) extends ValidationRule
+case class RegexValidationRule(regex: String) extends ValidationRule {
+  def validate(value: String): Boolean = value.matches(regex)
+}
+
+case object UrlValidationRule extends ValidationRule {
+  import eu.timepit.refined.string._
+  import eu.timepit.refined._
+
+  def validate(value: String): Boolean = refineV[Url](value).isRight
+}
 
 case class ValidationGroup(errorMessage: String, rules: NEL[ValidationRule])
 
 object FieldDefinitionType extends Enumeration {
   type FieldDefinitionType = Value
 
+  // TODO - complete "since" when release is ready
+  @deprecated("We don't use URL type for any validation", since = "0.5x")
   val URL = Value("URL")
   val SECURE_TOKEN = Value("SecureToken")
   val STRING = Value("STRING")

@@ -41,7 +41,7 @@ class SubscriptionFieldsService @Inject() (repository: SubscriptionFieldsReposit
 
     fieldDefinitions.map(
       _.fold[SubsFieldValidationResponse](throw new RuntimeException)(fieldDefinitions =>
-        SubscriptionFieldsService.validate(fieldDefinitions, fields) ++ SubscriptionFieldsService.validateFieldNamesAreDefined(fieldDefinitions,fields) match {
+        SubscriptionFieldsService.validateAgainstValidationRules(fieldDefinitions, fields) ++ SubscriptionFieldsService.validateFieldNamesAreDefined(fieldDefinitions,fields) match {
           case FieldErrorMap.empty => ValidSubsFieldValidationResponse
           case errs: FieldErrorMap =>
             InvalidSubsFieldValidationResponse(errorResponses = errs)
@@ -112,23 +112,18 @@ object SubscriptionFieldsService {
   }
 
   // True - passed
-  def validateAgainstRule(rule: ValidationRule, value: String): Boolean = rule match {
-    case RegexValidationRule(regex) => value.matches(regex)
-  }
-
-  // True - passed
   def validateAgainstGroup(group: ValidationGroup, value: String): Boolean = {
-    group.rules.foldLeft(true)((acc, rule) => (acc && validateAgainstRule(rule, value)))
+    group.rules.foldLeft(true)((acc, rule) => (acc && rule.validate(value)))
   }
 
   // Some is Some(error)
   def validateAgainstDefinition(fieldDefinition: FieldDefinition, value: String): Option[FieldError] = {
-    fieldDefinition.validation.flatMap(group => if (validateAgainstGroup(group, value)) None else Some((fieldDefinition.name, group.errorMessage)))
+    fieldDefinition.validation .flatMap(group => if (validateAgainstGroup(group, value)) None else Some((fieldDefinition.name, group.errorMessage)))
   }
 
-  def validate(fieldDefinitions: NonEmptyList[FieldDefinition], fields: Fields): FieldErrorMap =
+  def validateAgainstValidationRules(fieldDefinitions: NonEmptyList[FieldDefinition], fields: Fields): FieldErrorMap =
     fieldDefinitions
-      .map(fd => validateAgainstDefinition(fd, fields.get(fd.name).getOrElse("")))
+      .map(fd => validateAgainstDefinition(fd, fields.getOrElse(fd.name,"")))
       .foldLeft(FieldErrorMap.empty) {
         case (acc, None)     => acc
         case (acc, Some((name,msg))) => acc + (name -> msg)

@@ -23,6 +23,7 @@ import play.api.test.{FakeRequest, StubControllerComponentsFactory}
 import play.api.test.Helpers._
 import uk.gov.hmrc.apisubscriptionfields.SubscriptionFieldsTestData
 import uk.gov.hmrc.apisubscriptionfields.model._
+import Types._
 import uk.gov.hmrc.apisubscriptionfields.service.SubscriptionFieldsService
 import uk.gov.hmrc.apisubscriptionfields.HmrcPlaySpec
 
@@ -47,14 +48,14 @@ class SubscriptionFieldsControllerPutSpec
   "PUT /field/application/:clientId/context/:apiContext/version/:apiVersion" should {
     "return CREATED when Field values are Valid and created in the repo" in {
       (mockSubscriptionFieldsService.validate(_: ApiContext, _: ApiVersion, _: Fields)).
-        expects(FakeContext, FakeVersion, subscriptionFields).
+        expects(FakeContext, FakeVersion, FakeSubscriptionFields).
         returns(Future.successful(FakeValidSubsFieldValidationResponse))
 
       (mockSubscriptionFieldsService.upsert(_: ClientId, _: ApiContext, _: ApiVersion, _: Fields)).
-        expects(FakeClientId, FakeContext, FakeVersion, subscriptionFields).
+        expects(FakeClientId, FakeContext, FakeVersion, FakeSubscriptionFields).
         returns(Future.successful((FakeSubscriptionFieldsResponse, true)))
 
-      val json = mkJson(SubscriptionFieldsRequest(subscriptionFields))
+      val json = mkJson(SubscriptionFieldsRequest(FakeSubscriptionFields))
       testSubmitResult(mkRequest(json)) { result =>
         status(result) shouldBe CREATED
       }
@@ -62,14 +63,14 @@ class SubscriptionFieldsControllerPutSpec
 
     "return OK when Field values are Valid and updated in the repo" in {
       (mockSubscriptionFieldsService.validate(_: ApiContext, _: ApiVersion, _: Fields)).
-        expects(FakeContext, FakeVersion, subscriptionFields).
+        expects(FakeContext, FakeVersion, FakeSubscriptionFields).
         returns(Future.successful(FakeValidSubsFieldValidationResponse))
 
       (mockSubscriptionFieldsService.upsert (_: ClientId, _: ApiContext, _: ApiVersion, _: Fields)).
-        expects(FakeClientId, FakeContext, FakeVersion, subscriptionFields).
+        expects(FakeClientId, FakeContext, FakeVersion, FakeSubscriptionFields).
         returns(Future.successful((FakeSubscriptionFieldsResponse, false)))
 
-      val json = mkJson(SubscriptionFieldsRequest(subscriptionFields))
+      val json = mkJson(SubscriptionFieldsRequest(FakeSubscriptionFields))
       testSubmitResult(mkRequest(json)) { result =>
         status(result) shouldBe OK
       }
@@ -77,10 +78,10 @@ class SubscriptionFieldsControllerPutSpec
 
     "return OK with FieldErrorMessages when Field values are Invalid" in {
       (mockSubscriptionFieldsService.validate(_: ApiContext, _: ApiVersion, _: Fields)).
-        expects(FakeContext, FakeVersion, subscriptionFields).
+        expects(FakeContext, FakeVersion, FakeSubscriptionFields).
         returns(Future.successful(FakeInvalidSubsFieldValidationResponse))
 
-      val json = mkJson(SubscriptionFieldsRequest(subscriptionFields))
+      val json = mkJson(SubscriptionFieldsRequest(FakeSubscriptionFields))
       testSubmitResult(mkRequest(json)) { result =>
         status(result) shouldBe BAD_REQUEST
         contentAsJson(result) shouldBe (Json.toJson(FakeFieldErrorMessages))

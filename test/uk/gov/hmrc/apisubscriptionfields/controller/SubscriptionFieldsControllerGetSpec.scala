@@ -41,7 +41,7 @@ class SubscriptionFieldsControllerGetSpec extends UnitSpec with SubscriptionFiel
       |  "apiVersion": "1.0",
       |  "fieldsId":"327d9145-4965-4d28-a2c5-39dedee50334",
       |  "fields":{
-      |    "callback-id":"http://localhost",
+      |    "callbackId":"http://localhost",
       |    "token":"abc123"
       |  }
       |}""".stripMargin
@@ -57,7 +57,7 @@ class SubscriptionFieldsControllerGetSpec extends UnitSpec with SubscriptionFiel
       |      "apiVersion": "1.0",
       |      "fieldsId": "327d9145-4965-4d28-a2c5-39dedee50334",
       |      "fields": {
-      |        "callback-id": "http://localhost",
+      |        "callbackId": "http://localhost",
       |        "token": "abc123"
       |      }
       |    },
@@ -67,7 +67,7 @@ class SubscriptionFieldsControllerGetSpec extends UnitSpec with SubscriptionFiel
       |      "apiVersion": "2.0",
       |      "fieldsId": "327d9145-4965-4d28-a2c5-39dedee50335",
       |      "fields": {
-      |        "callback-id": "https://application.sage.com/return-route",
+      |        "callbackId": "https://application.sage.com/return-route",
       |        "token": "zyx456"
       |      }
       |    }

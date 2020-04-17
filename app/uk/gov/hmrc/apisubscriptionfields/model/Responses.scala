@@ -19,6 +19,7 @@ package uk.gov.hmrc.apisubscriptionfields.model
 import play.api.libs.json.Json.JsValueWrapper
 import play.api.libs.json.{JsObject, Json}
 import cats.data.NonEmptyList
+import Types._
 
 case class SubscriptionFieldsResponse(clientId: String, apiContext: String, apiVersion: String, fieldsId: SubscriptionFieldsId, fields: Fields)
 
@@ -32,7 +33,7 @@ sealed trait SubsFieldValidationResponse
 
 case object ValidSubsFieldValidationResponse extends SubsFieldValidationResponse
 
-case class InvalidSubsFieldValidationResponse(errorResponses: Map[String, String]) extends SubsFieldValidationResponse
+case class InvalidSubsFieldValidationResponse(errorResponses: Map[FieldName, String]) extends SubsFieldValidationResponse
 
 object ErrorCode extends Enumeration {
   type ErrorCode = Value

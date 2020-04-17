@@ -31,19 +31,20 @@ import play.modules.reactivemongo.ReactiveMongoComponent
 import uk.gov.hmrc.apisubscriptionfields.RequestHeaders
 import uk.gov.hmrc.apisubscriptionfields.model.JsonFormatters._
 import uk.gov.hmrc.apisubscriptionfields.model._
+import Types.Fields
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
-import uk.gov.hmrc.apisubscriptionfields.TestData
 import cats.data.NonEmptyList
+import uk.gov.hmrc.apisubscriptionfields.FieldsDefinitionTestData
 
 trait AcceptanceTestSpec extends FeatureSpec
   with GivenWhenThen
   with BeforeAndAfterAll
   with Matchers
   with GuiceOneServerPerSuite
-  with TestData {
+  with FieldsDefinitionTestData {
 
   protected val ValidRequest = FakeRequest()
     .withHeaders(RequestHeaders.ACCEPT_HMRC_JSON_HEADER)

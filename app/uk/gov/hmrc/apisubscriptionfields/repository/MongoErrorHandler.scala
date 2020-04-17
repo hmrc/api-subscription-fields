@@ -18,7 +18,7 @@ package uk.gov.hmrc.apisubscriptionfields.repository
 
 import play.api.Logger
 import reactivemongo.api.commands.{UpdateWriteResult, WriteResult}
-import uk.gov.hmrc.apisubscriptionfields.model.IsInsert
+import uk.gov.hmrc.apisubscriptionfields.model.Types.IsInsert
 
 trait MongoErrorHandler {
 

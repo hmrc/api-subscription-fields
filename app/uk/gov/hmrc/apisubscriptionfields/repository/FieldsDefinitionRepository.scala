@@ -22,9 +22,10 @@ import play.api.libs.json._
 import reactivemongo.api.indexes.IndexType
 import reactivemongo.bson.BSONObjectID
 import reactivemongo.play.json.collection.JSONCollection
-import uk.gov.hmrc.apisubscriptionfields.model.{ApiContext, ApiVersion, IsInsert}
 import uk.gov.hmrc.mongo.ReactiveRepository
 import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
+import uk.gov.hmrc.apisubscriptionfields.model._
+import Types._
 
 import scala.concurrent.Future
 

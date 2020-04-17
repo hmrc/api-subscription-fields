@@ -20,12 +20,12 @@ import java.util.UUID
 
 import javax.inject._
 import uk.gov.hmrc.apisubscriptionfields.model._
-import uk.gov.hmrc.apisubscriptionfields.repository.{SubscriptionFields, SubscriptionFieldsRepository}
+import Types._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import cats.data.NonEmptyList
-import uk.gov.hmrc.apisubscriptionfields.service.SubscriptionFieldsService.FieldErrorMap
+import uk.gov.hmrc.apisubscriptionfields.repository.SubscriptionFieldsRepository
 
 @Singleton
 class UUIDCreator {
@@ -102,14 +102,7 @@ class SubscriptionFieldsService @Inject() (repository: SubscriptionFieldsReposit
 }
 
 object SubscriptionFieldsService {
-
-  type FieldName = String
-  type ErrorMessage = String
-  type FieldError = (FieldName, ErrorMessage)
-  type FieldErrorMap = Map[FieldName, ErrorMessage]
-  object FieldErrorMap {
-    val empty = Map.empty[FieldName, ErrorMessage]
-  }
+  import Types._
 
   // True - passed
   def validateAgainstGroup(group: ValidationGroup, value: String): Boolean = {

@@ -20,9 +20,7 @@ import java.util.UUID
 import cats.data.{NonEmptyList => NEL}
 import uk.gov.hmrc.apisubscriptionfields.model.FieldDefinitionType.FieldDefinitionType
 import eu.timepit.refined._
-import eu.timepit.refined.api.Refined
-import eu.timepit.refined.string._
-import eu.timepit.refined.boolean._
+import Types._
 
 case class ClientId(value: String) extends AnyVal
 
@@ -36,18 +34,11 @@ sealed trait ValidationRule {
   def validate(value: String): Boolean
 }
 
-object RegexValidationRule {
-  type RegexExpr = String Refined Regex
-}
-
-
-case class RegexValidationRule(regex: RegexValidationRule.RegexExpr) extends ValidationRule {
+case class RegexValidationRule(regex: RegexExpr) extends ValidationRule {
   def validate(value: String): Boolean = value.matches(regex.value)
 }
 
 case object UrlValidationRule extends ValidationRule {
-
-  type NonFtpUrl = Url And Not[StartsWith[W.`"ftp"`.T]]
 
   def validate(value: String): Boolean = refineV[NonFtpUrl](value).isRight
 }
@@ -64,4 +55,6 @@ object FieldDefinitionType extends Enumeration {
   val STRING = Value("STRING")
 }
 
-case class FieldDefinition(name: String, description: String, hint: String = "", `type`: FieldDefinitionType, shortDescription: String, validation: Option[ValidationGroup] = None)
+case class FieldDefinition(name: FieldName, description: String, hint: String = "", `type`: FieldDefinitionType, shortDescription: String, validation: Option[ValidationGroup] = None)
+
+case class SubscriptionFields(clientId: String, apiContext: String, apiVersion: String, fieldsId: UUID, fields: Fields)

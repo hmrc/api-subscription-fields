@@ -25,7 +25,7 @@ import reactivemongo.api.Cursor
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import uk.gov.hmrc.apisubscriptionfields.model.IsInsert
+import uk.gov.hmrc.apisubscriptionfields.model.Types.IsInsert
 
 trait MongoCrudHelper[T] extends MongoIndexCreator with MongoErrorHandler {
 

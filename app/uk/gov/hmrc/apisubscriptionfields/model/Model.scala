@@ -22,6 +22,7 @@ import uk.gov.hmrc.apisubscriptionfields.model.FieldDefinitionType.FieldDefiniti
 import eu.timepit.refined._
 import eu.timepit.refined.api.Refined
 import eu.timepit.refined.string._
+import eu.timepit.refined.boolean._
 
 case class ClientId(value: String) extends AnyVal
 
@@ -45,7 +46,10 @@ case class RegexValidationRule(regex: RegexValidationRule.RegexExpr) extends Val
 }
 
 case object UrlValidationRule extends ValidationRule {
-  def validate(value: String): Boolean = refineV[Url](value).isRight
+
+  type NonFtpUrl = Url And Not[StartsWith[W.`"ftp"`.T]]
+
+  def validate(value: String): Boolean = refineV[NonFtpUrl](value).isRight
 }
 
 case class ValidationGroup(errorMessage: String, rules: NEL[ValidationRule])

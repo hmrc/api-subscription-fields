@@ -20,7 +20,6 @@ import eu.timepit.refined._
 import eu.timepit.refined.api.Refined
 import eu.timepit.refined.string._
 import eu.timepit.refined.boolean._
-import eu.timepit.refined.api.RefType.applyRef
 
 object Types {
   type RegexExpr = String Refined Regex
@@ -28,13 +27,10 @@ object Types {
 
   type FieldNameRegex = MatchesRegex[W.`"^[a-zA-Z]+$"`.T]
   type FieldName = Refined[String,FieldNameRegex]
-  object FieldName {
-    def unsafeApply(s: String): FieldName = Refined.unsafeApply(s)
-  }
 
   type FieldValue = String
 
-  type Fields = Map[FieldName, String]
+  type Fields = Map[FieldName, FieldValue]
 
   type ErrorMessage = String
 

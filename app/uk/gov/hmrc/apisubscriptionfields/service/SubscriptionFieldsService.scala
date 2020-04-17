@@ -105,12 +105,12 @@ object SubscriptionFieldsService {
   import Types._
 
   // True - passed
-  def validateAgainstGroup(group: ValidationGroup, value: String): Boolean = {
+  def validateAgainstGroup(group: ValidationGroup, value: FieldValue): Boolean = {
     group.rules.foldLeft(true)((acc, rule) => (acc && rule.validate(value)))
   }
 
   // Some is Some(error)
-  def validateAgainstDefinition(fieldDefinition: FieldDefinition, value: String): Option[FieldError] = {
+  def validateAgainstDefinition(fieldDefinition: FieldDefinition, value: FieldValue): Option[FieldError] = {
     fieldDefinition.validation .flatMap(group => if (validateAgainstGroup(group, value)) None else Some((fieldDefinition.name, group.errorMessage)))
   }
 

@@ -18,13 +18,15 @@ package uk.gov.hmrc.apisubscriptionfields.controller
 
 import javax.inject.{Inject, Singleton}
 
-import play.api.libs.json.{JsValue, Json}
+import play.api.libs.json.{JsValue, Json, JsSuccess, JsError}
 import play.api.mvc._
 import uk.gov.hmrc.apisubscriptionfields.model._
 import uk.gov.hmrc.apisubscriptionfields.service.FieldsDefinitionService
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import scala.util.{Try,Success,Failure}
+import play.api.Logger
 
 @Singleton
 class FieldsDefinitionController @Inject() (cc: ControllerComponents, service: FieldsDefinitionService) extends CommonController {
@@ -33,6 +35,20 @@ class FieldsDefinitionController @Inject() (cc: ControllerComponents, service: F
 
   private def notFoundResponse(rawApiContext: String, rawApiVersion: String) =
     NotFound(JsErrorResponse(ErrorCode.NOT_FOUND_CODE, s"Fields definition not found for ($rawApiContext, $rawApiVersion)"))
+
+  def validateFieldsDefinition(): Action[JsValue] = Action(parse.json) { request =>
+    Try(request.body.validate[FieldsDefinitionRequest]) match {
+      case Success(JsSuccess(payload, _)) => Ok("")
+      case Success(JsError(errs)) => {
+        Logger.error(s"A JSON error occurred: ${Json.prettyPrint(JsError.toJson(errs))}")
+        BadRequest("")
+      }
+      case Failure(e) => {
+        Logger.error(s"An error occurred during JSON validation: ${e.getMessage}")
+        BadRequest("")
+      }
+    }
+  }
 
   def upsertFieldsDefinition(rawApiContext: String, rawApiVersion: String): Action[JsValue] = Action.async(parse.json) { implicit request =>
     withJsonBody[FieldsDefinitionRequest] { payload =>

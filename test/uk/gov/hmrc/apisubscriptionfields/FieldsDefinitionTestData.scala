@@ -22,13 +22,14 @@ import uk.gov.hmrc.apisubscriptionfields.model._
 import Types._
 import cats.data.NonEmptyList
 import uk.gov.hmrc.apisubscriptionfields.repository.FieldsDefinition
+import eu.timepit.refined.api.Refined
 
 trait FieldsDefinitionTestData extends TestData {
     import eu.timepit.refined.auto._
 
   def fieldN(id: Int): FieldName = {
     val char = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".charAt(id)
-    FieldName.unsafeApply(s"field$char")
+    Refined.unsafeApply(s"field$char")
   }
 
   final val AlphanumericFieldName: FieldName = "alphanumericField"

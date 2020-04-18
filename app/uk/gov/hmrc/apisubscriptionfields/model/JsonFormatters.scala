@@ -26,16 +26,28 @@ import play.api.libs.json.Reads._
 import play.api.libs.functional.syntax._
 import uk.gov.hmrc.apisubscriptionfields.model.FieldDefinitionType.FieldDefinitionType
 import Types._
+import play.api.Logger
 
-trait SharedJsonFormatters {
-  implicit val SubscriptionFieldsIdJF = new Format[SubscriptionFieldsId] {
-    def writes(s: SubscriptionFieldsId) = JsString(s.value.toString)
+trait UUIDJsonFormatter {
+  import scala.util.{Try,Success,Failure}
+  implicit val UUIDjsonFormat = new Format[UUID] {
+    def writes(s: UUID) = JsString(s.toString)
 
     def reads(json: JsValue) = json match {
-      case JsNull => JsError()
-      case _      => JsSuccess(SubscriptionFieldsId(json.as[UUID]))
+      case JsNull          => JsError("No UUID found")
+      case JsString(value) => Try(UUID.fromString(value)) match {
+        case Success(uuid) => JsSuccess(uuid)
+        case Failure(ex) => {
+          Logger.warn("UUID unmarshalling failed", ex)
+          JsError("UUID failed to create")
+        }
+      }
     }
   }
+}
+
+trait SharedJsonFormatters extends UUIDJsonFormatter {
+  implicit val SubscriptionFieldsIdjsonFormat = Json.valueFormat[SubscriptionFieldsId]
 }
 
 trait NonEmptyListFormatters {

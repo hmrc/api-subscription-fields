@@ -27,11 +27,18 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.{Try,Success,Failure}
 import play.api.Logger
+import java.util.UUID
 
 @Singleton
 class FieldsDefinitionController @Inject() (cc: ControllerComponents, service: FieldsDefinitionService) extends CommonController {
 
   import JsonFormatters._
+
+  private def badRequestWithTag(fn: (UUID) => String): Result = {
+    val errorTag = java.util.UUID.randomUUID()
+    Logger.warn(fn(errorTag))
+    BadRequest(s"""{"tag": "$errorTag"}""")
+  }
 
   private def notFoundResponse(rawApiContext: String, rawApiVersion: String) =
     NotFound(JsErrorResponse(ErrorCode.NOT_FOUND_CODE, s"Fields definition not found for ($rawApiContext, $rawApiVersion)"))
@@ -40,12 +47,10 @@ class FieldsDefinitionController @Inject() (cc: ControllerComponents, service: F
     Try(request.body.validate[FieldsDefinitionRequest]) match {
       case Success(JsSuccess(payload, _)) => Ok("")
       case Success(JsError(errs)) => {
-        Logger.error(s"A JSON error occurred: ${Json.prettyPrint(JsError.toJson(errs))}")
-        BadRequest("")
+        badRequestWithTag( (tag:UUID) => s"A JSON error occurred: [${tag.toString}] ${Json.prettyPrint(JsError.toJson(errs))}")
       }
       case Failure(e) => {
-        Logger.error(s"An error occurred during JSON validation: ${e.getMessage}")
-        BadRequest("")
+        badRequestWithTag{ (tag:UUID) => s"An error occurred during JSON validation: [${tag.toString}] ${e.getMessage}" }
       }
     }
   }

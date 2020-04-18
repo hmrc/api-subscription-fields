@@ -16,39 +16,14 @@
 
 package uk.gov.hmrc.apisubscriptionfields.model
 
-import java.util.UUID
 
 import cats.data.{NonEmptyList => NEL}
 import julienrf.json.derived
 import play.api.libs.json._
-import julienrf.json.derived.TypeTagSetting.ShortClassName
-import play.api.libs.json.Reads._
 import play.api.libs.functional.syntax._
-import uk.gov.hmrc.apisubscriptionfields.model.FieldDefinitionType.FieldDefinitionType
+import julienrf.json.derived.TypeTagSetting.ShortClassName
 import Types._
-import play.api.Logger
-
-trait UUIDJsonFormatter {
-  import scala.util.{Try,Success,Failure}
-  implicit val UUIDjsonFormat = new Format[UUID] {
-    def writes(s: UUID) = JsString(s.toString)
-
-    def reads(json: JsValue) = json match {
-      case JsNull          => JsError("No UUID found")
-      case JsString(value) => Try(UUID.fromString(value)) match {
-        case Success(uuid) => JsSuccess(uuid)
-        case Failure(ex) => {
-          Logger.warn("UUID unmarshalling failed", ex)
-          JsError("UUID failed to create")
-        }
-      }
-    }
-  }
-}
-
-trait SharedJsonFormatters extends UUIDJsonFormatter {
-  implicit val SubscriptionFieldsIdjsonFormat = Json.valueFormat[SubscriptionFieldsId]
-}
+import uk.gov.hmrc.apisubscriptionfields.model.FieldDefinitionType.FieldDefinitionType
 
 trait NonEmptyListFormatters {
 
@@ -67,7 +42,10 @@ trait NonEmptyListFormatters {
       .contramap(_.toList)
 }
 
-trait JsonFormatters extends SharedJsonFormatters with NonEmptyListFormatters {
+trait JsonFormatters extends NonEmptyListFormatters {
+  // import play.api.data.format.Formats.uuidFormat
+  implicit val SubscriptionFieldsIdjsonFormat = Json.valueFormat[SubscriptionFieldsId]
+
   import be.venneborg.refined.play.RefinedJsonFormats._
   import eu.timepit.refined.api.Refined
   import eu.timepit.refined.auto._

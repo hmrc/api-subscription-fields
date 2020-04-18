@@ -83,6 +83,9 @@ lazy val microservice = Project(appName, file("."))
     inConfig(AcceptanceTest)(BloopDefaults.configSettings)
   )
   .settings(
+    routesImport += "uk.gov.hmrc.apisubscriptionfields.controller.Binders._"
+  )
+  .settings(
     libraryDependencies ++= appDependencies,
     dependencyOverrides ++= overrides,
     evictionWarningOptions in update := EvictionWarningOptions.default.withWarnScalaVersionEviction(false)

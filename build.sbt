@@ -83,7 +83,10 @@ lazy val microservice = Project(appName, file("."))
     inConfig(AcceptanceTest)(BloopDefaults.configSettings)
   )
   .settings(
-    routesImport += "uk.gov.hmrc.apisubscriptionfields.controller.Binders._"
+    routesImport ++= Seq(
+      "uk.gov.hmrc.apisubscriptionfields.model._",
+      "uk.gov.hmrc.apisubscriptionfields.controller.Binders._"
+    )
   )
   .settings(
     libraryDependencies ++= appDependencies,

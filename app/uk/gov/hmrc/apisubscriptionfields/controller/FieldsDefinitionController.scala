@@ -40,8 +40,8 @@ class FieldsDefinitionController @Inject() (cc: ControllerComponents, service: F
     BadRequest(s"""{"tag": "$errorTag"}""")
   }
 
-  private def notFoundResponse(apiContext: ApiContext, rawApiVersion: String) =
-    NotFound(JsErrorResponse(ErrorCode.NOT_FOUND_CODE, s"Fields definition not found for (${apiContext.value}, $rawApiVersion)"))
+  private def notFoundResponse(apiContext: ApiContext, apiVersion: ApiVersion) =
+    NotFound(JsErrorResponse(ErrorCode.NOT_FOUND_CODE, s"Fields definition not found for (${apiContext.value}, ${apiVersion.value})"))
 
   def validateFieldsDefinition(): Action[JsValue] = Action(parse.json) { request =>
     Try(request.body.validate[FieldsDefinitionRequest]) match {
@@ -55,9 +55,9 @@ class FieldsDefinitionController @Inject() (cc: ControllerComponents, service: F
     }
   }
 
-  def upsertFieldsDefinition(apiContext: ApiContext, rawApiVersion: String): Action[JsValue] = Action.async(parse.json) { implicit request =>
+  def upsertFieldsDefinition(apiContext: ApiContext, apiVersion: ApiVersion): Action[JsValue] = Action.async(parse.json) { implicit request =>
     withJsonBody[FieldsDefinitionRequest] { payload =>
-      service.upsert(apiContext, ApiVersion(rawApiVersion), payload.fieldDefinitions) map {
+      service.upsert(apiContext, apiVersion, payload.fieldDefinitions) map {
         case (response, true) => Created(Json.toJson(response))
         case (response, false) => Ok(Json.toJson(response))
       }
@@ -68,22 +68,22 @@ class FieldsDefinitionController @Inject() (cc: ControllerComponents, service: F
     service.getAll map (defs => Ok(Json.toJson(defs))) recover recovery
   }
 
-  def getFieldsDefinition(apiContext: ApiContext, rawApiVersion: String): Action[AnyContent] = Action.async { _ =>
-    val eventualMaybeResponse = service.get(apiContext, ApiVersion(rawApiVersion))
-    asActionResult(eventualMaybeResponse, apiContext, rawApiVersion)
+  def getFieldsDefinition(apiContext: ApiContext, apiVersion: ApiVersion): Action[AnyContent] = Action.async { _ =>
+    val eventualMaybeResponse = service.get(apiContext, apiVersion)
+    asActionResult(eventualMaybeResponse, apiContext, apiVersion)
   }
 
-  def deleteFieldsDefinition(apiContext: ApiContext, rawApiVersion: String): Action[AnyContent] = Action.async { _ =>
-    service.delete(apiContext, ApiVersion(rawApiVersion)) map {
+  def deleteFieldsDefinition(apiContext: ApiContext, apiVersion: ApiVersion): Action[AnyContent] = Action.async { _ =>
+    service.delete(apiContext, apiVersion) map {
       case true => NoContent
-      case false => notFoundResponse(apiContext, rawApiVersion)
+      case false => notFoundResponse(apiContext, apiVersion)
     } recover recovery
   }
 
-  private def asActionResult(eventualMaybeResponse: Future[Option[FieldsDefinitionResponse]], apiContext: ApiContext, rawApiVersion: String) = {
+  private def asActionResult(eventualMaybeResponse: Future[Option[FieldsDefinitionResponse]], apiContext: ApiContext, apiVersion: ApiVersion) = {
     eventualMaybeResponse map {
       case Some(subscriptionFields) => Ok(Json.toJson(subscriptionFields))
-      case None => notFoundResponse(apiContext, rawApiVersion)
+      case None => notFoundResponse(apiContext, apiVersion)
     } recover recovery
   }
 

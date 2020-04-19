@@ -36,7 +36,7 @@ class FieldsDefinitionControllerDeleteSpec extends UnitSpec with FieldsDefinitio
     "return NO_CONTENT (204) when successfully deleted from repo" in {
       (mockFieldsDefinitionService.delete _).expects(FakeContext, FakeVersion).returns(Future.successful(true))
 
-      val result = await(controller.deleteFieldsDefinition(FakeContext, fakeRawVersion)(FakeRequest()))
+      val result = await(controller.deleteFieldsDefinition(FakeContext, FakeVersion)(FakeRequest()))
 
       status(result) shouldBe NO_CONTENT
     }
@@ -44,11 +44,11 @@ class FieldsDefinitionControllerDeleteSpec extends UnitSpec with FieldsDefinitio
     "return NOT_FOUND (404) when failed to delete from repo" in {
       (mockFieldsDefinitionService.delete _).expects(FakeContext, FakeVersion).returns(Future.successful(false))
 
-      val result = await(controller.deleteFieldsDefinition(FakeContext, fakeRawVersion)(FakeRequest()))
+      val result = await(controller.deleteFieldsDefinition(FakeContext, FakeVersion)(FakeRequest()))
 
       status(result) shouldBe NOT_FOUND
       (contentAsJson(result) \ "code") shouldBe JsDefined(JsString("NOT_FOUND"))
-      (contentAsJson(result) \ "message") shouldBe JsDefined(JsString(s"Fields definition not found for (${FakeContext.value}, $fakeRawVersion)"))
+      (contentAsJson(result) \ "message") shouldBe JsDefined(JsString(s"Fields definition not found for (${FakeContext.value}, ${FakeVersion.value})"))
     }
   }
 

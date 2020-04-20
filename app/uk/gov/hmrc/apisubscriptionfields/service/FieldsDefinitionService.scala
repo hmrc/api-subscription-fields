@@ -23,6 +23,7 @@ import uk.gov.hmrc.apisubscriptionfields.repository.{FieldsDefinition, FieldsDef
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import cats.data.NonEmptyList
+import Types._
 
 @Singleton
 class FieldsDefinitionService @Inject() (repository: FieldsDefinitionRepository) {

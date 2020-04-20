@@ -38,7 +38,7 @@ class FieldsDefinitionControllerGetSpec extends UnitSpec with FieldsDefinitionTe
       |  "apiVersion": "1.0",
       |  "fieldDefinitions": [
       |    {
-      |      "name": "callback-url",
+      |      "name": "callbackUrl",
       |      "description": "Callback URL",
       |      "hint": "Description Hint",
       |      "type": "URL",
@@ -79,7 +79,7 @@ class FieldsDefinitionControllerGetSpec extends UnitSpec with FieldsDefinitionTe
       |      "apiVersion": "1.0",
       |      "fieldDefinitions": [
       |        {
-      |          "name": "callback-url",
+      |          "name": "callbackUrl",
       |          "description": "Callback URL",
       |          "hint": "Description Hint",
       |          "type": "URL",

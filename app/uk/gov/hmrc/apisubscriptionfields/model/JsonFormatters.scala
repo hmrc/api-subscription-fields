@@ -20,11 +20,12 @@ import java.util.UUID
 
 import cats.data.{NonEmptyList => NEL}
 import julienrf.json.derived
-import julienrf.json.derived.TypeTagSetting
 import play.api.libs.json._
+import julienrf.json.derived.TypeTagSetting.ShortClassName
 import play.api.libs.json.Reads._
 import play.api.libs.functional.syntax._
 import uk.gov.hmrc.apisubscriptionfields.model.FieldDefinitionType.FieldDefinitionType
+import Types._
 
 trait SharedJsonFormatters {
   implicit val SubscriptionFieldsIdJF = new Format[SubscriptionFieldsId] {
@@ -56,15 +57,22 @@ trait NonEmptyListFormatters {
 
 trait JsonFormatters extends SharedJsonFormatters with NonEmptyListFormatters {
   import be.venneborg.refined.play.RefinedJsonFormats._
+  import eu.timepit.refined.api.Refined
+  import eu.timepit.refined.auto._
+  import play.api.libs.json._
 
-  implicit val validationRuleFormat: OFormat[ValidationRule] = derived.withTypeTag.oformat(TypeTagSetting.ShortClassName)
+  implicit val FieldNameFormat = formatRefined[String, FieldNameRegex, Refined]
+
+  implicit val FieldsFormat: Format[Fields] = refinedMapFormat[String, FieldNameRegex, Refined]
+
+  implicit val validationRuleFormat: OFormat[ValidationRule] = derived.withTypeTag.oformat(ShortClassName)
 
   implicit val ValidationJF = Json.format[ValidationGroup]
 
   implicit val FieldDefinitionTypeReads = Reads.enumNameReads(FieldDefinitionType)
 
   val fieldDefinitionReads: Reads[FieldDefinition] = (
-    (JsPath \ "name").read[String] and
+    (JsPath \ "name").read[FieldName] and
       (JsPath \ "description").read[String] and
       ((JsPath \ "hint").read[String] or Reads.pure("")) and
       (JsPath \ "type").read[FieldDefinitionType] and
@@ -81,10 +89,12 @@ trait JsonFormatters extends SharedJsonFormatters with NonEmptyListFormatters {
   implicit val FieldsDefinitionResponseJF = Json.format[FieldsDefinitionResponse]
   implicit val BulkFieldsDefinitionsResponseJF = Json.format[BulkFieldsDefinitionsResponse]
   implicit val SubscriptionFieldsResponseJF = Json.format[SubscriptionFieldsResponse]
+  implicit val SubscriptionFieldsJF = Json.format[SubscriptionFields]
 
   implicit val BulkSubscriptionFieldsResponseJF = Json.format[BulkSubscriptionFieldsResponse]
 
-  implicit val SubsFieldValidationResponseJF: OFormat[SubsFieldValidationResponse] = derived.withTypeTag.oformat(TypeTagSetting.ShortClassName)
+
+  implicit val SubsFieldValidationResponseJF: OFormat[SubsFieldValidationResponse] = derived.withTypeTag.oformat(ShortClassName)
   implicit val InvalidSubsFieldValidationResponseJF = Json.format[InvalidSubsFieldValidationResponse]
 }
 

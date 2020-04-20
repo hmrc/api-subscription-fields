@@ -24,8 +24,8 @@ import uk.gov.hmrc.apisubscriptionfields.repository._
 import uk.gov.hmrc.apisubscriptionfields.{FieldsDefinitionTestData, SubscriptionFieldsTestData}
 import uk.gov.hmrc.play.test.UnitSpec
 
-import scala.concurrent.Future
 import cats.data.NonEmptyList
+import scala.concurrent.Future
 
 class SubscriptionFieldsServiceSpec extends UnitSpec with SubscriptionFieldsTestData with FieldsDefinitionTestData with MockFactory {
 
@@ -125,24 +125,24 @@ class SubscriptionFieldsServiceSpec extends UnitSpec with SubscriptionFieldsTest
     "return false when updating an existing api subscription fields" in {
       (mockSubscriptionFieldsIdRepository saveAtomic _) expects FakeApiSubscription returns ((FakeApiSubscription, false))
 
-      val result = await(service.upsert(FakeClientId, FakeContext, FakeVersion, subscriptionFields))
+      val result = await(service.upsert(FakeClientId, FakeContext, FakeVersion, FakeSubscriptionFields))
 
-      result shouldBe ((SubscriptionFieldsResponse(fakeRawClientId, fakeRawContext, fakeRawVersion, FakeFieldsId, subscriptionFields), false))
+      result shouldBe ((SubscriptionFieldsResponse(fakeRawClientId, fakeRawContext, fakeRawVersion, FakeFieldsId, FakeSubscriptionFields), false))
     }
 
     "return true when creating a new api subscription fields" in {
       (mockSubscriptionFieldsIdRepository saveAtomic _) expects FakeApiSubscription returns ((FakeApiSubscription, true))
 
-      val result = await(service.upsert(FakeClientId, FakeContext, FakeVersion, subscriptionFields))
+      val result = await(service.upsert(FakeClientId, FakeContext, FakeVersion, FakeSubscriptionFields))
 
-      result shouldBe ((SubscriptionFieldsResponse(fakeRawClientId, fakeRawContext, fakeRawVersion, FakeFieldsId, subscriptionFields), true))
+      result shouldBe ((SubscriptionFieldsResponse(fakeRawClientId, fakeRawContext, fakeRawVersion, FakeFieldsId, FakeSubscriptionFields), true))
     }
 
     "propagate the error" in {
       (mockSubscriptionFieldsIdRepository saveAtomic _) expects FakeApiSubscription returns Future.failed(emulatedFailure)
 
       val caught = intercept[EmulatedFailure] {
-        await(service.upsert(FakeClientId, FakeContext, FakeVersion, subscriptionFields))
+        await(service.upsert(FakeClientId, FakeContext, FakeVersion, FakeSubscriptionFields))
       }
 
       caught shouldBe emulatedFailure
@@ -183,12 +183,13 @@ class SubscriptionFieldsServiceSpec extends UnitSpec with SubscriptionFieldsTest
     }
   }
   "validate" should {
+    import eu.timepit.refined.auto._
     "returns ValidSubsFieldValidationResponse when fields are Valid " in {
       (mockFieldsDefinitionService get (_: ApiContext, _: ApiVersion))
         .expects(FakeContext, FakeVersion)
         .returns(Some(FakeFieldsDefinitionResponseWithRegex))
 
-      await(service.validate(FakeContext, FakeVersion, subscriptionFieldsMatchRegexValidation)) shouldBe ValidSubsFieldValidationResponse
+      await(service.validate(FakeContext, FakeVersion, SubscriptionFieldsMatchRegexValidation)) shouldBe ValidSubsFieldValidationResponse
     }
 
     "returns InvalidSubsFieldValidationResponse when fields are Invalid " in {
@@ -196,7 +197,7 @@ class SubscriptionFieldsServiceSpec extends UnitSpec with SubscriptionFieldsTest
         .expects(FakeContext, FakeVersion)
         .returns(Some(FakeFieldsDefinitionResponseWithRegex))
 
-      await(service.validate(FakeContext, FakeVersion, subscriptionFieldsDoNotMatchRegexValidation)) shouldBe FakeInvalidSubsFieldValidationResponse2
+      await(service.validate(FakeContext, FakeVersion, SubscriptionFieldsDoNotMatchRegexValidation)) shouldBe FakeInvalidSubsFieldValidationResponse2
     }
   }
 

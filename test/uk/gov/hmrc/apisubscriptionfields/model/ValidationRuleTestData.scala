@@ -17,6 +17,7 @@
 package uk.gov.hmrc.apisubscriptionfields.model
 
 trait ValidationRuleTestData {
+  import eu.timepit.refined.auto._
 
   val lowerCaseValue = "bob"
   val mixedCaseValue = "Bob"
@@ -28,5 +29,6 @@ trait ValidationRuleTestData {
   val atLeastTenLongRule: ValidationRule = RegexValidationRule("""^.{10}.*$""")
 
   val validUrl = "https://www.example.com/here/and/there"
-  val invalidUrl = "www.example.com"
+  val invalidUrls = List("www.example.com", "ftp://example.com/abc")
+
 }

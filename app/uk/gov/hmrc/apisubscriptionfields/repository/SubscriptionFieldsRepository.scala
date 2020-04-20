@@ -26,9 +26,9 @@ import reactivemongo.bson.BSONObjectID
 import reactivemongo.play.json._
 import reactivemongo.play.json.collection.JSONCollection
 import uk.gov.hmrc.apisubscriptionfields.model._
+import Types.IsInsert
 import uk.gov.hmrc.mongo.ReactiveRepository
 import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
-
 import scala.concurrent.Future
 
 @ImplementedBy(classOf[SubscriptionFieldsMongoRepository])
@@ -48,14 +48,17 @@ trait SubscriptionFieldsRepository {
 
 @Singleton
 class SubscriptionFieldsMongoRepository @Inject()(mongoDbProvider: MongoDbProvider)
-  extends ReactiveRepository[SubscriptionFields, BSONObjectID]("subscriptionFields", mongoDbProvider.mongo,
-    MongoFormatters.SubscriptionFieldsJF, ReactiveMongoFormats.objectIdFormats)
+  extends ReactiveRepository[SubscriptionFields, BSONObjectID](
+    "subscriptionFields",
+    mongoDbProvider.mongo,
+    JsonFormatters.SubscriptionFieldsJF,
+    ReactiveMongoFormats.objectIdFormats
+  )
   with SubscriptionFieldsRepository
-  with MongoCrudHelper[SubscriptionFields] {
+  with MongoCrudHelper[SubscriptionFields]
+  with MongoFormatters {
 
   override val mongoCollection: JSONCollection = collection
-
-  private implicit val format = MongoFormatters.SubscriptionFieldsJF
 
   override def indexes = Seq(
     createCompoundIndex(

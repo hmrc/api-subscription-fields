@@ -68,6 +68,42 @@ trait FieldsDefinitionTestData extends TestData {
   final val FakeFieldsDefinitionWithRegex = FieldsDefinition(fakeRawContext, fakeRawVersion, FakeFieldsDefinitionsWithRegex)
   final val FakeFieldsDefinitionResponseWithRegex: FieldsDefinitionResponse = FieldsDefinitionResponse(fakeRawContext, fakeRawVersion, FakeFieldsDefinitionsWithRegex)
 
+  final val FakeValidRegexFieldsDefinitionRequest = FieldsDefinitionRequest(NonEmptyList.fromListUnsafe(List(FakeFieldDefinitionAlphnumericField, FakeFieldDefinitionPassword)))
+
+  final val jsonInvalidRegexFieldsDefinitionRequest =
+    """{
+      |  "fieldDefinitions" : [ {
+      |    "name" : "alphanumericField",
+      |    "description" : "an alphanumeric filed",
+      |    "hint" : "this is an alphanumeric value",
+      |    "type" : "STRING",
+      |    "shortDescription" : "an alphanumeric field",
+      |    "validation" : {
+      |      "errorMessage" : "Needs to be alpha numeric",
+      |      "rules" : [ {
+      |        "RegexValidationRule" : {
+      |          "regex" : "^[a-zA-Z0-9]+$"
+      |        }
+      |      } ]
+      |    }
+      |  }, {
+      |    "name" : "invalidRegexField",
+      |    "description" : "description",
+      |    "hint" : "this is your hint",
+      |    "type" : "String",
+      |    "shortDescription" : "short description",
+      |    "validation" : {
+      |      "errorMessage" : "An error message",
+      |      "rules" : [ {
+      |        "RegexValidationRule" : {
+      |          "regex" : "*"
+      |        }
+      |      } ]
+      |    }
+      |  } ]
+      |}""".stripMargin
+
+
   def createFieldsDefinition(apiContext: String = fakeRawContext, apiVersion: String = fakeRawVersion, fieldDefinitions: NonEmptyList[FieldDefinition] = FakeFieldsDefinitions) =
     FieldsDefinition(apiContext, apiVersion, fieldDefinitions)
 

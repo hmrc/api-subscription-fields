@@ -24,6 +24,7 @@ import play.api.libs.functional.syntax._
 import julienrf.json.derived.TypeTagSetting.ShortClassName
 import Types._
 import uk.gov.hmrc.apisubscriptionfields.model.FieldDefinitionType.FieldDefinitionType
+import Types._
 
 trait NonEmptyListFormatters {
 

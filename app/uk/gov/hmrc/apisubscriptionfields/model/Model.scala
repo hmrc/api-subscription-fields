@@ -39,7 +39,6 @@ case class RegexValidationRule(regex: RegexExpr) extends ValidationRule {
 }
 
 case object UrlValidationRule extends ValidationRule {
-
   def validate(value: FieldValue): Boolean = refineV[NonFtpUrl](value).isRight
 }
 

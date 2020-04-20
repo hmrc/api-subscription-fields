@@ -31,16 +31,15 @@ case class ApiVersion(value: String) extends AnyVal
 case class SubscriptionFieldsId(value: UUID) extends AnyVal
 
 sealed trait ValidationRule {
-  def validate(value: String): Boolean
+  def validate(value: FieldValue): Boolean
 }
 
 case class RegexValidationRule(regex: RegexExpr) extends ValidationRule {
-  def validate(value: String): Boolean = value.matches(regex.value)
+  def validate(value: FieldValue): Boolean = value.matches(regex.value)
 }
 
 case object UrlValidationRule extends ValidationRule {
-
-  def validate(value: String): Boolean = refineV[NonFtpUrl](value).isRight
+  def validate(value: FieldValue): Boolean = refineV[NonFtpUrl](value).isRight
 }
 
 case class ValidationGroup(errorMessage: String, rules: NEL[ValidationRule])

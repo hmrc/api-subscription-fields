@@ -47,7 +47,7 @@ class SubscriptionFieldDefinitionsUnhappySpec extends AcceptanceTestSpec
       status(resultFuture) shouldBe NOT_FOUND
 
       And("the response body contains error message")
-      contentAsJson(resultFuture) shouldBe JsErrorResponse(NOT_FOUND_CODE, s"Fields definition not found for ($fakeRawContext, unknown)")
+      contentAsJson(resultFuture) shouldBe JsErrorResponse(NOT_FOUND_CODE, s"Fields definition not found for (${FakeContext.value}, unknown)")
     }
 
     scenario("the API is called to PUT a fields definition with an invalid JSON payload") {

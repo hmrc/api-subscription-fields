@@ -18,25 +18,46 @@ package uk.gov.hmrc.apisubscriptionfields.controller
 
 import javax.inject.{Inject, Singleton}
 
-import play.api.libs.json.{JsValue, Json}
+import play.api.libs.json.{JsValue, Json, JsSuccess, JsError}
 import play.api.mvc._
 import uk.gov.hmrc.apisubscriptionfields.model._
 import uk.gov.hmrc.apisubscriptionfields.service.FieldsDefinitionService
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import scala.util.{Try,Success,Failure}
+import play.api.Logger
+import java.util.UUID
 
 @Singleton
 class FieldsDefinitionController @Inject() (cc: ControllerComponents, service: FieldsDefinitionService) extends CommonController {
 
   import JsonFormatters._
 
-  private def notFoundResponse(rawApiContext: String, rawApiVersion: String) =
-    NotFound(JsErrorResponse(ErrorCode.NOT_FOUND_CODE, s"Fields definition not found for ($rawApiContext, $rawApiVersion)"))
+  private def badRequestWithTag(fn: (UUID) => String): Result = {
+    val errorTag = java.util.UUID.randomUUID()
+    Logger.warn(fn(errorTag))
+    BadRequest(s"""{"tag": "$errorTag"}""")
+  }
 
-  def upsertFieldsDefinition(rawApiContext: String, rawApiVersion: String): Action[JsValue] = Action.async(parse.json) { implicit request =>
+  private def notFoundResponse(apiContext: ApiContext, apiVersion: ApiVersion) =
+    NotFound(JsErrorResponse(ErrorCode.NOT_FOUND_CODE, s"Fields definition not found for (${apiContext.value}, ${apiVersion.value})"))
+
+  def validateFieldsDefinition(): Action[JsValue] = Action(parse.json) { request =>
+    Try(request.body.validate[FieldsDefinitionRequest]) match {
+      case Success(JsSuccess(payload, _)) => Ok("")
+      case Success(JsError(errs)) => {
+        badRequestWithTag( (tag:UUID) => s"A JSON error occurred: [${tag.toString}] ${Json.prettyPrint(JsError.toJson(errs))}")
+      }
+      case Failure(e) => {
+        badRequestWithTag{ (tag:UUID) => s"An error occurred during JSON validation: [${tag.toString}] ${e.getMessage}" }
+      }
+    }
+  }
+
+  def upsertFieldsDefinition(apiContext: ApiContext, apiVersion: ApiVersion): Action[JsValue] = Action.async(parse.json) { implicit request =>
     withJsonBody[FieldsDefinitionRequest] { payload =>
-      service.upsert(ApiContext(rawApiContext), ApiVersion(rawApiVersion), payload.fieldDefinitions) map {
+      service.upsert(apiContext, apiVersion, payload.fieldDefinitions) map {
         case (response, true) => Created(Json.toJson(response))
         case (response, false) => Ok(Json.toJson(response))
       }
@@ -47,22 +68,22 @@ class FieldsDefinitionController @Inject() (cc: ControllerComponents, service: F
     service.getAll map (defs => Ok(Json.toJson(defs))) recover recovery
   }
 
-  def getFieldsDefinition(rawApiContext: String, rawApiVersion: String): Action[AnyContent] = Action.async { _ =>
-    val eventualMaybeResponse = service.get(ApiContext(rawApiContext), ApiVersion(rawApiVersion))
-    asActionResult(eventualMaybeResponse, rawApiContext, rawApiVersion)
+  def getFieldsDefinition(apiContext: ApiContext, apiVersion: ApiVersion): Action[AnyContent] = Action.async { _ =>
+    val eventualMaybeResponse = service.get(apiContext, apiVersion)
+    asActionResult(eventualMaybeResponse, apiContext, apiVersion)
   }
 
-  def deleteFieldsDefinition(rawApiContext: String, rawApiVersion: String): Action[AnyContent] = Action.async { _ =>
-    service.delete(ApiContext(rawApiContext), ApiVersion(rawApiVersion)) map {
+  def deleteFieldsDefinition(apiContext: ApiContext, apiVersion: ApiVersion): Action[AnyContent] = Action.async { _ =>
+    service.delete(apiContext, apiVersion) map {
       case true => NoContent
-      case false => notFoundResponse(rawApiContext, rawApiVersion)
+      case false => notFoundResponse(apiContext, apiVersion)
     } recover recovery
   }
 
-  private def asActionResult(eventualMaybeResponse: Future[Option[FieldsDefinitionResponse]], rawApiContext: String, rawApiVersion: String) = {
+  private def asActionResult(eventualMaybeResponse: Future[Option[FieldsDefinitionResponse]], apiContext: ApiContext, apiVersion: ApiVersion) = {
     eventualMaybeResponse map {
       case Some(subscriptionFields) => Ok(Json.toJson(subscriptionFields))
-      case None => notFoundResponse(rawApiContext, rawApiVersion)
+      case None => notFoundResponse(apiContext, apiVersion)
     } recover recovery
   }
 

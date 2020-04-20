@@ -1,0 +1,51 @@
+/*
+ * Copyright 2020 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package uk.gov.hmrc.apisubscriptionfields.controller
+
+import play.api.mvc.PathBindable
+import uk.gov.hmrc.apisubscriptionfields.model.{ApiContext,ApiVersion, ClientId, SubscriptionFieldsId}
+import java.util.UUID
+
+object Binders {
+
+  implicit object apiContextPathBindable extends PathBindable.Parsing[ApiContext](
+    ApiContext.apply,
+    _.value,
+      (key: String, e: Exception) => "Cannot parse parameter %s as ApiContext: %s".format(key, e.getMessage)
+  )
+
+  implicit object apiVersionPathBindable extends PathBindable.Parsing[ApiVersion](
+    ApiVersion.apply,
+    _.value,
+      (key: String, e: Exception) => "Cannot parse parameter %s as ApiVersion: %s".format(key, e.getMessage)
+  )
+
+  implicit object clientIdPathBindable extends PathBindable.Parsing[ClientId](
+    ClientId.apply,
+    _.value,
+      (key: String, e: Exception) => "Cannot parse parameter %s as ClientId: %s".format(key, e.getMessage)
+  )
+
+  implicit object subscriptionFieldsIdPathBindable extends PathBindable.Parsing[SubscriptionFieldsId](
+    (s) => SubscriptionFieldsId(UUID.fromString(s)),
+    _.value.toString,
+      (key: String, e: Exception) => "Cannot parse parameter %s as SubscriptionFieldsId: %s".format(key, e.getMessage)
+  )
+}
+
+
+

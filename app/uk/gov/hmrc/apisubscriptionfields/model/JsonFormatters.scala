@@ -16,27 +16,15 @@
 
 package uk.gov.hmrc.apisubscriptionfields.model
 
-import java.util.UUID
 
 import cats.data.{NonEmptyList => NEL}
 import julienrf.json.derived
 import play.api.libs.json._
-import julienrf.json.derived.TypeTagSetting.ShortClassName
-import play.api.libs.json.Reads._
 import play.api.libs.functional.syntax._
+import julienrf.json.derived.TypeTagSetting.ShortClassName
+import Types._
 import uk.gov.hmrc.apisubscriptionfields.model.FieldDefinitionType.FieldDefinitionType
 import Types._
-
-trait SharedJsonFormatters {
-  implicit val SubscriptionFieldsIdJF = new Format[SubscriptionFieldsId] {
-    def writes(s: SubscriptionFieldsId) = JsString(s.value.toString)
-
-    def reads(json: JsValue) = json match {
-      case JsNull => JsError()
-      case _      => JsSuccess(SubscriptionFieldsId(json.as[UUID]))
-    }
-  }
-}
 
 trait NonEmptyListFormatters {
 
@@ -55,7 +43,9 @@ trait NonEmptyListFormatters {
       .contramap(_.toList)
 }
 
-trait JsonFormatters extends SharedJsonFormatters with NonEmptyListFormatters {
+trait JsonFormatters extends NonEmptyListFormatters {
+  implicit val SubscriptionFieldsIdjsonFormat = Json.valueFormat[SubscriptionFieldsId]
+
   import be.venneborg.refined.play.RefinedJsonFormats._
   import eu.timepit.refined.api.Refined
   import eu.timepit.refined.auto._

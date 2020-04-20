@@ -154,7 +154,7 @@ class FieldsDefinitionControllerGetSpec extends UnitSpec with FieldsDefinitionTe
     "return OK when the expected record exists in the repo" in {
       mockFieldsDefinitionService.get _ expects (FakeContext, FakeVersion) returns Future.successful(Some(responseModel))
 
-      val result = await(controller.getFieldsDefinition(fakeRawContext, fakeRawVersion)(FakeRequest()))
+      val result = await(controller.getFieldsDefinition(FakeContext, FakeVersion)(FakeRequest()))
 
       status(result) shouldBe OK
       contentAsJson(result) shouldBe responseJson
@@ -163,7 +163,7 @@ class FieldsDefinitionControllerGetSpec extends UnitSpec with FieldsDefinitionTe
     "return NOT_FOUND when entity does not exist in the repo" in {
       mockFieldsDefinitionService.get _ expects (FakeContext, FakeVersion) returns Future.successful(None)
 
-      val result = await(controller.getFieldsDefinition(fakeRawContext, fakeRawVersion)(FakeRequest()))
+      val result = await(controller.getFieldsDefinition(FakeContext, FakeVersion)(FakeRequest()))
 
       status(result) shouldBe NOT_FOUND
       (contentAsJson(result) \ "code") shouldBe JsDefined(JsString("NOT_FOUND"))
@@ -173,7 +173,7 @@ class FieldsDefinitionControllerGetSpec extends UnitSpec with FieldsDefinitionTe
     "return INTERNAL_SERVER_ERROR when service throws exception" in {
       mockFieldsDefinitionService.get _ expects (FakeContext, FakeVersion) returns Future.failed(emulatedFailure)
 
-      val result = await(controller.getFieldsDefinition(fakeRawContext, fakeRawVersion)(FakeRequest()))
+      val result = await(controller.getFieldsDefinition(FakeContext, FakeVersion)(FakeRequest()))
 
       status(result) shouldBe INTERNAL_SERVER_ERROR
       (contentAsJson(result) \ "code") shouldBe JsDefined(JsString("UNKNOWN_ERROR"))

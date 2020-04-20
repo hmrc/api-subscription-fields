@@ -25,51 +25,38 @@ import uk.gov.hmrc.apisubscriptionfields.FieldsDefinitionTestData
 import uk.gov.hmrc.apisubscriptionfields.model.{FieldsDefinitionRequest, JsonFormatters}
 import uk.gov.hmrc.apisubscriptionfields.service.FieldsDefinitionService
 import uk.gov.hmrc.play.test.UnitSpec
-
 import scala.concurrent.Future
 
-class FieldsDefinitionControllerPutSpec extends UnitSpec
-  with FieldsDefinitionTestData
-  with MockFactory
-  with JsonFormatters
-  with StubControllerComponentsFactory {
+class FieldsDefinitionControllerPostSpec extends UnitSpec
+with FieldsDefinitionTestData
+with MockFactory
+with JsonFormatters
+with StubControllerComponentsFactory {
 
-  private val mockFieldsDefinitionService = mock[FieldsDefinitionService]
-  private val controller = new FieldsDefinitionController(stubControllerComponents(), mockFieldsDefinitionService)
+  private val mockFieldDefintionService = mock[FieldsDefinitionService]
+  private val controller = new FieldsDefinitionController(stubControllerComponents(), mockFieldDefintionService)
 
-  "PUT /definition/context/:apiContext/version/:apiVersion" should {
-    "return CREATED when created in the repo" in {
-      (mockFieldsDefinitionService.upsert _).
-        expects(FakeContext, FakeVersion, FakeFieldsDefinitions).
-        returns(Future.successful((FakeFieldsDefinitionResponse, true)))
+  "validateFieldsDefinition" should {
+    "return OK when FieldDefinitionsRequest is valid" in {
 
-      val json = mkJson(FieldsDefinitionRequest(FakeFieldsDefinitions))
-      testSubmitResult(mkRequest(json)) { result =>
-        status(result) shouldBe CREATED
-      }
-    }
-
-    "return OK when updated in the repo" in {
-      (mockFieldsDefinitionService.upsert _).
-        expects(FakeContext, FakeVersion, FakeFieldsDefinitions).
-        returns(Future.successful((FakeFieldsDefinitionResponse, false)))
-
-      val json = mkJson(FieldsDefinitionRequest(FakeFieldsDefinitions))
+      val json = mkJson(FakeValidRegexFieldsDefinitionRequest)
+      println(Json.prettyPrint(json))
       testSubmitResult(mkRequest(json)) { result =>
         status(result) shouldBe OK
       }
     }
 
-    "error when request is invalid" in {
-      val json = Json.parse("{}")
+    "return BadRequest when FieldDefinitionsRequest is invalid" in {
+
+      val json = Json.parse(jsonInvalidRegexFieldsDefinitionRequest)
       testSubmitResult(mkRequest(json)) { result =>
-        status(result) shouldBe UNPROCESSABLE_ENTITY
+        status(result) shouldBe BAD_REQUEST
       }
     }
   }
 
   private def testSubmitResult(request: Request[JsValue])(test: Future[Result] => Unit) {
-    val action: Action[JsValue] = controller.upsertFieldsDefinition(FakeContext, FakeVersion)
+    val action: Action[JsValue] = controller.validateFieldsDefinition()
     val result: Future[Result] = action.apply(request)
     test(result)
   }
@@ -79,4 +66,5 @@ class FieldsDefinitionControllerPutSpec extends UnitSpec
       .withJsonBody(jsonBody).map(r => r.json)
 
   private def mkJson(model: FieldsDefinitionRequest) = Json.toJson(model)(Json.writes[FieldsDefinitionRequest])
+
 }

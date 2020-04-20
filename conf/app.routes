@@ -5,7 +5,7 @@ GET           /definition/context/:apiContext/version/:apiVersion               
 GET           /definition                                                              uk.gov.hmrc.apisubscriptionfields.controller.FieldsDefinitionController.getAllFieldsDefinitions
 DELETE        /definition/context/:apiContext/version/:apiVersion                      uk.gov.hmrc.apisubscriptionfields.controller.FieldsDefinitionController.deleteFieldsDefinition(apiContext: ApiContext, apiVersion: ApiVersion)
 
-PUT           /validate                                                                uk.gov.hmrc.apisubscriptionfields.controller.FieldsDefinitionController.validateFieldsDefinition()
+POST          /validate                                                                uk.gov.hmrc.apisubscriptionfields.controller.FieldsDefinitionController.validateFieldsDefinition()
 
 PUT           /field/application/:clientId/context/:apiContext/version/:apiVersion     uk.gov.hmrc.apisubscriptionfields.controller.SubscriptionFieldsController.upsertSubscriptionFields(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion)
 GET           /field/application/:clientId/context/:apiContext/version/:apiVersion     uk.gov.hmrc.apisubscriptionfields.controller.SubscriptionFieldsController.getSubscriptionFields(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion)

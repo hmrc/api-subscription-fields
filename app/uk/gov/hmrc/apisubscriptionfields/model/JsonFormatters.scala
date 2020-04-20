@@ -44,7 +44,6 @@ trait NonEmptyListFormatters {
 }
 
 trait JsonFormatters extends NonEmptyListFormatters {
-  // import play.api.data.format.Formats.uuidFormat
   implicit val SubscriptionFieldsIdjsonFormat = Json.valueFormat[SubscriptionFieldsId]
 
   import be.venneborg.refined.play.RefinedJsonFormats._

@@ -20,7 +20,7 @@ import org.scalamock.scalatest.MockFactory
 import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach}
 import reactivemongo.api.DB
 import reactivemongo.bson.BSONDocument
-import uk.gov.hmrc.apisubscriptionfields.model.{ApiContext, ApiVersion, JsonFormatters}
+import uk.gov.hmrc.apisubscriptionfields.model.{ApiContext, ApiVersion, FieldsDefinition, JsonFormatters}
 import uk.gov.hmrc.apisubscriptionfields.FieldsDefinitionTestData
 import uk.gov.hmrc.mongo.MongoSpecSupport
 import uk.gov.hmrc.play.test.UnitSpec
@@ -31,7 +31,6 @@ class FieldsDefinitionRepositorySpec extends UnitSpec
   with BeforeAndAfterAll
   with BeforeAndAfterEach
   with MongoSpecSupport
-  with MongoFormatters
   with JsonFormatters
   with FieldsDefinitionTestData
   with MockFactory { self =>

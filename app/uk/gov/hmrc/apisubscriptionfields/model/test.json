@@ -1,0 +1,10 @@
+"access": {
+    "devhubAccessLevels": {
+      "readWrite" : "NoOne",
+      "readOnly": "Admin"
+    }
+    "gateKeeperAccessLevels": {
+      "readWrite" : "SuperUser",
+      "readOnly": "User"
+    }
+}

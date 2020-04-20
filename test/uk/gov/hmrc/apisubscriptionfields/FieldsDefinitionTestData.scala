@@ -21,7 +21,6 @@ import java.util.UUID
 import uk.gov.hmrc.apisubscriptionfields.model._
 import Types._
 import cats.data.NonEmptyList
-import uk.gov.hmrc.apisubscriptionfields.repository.FieldsDefinition
 import eu.timepit.refined.api.Refined
 
 trait FieldsDefinitionTestData extends TestData {

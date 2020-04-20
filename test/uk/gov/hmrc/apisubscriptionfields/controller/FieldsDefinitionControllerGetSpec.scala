@@ -26,6 +26,7 @@ import uk.gov.hmrc.apisubscriptionfields.service.FieldsDefinitionService
 import uk.gov.hmrc.play.test.UnitSpec
 
 import scala.concurrent.Future
+import scala.concurrent.ExecutionContext.Implicits.global
 
 class FieldsDefinitionControllerGetSpec extends UnitSpec with FieldsDefinitionTestData with MockFactory with JsonFormatters with StubControllerComponentsFactory {
 

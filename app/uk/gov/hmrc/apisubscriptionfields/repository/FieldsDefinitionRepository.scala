@@ -26,6 +26,7 @@ import uk.gov.hmrc.mongo.ReactiveRepository
 import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
 import uk.gov.hmrc.apisubscriptionfields.model._
 import Types._
+import uk.gov.hmrc.apisubscriptionfields.model.JsonFormatters.FieldsDefinitionJF
 
 import scala.concurrent.Future
 
@@ -35,6 +36,7 @@ trait FieldsDefinitionRepository {
   def save(fieldsDefinition: FieldsDefinition): Future[(FieldsDefinition, IsInsert)]
 
   def fetch(apiContext: ApiContext, apiVersion: ApiVersion): Future[Option[FieldsDefinition]]
+
   def fetchAll(): Future[List[FieldsDefinition]]
 
   def delete(apiContext: ApiContext, apiVersion: ApiVersion): Future[Boolean]
@@ -42,12 +44,11 @@ trait FieldsDefinitionRepository {
 
 @Singleton
 class FieldsDefinitionMongoRepository @Inject() (mongoDbProvider: MongoDbProvider)
-    extends ReactiveRepository[FieldsDefinition, BSONObjectID]("fieldsDefinitions", mongoDbProvider.mongo, MongoFormatters.FieldsDefinitionJF, ReactiveMongoFormats.objectIdFormats)
+    extends ReactiveRepository[FieldsDefinition, BSONObjectID]("fieldsDefinitions", mongoDbProvider.mongo, JsonFormatters.FieldsDefinitionJF, ReactiveMongoFormats.objectIdFormats)
     with FieldsDefinitionRepository
     with MongoCrudHelper[FieldsDefinition] {
 
   override val mongoCollection: JSONCollection = collection
-  private implicit val format = MongoFormatters.FieldsDefinitionJF
 
   override def indexes = Seq(
     createCompoundIndex(

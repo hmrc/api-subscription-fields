@@ -30,6 +30,7 @@ case class ApiVersion(value: String) extends AnyVal
 
 case class SubscriptionFieldsId(value: UUID) extends AnyVal
 
+
 sealed trait ValidationRule {
   def validate(value: FieldValue): Boolean
 }
@@ -54,6 +55,15 @@ object FieldDefinitionType extends Enumeration {
   val STRING = Value("STRING")
 }
 
-case class FieldDefinition(name: FieldName, description: String, hint: String = "", `type`: FieldDefinitionType, shortDescription: String, validation: Option[ValidationGroup] = None)
+case class FieldDefinition(
+  name: FieldName,
+  description: String,
+  hint: String = "",
+  `type`: FieldDefinitionType,
+  shortDescription: String,
+  validation: Option[ValidationGroup] = None,
+  access: Option[AccessLevels] = None)
+
+case class FieldsDefinition(apiContext: String, apiVersion: String, fieldDefinitions: NEL[FieldDefinition])
 
 case class SubscriptionFields(clientId: String, apiContext: String, apiVersion: String, fieldsId: UUID, fields: Fields)

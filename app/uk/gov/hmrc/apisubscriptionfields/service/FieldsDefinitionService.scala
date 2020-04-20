@@ -18,15 +18,14 @@ package uk.gov.hmrc.apisubscriptionfields.service
 
 import javax.inject.{Inject, Singleton}
 import uk.gov.hmrc.apisubscriptionfields.model._
-import uk.gov.hmrc.apisubscriptionfields.repository.{FieldsDefinition, FieldsDefinitionRepository}
-
-import scala.concurrent.ExecutionContext.Implicits.global
+import Types._
 import scala.concurrent.Future
 import cats.data.NonEmptyList
-import Types._
+import uk.gov.hmrc.apisubscriptionfields.repository.FieldsDefinitionRepository
+import scala.concurrent.ExecutionContext
 
 @Singleton
-class FieldsDefinitionService @Inject() (repository: FieldsDefinitionRepository) {
+class FieldsDefinitionService @Inject() (repository: FieldsDefinitionRepository)(implicit ec: ExecutionContext) {
 
   def upsert(apiContext: ApiContext, apiVersion: ApiVersion, fieldDefinitions: NonEmptyList[FieldDefinition]): Future[(FieldsDefinitionResponse, IsInsert)] = {
     val fieldsDefinition = FieldsDefinition(apiContext.value, apiVersion.value, fieldDefinitions)

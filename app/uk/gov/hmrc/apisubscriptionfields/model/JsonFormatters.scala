@@ -44,6 +44,8 @@ trait NonEmptyListFormatters {
 }
 
 trait JsonFormatters extends NonEmptyListFormatters {
+  val defaultTypeFormat = (__ \ "type").format[String]
+
   implicit val SubscriptionFieldsIdjsonFormat = Json.valueFormat[SubscriptionFieldsId]
 
   import be.venneborg.refined.play.RefinedJsonFormats._
@@ -55,7 +57,15 @@ trait JsonFormatters extends NonEmptyListFormatters {
 
   implicit val FieldsFormat: Format[Fields] = refinedMapFormat[String, FieldNameRegex, Refined]
 
-  implicit val validationRuleFormat: OFormat[ValidationRule] = derived.withTypeTag.oformat(ShortClassName)
+  implicit val ValidationRuleFormat: OFormat[ValidationRule] = derived.withTypeTag.oformat(ShortClassName)
+
+  implicit val GatekeeperLevelFormat: OFormat[GatekeeperLevel] = derived.flat.oformat[GatekeeperLevel](defaultTypeFormat)
+  implicit val GatekeeperAccessLevelsFormat: OFormat[GatekeeperAccessLevels] = Json.format[GatekeeperAccessLevels]
+
+  implicit val DevhubLevelFormat: OFormat[DevhubLevel] = derived.flat.oformat(defaultTypeFormat)
+  implicit val DevhubAccessLevelsFormat: OFormat[DevhubAccessLevels] = Json.format[DevhubAccessLevels]
+
+  implicit val AccessLevelsFormat: OFormat[AccessLevels] = Json.format[AccessLevels]
 
   implicit val ValidationJF = Json.format[ValidationGroup]
 
@@ -67,11 +77,14 @@ trait JsonFormatters extends NonEmptyListFormatters {
       ((JsPath \ "hint").read[String] or Reads.pure("")) and
       (JsPath \ "type").read[FieldDefinitionType] and
       ((JsPath \ "shortDescription").read[String] or Reads.pure("")) and
-      (JsPath \ "validation").readNullable[ValidationGroup]
+      (JsPath \ "validation").readNullable[ValidationGroup] and
+      (JsPath \ "access").readNullable[AccessLevels]
   )(FieldDefinition.apply _)
-  val fieldDefinitionWrites = Json.writes[FieldDefinition]
 
+  val fieldDefinitionWrites = Json.writes[FieldDefinition]
   implicit val FieldDefinitionJF = Format(fieldDefinitionReads, fieldDefinitionWrites)
+
+  implicit val FieldsDefinitionJF: OFormat[FieldsDefinition] = Json.format[FieldsDefinition]
 
   implicit val FieldsDefinitionRequestJF = Json.format[FieldsDefinitionRequest]
   implicit val SubscriptionFieldsRequestJF = Json.format[SubscriptionFieldsRequest]

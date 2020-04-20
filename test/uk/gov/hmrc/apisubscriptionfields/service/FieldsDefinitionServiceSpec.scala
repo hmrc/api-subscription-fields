@@ -18,12 +18,13 @@ package uk.gov.hmrc.apisubscriptionfields.service
 
 import org.scalamock.scalatest.MockFactory
 import uk.gov.hmrc.apisubscriptionfields.FieldsDefinitionTestData
-import uk.gov.hmrc.apisubscriptionfields.model.{ApiContext, ApiVersion, BulkFieldsDefinitionsResponse, FieldsDefinitionResponse}
-import uk.gov.hmrc.apisubscriptionfields.repository.{FieldsDefinition, FieldsDefinitionRepository}
+import uk.gov.hmrc.apisubscriptionfields.model.{ApiContext, ApiVersion, FieldsDefinition, BulkFieldsDefinitionsResponse, FieldsDefinitionResponse}
+import uk.gov.hmrc.apisubscriptionfields.repository.FieldsDefinitionRepository
 import uk.gov.hmrc.play.test.UnitSpec
 
 import scala.concurrent.Future
 import cats.data.NonEmptyList
+import scala.concurrent.ExecutionContext.Implicits.global
 
 class FieldsDefinitionServiceSpec extends UnitSpec with FieldsDefinitionTestData with MockFactory {
 

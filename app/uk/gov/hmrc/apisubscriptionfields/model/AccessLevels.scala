@@ -43,7 +43,4 @@ object DevhubAccessLevels {
   final val Default = DevhubAccessLevels()
 }
 
-case class AccessLevels(devhub: DevhubAccessLevels = DevhubAccessLevels.Default, gatekeeper: GatekeeperAccessLevels = GatekeeperAccessLevels.Default)
-object AccessLevels {
-  final val Default = AccessLevels()
-}
+case class AccessLevels(devhub: Option[DevhubAccessLevels] = None, gatekeeper: Option[GatekeeperAccessLevels] = None)

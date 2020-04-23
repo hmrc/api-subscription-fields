@@ -16,22 +16,40 @@
 
 package uk.gov.hmrc.apisubscriptionfields.model
 
+
 sealed trait DevhubAccessRequirement
 object DevhubAccessRequirement {
    final val Default: DevhubAccessRequirement = DevhubAccessLevel.Developer
 
    case object NoOne extends DevhubAccessRequirement
+
+   private[model] def score(dl: DevhubAccessRequirement): Int = dl match {
+    case DevhubAccessRequirement.NoOne => 3
+    case DevhubAccessLevel.Admininstator => 2
+    case DevhubAccessLevel.Developer => 1
+  }
+
 }
 
-case class DevhubAccessRequirements(
-    readOnly: DevhubAccessRequirement = DevhubAccessRequirement.Default,
-    readWrite: DevhubAccessRequirement = DevhubAccessRequirement.Default) {
-  def satisfiesRead(dal: DevhubAccessLevel): Boolean = dal.satisfiesRequirement(readOnly) || dal.satisfiesRequirement(readWrite)
+case class DevhubAccessRequirements private (
+    val readOnly: DevhubAccessRequirement,
+    val readWrite: DevhubAccessRequirement) {
+  def satisfiesRead(dal: DevhubAccessLevel): Boolean = dal.satisfiesRequirement(readOnly) // ReadWrite will be at least as strict.
   def satisfiesWrite(dal: DevhubAccessLevel): Boolean = dal.satisfiesRequirement(readWrite)
 }
 
 object DevhubAccessRequirements {
-  final val Default = DevhubAccessRequirements()
+  final val Default = new DevhubAccessRequirements(DevhubAccessRequirement.Default, DevhubAccessRequirement.Default)
+
+  // Do not allow greater restrictions on readOnly than on readWrite
+  // - it would make no sense to allow NoOne readOnly but everyone readWrite or developer readWrite and admin readOnly
+  //
+  def apply(readOnly: DevhubAccessRequirement, readWrite: DevhubAccessRequirement = DevhubAccessRequirement.Default): DevhubAccessRequirements = {
+    if(DevhubAccessRequirement.score(readOnly) > DevhubAccessRequirement.score(readWrite))
+      new DevhubAccessRequirements(readOnly, readOnly)
+    else
+      new DevhubAccessRequirements(readOnly, readWrite)
+  }
 }
 
 case class AccessRequirements(devhub: DevhubAccessRequirements)
@@ -47,11 +65,5 @@ object DevhubAccessLevel {
   case object Developer extends DevhubAccessLevel
   case object Admininstator extends DevhubAccessLevel
 
-  private def score(dl: DevhubAccessRequirement): Int = dl match {
-    case DevhubAccessRequirement.NoOne => 3
-    case Admininstator => 2
-    case Developer => 1
-  }
-
-  def satisfies(requirement: DevhubAccessRequirement)(actual: DevhubAccessLevel): Boolean = score(requirement) <= score(actual)
+  def satisfies(requirement: DevhubAccessRequirement)(actual: DevhubAccessLevel): Boolean = DevhubAccessRequirement.score(requirement) <= DevhubAccessRequirement.score(actual)
 }

@@ -109,9 +109,9 @@ class JsonFormatterSpec extends WordSpec with Matchers with JsonFormatters with 
     }
   }
 
-  "DevhubLevelRequirements" should {
+  "DevhubAccessRequirements" should {
     "marshall a default correctly" in {
-      val rq = DevhubAccessRequirements()
+      val rq = DevhubAccessRequirements.Default
 
       Json.stringify(Json.toJson(rq)) shouldBe "{}"
     }
@@ -119,11 +119,11 @@ class JsonFormatterSpec extends WordSpec with Matchers with JsonFormatters with 
     "marshall a readOnly option" in {
       val rq = DevhubAccessRequirements(readOnly = DevhubAccessLevel.Admininstator)
 
-      Json.stringify(Json.toJson(rq)) shouldBe """{"readOnly":"administrator"}"""
+      Json.stringify(Json.toJson(rq)) shouldBe """{"readOnly":"administrator","readWrite":"administrator"}"""
     }
 
     "marshall a readWrite option" in {
-      val rq = DevhubAccessRequirements(readWrite = DevhubAccessRequirement.NoOne)
+      val rq = DevhubAccessRequirements(readOnly = DevhubAccessRequirement.Default, readWrite = DevhubAccessRequirement.NoOne)
 
       Json.stringify(Json.toJson(rq)) shouldBe """{"readWrite":"noone"}"""
     }
@@ -159,9 +159,10 @@ class JsonFormatterSpec extends WordSpec with Matchers with JsonFormatters with 
     }
 
     "marshalling with some devhub requirements correctly" in {
-      val rq = AccessRequirements(devhub = DevhubAccessRequirements(readOnly = Admininstator))
+      // readOnly is set explicity, but readWrite will be given this greater restriction too.
+      val rq = AccessRequirements(devhub = DevhubAccessRequirements.apply(readOnly = Admininstator))
 
-      Json.stringify(Json.toJson(rq)) shouldBe """{"devhub":{"readOnly":"administrator"}}"""
+      Json.stringify(Json.toJson(rq)) shouldBe """{"devhub":{"readOnly":"administrator","readWrite":"administrator"}}"""
     }
 
     "unmarshall with default correctly" in {
@@ -175,11 +176,11 @@ class JsonFormatterSpec extends WordSpec with Matchers with JsonFormatters with 
 
   "FieldDefinition" should {
     "marshal json with non default access" in {
-      objectAsJsonString(FakeFieldDefinitionWithAccess) should include(""","access":{"devhub":{"readOnly":"administrator"}}""")
+      objectAsJsonString(FakeFieldDefinitionWithAccess) should include(""","access":{"devhub":{"readOnly":"administrator","readWrite":"administrator"}}""")
     }
 
     "marshal json without mention of default access" in {
-      objectAsJsonString(FakeFieldDefinitionWithAccess.copy(access = AccessRequirements.Default)) should not include(""""access":{"devhub":{"readOnly":"administrator"}}""")
+      objectAsJsonString(FakeFieldDefinitionWithAccess.copy(access = AccessRequirements.Default)) should not include(""""access":{"devhub":{"readOnly":"administrator", "readWrite":"administrator"}}""")
       objectAsJsonString(FakeFieldDefinitionWithAccess.copy(access = AccessRequirements.Default)) should not include(""""access"""")
     }
   }

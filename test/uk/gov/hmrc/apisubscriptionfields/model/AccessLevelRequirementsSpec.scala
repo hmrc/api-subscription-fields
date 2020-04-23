@@ -24,9 +24,9 @@ class AccessRequirementsSpec extends WordSpec with Matchers {
 
   private val allLevels: List[DevhubAccessLevel] = List(Developer, Admininstator)
 
-  "DevhubLevelRequirement" should {
+  "DevhubRequirement" should {
 
-    "DevhubLevelRequirement Developer" should {
+    "Developer" should {
       val requirement: DevhubAccessRequirement = Developer
 
       "allow all devhub levels to satisfy the requirement" in {
@@ -34,7 +34,7 @@ class AccessRequirementsSpec extends WordSpec with Matchers {
       }
     }
 
-    "DevhubLevelRequirement Admin" should {
+    "Admin" should {
       val requirement: DevhubAccessRequirement = Admininstator
 
       "allow only admin to satisfy the requirement" in {
@@ -46,12 +46,36 @@ class AccessRequirementsSpec extends WordSpec with Matchers {
       }
     }
 
-    "DevhubLevelRequirement NoOne" should {
+    "DevhubRequirement NoOne" should {
       val requirement: DevhubAccessRequirement = DevhubAccessRequirement.NoOne
 
       "not allow any devhub level to satisfy the requirement" in {
         allLevels.foreach(at => at.satisfiesRequirement(requirement) shouldBe false)
       }
     }
+  }
+
+  "DevhubAccessRequirements" should {
+    "should allow read when default" in {
+      val dar = DevhubAccessRequirements.Default
+
+      dar.satisfiesRead(Developer) shouldBe true
+      dar.satisfiesRead(Admininstator) shouldBe true
+    }
+
+    "should allow read when readOnly at Administrator" in {
+      val dar = DevhubAccessRequirements(readOnly = Admininstator)
+
+      dar.satisfiesRead(Developer) shouldBe false
+      dar.satisfiesRead(Admininstator) shouldBe true
+    }
+
+    "should allow read when readOnly at NoOne" in {
+      val dar = DevhubAccessRequirements(readOnly = DevhubAccessRequirement.NoOne)
+
+      dar.satisfiesRead(Developer) shouldBe false
+      dar.satisfiesRead(Admininstator) shouldBe false
+    }
+
   }
 }

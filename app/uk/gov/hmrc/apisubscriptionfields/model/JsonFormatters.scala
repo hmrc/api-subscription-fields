@@ -119,15 +119,12 @@ trait JsonFormatters extends NonEmptyListFormatters with AccessLevelRequirements
     ((JsPath \ "access").read[AccessLevelRequirements] or Reads.pure(AccessLevelRequirements.Default))
   )(FieldDefinition.apply _)
 
-  // def ignoreDefaultField[T](value: T, default: T, jsonFieldName: String)(implicit w: Writes[T]) =
-  //   if(value == default) None else Some((jsonFieldName, Json.toJsFieldJsValueWrapper(value)))
-  //
-  // def ignoreNone[T](value: Option[T], jsonFieldName: String)(implicit w: Writes[T]) =
-  //   if(value.isEmpty) None else Some((jsonFieldName, Json.toJsFieldJsValueWrapper(value)))
-
-  def dropTail[A,B,C,D,E,F,G]( t: Tuple7[A,B,C,D,E,F,G] ): Tuple6[A,B,C,D,E,F] = (t._1, t._2, t._3, t._4, t._5, t._6)
-
   implicit val FieldDefinitionWrites: Writes[FieldDefinition] = new Writes[FieldDefinition] {
+
+    def dropTail[A,B,C,D,E,F,G]( t: Tuple7[A,B,C,D,E,F,G] ): Tuple6[A,B,C,D,E,F] = (t._1, t._2, t._3, t._4, t._5, t._6)
+
+    // This allows us to hide default AccessLevelRequirements from JSON - as this is a rarely used field
+    // but not one that business logic would want as an optional field and require getOrElse everywhere.
     override def writes(o: FieldDefinition): JsValue = {
       val common =
           (JsPath \ "name").write[FieldName] and
@@ -136,7 +133,6 @@ trait JsonFormatters extends NonEmptyListFormatters with AccessLevelRequirements
           (JsPath \ "type").write[FieldDefinitionType] and
           (JsPath \ "shortDescription").write[String] and
           (JsPath \ "validation").writeNullable[ValidationGroup]
-
 
       (if(o.access == AccessLevelRequirements.Default) {
         (common)(unlift(FieldDefinition.unapply).andThen(dropTail))

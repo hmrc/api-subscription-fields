@@ -22,15 +22,6 @@ import uk.gov.hmrc.apisubscriptionfields.model.FieldDefinitionType.FieldDefiniti
 import eu.timepit.refined._
 import Types._
 
-case class ClientId(value: String) extends AnyVal
-
-case class ApiContext(value: String) extends AnyVal
-
-case class ApiVersion(value: String) extends AnyVal
-
-case class SubscriptionFieldsId(value: UUID) extends AnyVal
-
-
 sealed trait ValidationRule {
   def validate(value: FieldValue): Boolean
 }
@@ -62,7 +53,7 @@ case class FieldDefinition(
   `type`: FieldDefinitionType,
   shortDescription: String,
   validation: Option[ValidationGroup] = None,
-  access: Option[AccessLevels] = None)
+  access: AccessLevelRequirements = AccessLevelRequirements.Default)
 
 case class FieldsDefinition(apiContext: String, apiVersion: String, fieldDefinitions: NEL[FieldDefinition])
 

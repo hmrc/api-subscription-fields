@@ -19,6 +19,7 @@ package uk.gov.hmrc.apisubscriptionfields.model
 import cats.data.NonEmptyList
 import org.scalatest.{Matchers, WordSpec}
 import uk.gov.hmrc.apisubscriptionfields.{FieldsDefinitionTestData, SubscriptionFieldsTestData}
+import uk.gov.hmrc.apisubscriptionfields.model.DevhubAccessLevel.{Admininstator, Developer}
 
 class JsonFormatterSpec extends WordSpec with Matchers with JsonFormatters with SubscriptionFieldsTestData with FieldsDefinitionTestData {
 
@@ -54,21 +55,6 @@ class JsonFormatterSpec extends WordSpec with Matchers with JsonFormatters with 
     }
   }
 
-  "BulkSubscriptionFieldsResponse" should {
-    val json = s"""{"subscriptions":[$subscriptionFieldJson]}"""
-
-    "marshal json" in {
-      objectAsJsonString(bulkSubscriptionFieldsResponse) shouldBe json
-    }
-
-    "unmarshal text" in {
-      Json.parse(json).validate[BulkSubscriptionFieldsResponse] match {
-        case JsSuccess(r, _) => r shouldBe bulkSubscriptionFieldsResponse
-        case JsError(e)      => fail(s"Should have parsed json text but got $e")
-      }
-    }
-  }
-
   "FieldsDefinitionResponse" should {
     "marshal json" in {
       objectAsJsonString(fakeFieldsDefinitionResponse) shouldBe fieldDefinitionJson
@@ -93,6 +79,21 @@ class JsonFormatterSpec extends WordSpec with Matchers with JsonFormatters with 
     }
   }
 
+  "BulkSubscriptionFieldsResponse" should {
+    val json = s"""{"subscriptions":[$subscriptionFieldJson]}"""
+
+    "marshal json" in {
+      objectAsJsonString(bulkSubscriptionFieldsResponse) shouldBe json
+    }
+
+    "unmarshal text" in {
+      Json.parse(json).validate[BulkSubscriptionFieldsResponse] match {
+        case JsSuccess(r, _) => r shouldBe bulkSubscriptionFieldsResponse
+        case JsError(e)      => fail(s"Should have parsed json text but got $e")
+      }
+    }
+  }
+
   "BulkFieldsDefinitionsResponse" should {
     val json = s"""{"apis":[$fieldDefinitionJson]}"""
 
@@ -105,6 +106,81 @@ class JsonFormatterSpec extends WordSpec with Matchers with JsonFormatters with 
         case JsSuccess(r, _) => r shouldBe bulkFieldsDefinitionResponse
         case JsError(e)      => fail(s"Should have parsed json text but got $e")
       }
+    }
+  }
+
+  "DevhubLevelRequirements" should {
+    "marshall a default correctly" in {
+      val rq = DevhubAccessLevelRequirements()
+
+      Json.stringify(Json.toJson(rq)) shouldBe "{}"
+    }
+
+    "marshall a readOnly option" in {
+      val rq = DevhubAccessLevelRequirements(readOnly = DevhubAccessLevel.Admininstator)
+
+      Json.stringify(Json.toJson(rq)) shouldBe """{"readOnly":"administrator"}"""
+    }
+
+    "marshall a readWrite option" in {
+      val rq = DevhubAccessLevelRequirements(readWrite = DevhubAccessLevelRequirement.NoOne)
+
+      Json.stringify(Json.toJson(rq)) shouldBe """{"readWrite":"noone"}"""
+    }
+
+    "marshall a complete option" in {
+      val rq = DevhubAccessLevelRequirements(readOnly = DevhubAccessLevel.Admininstator, readWrite = DevhubAccessLevelRequirement.NoOne)
+
+      Json.stringify(Json.toJson(rq)) shouldBe """{"readOnly":"administrator","readWrite":"noone"}"""
+    }
+
+    "unmarshall a default correctly" in {
+      Json.fromJson[DevhubAccessLevelRequirements](Json.parse("{}")) shouldBe JsSuccess(DevhubAccessLevelRequirements.Default)
+    }
+
+    "unmarshall a readOnly correctly" in {
+      Json.fromJson[DevhubAccessLevelRequirements](Json.parse("""{"readOnly":"administrator"}""")) shouldBe JsSuccess(DevhubAccessLevelRequirements(readOnly = Admininstator, readWrite = Developer))
+    }
+
+    "unmarshall a readWrite correctly" in {
+      Json.fromJson[DevhubAccessLevelRequirements](Json.parse("""{"readWrite":"noone"}""")) shouldBe JsSuccess(DevhubAccessLevelRequirements(readOnly = Developer, readWrite = DevhubAccessLevelRequirement.NoOne))
+    }
+
+    "unmarshall a complete option correctly" in {
+      Json.fromJson[DevhubAccessLevelRequirements](Json.parse("""{"readOnly":"administrator","readWrite":"noone"}""")) shouldBe JsSuccess(DevhubAccessLevelRequirements(readOnly = Admininstator, readWrite = DevhubAccessLevelRequirement.NoOne))
+    }
+  }
+
+  "AccessLevelRequirements" should {
+    "marshalling a default correctly" in {
+      val rq = AccessLevelRequirements.Default
+
+      Json.stringify(Json.toJson(rq)) shouldBe """{"devhub":{}}"""
+    }
+
+    "marshalling with some devhub requirements correctly" in {
+      val rq = AccessLevelRequirements(devhub = DevhubAccessLevelRequirements(readOnly = Admininstator))
+
+      Json.stringify(Json.toJson(rq)) shouldBe """{"devhub":{"readOnly":"administrator"}}"""
+    }
+
+    "unmarshall with default correctly" in {
+      Json.fromJson[AccessLevelRequirements](Json.parse("""{"devhub":{}}""")) shouldBe JsSuccess(AccessLevelRequirements.Default)
+    }
+
+    "unmarshall with non default correctly" in {
+      Json.fromJson[AccessLevelRequirements](Json.parse("""{"devhub":{"readOnly":"administrator"}}""")) shouldBe JsSuccess(AccessLevelRequirements(devhub = DevhubAccessLevelRequirements(readOnly = Admininstator)))
+    }
+  }
+
+  "FieldDefinition" should {
+    "marshal json with non default access" in {
+      objectAsJsonString(FakeFieldDefinitionWithAccess) should include(""","access":{"devhub":{"readOnly":"administrator"}}""")
+    }
+
+    "marshal json without mention of default access" in {
+      objectAsJsonString(FakeFieldDefinitionWithAccess.copy(access = AccessLevelRequirements.Default)) should not include(""""access":{"devhub":{"readOnly":"administrator"}}""")
+      objectAsJsonString(FakeFieldDefinitionWithAccess.copy(access = AccessLevelRequirements.Default)) should not include(""""access"""")
     }
   }
 }

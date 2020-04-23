@@ -25,6 +25,8 @@ import julienrf.json.derived.TypeTagSetting.ShortClassName
 import Types._
 import uk.gov.hmrc.apisubscriptionfields.model.FieldDefinitionType.FieldDefinitionType
 import Types._
+import play.api.libs.json.Json.JsValueWrapper
+import uk.gov.hmrc.apisubscriptionfields.model.DevhubAccessLevel.{Admininstator,Developer}
 
 trait NonEmptyListFormatters {
 
@@ -43,15 +45,59 @@ trait NonEmptyListFormatters {
       .contramap(_.toList)
 }
 
-trait JsonFormatters extends NonEmptyListFormatters {
-  val defaultTypeFormat = (__ \ "type").format[String]
+trait AccessLevelRequirementsFormatters {
 
-  implicit val SubscriptionFieldsIdjsonFormat = Json.valueFormat[SubscriptionFieldsId]
+  def ignoreDefaultField[T](value: T, default: T, jsonFieldName: String)(implicit w: Writes[T]) =
+    if(value == default) None else Some((jsonFieldName, Json.toJsFieldJsValueWrapper(value)))
 
+  implicit val DevhubAccessLevelRequirementFormat: Format[DevhubAccessLevelRequirement] = new Format[DevhubAccessLevelRequirement] {
+
+    override def writes(o: DevhubAccessLevelRequirement): JsValue = JsString(o match {
+      case Admininstator => "administrator"
+      case Developer => "developer"
+      case DevhubAccessLevelRequirement.NoOne => "noone"
+    })
+
+    override def reads(json: JsValue): JsResult[DevhubAccessLevelRequirement] = json match {
+      case JsString("administrator") => JsSuccess(Admininstator)
+      case JsString("developerdeveloper") => JsSuccess(Developer)
+      case JsString("noone") => JsSuccess(DevhubAccessLevelRequirement.NoOne)
+      case _ => JsError("Not a recognized DevhubAccessLevelRequirement")
+    }
+  }
+
+  implicit val DevhubAccessLevelRequirementsReads: Reads[DevhubAccessLevelRequirements] = (
+    ((JsPath \ "readOnly").read[DevhubAccessLevelRequirement] or Reads.pure(DevhubAccessLevelRequirement.Default)) and
+    ((JsPath \ "readWrite").read[DevhubAccessLevelRequirement] or Reads.pure(DevhubAccessLevelRequirement.Default))
+  )(DevhubAccessLevelRequirements.apply _)
+
+  implicit val DevhubAccessLevelRequirementsWrites: OWrites[DevhubAccessLevelRequirements] = new OWrites[DevhubAccessLevelRequirements] {
+    def writes(requirements: DevhubAccessLevelRequirements) = {
+      Json.obj(
+        (
+          ignoreDefaultField(requirements.readOnly, DevhubAccessLevelRequirement.Default, "readOnly") ::
+          ignoreDefaultField(requirements.readWrite, DevhubAccessLevelRequirement.Default, "readWrite") ::
+          List.empty[Option[(String, JsValueWrapper)]]
+        ).filterNot(_.isEmpty).map(_.get): _*
+      )
+    }
+  }
+
+  implicit val AccessLevelRequirementsReads: Reads[AccessLevelRequirements] = Json.reads[AccessLevelRequirements]
+
+  implicit val AccessLevelRequirementsWrites: Writes[AccessLevelRequirements] = Json.writes[AccessLevelRequirements]
+}
+
+trait JsonFormatters extends NonEmptyListFormatters with AccessLevelRequirementsFormatters {
   import be.venneborg.refined.play.RefinedJsonFormats._
   import eu.timepit.refined.api.Refined
   import eu.timepit.refined.auto._
   import play.api.libs.json._
+
+
+  final val defaultTypeFormat = (__ \ "type").format[String]
+
+  implicit val SubscriptionFieldsIdjsonFormat = Json.valueFormat[SubscriptionFieldsId]
 
   implicit val FieldNameFormat = formatRefined[String, FieldNameRegex, Refined]
 
@@ -59,30 +105,44 @@ trait JsonFormatters extends NonEmptyListFormatters {
 
   implicit val ValidationRuleFormat: OFormat[ValidationRule] = derived.withTypeTag.oformat(ShortClassName)
 
-  implicit val GatekeeperLevelFormat: OFormat[GatekeeperLevel] = derived.flat.oformat[GatekeeperLevel](defaultTypeFormat)
-  implicit val GatekeeperAccessLevelsFormat: OFormat[GatekeeperAccessLevels] = Json.format[GatekeeperAccessLevels]
-
-  implicit val DevhubLevelFormat: OFormat[DevhubLevel] = derived.flat.oformat(defaultTypeFormat)
-  implicit val DevhubAccessLevelsFormat: OFormat[DevhubAccessLevels] = Json.format[DevhubAccessLevels]
-
-  implicit val AccessLevelsFormat: OFormat[AccessLevels] = Json.format[AccessLevels]
-
   implicit val ValidationJF = Json.format[ValidationGroup]
 
   implicit val FieldDefinitionTypeReads = Reads.enumNameReads(FieldDefinitionType)
 
-  val fieldDefinitionReads: Reads[FieldDefinition] = (
+  implicit val FieldDefinitionReads: Reads[FieldDefinition] = (
     (JsPath \ "name").read[FieldName] and
-      (JsPath \ "description").read[String] and
-      ((JsPath \ "hint").read[String] or Reads.pure("")) and
-      (JsPath \ "type").read[FieldDefinitionType] and
-      ((JsPath \ "shortDescription").read[String] or Reads.pure("")) and
-      (JsPath \ "validation").readNullable[ValidationGroup] and
-      (JsPath \ "access").readNullable[AccessLevels]
+    (JsPath \ "description").read[String] and
+    ((JsPath \ "hint").read[String] or Reads.pure("")) and
+    (JsPath \ "type").read[FieldDefinitionType] and
+    ((JsPath \ "shortDescription").read[String] or Reads.pure("")) and
+    (JsPath \ "validation").readNullable[ValidationGroup] and
+    ((JsPath \ "access").read[AccessLevelRequirements] or Reads.pure(AccessLevelRequirements.Default))
   )(FieldDefinition.apply _)
 
-  val fieldDefinitionWrites = Json.writes[FieldDefinition]
-  implicit val FieldDefinitionJF = Format(fieldDefinitionReads, fieldDefinitionWrites)
+  def ignoreDefaultField[T](value: T, default: T, jsonFieldName: String)(implicit w: Writes[T]) =
+    if(value == default) None else Some((jsonFieldName, Json.toJsFieldJsValueWrapper(value)))
+
+  def ignoreNone[T](value: Option[T], jsonFieldName: String)(implicit w: Writes[T]) =
+    if(value.isEmpty) None else Some((jsonFieldName, Json.toJsFieldJsValueWrapper(value)))
+
+  def dropTail[A,B,C,D,E,F,G]( t: Tuple7[A,B,C,D,E,F,G] ): Tuple6[A,B,C,D,E,F] = (t._1, t._2, t._3, t._4, t._5, t._6)
+
+  implicit val FieldDefinitionWrites: Writes[FieldDefinition] = {
+    val common =
+        (JsPath \ "name").write[FieldName] and
+        (JsPath \ "description").write[String] and
+        (JsPath \ "hint").write[String] and
+        (JsPath \ "type").write[FieldDefinitionType] and
+        (JsPath \ "shortDescription").write[String] and
+        (JsPath \ "validation").writeNullable[ValidationGroup]
+
+
+    if(self.access == AccessLevelRequirements.Default) {
+      (common)(unlift(FieldDefinition.unapply).andThen(dropTail))
+    } else {
+      (common and (JsPath \ "access").write[AccessLevelRequirements])(unlift(FieldDefinition.unapply))
+    }
+  }
 
   implicit val FieldsDefinitionJF: OFormat[FieldsDefinition] = Json.format[FieldsDefinition]
 

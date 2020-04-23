@@ -46,9 +46,9 @@ trait FieldDefinitionTestData extends TestData {
   final val FakeFieldDefinitionString = FieldDefinition(fieldN(2), "desc2", "hint2", FieldDefinitionType.STRING, "short description", Some(FakeValidation))
   final val FakeFieldDefinitionWithAccess: FieldDefinition = FakeFieldDefinitionString.copy(validation = None, access = AccessLevelRequirements(devhub = DevhubAccessLevelRequirements(readOnly = Admininstator)))
   final val FakeFieldDefinitionSecureToken = FieldDefinition(fieldN(3), "desc3", "hint3", FieldDefinitionType.SECURE_TOKEN, "short description", Some(FakeValidation))
-  final val FakeFieldsDefinitions = NonEmptyList.fromListUnsafe(List(FakeFieldDefinitionUrl, FakeFieldDefinitionString, FakeFieldDefinitionSecureToken))
-  final val FakeFieldsDefinition = ApiFieldDefinitions(fakeRawContext, fakeRawVersion, FakeFieldsDefinitions)
-  final val FakeFieldsDefinitionResponse = FieldsDefinitionResponse(fakeRawContext, fakeRawVersion, FakeFieldsDefinition.fieldDefinitions)
+  final val NelOfFieldDefinitions = NonEmptyList.fromListUnsafe(List(FakeFieldDefinitionUrl, FakeFieldDefinitionString, FakeFieldDefinitionSecureToken))
+  final val FakeApiFieldDefinitions = ApiFieldDefinitions(fakeRawContext, fakeRawVersion, NelOfFieldDefinitions)
+  final val FakeApiFieldDefinitionsResponse = ApiFieldDefinitionsResponse(fakeRawContext, fakeRawVersion, FakeApiFieldDefinitions.fieldDefinitions)
 
   final val AlphaNumericRegexRule: RegexValidationRule = RegexValidationRule("^[a-zA-Z0-9]+$")
   final val PasswordRegexRule: RegexValidationRule = RegexValidationRule("^(?=.{8,})(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=]).*$")
@@ -65,11 +65,11 @@ trait FieldDefinitionTestData extends TestData {
   )
   final val FakeFieldDefinitionPassword =
     FieldDefinition("password", "password", "this is your password", FieldDefinitionType.SECURE_TOKEN, "password", Some(FakeValidationForPassword))
-  final val FakeFieldsDefinitionsWithRegex = NonEmptyList.fromListUnsafe(List(FakeFieldDefinitionAlphnumericField, FakeFieldDefinitionPassword))
-  final val FakeFieldsDefinitionWithRegex = ApiFieldDefinitions(fakeRawContext, fakeRawVersion, FakeFieldsDefinitionsWithRegex)
-  final val FakeFieldsDefinitionResponseWithRegex: FieldsDefinitionResponse = FieldsDefinitionResponse(fakeRawContext, fakeRawVersion, FakeFieldsDefinitionsWithRegex)
+  final val FakeApiFieldDefinitionssWithRegex = NonEmptyList.fromListUnsafe(List(FakeFieldDefinitionAlphnumericField, FakeFieldDefinitionPassword))
+  final val FakeApiFieldDefinitionsWithRegex = ApiFieldDefinitions(fakeRawContext, fakeRawVersion, FakeApiFieldDefinitionssWithRegex)
+  final val FakeApiFieldDefinitionsResponseWithRegex: ApiFieldDefinitionsResponse = ApiFieldDefinitionsResponse(fakeRawContext, fakeRawVersion, FakeApiFieldDefinitionssWithRegex)
 
-  final val FakeValidRegexFieldsDefinitionRequest = FieldsDefinitionRequest(NonEmptyList.fromListUnsafe(List(FakeFieldDefinitionAlphnumericField, FakeFieldDefinitionPassword)))
+  final val FakeValidRegexFieldsDefinitionRequest = FieldDefinitionsRequest(NonEmptyList.fromListUnsafe(List(FakeFieldDefinitionAlphnumericField, FakeFieldDefinitionPassword)))
 
   final val jsonInvalidRegexFieldsDefinitionRequest =
     """{
@@ -105,7 +105,7 @@ trait FieldDefinitionTestData extends TestData {
       |}""".stripMargin
 
 
-  def createFieldsDefinition(apiContext: String = fakeRawContext, apiVersion: String = fakeRawVersion, fieldDefinitions: NonEmptyList[FieldDefinition] = FakeFieldsDefinitions) =
+  def createApiFieldDefinitions(apiContext: String = fakeRawContext, apiVersion: String = fakeRawVersion, fieldDefinitions: NonEmptyList[FieldDefinition] = NelOfFieldDefinitions) =
     ApiFieldDefinitions(apiContext, apiVersion, fieldDefinitions)
 
   def uniqueApiContext = UUID.randomUUID().toString

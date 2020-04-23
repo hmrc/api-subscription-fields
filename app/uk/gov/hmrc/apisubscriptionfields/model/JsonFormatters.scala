@@ -144,11 +144,11 @@ trait JsonFormatters extends NonEmptyListFormatters with AccessLevelRequirements
 
   implicit val ApiFieldDefinitionsJF: OFormat[ApiFieldDefinitions] = Json.format[ApiFieldDefinitions]
 
-  implicit val FieldsDefinitionRequestJF = Json.format[FieldsDefinitionRequest]
+  implicit val FieldDefinitionsRequestJF = Json.format[FieldDefinitionsRequest]
   implicit val SubscriptionFieldsRequestJF = Json.format[SubscriptionFieldsRequest]
 
-  implicit val FieldsDefinitionResponseJF = Json.format[FieldsDefinitionResponse]
-  implicit val BulkFieldsDefinitionsResponseJF = Json.format[BulkFieldsDefinitionsResponse]
+  implicit val ApiFieldDefinitionsResponseJF = Json.format[ApiFieldDefinitionsResponse]
+  implicit val BulkApiFieldDefinitionsResponseJF = Json.format[BulkApiFieldDefinitionsResponse]
   implicit val SubscriptionFieldsResponseJF = Json.format[SubscriptionFieldsResponse]
   implicit val SubscriptionFieldsJF = Json.format[SubscriptionFields]
 

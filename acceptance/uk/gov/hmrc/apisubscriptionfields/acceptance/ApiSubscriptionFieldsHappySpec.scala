@@ -38,7 +38,7 @@ class ApiSubscriptionFieldsHappySpec extends AcceptanceTestSpec
   with BeforeAndAfterAll {
 
   override def beforeAll() {
-    val putRequest = validDefinitionPutRequest(FieldsDefinitionRequest(FakeFieldsDefinitions))
+    val putRequest = validDefinitionPutRequest(FieldDefinitionsRequest(NelOfFieldDefinitions))
       .withTarget( RequestTarget(uriString="", path=definitionEndpoint(fakeRawContext, fakeRawVersion), queryString = Map.empty))
 
     Await.result(route(app, putRequest).get, 10.seconds)

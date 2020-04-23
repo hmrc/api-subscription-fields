@@ -22,20 +22,20 @@ import play.api.mvc._
 import play.api.test.Helpers._
 import play.api.test._
 import uk.gov.hmrc.apisubscriptionfields.FieldDefinitionTestData
-import uk.gov.hmrc.apisubscriptionfields.model.{FieldsDefinitionRequest, JsonFormatters}
+import uk.gov.hmrc.apisubscriptionfields.model.{FieldDefinitionsRequest, JsonFormatters}
 import uk.gov.hmrc.apisubscriptionfields.service.ApiFieldDefinitionsService
 import uk.gov.hmrc.play.test.UnitSpec
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class FieldsDefinitionControllerPostSpec extends UnitSpec
+class ApiFieldDefinitionsControllerPostSpec extends UnitSpec
 with FieldDefinitionTestData
 with MockFactory
 with JsonFormatters
 with StubControllerComponentsFactory {
 
   private val mockFieldDefintionService = mock[ApiFieldDefinitionsService]
-  private val controller = new FieldsDefinitionController(stubControllerComponents(), mockFieldDefintionService)
+  private val controller = new ApiFieldDefinitionsController(stubControllerComponents(), mockFieldDefintionService)
 
   "validateFieldsDefinition" should {
     "return OK when FieldDefinitionsRequest is valid" in {
@@ -66,6 +66,6 @@ with StubControllerComponentsFactory {
     FakeRequest()
       .withJsonBody(jsonBody).map(r => r.json)
 
-  private def mkJson(model: FieldsDefinitionRequest) = Json.toJson(model)(Json.writes[FieldsDefinitionRequest])
+  private def mkJson(model: FieldDefinitionsRequest) = Json.toJson(model)(Json.writes[FieldDefinitionsRequest])
 
 }

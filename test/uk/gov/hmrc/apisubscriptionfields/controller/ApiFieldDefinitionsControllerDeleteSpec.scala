@@ -28,10 +28,10 @@ import uk.gov.hmrc.play.test.UnitSpec
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class FieldsDefinitionControllerDeleteSpec extends UnitSpec with FieldDefinitionTestData with MockFactory with JsonFormatters with StubControllerComponentsFactory {
+class ApiFieldDefinitionsControllerDeleteSpec extends UnitSpec with FieldDefinitionTestData with MockFactory with JsonFormatters with StubControllerComponentsFactory {
 
   private val mockFieldsDefinitionService = mock[ApiFieldDefinitionsService]
-  private val controller = new FieldsDefinitionController(stubControllerComponents(), mockFieldsDefinitionService)
+  private val controller = new ApiFieldDefinitionsController(stubControllerComponents(), mockFieldsDefinitionService)
 
   "DELETE /definition/context/:apiContext/version/:apiVersion" should {
     "return NO_CONTENT (204) when successfully deleted from repo" in {

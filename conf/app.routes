@@ -1,11 +1,11 @@
 # microservice-specific routes
 
-PUT           /definition/context/:apiContext/version/:apiVersion                      uk.gov.hmrc.apisubscriptionfields.controller.FieldsDefinitionController.upsertFieldsDefinition(apiContext: ApiContext, apiVersion: ApiVersion)
-GET           /definition/context/:apiContext/version/:apiVersion                      uk.gov.hmrc.apisubscriptionfields.controller.FieldsDefinitionController.getFieldsDefinition(apiContext: ApiContext, apiVersion: ApiVersion)
-GET           /definition                                                              uk.gov.hmrc.apisubscriptionfields.controller.FieldsDefinitionController.getAllFieldsDefinitions
-DELETE        /definition/context/:apiContext/version/:apiVersion                      uk.gov.hmrc.apisubscriptionfields.controller.FieldsDefinitionController.deleteFieldsDefinition(apiContext: ApiContext, apiVersion: ApiVersion)
+PUT           /definition/context/:apiContext/version/:apiVersion                      uk.gov.hmrc.apisubscriptionfields.controller.ApiFieldDefinitionsController.upsertFieldsDefinition(apiContext: ApiContext, apiVersion: ApiVersion)
+GET           /definition/context/:apiContext/version/:apiVersion                      uk.gov.hmrc.apisubscriptionfields.controller.ApiFieldDefinitionsController.getFieldsDefinition(apiContext: ApiContext, apiVersion: ApiVersion)
+GET           /definition                                                              uk.gov.hmrc.apisubscriptionfields.controller.ApiFieldDefinitionsController.getAllFieldsDefinitions
+DELETE        /definition/context/:apiContext/version/:apiVersion                      uk.gov.hmrc.apisubscriptionfields.controller.ApiFieldDefinitionsController.deleteFieldsDefinition(apiContext: ApiContext, apiVersion: ApiVersion)
 
-POST          /validate                                                                uk.gov.hmrc.apisubscriptionfields.controller.FieldsDefinitionController.validateFieldsDefinition()
+POST          /validate                                                                uk.gov.hmrc.apisubscriptionfields.controller.ApiFieldDefinitionsController.validateFieldsDefinition()
 
 PUT           /field/application/:clientId/context/:apiContext/version/:apiVersion     uk.gov.hmrc.apisubscriptionfields.controller.SubscriptionFieldsController.upsertSubscriptionFields(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion)
 GET           /field/application/:clientId/context/:apiContext/version/:apiVersion     uk.gov.hmrc.apisubscriptionfields.controller.SubscriptionFieldsController.getSubscriptionFields(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion)

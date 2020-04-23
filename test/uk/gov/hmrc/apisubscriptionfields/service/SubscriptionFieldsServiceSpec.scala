@@ -30,11 +30,11 @@ import scala.concurrent.Future
 class SubscriptionFieldsServiceSpec extends UnitSpec with SubscriptionFieldsTestData with FieldDefinitionTestData with MockFactory {
 
   private val mockSubscriptionFieldsIdRepository = mock[SubscriptionFieldsRepository]
-  private val mockFieldsDefinitionService = mock[ApiFieldDefinitionsService]
+  private val mockApiFieldDefinitionsService = mock[ApiFieldDefinitionsService]
   private val mockUuidCreator = new UUIDCreator {
     override def uuid(): UUID = FakeRawFieldsId
   }
-  private val service = new SubscriptionFieldsService(mockSubscriptionFieldsIdRepository, mockUuidCreator, mockFieldsDefinitionService)
+  private val service = new SubscriptionFieldsService(mockSubscriptionFieldsIdRepository, mockUuidCreator, mockApiFieldDefinitionsService)
 
   "getAll" should {
     "return an empty list when no entry exists in the database collection" in {
@@ -185,17 +185,17 @@ class SubscriptionFieldsServiceSpec extends UnitSpec with SubscriptionFieldsTest
   "validate" should {
     import eu.timepit.refined.auto._
     "returns ValidSubsFieldValidationResponse when fields are Valid " in {
-      (mockFieldsDefinitionService get (_: ApiContext, _: ApiVersion))
+      (mockApiFieldDefinitionsService get (_: ApiContext, _: ApiVersion))
         .expects(FakeContext, FakeVersion)
-        .returns(Some(FakeFieldsDefinitionResponseWithRegex))
+        .returns(Some(FakeApiFieldDefinitionsResponseWithRegex))
 
       await(service.validate(FakeContext, FakeVersion, SubscriptionFieldsMatchRegexValidation)) shouldBe ValidSubsFieldValidationResponse
     }
 
     "returns InvalidSubsFieldValidationResponse when fields are Invalid " in {
-      (mockFieldsDefinitionService get (_: ApiContext, _: ApiVersion))
+      (mockApiFieldDefinitionsService get (_: ApiContext, _: ApiVersion))
         .expects(FakeContext, FakeVersion)
-        .returns(Some(FakeFieldsDefinitionResponseWithRegex))
+        .returns(Some(FakeApiFieldDefinitionsResponseWithRegex))
 
       await(service.validate(FakeContext, FakeVersion, SubscriptionFieldsDoNotMatchRegexValidation)) shouldBe FakeInvalidSubsFieldValidationResponse2
     }

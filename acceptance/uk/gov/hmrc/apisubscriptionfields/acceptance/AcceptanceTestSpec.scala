@@ -74,9 +74,9 @@ trait AcceptanceTestSpec extends FeatureSpec
     fakeRequestWithHeaders.withMethod(PUT).withJsonBody(Json.toJson(contents))
 
   protected def validDefinitionPutRequest(fieldDefinitions: NonEmptyList[FieldDefinition]): FakeRequest[AnyContentAsJson] =
-    validDefinitionPutRequest(FieldsDefinitionRequest(fieldDefinitions))
+    validDefinitionPutRequest(FieldDefinitionsRequest(fieldDefinitions))
 
-  protected def validDefinitionPutRequest(contents: FieldsDefinitionRequest): FakeRequest[AnyContentAsJson] =
+  protected def validDefinitionPutRequest(contents: FieldDefinitionsRequest): FakeRequest[AnyContentAsJson] =
     fakeRequestWithHeaders.withMethod(PUT).withJsonBody(Json.toJson(contents))
 
   protected def fakeRequestWithHeaders: FakeRequest[AnyContentAsEmpty.type] = {

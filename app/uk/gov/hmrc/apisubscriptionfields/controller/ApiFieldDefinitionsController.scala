@@ -30,7 +30,7 @@ import java.util.UUID
 import scala.concurrent.ExecutionContext
 
 @Singleton
-class FieldsDefinitionController @Inject() (cc: ControllerComponents, service: ApiFieldDefinitionsService)(implicit ec: ExecutionContext) extends CommonController {
+class ApiFieldDefinitionsController @Inject() (cc: ControllerComponents, service: ApiFieldDefinitionsService)(implicit ec: ExecutionContext) extends CommonController {
 
   import JsonFormatters._
 
@@ -44,7 +44,7 @@ class FieldsDefinitionController @Inject() (cc: ControllerComponents, service: A
     NotFound(JsErrorResponse(ErrorCode.NOT_FOUND_CODE, s"Fields definition not found for (${apiContext.value}, ${apiVersion.value})"))
 
   def validateFieldsDefinition(): Action[JsValue] = Action(parse.json) { request =>
-    Try(request.body.validate[FieldsDefinitionRequest]) match {
+    Try(request.body.validate[FieldDefinitionsRequest]) match {
       case Success(JsSuccess(payload, _)) => Ok("")
       case Success(JsError(errs)) => {
         badRequestWithTag( (tag:UUID) => s"A JSON error occurred: [${tag.toString}] ${Json.prettyPrint(JsError.toJson(errs))}")
@@ -56,7 +56,7 @@ class FieldsDefinitionController @Inject() (cc: ControllerComponents, service: A
   }
 
   def upsertFieldsDefinition(apiContext: ApiContext, apiVersion: ApiVersion): Action[JsValue] = Action.async(parse.json) { implicit request =>
-    withJsonBody[FieldsDefinitionRequest] { payload =>
+    withJsonBody[FieldDefinitionsRequest] { payload =>
       service.upsert(apiContext, apiVersion, payload.fieldDefinitions) map {
         case (response, true) => Created(Json.toJson(response))
         case (response, false) => Ok(Json.toJson(response))
@@ -80,7 +80,7 @@ class FieldsDefinitionController @Inject() (cc: ControllerComponents, service: A
     } recover recovery
   }
 
-  private def asActionResult(eventualMaybeResponse: Future[Option[FieldsDefinitionResponse]], apiContext: ApiContext, apiVersion: ApiVersion) = {
+  private def asActionResult(eventualMaybeResponse: Future[Option[ApiFieldDefinitionsResponse]], apiContext: ApiContext, apiVersion: ApiVersion) = {
     eventualMaybeResponse map {
       case Some(subscriptionFields) => Ok(Json.toJson(subscriptionFields))
       case None => notFoundResponse(apiContext, apiVersion)

@@ -21,17 +21,18 @@ import play.api.libs.json.{JsDefined, JsString, Json}
 import play.api.test.Helpers._
 import play.api.test._
 import uk.gov.hmrc.apisubscriptionfields.FieldDefinitionTestData
-import uk.gov.hmrc.apisubscriptionfields.model.{BulkFieldsDefinitionsResponse, FieldsDefinitionResponse, JsonFormatters}
+import uk.gov.hmrc.apisubscriptionfields.model.{BulkApiFieldDefinitionsResponse, ApiFieldDefinitionsResponse, JsonFormatters}
 import uk.gov.hmrc.apisubscriptionfields.service.ApiFieldDefinitionsService
 import uk.gov.hmrc.play.test.UnitSpec
 
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
+import uk.gov.hmrc.apisubscriptionfields.model.ApiFieldDefinitionsResponse
 
-class FieldsDefinitionControllerGetSpec extends UnitSpec with FieldDefinitionTestData with MockFactory with JsonFormatters with StubControllerComponentsFactory {
+class ApiFieldDefinitionsControllerGetSpec extends UnitSpec with FieldDefinitionTestData with MockFactory with JsonFormatters with StubControllerComponentsFactory {
 
   private val mockFieldsDefinitionService = mock[ApiFieldDefinitionsService]
-  private val controller = new FieldsDefinitionController(stubControllerComponents(), mockFieldsDefinitionService)
+  private val controller = new ApiFieldDefinitionsController(stubControllerComponents(), mockFieldsDefinitionService)
 
   private val responseJsonString =
     """{
@@ -70,7 +71,7 @@ class FieldsDefinitionControllerGetSpec extends UnitSpec with FieldDefinitionTes
       |  ]
       |}""".stripMargin
   private val responseJson = Json.parse(responseJsonString)
-  private val responseModel = responseJson.as[FieldsDefinitionResponse]
+  private val responseModel = responseJson.as[ApiFieldDefinitionsResponse]
 
   private val allResponseJsonString =
     """{
@@ -148,8 +149,8 @@ class FieldsDefinitionControllerGetSpec extends UnitSpec with FieldDefinitionTes
       |  ]
       |}""".stripMargin
   private val allResponseJson = Json.parse(allResponseJsonString)
-  private val allResponseModel = allResponseJson.as[BulkFieldsDefinitionsResponse]
-  private val emptyAllResponseJson = Json.toJson(BulkFieldsDefinitionsResponse(Seq()))
+  private val allResponseModel = allResponseJson.as[BulkApiFieldDefinitionsResponse]
+  private val emptyAllResponseJson = Json.toJson(BulkApiFieldDefinitionsResponse(Seq()))
 
   "GET /definition/context/:apiContext/version/:apiVersion" should {
     "return OK when the expected record exists in the repo" in {
@@ -193,7 +194,7 @@ class FieldsDefinitionControllerGetSpec extends UnitSpec with FieldDefinitionTes
     }
 
     "return OK with an empty list when no field definitions exist in the repo" in {
-      mockFieldsDefinitionService.getAll _ expects () returns Future.successful(BulkFieldsDefinitionsResponse(Seq()))
+      mockFieldsDefinitionService.getAll _ expects () returns Future.successful(BulkApiFieldDefinitionsResponse(Seq()))
 
       val result = await(controller.getAllFieldsDefinitions(FakeRequest()))
 

@@ -55,7 +55,7 @@ class ApiFieldDefinitionsRepositorySpec extends UnitSpec
     await(repository.collection.count())
   }
 
-  private def createApiFieldDefinitions = ApiFieldDefinitions(fakeRawContext, fakeRawVersion, FakeFieldsDefinitions)
+  private def createApiFieldDefinitions = ApiFieldDefinitions(fakeRawContext, fakeRawVersion, NelOfFieldDefinitions)
 
   private trait Setup {
     val definitions: ApiFieldDefinitions = createApiFieldDefinitions
@@ -78,7 +78,7 @@ class ApiFieldDefinitionsRepositorySpec extends UnitSpec
       await(repository.save(definitions)) shouldBe ((definitions, true))
       collectionSize shouldBe 1
 
-      val edited = definitions.copy(fieldDefinitions = FakeFieldsDefinitions)
+      val edited = definitions.copy(fieldDefinitions = NelOfFieldDefinitions)
       await(repository.save(edited)) shouldBe ((edited, false))
       collectionSize shouldBe 1
       await(repository.collection.find(selector(edited)).one[ApiFieldDefinitions]) shouldBe Some(edited)
@@ -87,8 +87,8 @@ class ApiFieldDefinitionsRepositorySpec extends UnitSpec
 
   "fetchAll" should {
     "retrieve all the field definitions from the collection" in {
-      val fieldsDefinition1 = createFieldsDefinition(apiContext = uniqueApiContext)
-      val fieldsDefinition2 = createFieldsDefinition(apiContext = uniqueApiContext)
+      val fieldsDefinition1 = createApiFieldDefinitions(apiContext = uniqueApiContext)
+      val fieldsDefinition2 = createApiFieldDefinitions(apiContext = uniqueApiContext)
       await(repository.save(fieldsDefinition1))
       await(repository.save(fieldsDefinition2))
       collectionSize shouldBe 2
@@ -111,7 +111,7 @@ class ApiFieldDefinitionsRepositorySpec extends UnitSpec
 
     "return `None` when the `id` doesn't match any record in the collection" in {
       for (i <- 1 to 3) {
-        val definitions = createFieldsDefinition(apiContext = uniqueApiContext)
+        val definitions = createApiFieldDefinitions(apiContext = uniqueApiContext)
         await(repository.save(definitions))
       }
       collectionSize shouldBe 3

@@ -119,28 +119,30 @@ trait JsonFormatters extends NonEmptyListFormatters with AccessLevelRequirements
     ((JsPath \ "access").read[AccessLevelRequirements] or Reads.pure(AccessLevelRequirements.Default))
   )(FieldDefinition.apply _)
 
-  def ignoreDefaultField[T](value: T, default: T, jsonFieldName: String)(implicit w: Writes[T]) =
-    if(value == default) None else Some((jsonFieldName, Json.toJsFieldJsValueWrapper(value)))
-
-  def ignoreNone[T](value: Option[T], jsonFieldName: String)(implicit w: Writes[T]) =
-    if(value.isEmpty) None else Some((jsonFieldName, Json.toJsFieldJsValueWrapper(value)))
+  // def ignoreDefaultField[T](value: T, default: T, jsonFieldName: String)(implicit w: Writes[T]) =
+  //   if(value == default) None else Some((jsonFieldName, Json.toJsFieldJsValueWrapper(value)))
+  //
+  // def ignoreNone[T](value: Option[T], jsonFieldName: String)(implicit w: Writes[T]) =
+  //   if(value.isEmpty) None else Some((jsonFieldName, Json.toJsFieldJsValueWrapper(value)))
 
   def dropTail[A,B,C,D,E,F,G]( t: Tuple7[A,B,C,D,E,F,G] ): Tuple6[A,B,C,D,E,F] = (t._1, t._2, t._3, t._4, t._5, t._6)
 
-  implicit val FieldDefinitionWrites: Writes[FieldDefinition] = {
-    val common =
-        (JsPath \ "name").write[FieldName] and
-        (JsPath \ "description").write[String] and
-        (JsPath \ "hint").write[String] and
-        (JsPath \ "type").write[FieldDefinitionType] and
-        (JsPath \ "shortDescription").write[String] and
-        (JsPath \ "validation").writeNullable[ValidationGroup]
+  implicit val FieldDefinitionWrites: Writes[FieldDefinition] = new Writes[FieldDefinition] {
+    override def writes(o: FieldDefinition): JsValue = {
+      val common =
+          (JsPath \ "name").write[FieldName] and
+          (JsPath \ "description").write[String] and
+          (JsPath \ "hint").write[String] and
+          (JsPath \ "type").write[FieldDefinitionType] and
+          (JsPath \ "shortDescription").write[String] and
+          (JsPath \ "validation").writeNullable[ValidationGroup]
 
 
-    if(self.access == AccessLevelRequirements.Default) {
-      (common)(unlift(FieldDefinition.unapply).andThen(dropTail))
-    } else {
-      (common and (JsPath \ "access").write[AccessLevelRequirements])(unlift(FieldDefinition.unapply))
+      (if(o.access == AccessLevelRequirements.Default) {
+        (common)(unlift(FieldDefinition.unapply).andThen(dropTail))
+      } else {
+        (common and (JsPath \ "access").write[AccessLevelRequirements])(unlift(FieldDefinition.unapply))
+      }).writes(o)
     }
   }
 

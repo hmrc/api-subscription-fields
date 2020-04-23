@@ -20,14 +20,14 @@ import org.scalatest.WordSpec
 import org.scalatest.Matchers
 import uk.gov.hmrc.apisubscriptionfields.model.DevhubAccessLevel.{Developer,Admininstator}
 
-class AccessLevelRequirementsSpec extends WordSpec with Matchers {
+class AccessRequirementsSpec extends WordSpec with Matchers {
 
   private val allLevels: List[DevhubAccessLevel] = List(Developer, Admininstator)
 
   "DevhubLevelRequirement" should {
 
     "DevhubLevelRequirement Developer" should {
-      val requirement: DevhubAccessLevelRequirement = Developer
+      val requirement: DevhubAccessRequirement = Developer
 
       "allow all devhub levels to satisfy the requirement" in {
         allLevels.foreach(at => at.satisfiesRequirement(requirement) shouldBe true)
@@ -35,7 +35,7 @@ class AccessLevelRequirementsSpec extends WordSpec with Matchers {
     }
 
     "DevhubLevelRequirement Admin" should {
-      val requirement: DevhubAccessLevelRequirement = Admininstator
+      val requirement: DevhubAccessRequirement = Admininstator
 
       "allow only admin to satisfy the requirement" in {
         Admininstator.satisfiesRequirement(requirement) shouldBe true
@@ -47,7 +47,7 @@ class AccessLevelRequirementsSpec extends WordSpec with Matchers {
     }
 
     "DevhubLevelRequirement NoOne" should {
-      val requirement: DevhubAccessLevelRequirement = DevhubAccessLevelRequirement.NoOne
+      val requirement: DevhubAccessRequirement = DevhubAccessRequirement.NoOne
 
       "not allow any devhub level to satisfy the requirement" in {
         allLevels.foreach(at => at.satisfiesRequirement(requirement) shouldBe false)

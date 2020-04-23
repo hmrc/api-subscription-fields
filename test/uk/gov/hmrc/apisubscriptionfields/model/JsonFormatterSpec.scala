@@ -111,65 +111,65 @@ class JsonFormatterSpec extends WordSpec with Matchers with JsonFormatters with 
 
   "DevhubLevelRequirements" should {
     "marshall a default correctly" in {
-      val rq = DevhubAccessLevelRequirements()
+      val rq = DevhubAccessRequirements()
 
       Json.stringify(Json.toJson(rq)) shouldBe "{}"
     }
 
     "marshall a readOnly option" in {
-      val rq = DevhubAccessLevelRequirements(readOnly = DevhubAccessLevel.Admininstator)
+      val rq = DevhubAccessRequirements(readOnly = DevhubAccessLevel.Admininstator)
 
       Json.stringify(Json.toJson(rq)) shouldBe """{"readOnly":"administrator"}"""
     }
 
     "marshall a readWrite option" in {
-      val rq = DevhubAccessLevelRequirements(readWrite = DevhubAccessLevelRequirement.NoOne)
+      val rq = DevhubAccessRequirements(readWrite = DevhubAccessRequirement.NoOne)
 
       Json.stringify(Json.toJson(rq)) shouldBe """{"readWrite":"noone"}"""
     }
 
     "marshall a complete option" in {
-      val rq = DevhubAccessLevelRequirements(readOnly = DevhubAccessLevel.Admininstator, readWrite = DevhubAccessLevelRequirement.NoOne)
+      val rq = DevhubAccessRequirements(readOnly = DevhubAccessLevel.Admininstator, readWrite = DevhubAccessRequirement.NoOne)
 
       Json.stringify(Json.toJson(rq)) shouldBe """{"readOnly":"administrator","readWrite":"noone"}"""
     }
 
     "unmarshall a default correctly" in {
-      Json.fromJson[DevhubAccessLevelRequirements](Json.parse("{}")) shouldBe JsSuccess(DevhubAccessLevelRequirements.Default)
+      Json.fromJson[DevhubAccessRequirements](Json.parse("{}")) shouldBe JsSuccess(DevhubAccessRequirements.Default)
     }
 
     "unmarshall a readOnly correctly" in {
-      Json.fromJson[DevhubAccessLevelRequirements](Json.parse("""{"readOnly":"administrator"}""")) shouldBe JsSuccess(DevhubAccessLevelRequirements(readOnly = Admininstator, readWrite = Developer))
+      Json.fromJson[DevhubAccessRequirements](Json.parse("""{"readOnly":"administrator"}""")) shouldBe JsSuccess(DevhubAccessRequirements(readOnly = Admininstator, readWrite = Developer))
     }
 
     "unmarshall a readWrite correctly" in {
-      Json.fromJson[DevhubAccessLevelRequirements](Json.parse("""{"readWrite":"noone"}""")) shouldBe JsSuccess(DevhubAccessLevelRequirements(readOnly = Developer, readWrite = DevhubAccessLevelRequirement.NoOne))
+      Json.fromJson[DevhubAccessRequirements](Json.parse("""{"readWrite":"noone"}""")) shouldBe JsSuccess(DevhubAccessRequirements(readOnly = Developer, readWrite = DevhubAccessRequirement.NoOne))
     }
 
     "unmarshall a complete option correctly" in {
-      Json.fromJson[DevhubAccessLevelRequirements](Json.parse("""{"readOnly":"administrator","readWrite":"noone"}""")) shouldBe JsSuccess(DevhubAccessLevelRequirements(readOnly = Admininstator, readWrite = DevhubAccessLevelRequirement.NoOne))
+      Json.fromJson[DevhubAccessRequirements](Json.parse("""{"readOnly":"administrator","readWrite":"noone"}""")) shouldBe JsSuccess(DevhubAccessRequirements(readOnly = Admininstator, readWrite = DevhubAccessRequirement.NoOne))
     }
   }
 
-  "AccessLevelRequirements" should {
+  "AccessRequirements" should {
     "marshalling a default correctly" in {
-      val rq = AccessLevelRequirements.Default
+      val rq = AccessRequirements.Default
 
       Json.stringify(Json.toJson(rq)) shouldBe """{"devhub":{}}"""
     }
 
     "marshalling with some devhub requirements correctly" in {
-      val rq = AccessLevelRequirements(devhub = DevhubAccessLevelRequirements(readOnly = Admininstator))
+      val rq = AccessRequirements(devhub = DevhubAccessRequirements(readOnly = Admininstator))
 
       Json.stringify(Json.toJson(rq)) shouldBe """{"devhub":{"readOnly":"administrator"}}"""
     }
 
     "unmarshall with default correctly" in {
-      Json.fromJson[AccessLevelRequirements](Json.parse("""{"devhub":{}}""")) shouldBe JsSuccess(AccessLevelRequirements.Default)
+      Json.fromJson[AccessRequirements](Json.parse("""{"devhub":{}}""")) shouldBe JsSuccess(AccessRequirements.Default)
     }
 
     "unmarshall with non default correctly" in {
-      Json.fromJson[AccessLevelRequirements](Json.parse("""{"devhub":{"readOnly":"administrator"}}""")) shouldBe JsSuccess(AccessLevelRequirements(devhub = DevhubAccessLevelRequirements(readOnly = Admininstator)))
+      Json.fromJson[AccessRequirements](Json.parse("""{"devhub":{"readOnly":"administrator"}}""")) shouldBe JsSuccess(AccessRequirements(devhub = DevhubAccessRequirements(readOnly = Admininstator)))
     }
   }
 
@@ -179,8 +179,8 @@ class JsonFormatterSpec extends WordSpec with Matchers with JsonFormatters with 
     }
 
     "marshal json without mention of default access" in {
-      objectAsJsonString(FakeFieldDefinitionWithAccess.copy(access = AccessLevelRequirements.Default)) should not include(""""access":{"devhub":{"readOnly":"administrator"}}""")
-      objectAsJsonString(FakeFieldDefinitionWithAccess.copy(access = AccessLevelRequirements.Default)) should not include(""""access"""")
+      objectAsJsonString(FakeFieldDefinitionWithAccess.copy(access = AccessRequirements.Default)) should not include(""""access":{"devhub":{"readOnly":"administrator"}}""")
+      objectAsJsonString(FakeFieldDefinitionWithAccess.copy(access = AccessRequirements.Default)) should not include(""""access"""")
     }
   }
 }

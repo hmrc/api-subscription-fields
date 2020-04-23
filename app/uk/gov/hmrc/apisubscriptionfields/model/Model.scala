@@ -53,7 +53,7 @@ case class FieldDefinition(
   `type`: FieldDefinitionType,
   shortDescription: String,
   validation: Option[ValidationGroup] = None,
-  access: AccessLevelRequirements = AccessLevelRequirements.Default)
+  access: AccessRequirements = AccessRequirements.Default)
 
 case class ApiFieldDefinitions(apiContext: String, apiVersion: String, fieldDefinitions: NEL[FieldDefinition])
 

@@ -45,50 +45,50 @@ trait NonEmptyListFormatters {
       .contramap(_.toList)
 }
 
-trait AccessLevelRequirementsFormatters {
+trait AccessRequirementsFormatters {
 
   def ignoreDefaultField[T](value: T, default: T, jsonFieldName: String)(implicit w: Writes[T]) =
     if(value == default) None else Some((jsonFieldName, Json.toJsFieldJsValueWrapper(value)))
 
-  implicit val DevhubAccessLevelRequirementFormat: Format[DevhubAccessLevelRequirement] = new Format[DevhubAccessLevelRequirement] {
+  implicit val DevhubAccessRequirementFormat: Format[DevhubAccessRequirement] = new Format[DevhubAccessRequirement] {
 
-    override def writes(o: DevhubAccessLevelRequirement): JsValue = JsString(o match {
+    override def writes(o: DevhubAccessRequirement): JsValue = JsString(o match {
       case Admininstator => "administrator"
       case Developer => "developer"
-      case DevhubAccessLevelRequirement.NoOne => "noone"
+      case DevhubAccessRequirement.NoOne => "noone"
     })
 
-    override def reads(json: JsValue): JsResult[DevhubAccessLevelRequirement] = json match {
+    override def reads(json: JsValue): JsResult[DevhubAccessRequirement] = json match {
       case JsString("administrator") => JsSuccess(Admininstator)
       case JsString("developerdeveloper") => JsSuccess(Developer)
-      case JsString("noone") => JsSuccess(DevhubAccessLevelRequirement.NoOne)
-      case _ => JsError("Not a recognized DevhubAccessLevelRequirement")
+      case JsString("noone") => JsSuccess(DevhubAccessRequirement.NoOne)
+      case _ => JsError("Not a recognized DevhubAccessRequirement")
     }
   }
 
-  implicit val DevhubAccessLevelRequirementsReads: Reads[DevhubAccessLevelRequirements] = (
-    ((JsPath \ "readOnly").read[DevhubAccessLevelRequirement] or Reads.pure(DevhubAccessLevelRequirement.Default)) and
-    ((JsPath \ "readWrite").read[DevhubAccessLevelRequirement] or Reads.pure(DevhubAccessLevelRequirement.Default))
-  )(DevhubAccessLevelRequirements.apply _)
+  implicit val DevhubAccessRequirementsReads: Reads[DevhubAccessRequirements] = (
+    ((JsPath \ "readOnly").read[DevhubAccessRequirement] or Reads.pure(DevhubAccessRequirement.Default)) and
+    ((JsPath \ "readWrite").read[DevhubAccessRequirement] or Reads.pure(DevhubAccessRequirement.Default))
+  )(DevhubAccessRequirements.apply _)
 
-  implicit val DevhubAccessLevelRequirementsWrites: OWrites[DevhubAccessLevelRequirements] = new OWrites[DevhubAccessLevelRequirements] {
-    def writes(requirements: DevhubAccessLevelRequirements) = {
+  implicit val DevhubAccessRequirementsWrites: OWrites[DevhubAccessRequirements] = new OWrites[DevhubAccessRequirements] {
+    def writes(requirements: DevhubAccessRequirements) = {
       Json.obj(
         (
-          ignoreDefaultField(requirements.readOnly, DevhubAccessLevelRequirement.Default, "readOnly") ::
-          ignoreDefaultField(requirements.readWrite, DevhubAccessLevelRequirement.Default, "readWrite") ::
+          ignoreDefaultField(requirements.readOnly, DevhubAccessRequirement.Default, "readOnly") ::
+          ignoreDefaultField(requirements.readWrite, DevhubAccessRequirement.Default, "readWrite") ::
           List.empty[Option[(String, JsValueWrapper)]]
         ).filterNot(_.isEmpty).map(_.get): _*
       )
     }
   }
 
-  implicit val AccessLevelRequirementsReads: Reads[AccessLevelRequirements] = Json.reads[AccessLevelRequirements]
+  implicit val AccessRequirementsReads: Reads[AccessRequirements] = Json.reads[AccessRequirements]
 
-  implicit val AccessLevelRequirementsWrites: Writes[AccessLevelRequirements] = Json.writes[AccessLevelRequirements]
+  implicit val AccessRequirementsWrites: Writes[AccessRequirements] = Json.writes[AccessRequirements]
 }
 
-trait JsonFormatters extends NonEmptyListFormatters with AccessLevelRequirementsFormatters {
+trait JsonFormatters extends NonEmptyListFormatters with AccessRequirementsFormatters {
   import be.venneborg.refined.play.RefinedJsonFormats._
   import eu.timepit.refined.api.Refined
   import eu.timepit.refined.auto._
@@ -116,14 +116,14 @@ trait JsonFormatters extends NonEmptyListFormatters with AccessLevelRequirements
     (JsPath \ "type").read[FieldDefinitionType] and
     ((JsPath \ "shortDescription").read[String] or Reads.pure("")) and
     (JsPath \ "validation").readNullable[ValidationGroup] and
-    ((JsPath \ "access").read[AccessLevelRequirements] or Reads.pure(AccessLevelRequirements.Default))
+    ((JsPath \ "access").read[AccessRequirements] or Reads.pure(AccessRequirements.Default))
   )(FieldDefinition.apply _)
 
   implicit val FieldDefinitionWrites: Writes[FieldDefinition] = new Writes[FieldDefinition] {
 
     def dropTail[A,B,C,D,E,F,G]( t: Tuple7[A,B,C,D,E,F,G] ): Tuple6[A,B,C,D,E,F] = (t._1, t._2, t._3, t._4, t._5, t._6)
 
-    // This allows us to hide default AccessLevelRequirements from JSON - as this is a rarely used field
+    // This allows us to hide default AccessRequirements from JSON - as this is a rarely used field
     // but not one that business logic would want as an optional field and require getOrElse everywhere.
     override def writes(o: FieldDefinition): JsValue = {
       val common =
@@ -134,10 +134,10 @@ trait JsonFormatters extends NonEmptyListFormatters with AccessLevelRequirements
           (JsPath \ "shortDescription").write[String] and
           (JsPath \ "validation").writeNullable[ValidationGroup]
 
-      (if(o.access == AccessLevelRequirements.Default) {
+      (if(o.access == AccessRequirements.Default) {
         (common)(unlift(FieldDefinition.unapply).andThen(dropTail))
       } else {
-        (common and (JsPath \ "access").write[AccessLevelRequirements])(unlift(FieldDefinition.unapply))
+        (common and (JsPath \ "access").write[AccessRequirements])(unlift(FieldDefinition.unapply))
       }).writes(o)
     }
   }
@@ -153,7 +153,6 @@ trait JsonFormatters extends NonEmptyListFormatters with AccessLevelRequirements
   implicit val SubscriptionFieldsJF = Json.format[SubscriptionFields]
 
   implicit val BulkSubscriptionFieldsResponseJF = Json.format[BulkSubscriptionFieldsResponse]
-
 
   implicit val SubsFieldValidationResponseJF: OFormat[SubsFieldValidationResponse] = derived.withTypeTag.oformat(ShortClassName)
   implicit val InvalidSubsFieldValidationResponseJF = Json.format[InvalidSubsFieldValidationResponse]

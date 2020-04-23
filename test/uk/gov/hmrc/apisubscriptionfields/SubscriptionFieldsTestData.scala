@@ -22,7 +22,7 @@ import uk.gov.hmrc.apisubscriptionfields.model._
 import Types._
 import scala.concurrent.Future
 
-trait SubscriptionFieldsTestData extends FieldsDefinitionTestData with ValidationRuleTestData {
+trait SubscriptionFieldsTestData extends FieldDefinitionTestData with ValidationRuleTestData {
   import eu.timepit.refined.auto._
 
   final val FakeRawFieldsId = UUID.randomUUID()

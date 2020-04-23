@@ -20,17 +20,17 @@ import org.scalamock.scalatest.MockFactory
 import play.api.libs.json.{JsDefined, JsString, Json}
 import play.api.test.Helpers._
 import play.api.test._
-import uk.gov.hmrc.apisubscriptionfields.FieldsDefinitionTestData
+import uk.gov.hmrc.apisubscriptionfields.FieldDefinitionTestData
 import uk.gov.hmrc.apisubscriptionfields.model.{BulkFieldsDefinitionsResponse, FieldsDefinitionResponse, JsonFormatters}
-import uk.gov.hmrc.apisubscriptionfields.service.FieldsDefinitionService
+import uk.gov.hmrc.apisubscriptionfields.service.ApiFieldDefinitionsService
 import uk.gov.hmrc.play.test.UnitSpec
 
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class FieldsDefinitionControllerGetSpec extends UnitSpec with FieldsDefinitionTestData with MockFactory with JsonFormatters with StubControllerComponentsFactory {
+class FieldsDefinitionControllerGetSpec extends UnitSpec with FieldDefinitionTestData with MockFactory with JsonFormatters with StubControllerComponentsFactory {
 
-  private val mockFieldsDefinitionService = mock[FieldsDefinitionService]
+  private val mockFieldsDefinitionService = mock[ApiFieldDefinitionsService]
   private val controller = new FieldsDefinitionController(stubControllerComponents(), mockFieldsDefinitionService)
 
   private val responseJsonString =

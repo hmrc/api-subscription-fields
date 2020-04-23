@@ -20,26 +20,26 @@ import org.scalamock.scalatest.MockFactory
 import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach}
 import reactivemongo.api.DB
 import reactivemongo.bson.BSONDocument
-import uk.gov.hmrc.apisubscriptionfields.model.{ApiContext, ApiVersion, FieldsDefinition, JsonFormatters}
-import uk.gov.hmrc.apisubscriptionfields.FieldsDefinitionTestData
+import uk.gov.hmrc.apisubscriptionfields.model.{ApiContext, ApiVersion, ApiFieldDefinitions, JsonFormatters}
+import uk.gov.hmrc.apisubscriptionfields.FieldDefinitionTestData
 import uk.gov.hmrc.mongo.MongoSpecSupport
 import uk.gov.hmrc.play.test.UnitSpec
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class FieldsDefinitionRepositorySpec extends UnitSpec
+class ApiFieldDefinitionsRepositorySpec extends UnitSpec
   with BeforeAndAfterAll
   with BeforeAndAfterEach
   with MongoSpecSupport
   with JsonFormatters
-  with FieldsDefinitionTestData
+  with FieldDefinitionTestData
   with MockFactory { self =>
 
   private val mongoDbProvider = new MongoDbProvider {
     override val mongo: () => DB = self.mongo
   }
 
-  private val repository = new FieldsDefinitionMongoRepository(mongoDbProvider)
+  private val repository = new ApiFieldDefinitionsMongoRepository(mongoDbProvider)
 
   override def beforeEach() {
     super.beforeEach()
@@ -55,10 +55,10 @@ class FieldsDefinitionRepositorySpec extends UnitSpec
     await(repository.collection.count())
   }
 
-  private def createFieldsDefinition = FieldsDefinition(fakeRawContext, fakeRawVersion, FakeFieldsDefinitions)
+  private def createApiFieldDefinitions = ApiFieldDefinitions(fakeRawContext, fakeRawVersion, FakeFieldsDefinitions)
 
   private trait Setup {
-    val fieldsDefinition: FieldsDefinition = createFieldsDefinition
+    val definitions: ApiFieldDefinitions = createApiFieldDefinitions
   }
 
   "save" should {
@@ -67,21 +67,21 @@ class FieldsDefinitionRepositorySpec extends UnitSpec
     "insert the record in the collection" in new Setup {
       collectionSize shouldBe 0
 
-      await(repository.save(fieldsDefinition)) shouldBe ((fieldsDefinition, true))
+      await(repository.save(definitions)) shouldBe ((definitions, true))
       collectionSize shouldBe 1
-      await(repository.collection.find(selector(fieldsDefinition)).one[FieldsDefinition]) shouldBe Some(fieldsDefinition)
+      await(repository.collection.find(selector(definitions)).one[ApiFieldDefinitions]) shouldBe Some(definitions)
     }
 
     "update the record in the collection" in new Setup {
       collectionSize shouldBe 0
 
-      await(repository.save(fieldsDefinition)) shouldBe ((fieldsDefinition, true))
+      await(repository.save(definitions)) shouldBe ((definitions, true))
       collectionSize shouldBe 1
 
-      val edited = fieldsDefinition.copy(fieldDefinitions = FakeFieldsDefinitions)
+      val edited = definitions.copy(fieldDefinitions = FakeFieldsDefinitions)
       await(repository.save(edited)) shouldBe ((edited, false))
       collectionSize shouldBe 1
-      await(repository.collection.find(selector(edited)).one[FieldsDefinition]) shouldBe Some(edited)
+      await(repository.collection.find(selector(edited)).one[ApiFieldDefinitions]) shouldBe Some(edited)
     }
   }
 
@@ -103,16 +103,16 @@ class FieldsDefinitionRepositorySpec extends UnitSpec
 
   "fetch" should {
     "retrieve the correct record from the fields definition" in new Setup {
-      await(repository.save(fieldsDefinition))
+      await(repository.save(definitions))
       collectionSize shouldBe 1
 
-      await(repository.fetch(FakeContext, FakeVersion)) shouldBe Some(fieldsDefinition)
+      await(repository.fetch(FakeContext, FakeVersion)) shouldBe Some(definitions)
     }
 
     "return `None` when the `id` doesn't match any record in the collection" in {
       for (i <- 1 to 3) {
-        val fieldsDefinition = createFieldsDefinition(apiContext = uniqueApiContext)
-        await(repository.save(fieldsDefinition))
+        val definitions = createFieldsDefinition(apiContext = uniqueApiContext)
+        await(repository.save(definitions))
       }
       collectionSize shouldBe 3
 
@@ -122,17 +122,17 @@ class FieldsDefinitionRepositorySpec extends UnitSpec
 
   "delete" should {
     "remove the record with a specific fields definition" in {
-      val fieldsDefinition = createFieldsDefinition
+      val definitions = createApiFieldDefinitions
 
-      await(repository.save(fieldsDefinition))
+      await(repository.save(definitions))
       collectionSize shouldBe 1
 
-      await(repository.delete(ApiContext(fieldsDefinition.apiContext), ApiVersion(fieldsDefinition.apiVersion))) shouldBe true
+      await(repository.delete(ApiContext(definitions.apiContext), ApiVersion(definitions.apiVersion))) shouldBe true
       collectionSize shouldBe 0
     }
 
     "not alter the collection for unknown fields definition" in {
-      await(repository.save(createFieldsDefinition))
+      await(repository.save(createApiFieldDefinitions))
       collectionSize shouldBe 1
 
       await(repository.delete(ApiContext("DOES_NOT_EXIST"), FakeVersion)) shouldBe false
@@ -143,15 +143,15 @@ class FieldsDefinitionRepositorySpec extends UnitSpec
   "collection" should {
     "have a unique compound index based on `apiContext` and `apiVersion`" in new Setup {
 
-      await(repository.save(fieldsDefinition))
+      await(repository.save(definitions))
       collectionSize shouldBe 1
 
-      await(repository.save(fieldsDefinition))
+      await(repository.save(definitions))
       collectionSize shouldBe 1
     }
   }
 
-  private def selector(fd: FieldsDefinition) = {
+  private def selector(fd: ApiFieldDefinitions) = {
     BSONDocument("apiContext" -> fd.apiContext, "apiVersion" -> fd.apiVersion)
   }
 }

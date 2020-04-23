@@ -21,21 +21,21 @@ import play.api.libs.json.{JsValue, Json}
 import play.api.mvc._
 import play.api.test.Helpers._
 import play.api.test._
-import uk.gov.hmrc.apisubscriptionfields.FieldsDefinitionTestData
+import uk.gov.hmrc.apisubscriptionfields.FieldDefinitionTestData
 import uk.gov.hmrc.apisubscriptionfields.model.{FieldsDefinitionRequest, JsonFormatters}
-import uk.gov.hmrc.apisubscriptionfields.service.FieldsDefinitionService
+import uk.gov.hmrc.apisubscriptionfields.service.ApiFieldDefinitionsService
 import uk.gov.hmrc.play.test.UnitSpec
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class FieldsDefinitionControllerPutSpec extends UnitSpec
-  with FieldsDefinitionTestData
+  with FieldDefinitionTestData
   with MockFactory
   with JsonFormatters
   with StubControllerComponentsFactory {
 
-  private val mockFieldsDefinitionService = mock[FieldsDefinitionService]
+  private val mockFieldsDefinitionService = mock[ApiFieldDefinitionsService]
   private val controller = new FieldsDefinitionController(stubControllerComponents(), mockFieldsDefinitionService)
 
   "PUT /definition/context/:apiContext/version/:apiVersion" should {

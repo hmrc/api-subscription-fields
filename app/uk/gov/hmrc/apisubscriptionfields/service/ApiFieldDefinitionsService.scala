@@ -21,16 +21,16 @@ import uk.gov.hmrc.apisubscriptionfields.model._
 import Types._
 import scala.concurrent.Future
 import cats.data.NonEmptyList
-import uk.gov.hmrc.apisubscriptionfields.repository.FieldsDefinitionRepository
 import scala.concurrent.ExecutionContext
+import uk.gov.hmrc.apisubscriptionfields.repository.ApiFieldDefinitionsRepository
 
 @Singleton
-class FieldsDefinitionService @Inject() (repository: FieldsDefinitionRepository)(implicit ec: ExecutionContext) {
+class ApiFieldDefinitionsService @Inject() (repository: ApiFieldDefinitionsRepository)(implicit ec: ExecutionContext) {
 
   def upsert(apiContext: ApiContext, apiVersion: ApiVersion, fieldDefinitions: NonEmptyList[FieldDefinition]): Future[(FieldsDefinitionResponse, IsInsert)] = {
-    val fieldsDefinition = FieldsDefinition(apiContext.value, apiVersion.value, fieldDefinitions)
-    repository.save(fieldsDefinition).map {
-      case (fd: FieldsDefinition, inserted: IsInsert) => (asResponse(fd), inserted)
+    val definitions = ApiFieldDefinitions(apiContext.value, apiVersion.value, fieldDefinitions)
+    repository.save(definitions).map {
+      case (fd: ApiFieldDefinitions, inserted: IsInsert) => (asResponse(fd), inserted)
     }
   }
 
@@ -50,7 +50,7 @@ class FieldsDefinitionService @Inject() (repository: FieldsDefinitionRepository)
     } yield defs.map(asResponse)) map (BulkFieldsDefinitionsResponse(_))
   }
 
-  private def asResponse(fieldsDefinition: FieldsDefinition): FieldsDefinitionResponse = {
-    FieldsDefinitionResponse(fieldsDefinition.apiContext, fieldsDefinition.apiVersion, fieldsDefinition.fieldDefinitions)
+  private def asResponse(definitions: ApiFieldDefinitions): FieldsDefinitionResponse = {
+    FieldsDefinitionResponse(definitions.apiContext, definitions.apiVersion, definitions.fieldDefinitions)
   }
 }

@@ -18,10 +18,10 @@ package uk.gov.hmrc.apisubscriptionfields.model
 
 import cats.data.NonEmptyList
 import org.scalatest.{Matchers, WordSpec}
-import uk.gov.hmrc.apisubscriptionfields.{FieldsDefinitionTestData, SubscriptionFieldsTestData}
+import uk.gov.hmrc.apisubscriptionfields.{FieldDefinitionTestData, SubscriptionFieldsTestData}
 import uk.gov.hmrc.apisubscriptionfields.model.DevhubAccessLevel.{Admininstator, Developer}
 
-class JsonFormatterSpec extends WordSpec with Matchers with JsonFormatters with SubscriptionFieldsTestData with FieldsDefinitionTestData {
+class JsonFormatterSpec extends WordSpec with Matchers with JsonFormatters with SubscriptionFieldsTestData with FieldDefinitionTestData {
 
   import play.api.libs.json._
 

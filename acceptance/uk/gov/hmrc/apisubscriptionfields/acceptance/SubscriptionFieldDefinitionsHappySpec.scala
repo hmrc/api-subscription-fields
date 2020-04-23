@@ -21,17 +21,17 @@ import play.api.mvc._
 import play.api.mvc.request.RequestTarget
 import play.api.test.Helpers._
 import uk.gov.hmrc.apisubscriptionfields.model._
-import uk.gov.hmrc.apisubscriptionfields.{FieldsDefinitionTestData, SubscriptionFieldsTestData}
+import uk.gov.hmrc.apisubscriptionfields.{FieldDefinitionTestData, SubscriptionFieldsTestData}
 
 import scala.concurrent.Future
 
 class SubscriptionFieldDefinitionsHappySpec extends AcceptanceTestSpec
   with OptionValues
   with SubscriptionFieldsTestData
-  with FieldsDefinitionTestData
+  with FieldDefinitionTestData
   with JsonFormatters {
-    
-  
+
+
   feature("Fields-Definition") {
 
 

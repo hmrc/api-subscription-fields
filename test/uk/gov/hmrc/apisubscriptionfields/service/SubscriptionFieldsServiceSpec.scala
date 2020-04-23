@@ -21,16 +21,16 @@ import java.util.UUID
 import org.scalamock.scalatest.MockFactory
 import uk.gov.hmrc.apisubscriptionfields.model._
 import uk.gov.hmrc.apisubscriptionfields.repository._
-import uk.gov.hmrc.apisubscriptionfields.{FieldsDefinitionTestData, SubscriptionFieldsTestData}
+import uk.gov.hmrc.apisubscriptionfields.{FieldDefinitionTestData, SubscriptionFieldsTestData}
 import uk.gov.hmrc.play.test.UnitSpec
 
 import cats.data.NonEmptyList
 import scala.concurrent.Future
 
-class SubscriptionFieldsServiceSpec extends UnitSpec with SubscriptionFieldsTestData with FieldsDefinitionTestData with MockFactory {
+class SubscriptionFieldsServiceSpec extends UnitSpec with SubscriptionFieldsTestData with FieldDefinitionTestData with MockFactory {
 
   private val mockSubscriptionFieldsIdRepository = mock[SubscriptionFieldsRepository]
-  private val mockFieldsDefinitionService = mock[FieldsDefinitionService]
+  private val mockFieldsDefinitionService = mock[ApiFieldDefinitionsService]
   private val mockUuidCreator = new UUIDCreator {
     override def uuid(): UUID = FakeRawFieldsId
   }

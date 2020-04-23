@@ -22,7 +22,7 @@ import play.api.libs.json.{JsValue, Json, JsSuccess, JsError}
 import play.api.mvc._
 import uk.gov.hmrc.apisubscriptionfields.model._
 
-import uk.gov.hmrc.apisubscriptionfields.service.FieldsDefinitionService
+import uk.gov.hmrc.apisubscriptionfields.service.ApiFieldDefinitionsService
 import scala.concurrent.Future
 import scala.util.{Try,Success,Failure}
 import play.api.Logger
@@ -30,7 +30,7 @@ import java.util.UUID
 import scala.concurrent.ExecutionContext
 
 @Singleton
-class FieldsDefinitionController @Inject() (cc: ControllerComponents, service: FieldsDefinitionService)(implicit ec: ExecutionContext) extends CommonController {
+class FieldsDefinitionController @Inject() (cc: ControllerComponents, service: ApiFieldDefinitionsService)(implicit ec: ExecutionContext) extends CommonController {
 
   import JsonFormatters._
 

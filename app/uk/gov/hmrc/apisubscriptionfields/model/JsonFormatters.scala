@@ -94,9 +94,6 @@ trait JsonFormatters extends NonEmptyListFormatters with AccessRequirementsForma
   import eu.timepit.refined.auto._
   import play.api.libs.json._
 
-
-  final val defaultTypeFormat = (__ \ "type").format[String]
-
   implicit val SubscriptionFieldsIdjsonFormat = Json.valueFormat[SubscriptionFieldsId]
 
   implicit val FieldNameFormat = formatRefined[String, FieldNameRegex, Refined]

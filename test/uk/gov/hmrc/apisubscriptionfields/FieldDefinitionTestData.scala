@@ -22,7 +22,8 @@ import uk.gov.hmrc.apisubscriptionfields.model._
 import Types._
 import cats.data.NonEmptyList
 import eu.timepit.refined.api.Refined
-import uk.gov.hmrc.apisubscriptionfields.model.DevhubAccessLevel.Admininstator
+import uk.gov.hmrc.apisubscriptionfields.model.DevhubAccessLevel._
+import uk.gov.hmrc.apisubscriptionfields.model.DevhubAccessRequirement._
 
 trait FieldDefinitionTestData extends TestData {
     import eu.timepit.refined.auto._
@@ -44,7 +45,7 @@ trait FieldDefinitionTestData extends TestData {
   final val FakeFieldDefinitionUrl = FieldDefinition(fieldN(1), "desc1", "hint1", FieldDefinitionType.URL, "short description", Some(FakeUrlValidation))
   final val FakeFieldDefinitionUrlValidationEmpty = FieldDefinition(fieldN(1), "desc1", "hint1", FieldDefinitionType.URL, "short description", None)
   final val FakeFieldDefinitionString = FieldDefinition(fieldN(2), "desc2", "hint2", FieldDefinitionType.STRING, "short description", Some(FakeValidation))
-  final val FakeFieldDefinitionWithAccess: FieldDefinition = FakeFieldDefinitionString.copy(validation = None, access = AccessRequirements(devhub = DevhubAccessRequirements(readOnly = Admininstator)))
+  final val FakeFieldDefinitionWithAccess: FieldDefinition = FakeFieldDefinitionString.copy(validation = None, access = AccessRequirements(devhub = DevhubAccessRequirements(read = AdminOnly)))
   final val FakeFieldDefinitionSecureToken = FieldDefinition(fieldN(3), "desc3", "hint3", FieldDefinitionType.SECURE_TOKEN, "short description", Some(FakeValidation))
   final val NelOfFieldDefinitions = NonEmptyList.fromListUnsafe(List(FakeFieldDefinitionUrl, FakeFieldDefinitionString, FakeFieldDefinitionSecureToken))
   final val FakeApiFieldDefinitions = ApiFieldDefinitions(fakeRawContext, fakeRawVersion, NelOfFieldDefinitions)

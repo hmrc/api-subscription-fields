@@ -16,39 +16,35 @@
 
 package uk.gov.hmrc.apisubscriptionfields.model
 
-
 sealed trait DevhubAccessRequirement
 object DevhubAccessRequirement {
-   final val Default: DevhubAccessRequirement = DevhubAccessLevel.Developer
+   final val Default: DevhubAccessRequirement = Anyone
 
    case object NoOne extends DevhubAccessRequirement
-
-   private[model] def score(dl: DevhubAccessRequirement): Int = dl match {
-    case DevhubAccessRequirement.NoOne => 3
-    case DevhubAccessLevel.Admininstator => 2
-    case DevhubAccessLevel.Developer => 1
-  }
-
+   case object AdminOnly extends DevhubAccessRequirement
+   case object Anyone extends DevhubAccessRequirement
 }
 
 case class DevhubAccessRequirements private (
-    val readOnly: DevhubAccessRequirement,
-    val readWrite: DevhubAccessRequirement) {
-  def satisfiesRead(dal: DevhubAccessLevel): Boolean = dal.satisfiesRequirement(readOnly) // ReadWrite will be at least as strict.
-  def satisfiesWrite(dal: DevhubAccessLevel): Boolean = dal.satisfiesRequirement(readWrite)
+    val read: DevhubAccessRequirement,
+    val write: DevhubAccessRequirement) {
+  def satisfiesRead(dal: DevhubAccessLevel): Boolean = dal.satisfiesRequirement(read) // ReadWrite will be at least as strict.
+  def satisfiesWrite(dal: DevhubAccessLevel): Boolean = dal.satisfiesRequirement(write)
 }
 
+
 object DevhubAccessRequirements {
+  import DevhubAccessRequirement._
+
   final val Default = new DevhubAccessRequirements(DevhubAccessRequirement.Default, DevhubAccessRequirement.Default)
 
-  // Do not allow greater restrictions on readOnly than on readWrite
-  // - it would make no sense to allow NoOne readOnly but everyone readWrite or developer readWrite and admin readOnly
+  // Do not allow greater restrictions on read than on write
+  // - it would make no sense to allow NoOne read but everyone write or developer write and admin read
   //
-  def apply(readOnly: DevhubAccessRequirement, readWrite: DevhubAccessRequirement = DevhubAccessRequirement.Default): DevhubAccessRequirements = {
-    if(DevhubAccessRequirement.score(readOnly) > DevhubAccessRequirement.score(readWrite))
-      new DevhubAccessRequirements(readOnly, readOnly)
-    else
-      new DevhubAccessRequirements(readOnly, readWrite)
+  def apply(read: DevhubAccessRequirement, write: DevhubAccessRequirement = DevhubAccessRequirement.Default): DevhubAccessRequirements = (read,write) match {
+    case (NoOne, _)          => new DevhubAccessRequirements(NoOne, NoOne)
+    case (AdminOnly, Anyone) => new DevhubAccessRequirements(AdminOnly,AdminOnly)
+    case _                   => new DevhubAccessRequirements(read,write)
   }
 }
 
@@ -58,12 +54,17 @@ object AccessRequirements {
 }
 
 
-sealed trait DevhubAccessLevel extends DevhubAccessRequirement {
+sealed trait DevhubAccessLevel {
   def satisfiesRequirement(requirement: DevhubAccessRequirement): Boolean = DevhubAccessLevel.satisfies(requirement)(this)
 }
 object DevhubAccessLevel {
   case object Developer extends DevhubAccessLevel
   case object Admininstator extends DevhubAccessLevel
 
-  def satisfies(requirement: DevhubAccessRequirement)(actual: DevhubAccessLevel): Boolean = DevhubAccessRequirement.score(requirement) <= DevhubAccessRequirement.score(actual)
+  import DevhubAccessRequirement._
+  def satisfies(requirement: DevhubAccessRequirement)(actual: DevhubAccessLevel): Boolean = (requirement, actual) match {
+      case (NoOne, _) => false
+      case (AdminOnly, Developer) => false
+      case _ => true
+  }
 }

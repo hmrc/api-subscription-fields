@@ -1,10 +1,11 @@
 "access": {
-    "devhubAccessLevels": {
-      "readWrite" : "NoOne",
-      "readOnly": "Admin"
+    "devhub": {
+      "write" : "noOne",
+      "read": "adminOnly"
     }
     "gateKeeperAccessLevels": {
-      "readWrite" : "SuperUser",
-      "readOnly": "User"
+      "write" : "SuperUser",
+      "read": "User"
     }
 }
+

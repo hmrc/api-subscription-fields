@@ -19,7 +19,6 @@ package uk.gov.hmrc.apisubscriptionfields.model
 import cats.data.NonEmptyList
 import org.scalatest.{Matchers, WordSpec}
 import uk.gov.hmrc.apisubscriptionfields.{FieldDefinitionTestData, SubscriptionFieldsTestData}
-import uk.gov.hmrc.apisubscriptionfields.model.DevhubAccessLevel.{Admininstator, Developer}
 
 class JsonFormatterSpec extends WordSpec with Matchers with JsonFormatters with SubscriptionFieldsTestData with FieldDefinitionTestData {
 
@@ -110,48 +109,52 @@ class JsonFormatterSpec extends WordSpec with Matchers with JsonFormatters with 
   }
 
   "DevhubAccessRequirements" should {
+    import DevhubAccessRequirement._
+
     "marshall a default correctly" in {
       val rq = DevhubAccessRequirements.Default
 
       Json.stringify(Json.toJson(rq)) shouldBe "{}"
     }
 
-    "marshall a readOnly option" in {
-      val rq = DevhubAccessRequirements(readOnly = DevhubAccessLevel.Admininstator)
+    "marshall a read option" in {
+      val rq = DevhubAccessRequirements(read = AdminOnly)
 
-      Json.stringify(Json.toJson(rq)) shouldBe """{"readOnly":"administrator","readWrite":"administrator"}"""
+      Json.stringify(Json.toJson(rq)) shouldBe """{"read":"adminOnly","write":"adminOnly"}"""
     }
 
-    "marshall a readWrite option" in {
-      val rq = DevhubAccessRequirements(readOnly = DevhubAccessRequirement.Default, readWrite = DevhubAccessRequirement.NoOne)
+    "marshall a write option" in {
+      val rq = DevhubAccessRequirements(read = DevhubAccessRequirement.Default, write = NoOne)
 
-      Json.stringify(Json.toJson(rq)) shouldBe """{"readWrite":"noone"}"""
+      Json.stringify(Json.toJson(rq)) shouldBe """{"write":"noOne"}"""
     }
 
     "marshall a complete option" in {
-      val rq = DevhubAccessRequirements(readOnly = DevhubAccessLevel.Admininstator, readWrite = DevhubAccessRequirement.NoOne)
+      val rq = DevhubAccessRequirements(read = AdminOnly, write = NoOne)
 
-      Json.stringify(Json.toJson(rq)) shouldBe """{"readOnly":"administrator","readWrite":"noone"}"""
+      Json.stringify(Json.toJson(rq)) shouldBe """{"read":"adminOnly","write":"noOne"}"""
     }
 
     "unmarshall a default correctly" in {
       Json.fromJson[DevhubAccessRequirements](Json.parse("{}")) shouldBe JsSuccess(DevhubAccessRequirements.Default)
     }
 
-    "unmarshall a readOnly correctly" in {
-      Json.fromJson[DevhubAccessRequirements](Json.parse("""{"readOnly":"administrator"}""")) shouldBe JsSuccess(DevhubAccessRequirements(readOnly = Admininstator, readWrite = Developer))
+    "unmarshall a read correctly" in {
+      Json.fromJson[DevhubAccessRequirements](Json.parse("""{"read":"adminOnly"}""")) shouldBe JsSuccess(DevhubAccessRequirements(read = AdminOnly, write = AdminOnly))
     }
 
-    "unmarshall a readWrite correctly" in {
-      Json.fromJson[DevhubAccessRequirements](Json.parse("""{"readWrite":"noone"}""")) shouldBe JsSuccess(DevhubAccessRequirements(readOnly = Developer, readWrite = DevhubAccessRequirement.NoOne))
+    "unmarshall a write correctly" in {
+      Json.fromJson[DevhubAccessRequirements](Json.parse("""{"write":"noOne"}""")) shouldBe JsSuccess(DevhubAccessRequirements(read = Anyone, write = NoOne))
     }
 
     "unmarshall a complete option correctly" in {
-      Json.fromJson[DevhubAccessRequirements](Json.parse("""{"readOnly":"administrator","readWrite":"noone"}""")) shouldBe JsSuccess(DevhubAccessRequirements(readOnly = Admininstator, readWrite = DevhubAccessRequirement.NoOne))
+      Json.fromJson[DevhubAccessRequirements](Json.parse("""{"read":"adminOnly","write":"noOne"}""")) shouldBe JsSuccess(DevhubAccessRequirements(read = AdminOnly, write = NoOne))
     }
   }
 
   "AccessRequirements" should {
+    import DevhubAccessRequirement._
+
     "marshalling a default correctly" in {
       val rq = AccessRequirements.Default
 
@@ -159,10 +162,10 @@ class JsonFormatterSpec extends WordSpec with Matchers with JsonFormatters with 
     }
 
     "marshalling with some devhub requirements correctly" in {
-      // readOnly is set explicity, but readWrite will be given this greater restriction too.
-      val rq = AccessRequirements(devhub = DevhubAccessRequirements.apply(readOnly = Admininstator))
+      // read is set explicity, but write will be given this greater restriction too.
+      val rq = AccessRequirements(devhub = DevhubAccessRequirements.apply(read = AdminOnly))
 
-      Json.stringify(Json.toJson(rq)) shouldBe """{"devhub":{"readOnly":"administrator","readWrite":"administrator"}}"""
+      Json.stringify(Json.toJson(rq)) shouldBe """{"devhub":{"read":"adminOnly","write":"adminOnly"}}"""
     }
 
     "unmarshall with default correctly" in {
@@ -170,17 +173,17 @@ class JsonFormatterSpec extends WordSpec with Matchers with JsonFormatters with 
     }
 
     "unmarshall with non default correctly" in {
-      Json.fromJson[AccessRequirements](Json.parse("""{"devhub":{"readOnly":"administrator"}}""")) shouldBe JsSuccess(AccessRequirements(devhub = DevhubAccessRequirements(readOnly = Admininstator)))
+      Json.fromJson[AccessRequirements](Json.parse("""{"devhub":{"read":"adminOnly"}}""")) shouldBe JsSuccess(AccessRequirements(devhub = DevhubAccessRequirements(read = AdminOnly)))
     }
   }
 
   "FieldDefinition" should {
     "marshal json with non default access" in {
-      objectAsJsonString(FakeFieldDefinitionWithAccess) should include(""","access":{"devhub":{"readOnly":"administrator","readWrite":"administrator"}}""")
+      objectAsJsonString(FakeFieldDefinitionWithAccess) should include(""","access":{"devhub":{"read":"adminOnly","write":"adminOnly"}}""")
     }
 
     "marshal json without mention of default access" in {
-      objectAsJsonString(FakeFieldDefinitionWithAccess.copy(access = AccessRequirements.Default)) should not include(""""access":{"devhub":{"readOnly":"administrator", "readWrite":"administrator"}}""")
+      objectAsJsonString(FakeFieldDefinitionWithAccess.copy(access = AccessRequirements.Default)) should not include(""""access":{"devhub":{"read":"adminOnly", "write":"adminOnly"}}""")
       objectAsJsonString(FakeFieldDefinitionWithAccess.copy(access = AccessRequirements.Default)) should not include(""""access"""")
     }
   }

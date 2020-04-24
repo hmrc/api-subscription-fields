@@ -117,7 +117,6 @@ class SubscriptionFieldDefinitionsHappySpec extends AcceptanceTestSpec
       Then(s"a response with a 200 status is received")
       result shouldBe 'defined
       val resultFuture = result.value
-ApiFieldDefinitionsResponse
       status(resultFuture) shouldBe OK
 
       And("the response body should be a valid response")

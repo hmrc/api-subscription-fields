@@ -27,8 +27,8 @@ import play.api.test.Helpers._
 import uk.gov.hmrc.apisubscriptionfields.model._
 import uk.gov.hmrc.apisubscriptionfields.{FieldDefinitionTestData, SubscriptionFieldsTestData}
 import scala.concurrent.Future
-    import scala.concurrent.Await
-    import scala.concurrent.duration._
+import scala.concurrent.Await
+import scala.concurrent.duration._
 
 class ApiSubscriptionFieldsHappySpec extends AcceptanceTestSpec
   with OptionValues

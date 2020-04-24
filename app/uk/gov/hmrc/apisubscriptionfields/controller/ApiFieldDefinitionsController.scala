@@ -21,16 +21,16 @@ import javax.inject.{Inject, Singleton}
 import play.api.libs.json.{JsValue, Json, JsSuccess, JsError}
 import play.api.mvc._
 import uk.gov.hmrc.apisubscriptionfields.model._
-import uk.gov.hmrc.apisubscriptionfields.service.FieldsDefinitionService
 
-import scala.concurrent.ExecutionContext.Implicits.global
+import uk.gov.hmrc.apisubscriptionfields.service.ApiFieldDefinitionsService
 import scala.concurrent.Future
 import scala.util.{Try,Success,Failure}
 import play.api.Logger
 import java.util.UUID
+import scala.concurrent.ExecutionContext
 
 @Singleton
-class FieldsDefinitionController @Inject() (cc: ControllerComponents, service: FieldsDefinitionService) extends CommonController {
+class ApiFieldDefinitionsController @Inject() (cc: ControllerComponents, service: ApiFieldDefinitionsService)(implicit ec: ExecutionContext) extends CommonController {
 
   import JsonFormatters._
 
@@ -44,7 +44,7 @@ class FieldsDefinitionController @Inject() (cc: ControllerComponents, service: F
     NotFound(JsErrorResponse(ErrorCode.NOT_FOUND_CODE, s"Fields definition not found for (${apiContext.value}, ${apiVersion.value})"))
 
   def validateFieldsDefinition(): Action[JsValue] = Action(parse.json) { request =>
-    Try(request.body.validate[FieldsDefinitionRequest]) match {
+    Try(request.body.validate[FieldDefinitionsRequest]) match {
       case Success(JsSuccess(payload, _)) => Ok("")
       case Success(JsError(errs)) => {
         badRequestWithTag( (tag:UUID) => s"A JSON error occurred: [${tag.toString}] ${Json.prettyPrint(JsError.toJson(errs))}")
@@ -56,7 +56,7 @@ class FieldsDefinitionController @Inject() (cc: ControllerComponents, service: F
   }
 
   def upsertFieldsDefinition(apiContext: ApiContext, apiVersion: ApiVersion): Action[JsValue] = Action.async(parse.json) { implicit request =>
-    withJsonBody[FieldsDefinitionRequest] { payload =>
+    withJsonBody[FieldDefinitionsRequest] { payload =>
       service.upsert(apiContext, apiVersion, payload.fieldDefinitions) map {
         case (response, true) => Created(Json.toJson(response))
         case (response, false) => Ok(Json.toJson(response))
@@ -80,7 +80,7 @@ class FieldsDefinitionController @Inject() (cc: ControllerComponents, service: F
     } recover recovery
   }
 
-  private def asActionResult(eventualMaybeResponse: Future[Option[FieldsDefinitionResponse]], apiContext: ApiContext, apiVersion: ApiVersion) = {
+  private def asActionResult(eventualMaybeResponse: Future[Option[ApiFieldDefinitionsResponse]], apiContext: ApiContext, apiVersion: ApiVersion) = {
     eventualMaybeResponse map {
       case Some(subscriptionFields) => Ok(Json.toJson(subscriptionFields))
       case None => notFoundResponse(apiContext, apiVersion)

@@ -21,40 +21,41 @@ import play.api.libs.json.{JsValue, Json}
 import play.api.mvc._
 import play.api.test.Helpers._
 import play.api.test._
-import uk.gov.hmrc.apisubscriptionfields.FieldsDefinitionTestData
-import uk.gov.hmrc.apisubscriptionfields.model.{FieldsDefinitionRequest, JsonFormatters}
-import uk.gov.hmrc.apisubscriptionfields.service.FieldsDefinitionService
+import uk.gov.hmrc.apisubscriptionfields.FieldDefinitionTestData
+import uk.gov.hmrc.apisubscriptionfields.model.{FieldDefinitionsRequest, JsonFormatters}
+import uk.gov.hmrc.apisubscriptionfields.service.ApiFieldDefinitionsService
 import uk.gov.hmrc.play.test.UnitSpec
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class FieldsDefinitionControllerPutSpec extends UnitSpec
-  with FieldsDefinitionTestData
+class ApiFieldDefinitionsControllerPutSpec extends UnitSpec
+  with FieldDefinitionTestData
   with MockFactory
   with JsonFormatters
   with StubControllerComponentsFactory {
 
-  private val mockFieldsDefinitionService = mock[FieldsDefinitionService]
-  private val controller = new FieldsDefinitionController(stubControllerComponents(), mockFieldsDefinitionService)
+  private val mockApiFieldDefinitionsService = mock[ApiFieldDefinitionsService]
+  private val controller = new ApiFieldDefinitionsController(stubControllerComponents(), mockApiFieldDefinitionsService)
 
   "PUT /definition/context/:apiContext/version/:apiVersion" should {
     "return CREATED when created in the repo" in {
-      (mockFieldsDefinitionService.upsert _).
-        expects(FakeContext, FakeVersion, FakeFieldsDefinitions).
-        returns(Future.successful((FakeFieldsDefinitionResponse, true)))
+      (mockApiFieldDefinitionsService.upsert _).
+        expects(FakeContext, FakeVersion, NelOfFieldDefinitions).
+        returns(Future.successful((FakeApiFieldDefinitionsResponse, true)))
 
-      val json = mkJson(FieldsDefinitionRequest(FakeFieldsDefinitions))
+      val json = mkJson(FieldDefinitionsRequest(NelOfFieldDefinitions))
       testSubmitResult(mkRequest(json)) { result =>
         status(result) shouldBe CREATED
       }
     }
 
     "return OK when updated in the repo" in {
-      (mockFieldsDefinitionService.upsert _).
-        expects(FakeContext, FakeVersion, FakeFieldsDefinitions).
-        returns(Future.successful((FakeFieldsDefinitionResponse, false)))
+      (mockApiFieldDefinitionsService.upsert _).
+        expects(FakeContext, FakeVersion, NelOfFieldDefinitions).
+        returns(Future.successful((FakeApiFieldDefinitionsResponse, false)))
 
-      val json = mkJson(FieldsDefinitionRequest(FakeFieldsDefinitions))
+      val json = mkJson(FieldDefinitionsRequest(NelOfFieldDefinitions))
       testSubmitResult(mkRequest(json)) { result =>
         status(result) shouldBe OK
       }
@@ -78,5 +79,5 @@ class FieldsDefinitionControllerPutSpec extends UnitSpec
     FakeRequest()
       .withJsonBody(jsonBody).map(r => r.json)
 
-  private def mkJson(model: FieldsDefinitionRequest) = Json.toJson(model)(Json.writes[FieldsDefinitionRequest])
+  private def mkJson(model: FieldDefinitionsRequest) = Json.toJson(model)(Json.writes[FieldDefinitionsRequest])
 }

@@ -35,7 +35,6 @@ class SubscriptionFieldsRepositorySpec extends UnitSpec
   with BeforeAndAfterAll
   with BeforeAndAfterEach
   with MongoSpecSupport
-  with MongoFormatters
   with JsonFormatters
   with SubscriptionFieldsTestData
   with MockFactory { self =>

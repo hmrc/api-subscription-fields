@@ -33,10 +33,10 @@ class UUIDCreator {
 }
 
 @Singleton
-class SubscriptionFieldsService @Inject() (repository: SubscriptionFieldsRepository, uuidCreator: UUIDCreator, fieldsDefinitionService: FieldsDefinitionService) {
+class SubscriptionFieldsService @Inject() (repository: SubscriptionFieldsRepository, uuidCreator: UUIDCreator, apiFieldDefinitionsService: ApiFieldDefinitionsService) {
 
   def validate(context: ApiContext, version: ApiVersion, fields: Fields): Future[SubsFieldValidationResponse] = {
-    val fieldDefinitionResponse: Future[Option[FieldsDefinitionResponse]] = fieldsDefinitionService.get(context, version)
+    val fieldDefinitionResponse: Future[Option[ApiFieldDefinitionsResponse]] = apiFieldDefinitionsService.get(context, version)
     val fieldDefinitions: Future[Option[NonEmptyList[FieldDefinition]]] = fieldDefinitionResponse.map(_.map(_.fieldDefinitions))
 
     fieldDefinitions.map(

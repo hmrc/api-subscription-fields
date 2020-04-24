@@ -29,25 +29,25 @@ import Types._
 
 import scala.concurrent.Future
 
-@ImplementedBy(classOf[FieldsDefinitionMongoRepository])
-trait FieldsDefinitionRepository {
+@ImplementedBy(classOf[ApiFieldDefinitionsMongoRepository])
+trait ApiFieldDefinitionsRepository {
 
-  def save(fieldsDefinition: FieldsDefinition): Future[(FieldsDefinition, IsInsert)]
+  def save(definitions: ApiFieldDefinitions): Future[(ApiFieldDefinitions, IsInsert)]
 
-  def fetch(apiContext: ApiContext, apiVersion: ApiVersion): Future[Option[FieldsDefinition]]
-  def fetchAll(): Future[List[FieldsDefinition]]
+  def fetch(apiContext: ApiContext, apiVersion: ApiVersion): Future[Option[ApiFieldDefinitions]]
+
+  def fetchAll(): Future[List[ApiFieldDefinitions]]
 
   def delete(apiContext: ApiContext, apiVersion: ApiVersion): Future[Boolean]
 }
 
 @Singleton
-class FieldsDefinitionMongoRepository @Inject() (mongoDbProvider: MongoDbProvider)
-    extends ReactiveRepository[FieldsDefinition, BSONObjectID]("fieldsDefinitions", mongoDbProvider.mongo, MongoFormatters.FieldsDefinitionJF, ReactiveMongoFormats.objectIdFormats)
-    with FieldsDefinitionRepository
-    with MongoCrudHelper[FieldsDefinition] {
+class ApiFieldDefinitionsMongoRepository @Inject() (mongoDbProvider: MongoDbProvider)
+    extends ReactiveRepository[ApiFieldDefinitions, BSONObjectID]("fieldsDefinitions", mongoDbProvider.mongo, JsonFormatters.ApiFieldDefinitionsJF, ReactiveMongoFormats.objectIdFormats)
+    with ApiFieldDefinitionsRepository
+    with MongoCrudHelper[ApiFieldDefinitions] {
 
   override val mongoCollection: JSONCollection = collection
-  private implicit val format = MongoFormatters.FieldsDefinitionJF
 
   override def indexes = Seq(
     createCompoundIndex(
@@ -60,27 +60,28 @@ class FieldsDefinitionMongoRepository @Inject() (mongoDbProvider: MongoDbProvide
     )
   )
 
-  override def save(fieldsDefinition: FieldsDefinition): Future[(FieldsDefinition, IsInsert)] = {
-    save(fieldsDefinition, selectorForFieldsDefinition(fieldsDefinition))
+  override def save(definitions: ApiFieldDefinitions): Future[(ApiFieldDefinitions, IsInsert)] = {
+    import JsonFormatters.ApiFieldDefinitionsJF
+    save(definitions, selectorFor(definitions))
   }
 
-  override def fetch(apiContext: ApiContext, apiVersion: ApiVersion): Future[Option[FieldsDefinition]] = {
-    getOne(selectorForFieldsDefinition(apiContext, apiVersion))
+  override def fetch(apiContext: ApiContext, apiVersion: ApiVersion): Future[Option[ApiFieldDefinitions]] = {
+    getOne(selectorFor(apiContext, apiVersion))
   }
 
-  override def fetchAll(): Future[List[FieldsDefinition]] = {
+  override def fetchAll(): Future[List[ApiFieldDefinitions]] = {
     getMany(Json.obj())
   }
 
   override def delete(apiContext: ApiContext, apiVersion: ApiVersion): Future[Boolean] = {
-    deleteOne(selectorForFieldsDefinition(apiContext, apiVersion))
+    deleteOne(selectorFor(apiContext, apiVersion))
   }
 
-  private def selectorForFieldsDefinition(apiContext: ApiContext, apiVersion: ApiVersion): JsObject = {
+  private def selectorFor(apiContext: ApiContext, apiVersion: ApiVersion): JsObject = {
     selector(apiContext.value, apiVersion.value)
   }
 
-  private def selectorForFieldsDefinition(fd: FieldsDefinition): JsObject = {
+  private def selectorFor(fd: ApiFieldDefinitions): JsObject = {
     selector(fd.apiContext, fd.apiVersion)
   }
 

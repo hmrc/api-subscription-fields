@@ -22,14 +22,6 @@ import uk.gov.hmrc.apisubscriptionfields.model.FieldDefinitionType.FieldDefiniti
 import eu.timepit.refined._
 import Types._
 
-case class ClientId(value: String) extends AnyVal
-
-case class ApiContext(value: String) extends AnyVal
-
-case class ApiVersion(value: String) extends AnyVal
-
-case class SubscriptionFieldsId(value: UUID) extends AnyVal
-
 sealed trait ValidationRule {
   def validate(value: FieldValue): Boolean
 }
@@ -54,6 +46,15 @@ object FieldDefinitionType extends Enumeration {
   val STRING = Value("STRING")
 }
 
-case class FieldDefinition(name: FieldName, description: String, hint: String = "", `type`: FieldDefinitionType, shortDescription: String, validation: Option[ValidationGroup] = None)
+case class FieldDefinition(
+  name: FieldName,
+  description: String,
+  hint: String = "",
+  `type`: FieldDefinitionType,
+  shortDescription: String,
+  validation: Option[ValidationGroup] = None,
+  access: AccessRequirements = AccessRequirements.Default)
+
+case class ApiFieldDefinitions(apiContext: String, apiVersion: String, fieldDefinitions: NEL[FieldDefinition])
 
 case class SubscriptionFields(clientId: String, apiContext: String, apiVersion: String, fieldsId: UUID, fields: Fields)

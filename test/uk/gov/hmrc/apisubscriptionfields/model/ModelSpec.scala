@@ -18,10 +18,10 @@ package uk.gov.hmrc.apisubscriptionfields.model
 
 import uk.gov.hmrc.play.test.UnitSpec
 import uk.gov.hmrc.apisubscriptionfields.SubscriptionFieldsTestData
-import uk.gov.hmrc.apisubscriptionfields.FieldsDefinitionTestData
+import uk.gov.hmrc.apisubscriptionfields.FieldDefinitionTestData
 
 
-class ModelSpec extends UnitSpec with SubscriptionFieldsTestData with FieldsDefinitionTestData with ValidationRuleTestData {
+class ModelSpec extends UnitSpec with SubscriptionFieldsTestData with FieldDefinitionTestData with ValidationRuleTestData {
   "RegexValidationRule" should {
 
     "return true when the value is valid - correct case" in {

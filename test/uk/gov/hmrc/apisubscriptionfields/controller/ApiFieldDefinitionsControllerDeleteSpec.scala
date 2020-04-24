@@ -20,17 +20,18 @@ import org.scalamock.scalatest.MockFactory
 import play.api.libs.json.{JsDefined, JsString}
 import play.api.test.{FakeRequest, StubControllerComponentsFactory}
 import play.api.test.Helpers._
-import uk.gov.hmrc.apisubscriptionfields.FieldsDefinitionTestData
+import uk.gov.hmrc.apisubscriptionfields.FieldDefinitionTestData
 import uk.gov.hmrc.apisubscriptionfields.model.JsonFormatters
-import uk.gov.hmrc.apisubscriptionfields.service.FieldsDefinitionService
+import uk.gov.hmrc.apisubscriptionfields.service.ApiFieldDefinitionsService
 import uk.gov.hmrc.play.test.UnitSpec
 
 import scala.concurrent.Future
+import scala.concurrent.ExecutionContext.Implicits.global
 
-class FieldsDefinitionControllerDeleteSpec extends UnitSpec with FieldsDefinitionTestData with MockFactory with JsonFormatters with StubControllerComponentsFactory {
+class ApiFieldDefinitionsControllerDeleteSpec extends UnitSpec with FieldDefinitionTestData with MockFactory with JsonFormatters with StubControllerComponentsFactory {
 
-  private val mockFieldsDefinitionService = mock[FieldsDefinitionService]
-  private val controller = new FieldsDefinitionController(stubControllerComponents(), mockFieldsDefinitionService)
+  private val mockFieldsDefinitionService = mock[ApiFieldDefinitionsService]
+  private val controller = new ApiFieldDefinitionsController(stubControllerComponents(), mockFieldsDefinitionService)
 
   "DELETE /definition/context/:apiContext/version/:apiVersion" should {
     "return NO_CONTENT (204) when successfully deleted from repo" in {

@@ -21,20 +21,20 @@ import java.util.UUID
 import org.scalamock.scalatest.MockFactory
 import uk.gov.hmrc.apisubscriptionfields.model._
 import uk.gov.hmrc.apisubscriptionfields.repository._
-import uk.gov.hmrc.apisubscriptionfields.{FieldsDefinitionTestData, SubscriptionFieldsTestData}
+import uk.gov.hmrc.apisubscriptionfields.{FieldDefinitionTestData, SubscriptionFieldsTestData}
 import uk.gov.hmrc.play.test.UnitSpec
 
 import cats.data.NonEmptyList
 import scala.concurrent.Future
 
-class SubscriptionFieldsServiceSpec extends UnitSpec with SubscriptionFieldsTestData with FieldsDefinitionTestData with MockFactory {
+class SubscriptionFieldsServiceSpec extends UnitSpec with SubscriptionFieldsTestData with FieldDefinitionTestData with MockFactory {
 
   private val mockSubscriptionFieldsIdRepository = mock[SubscriptionFieldsRepository]
-  private val mockFieldsDefinitionService = mock[FieldsDefinitionService]
+  private val mockApiFieldDefinitionsService = mock[ApiFieldDefinitionsService]
   private val mockUuidCreator = new UUIDCreator {
     override def uuid(): UUID = FakeRawFieldsId
   }
-  private val service = new SubscriptionFieldsService(mockSubscriptionFieldsIdRepository, mockUuidCreator, mockFieldsDefinitionService)
+  private val service = new SubscriptionFieldsService(mockSubscriptionFieldsIdRepository, mockUuidCreator, mockApiFieldDefinitionsService)
 
   "getAll" should {
     "return an empty list when no entry exists in the database collection" in {
@@ -185,17 +185,17 @@ class SubscriptionFieldsServiceSpec extends UnitSpec with SubscriptionFieldsTest
   "validate" should {
     import eu.timepit.refined.auto._
     "returns ValidSubsFieldValidationResponse when fields are Valid " in {
-      (mockFieldsDefinitionService get (_: ApiContext, _: ApiVersion))
+      (mockApiFieldDefinitionsService get (_: ApiContext, _: ApiVersion))
         .expects(FakeContext, FakeVersion)
-        .returns(Some(FakeFieldsDefinitionResponseWithRegex))
+        .returns(Some(FakeApiFieldDefinitionsResponseWithRegex))
 
       await(service.validate(FakeContext, FakeVersion, SubscriptionFieldsMatchRegexValidation)) shouldBe ValidSubsFieldValidationResponse
     }
 
     "returns InvalidSubsFieldValidationResponse when fields are Invalid " in {
-      (mockFieldsDefinitionService get (_: ApiContext, _: ApiVersion))
+      (mockApiFieldDefinitionsService get (_: ApiContext, _: ApiVersion))
         .expects(FakeContext, FakeVersion)
-        .returns(Some(FakeFieldsDefinitionResponseWithRegex))
+        .returns(Some(FakeApiFieldDefinitionsResponseWithRegex))
 
       await(service.validate(FakeContext, FakeVersion, SubscriptionFieldsDoNotMatchRegexValidation)) shouldBe FakeInvalidSubsFieldValidationResponse2
     }

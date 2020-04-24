@@ -56,7 +56,7 @@ class SubscriptionFieldsMongoRepository @Inject()(mongoDbProvider: MongoDbProvid
   )
   with SubscriptionFieldsRepository
   with MongoCrudHelper[SubscriptionFields]
-  with MongoFormatters {
+  with JsonFormatters {
 
   override val mongoCollection: JSONCollection = collection
 

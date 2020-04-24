@@ -21,4 +21,4 @@ import Types._
 
 case class SubscriptionFieldsRequest(fields: Fields)
 
-case class FieldsDefinitionRequest(fieldDefinitions: NonEmptyList[FieldDefinition])
+case class FieldDefinitionsRequest(fieldDefinitions: NonEmptyList[FieldDefinition])

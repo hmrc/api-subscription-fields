@@ -18,9 +18,9 @@ package uk.gov.hmrc.apisubscriptionfields.model
 
 import cats.data.NonEmptyList
 import org.scalatest.{Matchers, WordSpec}
-import uk.gov.hmrc.apisubscriptionfields.{FieldsDefinitionTestData, SubscriptionFieldsTestData}
+import uk.gov.hmrc.apisubscriptionfields.{FieldDefinitionTestData, SubscriptionFieldsTestData}
 
-class JsonFormatterSpec extends WordSpec with Matchers with JsonFormatters with SubscriptionFieldsTestData with FieldsDefinitionTestData {
+class JsonFormatterSpec extends WordSpec with Matchers with JsonFormatters with SubscriptionFieldsTestData with FieldDefinitionTestData {
 
   import play.api.libs.json._
 
@@ -28,9 +28,9 @@ class JsonFormatterSpec extends WordSpec with Matchers with JsonFormatters with 
   private val subscriptionFieldsResponse = SubscriptionFieldsResponse(fakeRawClientId, fakeRawContext, fakeRawVersion, FakeFieldsId, fakeFields)
   private val bulkSubscriptionFieldsResponse = BulkSubscriptionFieldsResponse(Seq(subscriptionFieldsResponse))
 
-  private val fakeFieldsDefinitionResponse = FieldsDefinitionResponse(fakeRawContext, fakeRawVersion, NonEmptyList.one(FakeFieldDefinitionUrl))
-  private val fakeFieldsDefinitionResponseEmptyValidation = FieldsDefinitionResponse(fakeRawContext, fakeRawVersion, NonEmptyList.one(FakeFieldDefinitionUrlValidationEmpty))
-  private val bulkFieldsDefinitionResponse = BulkFieldsDefinitionsResponse(Seq(fakeFieldsDefinitionResponse))
+  private val fakeApiFieldDefinitionsResponse = ApiFieldDefinitionsResponse(fakeRawContext, fakeRawVersion, NonEmptyList.one(FakeFieldDefinitionUrl))
+  private val fakeApiFieldDefinitionsResponseEmptyValidation = ApiFieldDefinitionsResponse(fakeRawContext, fakeRawVersion, NonEmptyList.one(FakeFieldDefinitionUrlValidationEmpty))
+  private val bulkFieldsDefinitionResponse = BulkApiFieldDefinitionsResponse(Seq(fakeApiFieldDefinitionsResponse))
 
   private def objectAsJsonString[A](a: A)(implicit t: Writes[A]) = Json.asciiStringify(Json.toJson(a))
 
@@ -54,6 +54,30 @@ class JsonFormatterSpec extends WordSpec with Matchers with JsonFormatters with 
     }
   }
 
+  "ApiFieldDefinitionsResponse" should {
+    "marshal json" in {
+      objectAsJsonString(fakeApiFieldDefinitionsResponse) shouldBe fieldDefinitionJson
+    }
+
+    "marshal json when ValidationGroup is empty" in {
+      objectAsJsonString(fakeApiFieldDefinitionsResponseEmptyValidation) shouldBe fieldDefinitionEmptyValidationJson
+    }
+
+    "unmarshal text" in {
+      Json.parse(fieldDefinitionJson).validate[ApiFieldDefinitionsResponse] match {
+        case JsSuccess(r, _) => r shouldBe fakeApiFieldDefinitionsResponse
+        case JsError(e)      => fail(s"Should have parsed json text but got $e")
+      }
+    }
+
+    "unmarshal text  when ValidationGroup is empty" in {
+      Json.parse(fieldDefinitionEmptyValidationJson).validate[ApiFieldDefinitionsResponse] match {
+        case JsSuccess(r, _) => r shouldBe fakeApiFieldDefinitionsResponseEmptyValidation
+        case JsError(e)      => fail(s"Should have parsed json text but got $e")
+      }
+    }
+  }
+
   "BulkSubscriptionFieldsResponse" should {
     val json = s"""{"subscriptions":[$subscriptionFieldJson]}"""
 
@@ -69,31 +93,7 @@ class JsonFormatterSpec extends WordSpec with Matchers with JsonFormatters with 
     }
   }
 
-  "FieldsDefinitionResponse" should {
-    "marshal json" in {
-      objectAsJsonString(fakeFieldsDefinitionResponse) shouldBe fieldDefinitionJson
-    }
-
-    "marshal json when ValidationGroup is empty" in {
-      objectAsJsonString(fakeFieldsDefinitionResponseEmptyValidation) shouldBe fieldDefinitionEmptyValidationJson
-    }
-
-    "unmarshal text" in {
-      Json.parse(fieldDefinitionJson).validate[FieldsDefinitionResponse] match {
-        case JsSuccess(r, _) => r shouldBe fakeFieldsDefinitionResponse
-        case JsError(e)      => fail(s"Should have parsed json text but got $e")
-      }
-    }
-
-    "unmarshal text  when ValidationGroup is empty" in {
-      Json.parse(fieldDefinitionEmptyValidationJson).validate[FieldsDefinitionResponse] match {
-        case JsSuccess(r, _) => r shouldBe fakeFieldsDefinitionResponseEmptyValidation
-        case JsError(e)      => fail(s"Should have parsed json text but got $e")
-      }
-    }
-  }
-
-  "BulkFieldsDefinitionsResponse" should {
+  "BulkApiFieldDefinitionsResponse" should {
     val json = s"""{"apis":[$fieldDefinitionJson]}"""
 
     "marshal json" in {
@@ -101,10 +101,90 @@ class JsonFormatterSpec extends WordSpec with Matchers with JsonFormatters with 
     }
 
     "unmarshal text" in {
-      Json.parse(json).validate[BulkFieldsDefinitionsResponse] match {
+      Json.parse(json).validate[BulkApiFieldDefinitionsResponse] match {
         case JsSuccess(r, _) => r shouldBe bulkFieldsDefinitionResponse
         case JsError(e)      => fail(s"Should have parsed json text but got $e")
       }
+    }
+  }
+
+  "DevhubAccessRequirements" should {
+    import DevhubAccessRequirement._
+
+    "marshall a default correctly" in {
+      val rq = DevhubAccessRequirements.Default
+
+      Json.stringify(Json.toJson(rq)) shouldBe "{}"
+    }
+
+    "marshall a read option" in {
+      val rq = DevhubAccessRequirements(read = AdminOnly)
+
+      Json.stringify(Json.toJson(rq)) shouldBe """{"read":"adminOnly","write":"adminOnly"}"""
+    }
+
+    "marshall a write option" in {
+      val rq = DevhubAccessRequirements(read = DevhubAccessRequirement.Default, write = NoOne)
+
+      Json.stringify(Json.toJson(rq)) shouldBe """{"write":"noOne"}"""
+    }
+
+    "marshall a complete option" in {
+      val rq = DevhubAccessRequirements(read = AdminOnly, write = NoOne)
+
+      Json.stringify(Json.toJson(rq)) shouldBe """{"read":"adminOnly","write":"noOne"}"""
+    }
+
+    "unmarshall a default correctly" in {
+      Json.fromJson[DevhubAccessRequirements](Json.parse("{}")) shouldBe JsSuccess(DevhubAccessRequirements.Default)
+    }
+
+    "unmarshall a read correctly" in {
+      Json.fromJson[DevhubAccessRequirements](Json.parse("""{"read":"adminOnly"}""")) shouldBe JsSuccess(DevhubAccessRequirements(read = AdminOnly, write = AdminOnly))
+    }
+
+    "unmarshall a write correctly" in {
+      Json.fromJson[DevhubAccessRequirements](Json.parse("""{"write":"noOne"}""")) shouldBe JsSuccess(DevhubAccessRequirements(read = Anyone, write = NoOne))
+    }
+
+    "unmarshall a complete option correctly" in {
+      Json.fromJson[DevhubAccessRequirements](Json.parse("""{"read":"adminOnly","write":"noOne"}""")) shouldBe JsSuccess(DevhubAccessRequirements(read = AdminOnly, write = NoOne))
+    }
+  }
+
+  "AccessRequirements" should {
+    import DevhubAccessRequirement._
+
+    "marshalling a default correctly" in {
+      val rq = AccessRequirements.Default
+
+      Json.stringify(Json.toJson(rq)) shouldBe """{"devhub":{}}"""
+    }
+
+    "marshalling with some devhub requirements correctly" in {
+      // read is set explicity, but write will be given this greater restriction too.
+      val rq = AccessRequirements(devhub = DevhubAccessRequirements.apply(read = AdminOnly))
+
+      Json.stringify(Json.toJson(rq)) shouldBe """{"devhub":{"read":"adminOnly","write":"adminOnly"}}"""
+    }
+
+    "unmarshall with default correctly" in {
+      Json.fromJson[AccessRequirements](Json.parse("""{"devhub":{}}""")) shouldBe JsSuccess(AccessRequirements.Default)
+    }
+
+    "unmarshall with non default correctly" in {
+      Json.fromJson[AccessRequirements](Json.parse("""{"devhub":{"read":"adminOnly"}}""")) shouldBe JsSuccess(AccessRequirements(devhub = DevhubAccessRequirements(read = AdminOnly)))
+    }
+  }
+
+  "FieldDefinition" should {
+    "marshal json with non default access" in {
+      objectAsJsonString(FakeFieldDefinitionWithAccess) should include(""","access":{"devhub":{"read":"adminOnly","write":"adminOnly"}}""")
+    }
+
+    "marshal json without mention of default access" in {
+      objectAsJsonString(FakeFieldDefinitionWithAccess.copy(access = AccessRequirements.Default)) should not include(""""access":{"devhub":{"read":"adminOnly", "write":"adminOnly"}}""")
+      objectAsJsonString(FakeFieldDefinitionWithAccess.copy(access = AccessRequirements.Default)) should not include(""""access"""")
     }
   }
 }

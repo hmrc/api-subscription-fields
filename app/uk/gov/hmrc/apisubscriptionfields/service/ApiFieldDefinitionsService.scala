@@ -18,20 +18,19 @@ package uk.gov.hmrc.apisubscriptionfields.service
 
 import javax.inject.{Inject, Singleton}
 import uk.gov.hmrc.apisubscriptionfields.model._
-import uk.gov.hmrc.apisubscriptionfields.repository.{FieldsDefinition, FieldsDefinitionRepository}
-
-import scala.concurrent.ExecutionContext.Implicits.global
+import Types._
 import scala.concurrent.Future
 import cats.data.NonEmptyList
-import Types._
+import scala.concurrent.ExecutionContext
+import uk.gov.hmrc.apisubscriptionfields.repository.ApiFieldDefinitionsRepository
 
 @Singleton
-class FieldsDefinitionService @Inject() (repository: FieldsDefinitionRepository) {
+class ApiFieldDefinitionsService @Inject() (repository: ApiFieldDefinitionsRepository)(implicit ec: ExecutionContext) {
 
-  def upsert(apiContext: ApiContext, apiVersion: ApiVersion, fieldDefinitions: NonEmptyList[FieldDefinition]): Future[(FieldsDefinitionResponse, IsInsert)] = {
-    val fieldsDefinition = FieldsDefinition(apiContext.value, apiVersion.value, fieldDefinitions)
-    repository.save(fieldsDefinition).map {
-      case (fd: FieldsDefinition, inserted: IsInsert) => (asResponse(fd), inserted)
+  def upsert(apiContext: ApiContext, apiVersion: ApiVersion, fieldDefinitions: NonEmptyList[FieldDefinition]): Future[(ApiFieldDefinitionsResponse, IsInsert)] = {
+    val definitions = ApiFieldDefinitions(apiContext.value, apiVersion.value, fieldDefinitions)
+    repository.save(definitions).map {
+      case (fd: ApiFieldDefinitions, inserted: IsInsert) => (asResponse(fd), inserted)
     }
   }
 
@@ -39,19 +38,19 @@ class FieldsDefinitionService @Inject() (repository: FieldsDefinitionRepository)
     repository.delete(apiContext, apiVersion)
   }
 
-  def get(apiContext: ApiContext, apiVersion: ApiVersion): Future[Option[FieldsDefinitionResponse]] = {
+  def get(apiContext: ApiContext, apiVersion: ApiVersion): Future[Option[ApiFieldDefinitionsResponse]] = {
     for {
       fetch <- repository.fetch(apiContext, apiVersion)
     } yield fetch.map(asResponse)
   }
 
-  def getAll: Future[BulkFieldsDefinitionsResponse] = {
+  def getAll: Future[BulkApiFieldDefinitionsResponse] = {
     (for {
       defs <- repository.fetchAll()
-    } yield defs.map(asResponse)) map (BulkFieldsDefinitionsResponse(_))
+    } yield defs.map(asResponse)) map (BulkApiFieldDefinitionsResponse(_))
   }
 
-  private def asResponse(fieldsDefinition: FieldsDefinition): FieldsDefinitionResponse = {
-    FieldsDefinitionResponse(fieldsDefinition.apiContext, fieldsDefinition.apiVersion, fieldsDefinition.fieldDefinitions)
+  private def asResponse(definitions: ApiFieldDefinitions): ApiFieldDefinitionsResponse = {
+    ApiFieldDefinitionsResponse(definitions.apiContext, definitions.apiVersion, definitions.fieldDefinitions)
   }
 }

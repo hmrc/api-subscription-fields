@@ -14,13 +14,15 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.apisubscriptionfields.repository
+package uk.gov.hmrc.apisubscriptionfields.model
 
-import play.api.libs.json.Json
-import uk.gov.hmrc.apisubscriptionfields.model.JsonFormatters
+import java.util.UUID
 
-trait MongoFormatters extends JsonFormatters {
-  implicit val FieldsDefinitionJF = Json.format[FieldsDefinition]
-}
 
-object MongoFormatters extends MongoFormatters
+case class ClientId(value: String) extends AnyVal
+
+case class ApiContext(value: String) extends AnyVal
+
+case class ApiVersion(value: String) extends AnyVal
+
+case class SubscriptionFieldsId(value: UUID) extends AnyVal

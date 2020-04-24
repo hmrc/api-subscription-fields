@@ -25,9 +25,9 @@ case class SubscriptionFieldsResponse(clientId: String, apiContext: String, apiV
 
 case class BulkSubscriptionFieldsResponse(subscriptions: Seq[SubscriptionFieldsResponse])
 
-case class FieldsDefinitionResponse(apiContext: String, apiVersion: String, fieldDefinitions: NonEmptyList[FieldDefinition])
+case class ApiFieldDefinitionsResponse(apiContext: String, apiVersion: String, fieldDefinitions: NonEmptyList[FieldDefinition])
 
-case class BulkFieldsDefinitionsResponse(apis: Seq[FieldsDefinitionResponse])
+case class BulkApiFieldDefinitionsResponse(apis: Seq[ApiFieldDefinitionsResponse])
 
 sealed trait SubsFieldValidationResponse
 

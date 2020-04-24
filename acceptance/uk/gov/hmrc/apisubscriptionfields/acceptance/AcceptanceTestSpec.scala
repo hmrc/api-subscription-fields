@@ -37,14 +37,14 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
 import cats.data.NonEmptyList
-import uk.gov.hmrc.apisubscriptionfields.FieldsDefinitionTestData
+import uk.gov.hmrc.apisubscriptionfields.FieldDefinitionTestData
 
 trait AcceptanceTestSpec extends FeatureSpec
   with GivenWhenThen
   with BeforeAndAfterAll
   with Matchers
   with GuiceOneServerPerSuite
-  with FieldsDefinitionTestData {
+  with FieldDefinitionTestData {
 
   protected val ValidRequest = FakeRequest()
     .withHeaders(RequestHeaders.ACCEPT_HMRC_JSON_HEADER)
@@ -74,9 +74,9 @@ trait AcceptanceTestSpec extends FeatureSpec
     fakeRequestWithHeaders.withMethod(PUT).withJsonBody(Json.toJson(contents))
 
   protected def validDefinitionPutRequest(fieldDefinitions: NonEmptyList[FieldDefinition]): FakeRequest[AnyContentAsJson] =
-    validDefinitionPutRequest(FieldsDefinitionRequest(fieldDefinitions))
+    validDefinitionPutRequest(FieldDefinitionsRequest(fieldDefinitions))
 
-  protected def validDefinitionPutRequest(contents: FieldsDefinitionRequest): FakeRequest[AnyContentAsJson] =
+  protected def validDefinitionPutRequest(contents: FieldDefinitionsRequest): FakeRequest[AnyContentAsJson] =
     fakeRequestWithHeaders.withMethod(PUT).withJsonBody(Json.toJson(contents))
 
   protected def fakeRequestWithHeaders: FakeRequest[AnyContentAsEmpty.type] = {

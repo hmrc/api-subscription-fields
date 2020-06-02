@@ -44,6 +44,7 @@ object FieldDefinitionType extends Enumeration {
   val URL = Value("URL")
   val SECURE_TOKEN = Value("SecureToken")
   val STRING = Value("STRING")
+  val PPNS_TOPIC = Value("PPNSTopic")
 }
 
 case class FieldDefinition(

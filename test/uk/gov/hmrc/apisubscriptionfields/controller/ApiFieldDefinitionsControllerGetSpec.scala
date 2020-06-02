@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.apisubscriptionfields.controller
 
-import org.scalamock.scalatest.MockFactory
 import play.api.libs.json.{JsDefined, JsString, Json}
 import play.api.test.Helpers._
 import play.api.test._
@@ -25,11 +24,14 @@ import uk.gov.hmrc.apisubscriptionfields.model.{BulkApiFieldDefinitionsResponse,
 import uk.gov.hmrc.apisubscriptionfields.service.ApiFieldDefinitionsService
 import uk.gov.hmrc.play.test.UnitSpec
 
-import scala.concurrent.Future
+import scala.concurrent.Future.{successful,failed}
 import scala.concurrent.ExecutionContext.Implicits.global
 import uk.gov.hmrc.apisubscriptionfields.model.ApiFieldDefinitionsResponse
+import org.scalatest.mockito.MockitoSugar
 
-class ApiFieldDefinitionsControllerGetSpec extends UnitSpec with FieldDefinitionTestData with MockFactory with JsonFormatters with StubControllerComponentsFactory {
+import org.mockito.Mockito.when
+
+class ApiFieldDefinitionsControllerGetSpec extends UnitSpec with FieldDefinitionTestData with MockitoSugar with JsonFormatters with StubControllerComponentsFactory {
 
   private val mockFieldsDefinitionService = mock[ApiFieldDefinitionsService]
   private val controller = new ApiFieldDefinitionsController(stubControllerComponents(), mockFieldsDefinitionService)
@@ -154,7 +156,7 @@ class ApiFieldDefinitionsControllerGetSpec extends UnitSpec with FieldDefinition
 
   "GET /definition/context/:apiContext/version/:apiVersion" should {
     "return OK when the expected record exists in the repo" in {
-      mockFieldsDefinitionService.get _ expects (FakeContext, FakeVersion) returns Future.successful(Some(responseModel))
+      when(mockFieldsDefinitionService.get(FakeContext, FakeVersion)).thenReturn(successful(Some(responseModel)))
 
       val result = await(controller.getFieldsDefinition(FakeContext, FakeVersion)(FakeRequest()))
 
@@ -163,7 +165,7 @@ class ApiFieldDefinitionsControllerGetSpec extends UnitSpec with FieldDefinition
     }
 
     "return NOT_FOUND when entity does not exist in the repo" in {
-      mockFieldsDefinitionService.get _ expects (FakeContext, FakeVersion) returns Future.successful(None)
+      when(mockFieldsDefinitionService.get(FakeContext, FakeVersion)).thenReturn(successful(None))
 
       val result = await(controller.getFieldsDefinition(FakeContext, FakeVersion)(FakeRequest()))
 
@@ -173,7 +175,7 @@ class ApiFieldDefinitionsControllerGetSpec extends UnitSpec with FieldDefinition
     }
 
     "return INTERNAL_SERVER_ERROR when service throws exception" in {
-      mockFieldsDefinitionService.get _ expects (FakeContext, FakeVersion) returns Future.failed(emulatedFailure)
+      when(mockFieldsDefinitionService.get(FakeContext, FakeVersion)).thenReturn(failed(emulatedFailure))
 
       val result = await(controller.getFieldsDefinition(FakeContext, FakeVersion)(FakeRequest()))
 
@@ -185,7 +187,7 @@ class ApiFieldDefinitionsControllerGetSpec extends UnitSpec with FieldDefinition
 
   "GET /definition" should {
     "return OK with all field definitions" in {
-      mockFieldsDefinitionService.getAll _ expects () returns Future.successful(allResponseModel)
+      when(mockFieldsDefinitionService.getAll).thenReturn(successful(allResponseModel))
 
       val result = await(controller.getAllFieldsDefinitions(FakeRequest()))
 
@@ -194,7 +196,7 @@ class ApiFieldDefinitionsControllerGetSpec extends UnitSpec with FieldDefinition
     }
 
     "return OK with an empty list when no field definitions exist in the repo" in {
-      mockFieldsDefinitionService.getAll _ expects () returns Future.successful(BulkApiFieldDefinitionsResponse(Seq()))
+      when(mockFieldsDefinitionService.getAll).thenReturn(successful(BulkApiFieldDefinitionsResponse(Seq())))
 
       val result = await(controller.getAllFieldsDefinitions(FakeRequest()))
 
@@ -203,7 +205,7 @@ class ApiFieldDefinitionsControllerGetSpec extends UnitSpec with FieldDefinition
     }
 
     "return INTERNAL_SERVER_ERROR when service throws exception" in {
-      mockFieldsDefinitionService.getAll _ expects () returns Future.failed(emulatedFailure)
+      when(mockFieldsDefinitionService.getAll).thenReturn(failed(emulatedFailure))
 
       val result = await(controller.getAllFieldsDefinitions(FakeRequest()))
 

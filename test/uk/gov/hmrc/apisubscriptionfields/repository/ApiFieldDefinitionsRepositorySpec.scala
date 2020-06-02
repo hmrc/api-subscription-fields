@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.apisubscriptionfields.repository
 
-import org.scalamock.scalatest.MockFactory
 import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach}
 import reactivemongo.api.DB
 import reactivemongo.bson.BSONDocument
@@ -26,6 +25,7 @@ import uk.gov.hmrc.mongo.MongoSpecSupport
 import uk.gov.hmrc.play.test.UnitSpec
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import org.scalatest.mockito.MockitoSugar
 
 class ApiFieldDefinitionsRepositorySpec extends UnitSpec
   with BeforeAndAfterAll
@@ -33,7 +33,7 @@ class ApiFieldDefinitionsRepositorySpec extends UnitSpec
   with MongoSpecSupport
   with JsonFormatters
   with FieldDefinitionTestData
-  with MockFactory { self =>
+  with MockitoSugar { self =>
 
   private val mongoDbProvider = new MongoDbProvider {
     override val mongo: () => DB = self.mongo

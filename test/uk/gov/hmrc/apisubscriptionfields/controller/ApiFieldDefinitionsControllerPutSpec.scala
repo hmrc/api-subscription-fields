@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.apisubscriptionfields.controller
 
-import org.scalamock.scalatest.MockFactory
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc._
 import play.api.test.Helpers._
@@ -27,11 +26,14 @@ import uk.gov.hmrc.apisubscriptionfields.service.ApiFieldDefinitionsService
 import uk.gov.hmrc.play.test.UnitSpec
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future.successful
+import org.mockito.Mockito.when
 import scala.concurrent.Future
+import org.scalatest.mockito.MockitoSugar
 
 class ApiFieldDefinitionsControllerPutSpec extends UnitSpec
   with FieldDefinitionTestData
-  with MockFactory
+  with MockitoSugar
   with JsonFormatters
   with StubControllerComponentsFactory {
 
@@ -40,9 +42,7 @@ class ApiFieldDefinitionsControllerPutSpec extends UnitSpec
 
   "PUT /definition/context/:apiContext/version/:apiVersion" should {
     "return CREATED when created in the repo" in {
-      (mockApiFieldDefinitionsService.upsert _).
-        expects(FakeContext, FakeVersion, NelOfFieldDefinitions).
-        returns(Future.successful((FakeApiFieldDefinitionsResponse, true)))
+      when(mockApiFieldDefinitionsService.upsert(FakeContext, FakeVersion, NelOfFieldDefinitions)).thenReturn(successful((FakeApiFieldDefinitionsResponse, true)))
 
       val json = mkJson(FieldDefinitionsRequest(NelOfFieldDefinitions))
       testSubmitResult(mkRequest(json)) { result =>
@@ -51,9 +51,7 @@ class ApiFieldDefinitionsControllerPutSpec extends UnitSpec
     }
 
     "return OK when updated in the repo" in {
-      (mockApiFieldDefinitionsService.upsert _).
-        expects(FakeContext, FakeVersion, NelOfFieldDefinitions).
-        returns(Future.successful((FakeApiFieldDefinitionsResponse, false)))
+      when(mockApiFieldDefinitionsService.upsert(FakeContext, FakeVersion, NelOfFieldDefinitions)).thenReturn(successful((FakeApiFieldDefinitionsResponse, false)))
 
       val json = mkJson(FieldDefinitionsRequest(NelOfFieldDefinitions))
       testSubmitResult(mkRequest(json)) { result =>

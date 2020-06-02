@@ -16,20 +16,22 @@
 
 package uk.gov.hmrc.apisubscriptionfields.controller
 
-import org.scalamock.scalatest.MockFactory
 import play.api.libs.json.{JsDefined, JsString, Json}
 import play.api.mvc._
 import play.api.test.Helpers._
 import play.api.test._
 import uk.gov.hmrc.apisubscriptionfields.SubscriptionFieldsTestData
-import uk.gov.hmrc.apisubscriptionfields.model.{ApiContext, ApiVersion, BulkSubscriptionFieldsResponse, ClientId, JsonFormatters, SubscriptionFieldsId, SubscriptionFieldsResponse}
+import uk.gov.hmrc.apisubscriptionfields.model._
 import uk.gov.hmrc.apisubscriptionfields.service.SubscriptionFieldsService
 import uk.gov.hmrc.play.test.UnitSpec
 import scala.concurrent.ExecutionContext.Implicits.global
+import org.mockito.Mockito.when
 
 import scala.concurrent.Future
+import scala.concurrent.Future.{successful,failed}
+import org.scalatest.mockito.MockitoSugar
 
-class SubscriptionFieldsControllerGetSpec extends UnitSpec with SubscriptionFieldsTestData with MockFactory with JsonFormatters with StubControllerComponentsFactory {
+class SubscriptionFieldsControllerGetSpec extends UnitSpec with SubscriptionFieldsTestData with MockitoSugar with JsonFormatters with StubControllerComponentsFactory {
 
   private val mockSubscriptionFieldsService = mock[SubscriptionFieldsService]
   private val controller = new SubscriptionFieldsController(stubControllerComponents(), mockSubscriptionFieldsService)
@@ -80,7 +82,7 @@ class SubscriptionFieldsControllerGetSpec extends UnitSpec with SubscriptionFiel
   "GET /field/application/{client-id}/context/{context}/version/{api-version}" should {
 
     "return OK when the expected record exists in the repo" in {
-      (mockSubscriptionFieldsService.get(_:ClientId, _:ApiContext, _:ApiVersion)) expects(FakeClientId, FakeContext, FakeVersion) returns Some(responseModel)
+      when(mockSubscriptionFieldsService.get(FakeClientId, FakeContext, FakeVersion)).thenReturn(Some(responseModel))
 
       val result = await(controller.getSubscriptionFields(FakeClientId, FakeContext, FakeVersion)(FakeRequest()))
 
@@ -89,7 +91,7 @@ class SubscriptionFieldsControllerGetSpec extends UnitSpec with SubscriptionFiel
     }
 
     "return NOT_FOUND when not in the repo" in {
-      (mockSubscriptionFieldsService.get(_:ClientId, _:ApiContext, _:ApiVersion)) expects(FakeClientId, FakeContext, FakeVersion) returns None
+      when(mockSubscriptionFieldsService.get(FakeClientId, FakeContext, FakeVersion)).thenReturn(None)
 
       val result: Future[Result] = await(controller.getSubscriptionFields(FakeClientId, FakeContext, FakeVersion)(FakeRequest()))
 
@@ -99,7 +101,7 @@ class SubscriptionFieldsControllerGetSpec extends UnitSpec with SubscriptionFiel
     }
 
     "return INTERNAL_SERVER_ERROR when service throws exception" in {
-      (mockSubscriptionFieldsService.get(_:ClientId, _:ApiContext, _:ApiVersion)) expects(FakeClientId, FakeContext, FakeVersion) returns Future.failed(emulatedFailure)
+      when(mockSubscriptionFieldsService.get(FakeClientId, FakeContext, FakeVersion)).thenReturn(failed(emulatedFailure))
 
       val result: Future[Result] = await(controller.getSubscriptionFields(FakeClientId, FakeContext, FakeVersion)(FakeRequest()))
 
@@ -113,7 +115,7 @@ class SubscriptionFieldsControllerGetSpec extends UnitSpec with SubscriptionFiel
   "GET /field/{fields-id}" should {
 
     "return OK when the expected record exists in the repo" in {
-      (mockSubscriptionFieldsService.get(_:SubscriptionFieldsId)) expects FakeFieldsId returns Some(responseModel)
+      when(mockSubscriptionFieldsService.get(FakeFieldsId)).thenReturn(successful(Some(responseModel)))
 
       val result = await(controller.getSubscriptionFieldsByFieldsId(FakeFieldsId)(FakeRequest()))
 
@@ -122,7 +124,7 @@ class SubscriptionFieldsControllerGetSpec extends UnitSpec with SubscriptionFiel
     }
 
     "return NOT_FOUND when not in the repo" in {
-      (mockSubscriptionFieldsService.get(_:SubscriptionFieldsId)) expects FakeFieldsId returns None
+      when(mockSubscriptionFieldsService.get(FakeFieldsId)).thenReturn(successful(None))
 
       val result: Future[Result] = await(controller.getSubscriptionFieldsByFieldsId(FakeFieldsId)(FakeRequest()))
 
@@ -132,7 +134,7 @@ class SubscriptionFieldsControllerGetSpec extends UnitSpec with SubscriptionFiel
     }
 
     "return INTERNAL_SERVER_ERROR when service throws exception" in {
-      (mockSubscriptionFieldsService.get(_:SubscriptionFieldsId)) expects FakeFieldsId returns Future.failed(emulatedFailure)
+      when(mockSubscriptionFieldsService.get(FakeFieldsId)).thenReturn(failed(emulatedFailure))
 
       val result: Future[Result] = await(controller.getSubscriptionFieldsByFieldsId(FakeFieldsId)(FakeRequest()))
 
@@ -145,7 +147,7 @@ class SubscriptionFieldsControllerGetSpec extends UnitSpec with SubscriptionFiel
   "GET /field/application/{client-id}" should {
 
     "return OK when the expected record exists in the repo" in {
-      (mockSubscriptionFieldsService.get(_:ClientId)) expects FakeClientId returns Some(bulkResponseModel)
+      when(mockSubscriptionFieldsService.get(FakeClientId)).thenReturn(successful(Some(bulkResponseModel)))
 
       val result = await(controller.getBulkSubscriptionFieldsByClientId(FakeClientId)(FakeRequest()))
 
@@ -154,7 +156,7 @@ class SubscriptionFieldsControllerGetSpec extends UnitSpec with SubscriptionFiel
     }
 
     "return NOT_FOUND when not in the repo" in {
-      (mockSubscriptionFieldsService.get(_:ClientId)) expects FakeClientId returns None
+      when(mockSubscriptionFieldsService.get(FakeClientId)).thenReturn(successful(None))
 
       val result = await(controller.getBulkSubscriptionFieldsByClientId(FakeClientId)(FakeRequest()))
 
@@ -164,7 +166,7 @@ class SubscriptionFieldsControllerGetSpec extends UnitSpec with SubscriptionFiel
     }
 
     "return INTERNAL_SERVER_ERROR when service throws exception" in {
-      (mockSubscriptionFieldsService.get(_:ClientId)) expects FakeClientId returns Future.failed(emulatedFailure)
+      when(mockSubscriptionFieldsService.get(FakeClientId)).thenReturn(failed(emulatedFailure))
 
       val result = await(controller.getBulkSubscriptionFieldsByClientId(FakeClientId)(FakeRequest()))
 
@@ -177,7 +179,7 @@ class SubscriptionFieldsControllerGetSpec extends UnitSpec with SubscriptionFiel
 
   "GET /field" should {
     "return OK with all field subscriptions" in {
-      mockSubscriptionFieldsService.getAll _ expects () returns bulkResponseModel
+      when(mockSubscriptionFieldsService.getAll).thenReturn(successful(bulkResponseModel))
 
       val result = await(controller.getAllSubscriptionFields(FakeRequest()))
 
@@ -186,7 +188,7 @@ class SubscriptionFieldsControllerGetSpec extends UnitSpec with SubscriptionFiel
     }
 
     "return OK with an empty list when no field subscriptions exist in the repo" in {
-      mockSubscriptionFieldsService.getAll _ expects () returns BulkSubscriptionFieldsResponse(subscriptions = Seq())
+      when(mockSubscriptionFieldsService.getAll).thenReturn(successful(BulkSubscriptionFieldsResponse(subscriptions = Seq())))
 
       val result = await(controller.getAllSubscriptionFields(FakeRequest()))
 
@@ -195,7 +197,7 @@ class SubscriptionFieldsControllerGetSpec extends UnitSpec with SubscriptionFiel
     }
 
     "return INTERNAL_SERVER_ERROR when service throws exception" in {
-      mockSubscriptionFieldsService.getAll _ expects () returns Future.failed(emulatedFailure)
+      when(mockSubscriptionFieldsService.getAll).thenReturn(failed(emulatedFailure))
 
       val result = await(controller.getAllSubscriptionFields(FakeRequest()))
 

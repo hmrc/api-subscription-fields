@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.apisubscriptionfields.controller
 
-import org.scalamock.scalatest.MockFactory
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc._
 import play.api.test.Helpers._
@@ -27,10 +26,11 @@ import uk.gov.hmrc.apisubscriptionfields.service.ApiFieldDefinitionsService
 import uk.gov.hmrc.play.test.UnitSpec
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
+import org.scalatest.mockito.MockitoSugar
 
 class ApiFieldDefinitionsControllerPostSpec extends UnitSpec
 with FieldDefinitionTestData
-with MockFactory
+with MockitoSugar
 with JsonFormatters
 with StubControllerComponentsFactory {
 

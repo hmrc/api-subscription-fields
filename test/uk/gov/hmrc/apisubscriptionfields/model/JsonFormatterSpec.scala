@@ -19,6 +19,7 @@ package uk.gov.hmrc.apisubscriptionfields.model
 import cats.data.NonEmptyList
 import org.scalatest.{Matchers, WordSpec}
 import uk.gov.hmrc.apisubscriptionfields.{FieldDefinitionTestData, SubscriptionFieldsTestData}
+import uk.gov.hmrc.apisubscriptionfields.model.FieldDefinitionType._
 
 class JsonFormatterSpec extends WordSpec with Matchers with JsonFormatters with SubscriptionFieldsTestData with FieldDefinitionTestData {
 
@@ -185,6 +186,15 @@ class JsonFormatterSpec extends WordSpec with Matchers with JsonFormatters with 
     "marshal json without mention of default access" in {
       objectAsJsonString(FakeFieldDefinitionWithAccess.copy(access = AccessRequirements.Default)) should not include(""""access":{"devhub":{"read":"adminOnly", "write":"adminOnly"}}""")
       objectAsJsonString(FakeFieldDefinitionWithAccess.copy(access = AccessRequirements.Default)) should not include(""""access"""")
+    }
+
+    "unmarshal json string into a FieldDefinition" in {
+      val json = """{"name":"fieldB","description":"desc1","hint":"hint1","type":"PPNSTopic","shortDescription":"short description"}"""
+
+      Json.fromJson[FieldDefinition](Json.parse(json)) match {
+        case JsSuccess(r, _) => r.`type` shouldBe PPNS_TOPIC
+        case JsError(e)      => fail(s"Should have parsed json text but got $e")
+      }
     }
   }
 }

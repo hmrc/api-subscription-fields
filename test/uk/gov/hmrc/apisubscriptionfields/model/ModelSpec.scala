@@ -23,7 +23,6 @@ import uk.gov.hmrc.apisubscriptionfields.HmrcSpec
 
 class ModelSpec extends HmrcSpec with SubscriptionFieldsTestData with FieldDefinitionTestData with ValidationRuleTestData {
   "RegexValidationRule" should {
-
     "return true when the value is valid - correct case" in {
       lowerCaseRule.validate(lowerCaseValue) shouldBe true
     }
@@ -41,8 +40,9 @@ class ModelSpec extends HmrcSpec with SubscriptionFieldsTestData with FieldDefin
   "UrlValidationRule" should {
     "pass for a matching value" in {
       UrlValidationRule.validate(validUrl) shouldBe true
-      }
-      "fail for a value that does not match" in {
+    }
+
+    "fail for a value that does not match" in {
         invalidUrls.map(invalidUrl => UrlValidationRule.validate(invalidUrl) shouldBe false)
     }
   }

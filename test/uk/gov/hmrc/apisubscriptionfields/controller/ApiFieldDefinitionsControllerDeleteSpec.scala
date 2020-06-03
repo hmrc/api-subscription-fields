@@ -16,41 +16,43 @@
 
 package uk.gov.hmrc.apisubscriptionfields.controller
 
-import org.scalamock.scalatest.MockFactory
-import play.api.libs.json.{JsDefined, JsString}
 import play.api.test.{FakeRequest, StubControllerComponentsFactory}
-import play.api.test.Helpers._
 import uk.gov.hmrc.apisubscriptionfields.FieldDefinitionTestData
 import uk.gov.hmrc.apisubscriptionfields.model.JsonFormatters
 import uk.gov.hmrc.apisubscriptionfields.service.ApiFieldDefinitionsService
-import uk.gov.hmrc.play.test.UnitSpec
+import uk.gov.hmrc.apisubscriptionfields.AsyncHmrcSpec
 
-import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future.successful
+import play.api.libs.json._
+import play.api.test.Helpers._
 
-class ApiFieldDefinitionsControllerDeleteSpec extends UnitSpec with FieldDefinitionTestData with MockFactory with JsonFormatters with StubControllerComponentsFactory {
+class ApiFieldDefinitionsControllerDeleteSpec
+    extends AsyncHmrcSpec
+    with FieldDefinitionTestData
+    with JsonFormatters
+    with StubControllerComponentsFactory {
 
   private val mockFieldsDefinitionService = mock[ApiFieldDefinitionsService]
   private val controller = new ApiFieldDefinitionsController(stubControllerComponents(), mockFieldsDefinitionService)
 
   "DELETE /definition/context/:apiContext/version/:apiVersion" should {
     "return NO_CONTENT (204) when successfully deleted from repo" in {
-      (mockFieldsDefinitionService.delete _).expects(FakeContext, FakeVersion).returns(Future.successful(true))
+      when(mockFieldsDefinitionService.delete(FakeContext, FakeVersion)).thenReturn(successful(true))
 
-      val result = await(controller.deleteFieldsDefinition(FakeContext, FakeVersion)(FakeRequest()))
+      val result = controller.deleteFieldsDefinition(FakeContext, FakeVersion)(FakeRequest())
 
       status(result) shouldBe NO_CONTENT
     }
 
     "return NOT_FOUND (404) when failed to delete from repo" in {
-      (mockFieldsDefinitionService.delete _).expects(FakeContext, FakeVersion).returns(Future.successful(false))
+      when(mockFieldsDefinitionService.delete(FakeContext, FakeVersion)).thenReturn(successful(false))
 
-      val result = await(controller.deleteFieldsDefinition(FakeContext, FakeVersion)(FakeRequest()))
+      val result = controller.deleteFieldsDefinition(FakeContext, FakeVersion)(FakeRequest())
 
       status(result) shouldBe NOT_FOUND
       (contentAsJson(result) \ "code") shouldBe JsDefined(JsString("NOT_FOUND"))
       (contentAsJson(result) \ "message") shouldBe JsDefined(JsString(s"Fields definition not found for (${FakeContext.value}, ${FakeVersion.value})"))
     }
   }
-
 }

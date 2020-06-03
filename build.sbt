@@ -32,7 +32,6 @@ val compile = Seq(
   "com.typesafe.play" %% "play-json" % "2.7.1",
   "org.typelevel" %% "cats-core" % "2.1.0",
   "eu.timepit" %% "refined"                 % "0.9.13",
-  // "eu.timepit" %% "refined-cats"            % "0.9.13"
   "be.venneborg" %% "play26-refined" % "0.5.0"
 )
 
@@ -49,14 +48,11 @@ val overrides: Seq[ModuleID] = Seq(
 )
 
 def test(scope: String = "test,acceptance") = Seq(
-  "uk.gov.hmrc" %% "hmrctest" % "3.9.0-play-26" % scope,
   "uk.gov.hmrc" %% "reactivemongo-test" % "4.16.0-play-26" % scope,
-  "org.scalamock" %% "scalamock-scalatest-support" % "3.6.0" % scope,
-  "org.scalatest" %% "scalatest" % "3.0.5" % scope,
-  "org.scalatestplus.play" %% "scalatestplus-play" % "3.1.2" % scope,
+  "org.scalatestplus.play" %% "scalatestplus-play" % "3.1.3" % scope,
+  "org.mockito" %% "mockito-scala-scalatest" % "1.7.1" % scope,
   "org.pegdown" % "pegdown" % "1.6.0" % scope,
-  "com.typesafe.play" %% "play-test" % play.core.PlayVersion.current % scope,
-  "org.mockito" % "mockito-core" % "1.10.19" % "test"
+  "com.typesafe.play" %% "play-test" % play.core.PlayVersion.current % scope
 )
 
 val appName = "api-subscription-fields"

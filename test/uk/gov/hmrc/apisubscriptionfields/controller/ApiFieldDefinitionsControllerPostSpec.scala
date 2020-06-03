@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.apisubscriptionfields.controller
 
-import org.scalamock.scalatest.MockFactory
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc._
 import play.api.test.Helpers._
@@ -24,32 +23,30 @@ import play.api.test._
 import uk.gov.hmrc.apisubscriptionfields.FieldDefinitionTestData
 import uk.gov.hmrc.apisubscriptionfields.model.{FieldDefinitionsRequest, JsonFormatters}
 import uk.gov.hmrc.apisubscriptionfields.service.ApiFieldDefinitionsService
-import uk.gov.hmrc.play.test.UnitSpec
+import uk.gov.hmrc.apisubscriptionfields.AsyncHmrcSpec
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class ApiFieldDefinitionsControllerPostSpec extends UnitSpec
-with FieldDefinitionTestData
-with MockFactory
-with JsonFormatters
-with StubControllerComponentsFactory {
+class ApiFieldDefinitionsControllerPostSpec extends AsyncHmrcSpec
+  with FieldDefinitionTestData
+  with JsonFormatters
+  with StubControllerComponentsFactory {
 
   private val mockFieldDefintionService = mock[ApiFieldDefinitionsService]
   private val controller = new ApiFieldDefinitionsController(stubControllerComponents(), mockFieldDefintionService)
 
   "validateFieldsDefinition" should {
     "return OK when FieldDefinitionsRequest is valid" in {
-
       val json = mkJson(FakeValidRegexFieldsDefinitionRequest)
-      println(Json.prettyPrint(json))
+
       testSubmitResult(mkRequest(json)) { result =>
         status(result) shouldBe OK
       }
     }
 
     "return BadRequest when FieldDefinitionsRequest is invalid" in {
-
       val json = Json.parse(jsonInvalidRegexFieldsDefinitionRequest)
+      
       testSubmitResult(mkRequest(json)) { result =>
         status(result) shouldBe BAD_REQUEST
       }

@@ -18,7 +18,6 @@ package uk.gov.hmrc.apisubscriptionfields.repository
 
 import java.util.UUID
 
-import org.scalamock.scalatest.MockFactory
 import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach}
 import reactivemongo.api.DB
 import reactivemongo.bson._
@@ -26,18 +25,17 @@ import uk.gov.hmrc.apisubscriptionfields.model._
 import Types._
 import uk.gov.hmrc.apisubscriptionfields.SubscriptionFieldsTestData
 import uk.gov.hmrc.mongo.MongoSpecSupport
-import uk.gov.hmrc.play.test.UnitSpec
+import uk.gov.hmrc.apisubscriptionfields.AsyncHmrcSpec
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class SubscriptionFieldsRepositorySpec extends UnitSpec
+class SubscriptionFieldsRepositorySpec extends AsyncHmrcSpec
   with BeforeAndAfterAll
   with BeforeAndAfterEach
   with MongoSpecSupport
   with JsonFormatters
-  with SubscriptionFieldsTestData
-  with MockFactory { self =>
+  with SubscriptionFieldsTestData { self =>
 
   private val mongoDbProvider = new MongoDbProvider {
     override val mongo: () => DB = self.mongo

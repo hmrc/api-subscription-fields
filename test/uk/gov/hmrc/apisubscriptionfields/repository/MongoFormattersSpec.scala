@@ -19,9 +19,9 @@ package uk.gov.hmrc.apisubscriptionfields.repository
 import cats.data.NonEmptyList
 import play.api.libs.json.{JsSuccess, Json}
 import uk.gov.hmrc.apisubscriptionfields.model.{FieldDefinition, FieldDefinitionType, JsonFormatters, RegexValidationRule, ValidationGroup}
-import uk.gov.hmrc.play.test.UnitSpec
+import uk.gov.hmrc.apisubscriptionfields.AsyncHmrcSpec
 
-class MongoFormattersSpec extends UnitSpec with JsonFormatters {
+class MongoFormattersSpec extends AsyncHmrcSpec with JsonFormatters {
   import eu.timepit.refined.auto._
 
   val validationRule = RegexValidationRule("test regex")

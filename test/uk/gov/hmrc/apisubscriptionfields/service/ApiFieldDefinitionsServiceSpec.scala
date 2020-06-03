@@ -16,24 +16,23 @@
 
 package uk.gov.hmrc.apisubscriptionfields.service
 
-import org.scalamock.scalatest.MockFactory
 import uk.gov.hmrc.apisubscriptionfields.FieldDefinitionTestData
-import uk.gov.hmrc.apisubscriptionfields.model.{ApiContext, ApiVersion, ApiFieldDefinitions, BulkApiFieldDefinitionsResponse, ApiFieldDefinitionsResponse}
+import uk.gov.hmrc.apisubscriptionfields.model._
 import uk.gov.hmrc.apisubscriptionfields.repository.ApiFieldDefinitionsRepository
-import uk.gov.hmrc.play.test.UnitSpec
+import uk.gov.hmrc.apisubscriptionfields.AsyncHmrcSpec
 
-import scala.concurrent.Future
+import scala.concurrent.Future.{successful,failed}
 import cats.data.NonEmptyList
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class ApiFieldDefinitionsServiceSpec extends UnitSpec with FieldDefinitionTestData with MockFactory {
+class ApiFieldDefinitionsServiceSpec extends AsyncHmrcSpec with FieldDefinitionTestData {
 
   private val mockApiFieldDefinitionsRepository = mock[ApiFieldDefinitionsRepository]
   private val service = new ApiFieldDefinitionsService(mockApiFieldDefinitionsRepository)
 
   "getAll" should {
     "return an empty list when there are no records in the database collection" in {
-      (mockApiFieldDefinitionsRepository.fetchAll _).expects().returns(List())
+      when(mockApiFieldDefinitionsRepository.fetchAll()).thenReturn(successful(List()))
 
       val result = await(service.getAll)
 
@@ -44,7 +43,7 @@ class ApiFieldDefinitionsServiceSpec extends UnitSpec with FieldDefinitionTestDa
       val fd1 = createApiFieldDefinitions(apiContext = "api-1", fieldDefinitions = NonEmptyList.one(FakeFieldDefinitionUrl))
       val fd2 = createApiFieldDefinitions(apiContext = "api-2", fieldDefinitions = NonEmptyList.one(FakeFieldDefinitionString))
 
-      (mockApiFieldDefinitionsRepository.fetchAll _).expects().returns(List(fd1, fd2))
+      when(mockApiFieldDefinitionsRepository.fetchAll()).thenReturn(successful(List(fd1, fd2)))
 
       val result = await(service.getAll)
 
@@ -57,8 +56,7 @@ class ApiFieldDefinitionsServiceSpec extends UnitSpec with FieldDefinitionTestDa
 
   "get" should {
     "return None when no definition exists in the database collection" in {
-      (mockApiFieldDefinitionsRepository fetch(_: ApiContext, _: ApiVersion)).expects(FakeContext, FakeVersion)
-        .returns(None)
+      when(mockApiFieldDefinitionsRepository.fetch(FakeContext, FakeVersion)).thenReturn(successful(None))
 
       val result = await(service.get(FakeContext, FakeVersion))
 
@@ -66,8 +64,7 @@ class ApiFieldDefinitionsServiceSpec extends UnitSpec with FieldDefinitionTestDa
     }
 
     "return the expected definition" in {
-      (mockApiFieldDefinitionsRepository fetch(_: ApiContext, _: ApiVersion)).expects(FakeContext, FakeVersion)
-        .returns(Some(FakeApiFieldDefinitions))
+      when(mockApiFieldDefinitionsRepository.fetch(FakeContext, FakeVersion)).thenReturn(successful(Some(FakeApiFieldDefinitions)))
 
       val result = await(service.get(FakeContext, FakeVersion))
 
@@ -77,7 +74,7 @@ class ApiFieldDefinitionsServiceSpec extends UnitSpec with FieldDefinitionTestDa
 
   "upsert" should {
     "return false when updating an existing fields definition" in {
-      (mockApiFieldDefinitionsRepository save _) expects FakeApiFieldDefinitions returns ((FakeApiFieldDefinitions, false))
+      when(mockApiFieldDefinitionsRepository.save(FakeApiFieldDefinitions)).thenReturn(successful((FakeApiFieldDefinitions, false)))
 
       val result = await(service.upsert(FakeContext, FakeVersion, NelOfFieldDefinitions))
 
@@ -85,7 +82,7 @@ class ApiFieldDefinitionsServiceSpec extends UnitSpec with FieldDefinitionTestDa
     }
 
     "return true when creating a new fields definition" in {
-      (mockApiFieldDefinitionsRepository save _) expects FakeApiFieldDefinitions returns ((FakeApiFieldDefinitions, true))
+      when(mockApiFieldDefinitionsRepository.save(FakeApiFieldDefinitions)).thenReturn(successful((FakeApiFieldDefinitions, true)))
 
       val result = await(service.upsert(FakeContext, FakeVersion, NelOfFieldDefinitions))
 
@@ -93,7 +90,7 @@ class ApiFieldDefinitionsServiceSpec extends UnitSpec with FieldDefinitionTestDa
     }
 
     "propagate the error" in {
-      (mockApiFieldDefinitionsRepository save(_: ApiFieldDefinitions)) expects * returns Future.failed(emulatedFailure)
+      when(mockApiFieldDefinitionsRepository.save(*)).thenReturn(failed(emulatedFailure))
 
       val caught = intercept[EmulatedFailure] {
         await(service.upsert(FakeContext, FakeVersion, NelOfFieldDefinitions))
@@ -105,15 +102,13 @@ class ApiFieldDefinitionsServiceSpec extends UnitSpec with FieldDefinitionTestDa
 
   "delete" should {
     "return true when the record is removed from the database collection" in {
-      (mockApiFieldDefinitionsRepository delete (_:ApiContext, _:ApiVersion)).expects(FakeContext, FakeVersion)
-        .returns(true)
+      when(mockApiFieldDefinitionsRepository.delete(FakeContext, FakeVersion)).thenReturn(successful(true))
 
       await(service.delete(FakeContext, FakeVersion)) shouldBe true
     }
 
     "return false when the record is not found in the database collection" in {
-      (mockApiFieldDefinitionsRepository delete (_:ApiContext, _:ApiVersion)).expects(FakeContext, FakeVersion)
-        .returns(false)
+      when(mockApiFieldDefinitionsRepository.delete(FakeContext, FakeVersion)).thenReturn(successful(false))
 
       await(service.delete(FakeContext, FakeVersion)) shouldBe false
     }

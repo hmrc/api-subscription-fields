@@ -25,12 +25,12 @@ import uk.gov.hmrc.apisubscriptionfields.model._
 import Types._
 import uk.gov.hmrc.apisubscriptionfields.SubscriptionFieldsTestData
 import uk.gov.hmrc.mongo.MongoSpecSupport
-import uk.gov.hmrc.play.test.UnitSpec
+import uk.gov.hmrc.apisubscriptionfields.AsyncHmrcSpec
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class SubscriptionFieldsRepositorySpec extends UnitSpec
+class SubscriptionFieldsRepositorySpec extends AsyncHmrcSpec
   with BeforeAndAfterAll
   with BeforeAndAfterEach
   with MongoSpecSupport

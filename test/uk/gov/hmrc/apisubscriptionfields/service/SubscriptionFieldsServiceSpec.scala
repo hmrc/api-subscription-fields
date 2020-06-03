@@ -21,14 +21,11 @@ import java.util.UUID
 import uk.gov.hmrc.apisubscriptionfields.model._
 import uk.gov.hmrc.apisubscriptionfields.repository._
 import uk.gov.hmrc.apisubscriptionfields.{FieldDefinitionTestData, SubscriptionFieldsTestData}
-import uk.gov.hmrc.play.test.UnitSpec
-
+import uk.gov.hmrc.apisubscriptionfields.AsyncHmrcSpec
 import cats.data.NonEmptyList
 import scala.concurrent.Future.{successful,failed}
-import org.scalatest.mockito.MockitoSugar
-import org.mockito.Mockito.when
 
-class SubscriptionFieldsServiceSpec extends UnitSpec with SubscriptionFieldsTestData with FieldDefinitionTestData with MockitoSugar {
+class SubscriptionFieldsServiceSpec extends AsyncHmrcSpec with SubscriptionFieldsTestData with FieldDefinitionTestData {
 
   private val mockSubscriptionFieldsIdRepository = mock[SubscriptionFieldsRepository]
   private val mockApiFieldDefinitionsService = mock[ApiFieldDefinitionsService]

@@ -16,28 +16,23 @@
 
 package uk.gov.hmrc.apisubscriptionfields.controller
 
-import play.api.libs.json.{JsValue, Json}
+import akka.actor.ActorSystem
+import akka.stream.{ActorMaterializer, Materializer}
+import play.api.libs.json.{Json, JsValue}
 import play.api.mvc._
 import play.api.test.{FakeRequest, StubControllerComponentsFactory}
-import play.api.test.Helpers._
-import uk.gov.hmrc.apisubscriptionfields.SubscriptionFieldsTestData
 import uk.gov.hmrc.apisubscriptionfields.model._
 import uk.gov.hmrc.apisubscriptionfields.service.SubscriptionFieldsService
-import uk.gov.hmrc.apisubscriptionfields.HmrcPlaySpec
+import uk.gov.hmrc.apisubscriptionfields.{AsyncHmrcSpec, SubscriptionFieldsTestData}
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future.successful
-import akka.stream.Materializer
-import akka.actor.ActorSystem
-import akka.stream.ActorMaterializer
-import org.scalatest.mockito.MockitoSugar
-import org.mockito.Mockito.when
 import scala.concurrent.Future
+import scala.concurrent.Future.successful
+import play.api.test.Helpers._
 
 class SubscriptionFieldsControllerPutSpec
-    extends HmrcPlaySpec
+  extends AsyncHmrcSpec
   with SubscriptionFieldsTestData
-  with MockitoSugar
   with JsonFormatters
   with StubControllerComponentsFactory {
 
@@ -45,7 +40,7 @@ class SubscriptionFieldsControllerPutSpec
   private val controller = new SubscriptionFieldsController(stubControllerComponents(), mockSubscriptionFieldsService)
   implicit private val actorSystem = ActorSystem("test")
   implicit private val mat: Materializer = ActorMaterializer.create(actorSystem)
-
+  
   "PUT /field/application/:clientId/context/:apiContext/version/:apiVersion" should {
     "return CREATED when Field values are Valid and created in the repo" in {
       when(mockSubscriptionFieldsService.validate(FakeContext, FakeVersion, FakeSubscriptionFields)).thenReturn(successful(FakeValidSubsFieldValidationResponse))
@@ -79,6 +74,7 @@ class SubscriptionFieldsControllerPutSpec
 
     "return UnprocessableEntity when no Fields are specified" in {
       val json = mkJson(SubscriptionFieldsRequest(Map.empty))
+      
       testSubmitResult(mkRequest(json)) { result =>
         status(result) shouldBe UNPROCESSABLE_ENTITY
         val errorPayload = JsErrorResponse(ErrorCode.INVALID_REQUEST_PAYLOAD, "At least one field must be specified")

@@ -23,17 +23,14 @@ import play.api.test._
 import uk.gov.hmrc.apisubscriptionfields.FieldDefinitionTestData
 import uk.gov.hmrc.apisubscriptionfields.model.{FieldDefinitionsRequest, JsonFormatters}
 import uk.gov.hmrc.apisubscriptionfields.service.ApiFieldDefinitionsService
-import uk.gov.hmrc.play.test.UnitSpec
+import uk.gov.hmrc.apisubscriptionfields.AsyncHmrcSpec
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future.successful
-import org.mockito.Mockito.when
 import scala.concurrent.Future
-import org.scalatest.mockito.MockitoSugar
 
-class ApiFieldDefinitionsControllerPutSpec extends UnitSpec
+class ApiFieldDefinitionsControllerPutSpec extends AsyncHmrcSpec
   with FieldDefinitionTestData
-  with MockitoSugar
   with JsonFormatters
   with StubControllerComponentsFactory {
 

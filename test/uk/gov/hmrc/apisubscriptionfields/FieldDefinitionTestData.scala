@@ -22,7 +22,6 @@ import uk.gov.hmrc.apisubscriptionfields.model._
 import Types._
 import cats.data.NonEmptyList
 import eu.timepit.refined.api.Refined
-import uk.gov.hmrc.apisubscriptionfields.model.DevhubAccessLevel._
 import uk.gov.hmrc.apisubscriptionfields.model.DevhubAccessRequirement._
 
 trait FieldDefinitionTestData extends TestData {

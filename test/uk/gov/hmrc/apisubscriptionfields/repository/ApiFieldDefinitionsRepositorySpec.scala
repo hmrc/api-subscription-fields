@@ -22,18 +22,16 @@ import reactivemongo.bson.BSONDocument
 import uk.gov.hmrc.apisubscriptionfields.model.{ApiContext, ApiVersion, ApiFieldDefinitions, JsonFormatters}
 import uk.gov.hmrc.apisubscriptionfields.FieldDefinitionTestData
 import uk.gov.hmrc.mongo.MongoSpecSupport
-import uk.gov.hmrc.play.test.UnitSpec
-
+import uk.gov.hmrc.apisubscriptionfields.AsyncHmrcSpec
 import scala.concurrent.ExecutionContext.Implicits.global
-import org.scalatest.mockito.MockitoSugar
 
-class ApiFieldDefinitionsRepositorySpec extends UnitSpec
+class ApiFieldDefinitionsRepositorySpec extends AsyncHmrcSpec
   with BeforeAndAfterAll
   with BeforeAndAfterEach
   with MongoSpecSupport
   with JsonFormatters
   with FieldDefinitionTestData
-  with MockitoSugar { self =>
+  { self =>
 
   private val mongoDbProvider = new MongoDbProvider {
     override val mongo: () => DB = self.mongo

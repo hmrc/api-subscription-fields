@@ -17,21 +17,22 @@
 package uk.gov.hmrc.apisubscriptionfields.controller
 
 import play.api.libs.json.{JsDefined, JsString, Json}
+import play.api.test.{FakeRequest, StubControllerComponentsFactory}
 import play.api.test.Helpers._
-import play.api.test._
 import uk.gov.hmrc.apisubscriptionfields.FieldDefinitionTestData
 import uk.gov.hmrc.apisubscriptionfields.model.{BulkApiFieldDefinitionsResponse, ApiFieldDefinitionsResponse, JsonFormatters}
 import uk.gov.hmrc.apisubscriptionfields.service.ApiFieldDefinitionsService
-import uk.gov.hmrc.play.test.UnitSpec
+import uk.gov.hmrc.apisubscriptionfields.AsyncHmrcSpec
 
 import scala.concurrent.Future.{successful,failed}
 import scala.concurrent.ExecutionContext.Implicits.global
 import uk.gov.hmrc.apisubscriptionfields.model.ApiFieldDefinitionsResponse
-import org.scalatest.mockito.MockitoSugar
 
-import org.mockito.Mockito.when
-
-class ApiFieldDefinitionsControllerGetSpec extends UnitSpec with FieldDefinitionTestData with MockitoSugar with JsonFormatters with StubControllerComponentsFactory {
+class ApiFieldDefinitionsControllerGetSpec
+  extends AsyncHmrcSpec
+  with FieldDefinitionTestData
+  with JsonFormatters
+  with StubControllerComponentsFactory {
 
   private val mockFieldsDefinitionService = mock[ApiFieldDefinitionsService]
   private val controller = new ApiFieldDefinitionsController(stubControllerComponents(), mockFieldsDefinitionService)
@@ -158,7 +159,7 @@ class ApiFieldDefinitionsControllerGetSpec extends UnitSpec with FieldDefinition
     "return OK when the expected record exists in the repo" in {
       when(mockFieldsDefinitionService.get(FakeContext, FakeVersion)).thenReturn(successful(Some(responseModel)))
 
-      val result = await(controller.getFieldsDefinition(FakeContext, FakeVersion)(FakeRequest()))
+      val result = controller.getFieldsDefinition(FakeContext, FakeVersion)(FakeRequest())
 
       status(result) shouldBe OK
       contentAsJson(result) shouldBe responseJson
@@ -167,7 +168,7 @@ class ApiFieldDefinitionsControllerGetSpec extends UnitSpec with FieldDefinition
     "return NOT_FOUND when entity does not exist in the repo" in {
       when(mockFieldsDefinitionService.get(FakeContext, FakeVersion)).thenReturn(successful(None))
 
-      val result = await(controller.getFieldsDefinition(FakeContext, FakeVersion)(FakeRequest()))
+      val result = controller.getFieldsDefinition(FakeContext, FakeVersion)(FakeRequest())
 
       status(result) shouldBe NOT_FOUND
       (contentAsJson(result) \ "code") shouldBe JsDefined(JsString("NOT_FOUND"))
@@ -177,7 +178,7 @@ class ApiFieldDefinitionsControllerGetSpec extends UnitSpec with FieldDefinition
     "return INTERNAL_SERVER_ERROR when service throws exception" in {
       when(mockFieldsDefinitionService.get(FakeContext, FakeVersion)).thenReturn(failed(emulatedFailure))
 
-      val result = await(controller.getFieldsDefinition(FakeContext, FakeVersion)(FakeRequest()))
+      val result = controller.getFieldsDefinition(FakeContext, FakeVersion)(FakeRequest())
 
       status(result) shouldBe INTERNAL_SERVER_ERROR
       (contentAsJson(result) \ "code") shouldBe JsDefined(JsString("UNKNOWN_ERROR"))
@@ -189,7 +190,7 @@ class ApiFieldDefinitionsControllerGetSpec extends UnitSpec with FieldDefinition
     "return OK with all field definitions" in {
       when(mockFieldsDefinitionService.getAll).thenReturn(successful(allResponseModel))
 
-      val result = await(controller.getAllFieldsDefinitions(FakeRequest()))
+      val result = controller.getAllFieldsDefinitions(FakeRequest())
 
       status(result) shouldBe OK
       contentAsJson(result) shouldBe allResponseJson
@@ -198,7 +199,7 @@ class ApiFieldDefinitionsControllerGetSpec extends UnitSpec with FieldDefinition
     "return OK with an empty list when no field definitions exist in the repo" in {
       when(mockFieldsDefinitionService.getAll).thenReturn(successful(BulkApiFieldDefinitionsResponse(Seq())))
 
-      val result = await(controller.getAllFieldsDefinitions(FakeRequest()))
+      val result = controller.getAllFieldsDefinitions(FakeRequest())
 
       status(result) shouldBe OK
       contentAsJson(result) shouldBe emptyAllResponseJson
@@ -207,7 +208,7 @@ class ApiFieldDefinitionsControllerGetSpec extends UnitSpec with FieldDefinition
     "return INTERNAL_SERVER_ERROR when service throws exception" in {
       when(mockFieldsDefinitionService.getAll).thenReturn(failed(emulatedFailure))
 
-      val result = await(controller.getAllFieldsDefinitions(FakeRequest()))
+      val result = controller.getAllFieldsDefinitions(FakeRequest())
 
       status(result) shouldBe INTERNAL_SERVER_ERROR
       (contentAsJson(result) \ "code") shouldBe JsDefined(JsString("UNKNOWN_ERROR"))

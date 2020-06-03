@@ -19,16 +19,13 @@ package uk.gov.hmrc.apisubscriptionfields.service
 import uk.gov.hmrc.apisubscriptionfields.FieldDefinitionTestData
 import uk.gov.hmrc.apisubscriptionfields.model._
 import uk.gov.hmrc.apisubscriptionfields.repository.ApiFieldDefinitionsRepository
-import uk.gov.hmrc.play.test.UnitSpec
+import uk.gov.hmrc.apisubscriptionfields.AsyncHmrcSpec
 
 import scala.concurrent.Future.{successful,failed}
 import cats.data.NonEmptyList
 import scala.concurrent.ExecutionContext.Implicits.global
-import org.scalatest.mockito.MockitoSugar
-import org.mockito.Mockito.when
-import org.mockito.Matchers.any
 
-class ApiFieldDefinitionsServiceSpec extends UnitSpec with FieldDefinitionTestData with MockitoSugar {
+class ApiFieldDefinitionsServiceSpec extends AsyncHmrcSpec with FieldDefinitionTestData {
 
   private val mockApiFieldDefinitionsRepository = mock[ApiFieldDefinitionsRepository]
   private val service = new ApiFieldDefinitionsService(mockApiFieldDefinitionsRepository)
@@ -93,7 +90,7 @@ class ApiFieldDefinitionsServiceSpec extends UnitSpec with FieldDefinitionTestDa
     }
 
     "propagate the error" in {
-      when(mockApiFieldDefinitionsRepository.save(any())).thenReturn(failed(emulatedFailure))
+      when(mockApiFieldDefinitionsRepository.save(*)).thenReturn(failed(emulatedFailure))
 
       val caught = intercept[EmulatedFailure] {
         await(service.upsert(FakeContext, FakeVersion, NelOfFieldDefinitions))

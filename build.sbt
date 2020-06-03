@@ -48,12 +48,11 @@ val overrides: Seq[ModuleID] = Seq(
 )
 
 def test(scope: String = "test,acceptance") = Seq(
-  "uk.gov.hmrc" %% "hmrctest" % "3.9.0-play-26" % scope,
   "uk.gov.hmrc" %% "reactivemongo-test" % "4.16.0-play-26" % scope,
-  "org.scalatestplus.play" %% "scalatestplus-play" % "3.1.2" % scope,
+  "org.scalatestplus.play" %% "scalatestplus-play" % "3.1.3" % scope,
+  "org.mockito" %% "mockito-scala-scalatest" % "1.7.1" % scope,
   "org.pegdown" % "pegdown" % "1.6.0" % scope,
-  "com.typesafe.play" %% "play-test" % play.core.PlayVersion.current % scope,
-  "org.mockito" % "mockito-core" % "1.10.19" % "test"
+  "com.typesafe.play" %% "play-test" % play.core.PlayVersion.current % scope
 )
 
 val appName = "api-subscription-fields"

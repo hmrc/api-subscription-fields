@@ -18,9 +18,9 @@ package uk.gov.hmrc.apisubscriptionfields.repository
 
 import reactivemongo.api.commands._
 import reactivemongo.bson.BSONInteger
-import uk.gov.hmrc.play.test.UnitSpec
+import uk.gov.hmrc.apisubscriptionfields.AsyncHmrcSpec
 
-class MongoErrorHandlerSpec extends UnitSpec {
+class MongoErrorHandlerSpec extends AsyncHmrcSpec {
 
   private val mongoErrorHandler = new MongoErrorHandler {}
   private val BsonValue = BSONInteger(1)

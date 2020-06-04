@@ -88,7 +88,7 @@ class SubscriptionFieldsController @Inject()(cc: ControllerComponents, service: 
         Future.successful(UnprocessableEntity(JsErrorResponse(INVALID_REQUEST_PAYLOAD, "At least one field must be specified")))
       }
       else {
-        service.validate(apiContext, apiVersion, payload.fields) flatMap {
+        service.validate(clientId, apiContext, apiVersion, payload.fields) flatMap {
             case ValidSubsFieldValidationResponse => {
               service.upsert(clientId, apiContext, apiVersion, payload.fields) map {
                 case (response, true) => Created(Json.toJson(response))

@@ -44,6 +44,8 @@ trait NonEmptyListFormatters {
       .contramap(_.toList)
 }
 
+object NonEmptyListFormatters extends NonEmptyListFormatters
+
 trait AccessRequirementsFormatters {
     import DevhubAccessRequirement._
 
@@ -87,6 +89,8 @@ trait AccessRequirementsFormatters {
 
   implicit val AccessRequirementsWrites: Writes[AccessRequirements] = Json.writes[AccessRequirements]
 }
+
+object AccessRequirementsFormatters extends AccessRequirementsFormatters
 
 trait JsonFormatters extends NonEmptyListFormatters with AccessRequirementsFormatters {
   import be.venneborg.refined.play.RefinedJsonFormats._
@@ -141,8 +145,6 @@ trait JsonFormatters extends NonEmptyListFormatters with AccessRequirementsForma
 
   implicit val ApiFieldDefinitionsJF: OFormat[ApiFieldDefinitions] = Json.format[ApiFieldDefinitions]
 
-  implicit val FieldDefinitionsRequestJF = Json.format[FieldDefinitionsRequest]
-  implicit val SubscriptionFieldsRequestJF = Json.format[SubscriptionFieldsRequest]
 
   implicit val ApiFieldDefinitionsResponseJF = Json.format[ApiFieldDefinitionsResponse]
   implicit val BulkApiFieldDefinitionsResponseJF = Json.format[BulkApiFieldDefinitionsResponse]

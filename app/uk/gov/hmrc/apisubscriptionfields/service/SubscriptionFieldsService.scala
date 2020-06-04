@@ -26,6 +26,8 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import cats.data.NonEmptyList
 import uk.gov.hmrc.apisubscriptionfields.repository.SubscriptionFieldsRepository
+import cats.data.OptionT
+import cats.implicits._
 
 @Singleton
 class UUIDCreator {
@@ -33,21 +35,34 @@ class UUIDCreator {
 }
 
 @Singleton
-class SubscriptionFieldsService @Inject() (repository: SubscriptionFieldsRepository, uuidCreator: UUIDCreator, apiFieldDefinitionsService: ApiFieldDefinitionsService) {
+class SubscriptionFieldsService @Inject() (
+                                          repository: SubscriptionFieldsRepository,
+                                          uuidCreator: UUIDCreator,
+                                          apiFieldDefinitionsService: ApiFieldDefinitionsService,
+                                          pushPullNotificationService: PushPullNotificationService) {
 
-  def validate(context: ApiContext, version: ApiVersion, fields: Fields): Future[SubsFieldValidationResponse] = {
-    val fieldDefinitionResponse: Future[Option[ApiFieldDefinitionsResponse]] = apiFieldDefinitionsService.get(context, version)
-    val fieldDefinitions: Future[Option[NonEmptyList[FieldDefinition]]] = fieldDefinitionResponse.map(_.map(_.fieldDefinitions))
 
-    fieldDefinitions.map(
-      _.fold[SubsFieldValidationResponse](throw new RuntimeException)(fieldDefinitions =>
-        SubscriptionFieldsService.validateAgainstValidationRules(fieldDefinitions, fields) ++ SubscriptionFieldsService.validateFieldNamesAreDefined(fieldDefinitions,fields) match {
-          case FieldErrorMap.empty => ValidSubsFieldValidationResponse
-          case errs: FieldErrorMap =>
-            InvalidSubsFieldValidationResponse(errorResponses = errs)
-        }
-      )
-    )
+  def validate(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion, fields: Fields): Future[SubsFieldValidationResponse] = {
+    def asResponse(fieldDefinitions: NonEmptyList[FieldDefinition]): SubsFieldValidationResponse = {
+      import SubscriptionFieldsService.{validateAgainstValidationRules, validateFieldNamesAreDefined}
+
+      validateAgainstValidationRules(fieldDefinitions, fields) ++ validateFieldNamesAreDefined(fieldDefinitions,fields) match {
+        case FieldErrorMap.empty => ValidSubsFieldValidationResponse
+        case errs: FieldErrorMap => InvalidSubsFieldValidationResponse(errorResponses = errs)
+      }
+    }
+
+    (for {
+      fieldDefinitionResponse <- OptionT(apiFieldDefinitionsService.get(apiContext, apiVersion))
+      fieldDefinitions = fieldDefinitionResponse.fieldDefinitions
+      _ <- OptionT.liftF(pushPullNotificationService.notifyOfAnyTopics(clientId, apiContext, apiVersion, fieldDefinitions))
+    }
+    yield asResponse(fieldDefinitions))
+    .value
+    .flatMap(_ match {
+      case Some(sfr) => Future.successful(sfr)
+      case None => Future.failed(new RuntimeException)
+    })
   }
 
   def upsert(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion, subscriptionFields: Fields): Future[(SubscriptionFieldsResponse, IsInsert)] = {

@@ -29,10 +29,14 @@ class SubscriptionFieldsServiceSpec extends AsyncHmrcSpec with SubscriptionField
 
   private val mockSubscriptionFieldsIdRepository = mock[SubscriptionFieldsRepository]
   private val mockApiFieldDefinitionsService = mock[ApiFieldDefinitionsService]
+  private val mockPushPullNotificationService = mock[PushPullNotificationService]
   private val mockUuidCreator = new UUIDCreator {
     override def uuid(): UUID = FakeRawFieldsId
   }
-  private val service = new SubscriptionFieldsService(mockSubscriptionFieldsIdRepository, mockUuidCreator, mockApiFieldDefinitionsService)
+  private val service = new SubscriptionFieldsService(mockSubscriptionFieldsIdRepository, mockUuidCreator, mockApiFieldDefinitionsService, mockPushPullNotificationService)
+
+  // TODO - write some tests for this
+  when(mockPushPullNotificationService.notifyOfAnyTopics(any[ClientId],any[ApiContext],any[ApiVersion],*)).thenReturn(successful(()))
 
   "getAll" should {
     "return an empty list when no entry exists in the database collection" in {
@@ -171,13 +175,13 @@ class SubscriptionFieldsServiceSpec extends AsyncHmrcSpec with SubscriptionField
     "returns ValidSubsFieldValidationResponse when fields are Valid " in {
       when(mockApiFieldDefinitionsService get (FakeContext, FakeVersion)).thenReturn(successful(Some(FakeApiFieldDefinitionsResponseWithRegex)))
 
-      await(service.validate(FakeContext, FakeVersion, SubscriptionFieldsMatchRegexValidation)) shouldBe ValidSubsFieldValidationResponse
+      await(service.validate(FakeClientId, FakeContext, FakeVersion, SubscriptionFieldsMatchRegexValidation)) shouldBe ValidSubsFieldValidationResponse
     }
 
     "returns InvalidSubsFieldValidationResponse when fields are Invalid " in {
       when(mockApiFieldDefinitionsService get(FakeContext, FakeVersion)).thenReturn(successful(Some(FakeApiFieldDefinitionsResponseWithRegex)))
 
-      await(service.validate(FakeContext, FakeVersion, SubscriptionFieldsDoNotMatchRegexValidation)) shouldBe FakeInvalidSubsFieldValidationResponse2
+      await(service.validate(FakeClientId, FakeContext, FakeVersion, SubscriptionFieldsDoNotMatchRegexValidation)) shouldBe FakeInvalidSubsFieldValidationResponse2
     }
   }
 

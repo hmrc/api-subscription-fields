@@ -69,7 +69,6 @@ trait FieldDefinitionTestData extends TestData {
   final val FakeApiFieldDefinitionsWithRegex = ApiFieldDefinitions(fakeRawContext, fakeRawVersion, FakeApiFieldDefinitionssWithRegex)
   final val FakeApiFieldDefinitionsResponseWithRegex: ApiFieldDefinitionsResponse = ApiFieldDefinitionsResponse(fakeRawContext, fakeRawVersion, FakeApiFieldDefinitionssWithRegex)
 
-  final val FakeValidRegexFieldsDefinitionRequest = FieldDefinitionsRequest(NonEmptyList.fromListUnsafe(List(FakeFieldDefinitionAlphnumericField, FakeFieldDefinitionPassword)))
 
   final val jsonInvalidRegexFieldsDefinitionRequest =
     """{

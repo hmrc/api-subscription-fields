@@ -16,9 +16,6 @@
 
 package uk.gov.hmrc.apisubscriptionfields.model
 
-import cats.data.NonEmptyList
-import Types._
+import java.{util => ju}
 
-case class SubscriptionFieldsRequest(fields: Fields)
-
-case class FieldDefinitionsRequest(fieldDefinitions: NonEmptyList[FieldDefinition])
+case class TopicId(value: ju.UUID) extends AnyVal

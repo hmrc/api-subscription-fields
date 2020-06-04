@@ -40,10 +40,10 @@ class SubscriptionFieldsControllerPutSpec
   private val controller = new SubscriptionFieldsController(stubControllerComponents(), mockSubscriptionFieldsService)
   implicit private val actorSystem = ActorSystem("test")
   implicit private val mat: Materializer = ActorMaterializer.create(actorSystem)
-  
+
   "PUT /field/application/:clientId/context/:apiContext/version/:apiVersion" should {
     "return CREATED when Field values are Valid and created in the repo" in {
-      when(mockSubscriptionFieldsService.validate(FakeContext, FakeVersion, FakeSubscriptionFields)).thenReturn(successful(FakeValidSubsFieldValidationResponse))
+      when(mockSubscriptionFieldsService.validate(FakeClientId, FakeContext, FakeVersion, FakeSubscriptionFields)).thenReturn(successful(FakeValidSubsFieldValidationResponse))
       when(mockSubscriptionFieldsService.upsert(FakeClientId, FakeContext, FakeVersion, FakeSubscriptionFields)).thenReturn(successful((FakeSubscriptionFieldsResponse, true)))
 
       val json = mkJson(SubscriptionFieldsRequest(FakeSubscriptionFields))
@@ -53,7 +53,7 @@ class SubscriptionFieldsControllerPutSpec
     }
 
     "return OK when Field values are Valid and updated in the repo" in {
-      when(mockSubscriptionFieldsService.validate(FakeContext, FakeVersion, FakeSubscriptionFields)).thenReturn(successful(FakeValidSubsFieldValidationResponse))
+      when(mockSubscriptionFieldsService.validate(FakeClientId, FakeContext, FakeVersion, FakeSubscriptionFields)).thenReturn(successful(FakeValidSubsFieldValidationResponse))
       when(mockSubscriptionFieldsService.upsert(FakeClientId, FakeContext, FakeVersion, FakeSubscriptionFields)).thenReturn(successful((FakeSubscriptionFieldsResponse, false)))
 
       val json = mkJson(SubscriptionFieldsRequest(FakeSubscriptionFields))
@@ -63,7 +63,7 @@ class SubscriptionFieldsControllerPutSpec
     }
 
     "return OK with FieldErrorMessages when Field values are Invalid" in {
-      when(mockSubscriptionFieldsService.validate(FakeContext, FakeVersion, FakeSubscriptionFields)).thenReturn(successful(FakeInvalidSubsFieldValidationResponse))
+      when(mockSubscriptionFieldsService.validate(FakeClientId, FakeContext, FakeVersion, FakeSubscriptionFields)).thenReturn(successful(FakeInvalidSubsFieldValidationResponse))
 
       val json = mkJson(SubscriptionFieldsRequest(FakeSubscriptionFields))
       testSubmitResult(mkRequest(json)) { result =>
@@ -74,7 +74,7 @@ class SubscriptionFieldsControllerPutSpec
 
     "return UnprocessableEntity when no Fields are specified" in {
       val json = mkJson(SubscriptionFieldsRequest(Map.empty))
-      
+
       testSubmitResult(mkRequest(json)) { result =>
         status(result) shouldBe UNPROCESSABLE_ENTITY
         val errorPayload = JsErrorResponse(ErrorCode.INVALID_REQUEST_PAYLOAD, "At least one field must be specified")

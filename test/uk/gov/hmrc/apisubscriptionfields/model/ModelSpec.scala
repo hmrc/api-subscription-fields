@@ -35,6 +35,10 @@ class ModelSpec extends HmrcSpec with SubscriptionFieldsTestData with FieldDefin
     "return false when the value is invalid - too short" in {
       atLeastTenLongRule.validate(mixedCaseValue) shouldBe false
     }
+
+    "return true when the value is blank" in {
+      atLeastTenLongRule.validate("") shouldBe true
+    }
   }
 
   "UrlValidationRule" should {
@@ -44,6 +48,10 @@ class ModelSpec extends HmrcSpec with SubscriptionFieldsTestData with FieldDefin
 
     "fail for a value that does not match" in {
         invalidUrls.map(invalidUrl => UrlValidationRule.validate(invalidUrl) shouldBe false)
+    }
+
+    "return true when the value is blank" in {
+      UrlValidationRule.validate("") shouldBe true
     }
   }
 }

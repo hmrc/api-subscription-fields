@@ -14,17 +14,16 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.apisubscriptionfields.model
+package uk.gov.hmrc.apisubscriptionfields.connector
 
-import java.{util => ju}
+import uk.gov.hmrc.apisubscriptionfields.model.{ClientId, TopicId}
 
+private[connector] case class CreateTopicRequest(topicName: String, clientId: ClientId)
 
-case class ClientId(value: ju.UUID) extends AnyVal {
-  def raw: String = value.toString
-}
+private[connector] case class CreateTopicResponse(topicId: TopicId)
 
-case class ApiContext(value: String) extends AnyVal
+private[connector] case class SubscribersRequest(callBackUrl: String, subscriberType: String, subscriberId: Option[ClientId] = None)
 
-case class ApiVersion(value: String) extends AnyVal
+private[connector] case class UpdateSubscribersRequest(subscribers: List[SubscribersRequest])
 
-case class SubscriptionFieldsId(value: ju.UUID) extends AnyVal
+private[connector] case class UpdateSubscribersResponse(topicId: TopicId)

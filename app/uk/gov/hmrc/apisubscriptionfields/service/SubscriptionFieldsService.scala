@@ -27,6 +27,7 @@ import scala.concurrent.Future
 import scala.concurrent.Future.{successful}
 import cats.data.NonEmptyList
 import uk.gov.hmrc.apisubscriptionfields.repository.SubscriptionFieldsRepository
+import uk.gov.hmrc.http.HeaderCarrier
 
 @Singleton
 class UUIDCreator {
@@ -48,16 +49,16 @@ class SubscriptionFieldsService @Inject() (
     }
   }
 
-  private def upsert(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion, fields: Fields, fieldDefinitions: NonEmptyList[FieldDefinition]): Future[SuccessfulSubsFieldsUpsertResponse] = {
-    val subscriptionFields = SubscriptionFields(clientId.value, apiContext.value, apiVersion.value, uuidCreator.uuid(), fields)
+  private def upsert(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion, fields: Fields, fieldDefinitions: NonEmptyList[FieldDefinition])(implicit hc: HeaderCarrier): Future[SuccessfulSubsFieldsUpsertResponse] = {
+    val subscriptionFields = SubscriptionFields(clientId, apiContext.value, apiVersion.value, uuidCreator.uuid(), fields)
 
     for {
       result  <- repository.saveAtomic(subscriptionFields).map(tuple => (asResponse(tuple._1), tuple._2))
-      _       <- pushPullNotificationService.notifyOfAnyTopics(clientId, apiContext, apiVersion, fieldDefinitions)
+      _       <- pushPullNotificationService.subscribeToPPNS(clientId, apiContext, apiVersion, fieldDefinitions, fields)
     } yield SuccessfulSubsFieldsUpsertResponse(result._1, result._2)
   }
 
-  def upsert(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion, fields: Fields): Future[SubsFieldsUpsertResponse] = {
+  def upsert(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion, fields: Fields)(implicit hc: HeaderCarrier): Future[SubsFieldsUpsertResponse] = {
     val foFieldDefinitions: Future[Option[NonEmptyList[FieldDefinition]]] = apiFieldDefinitionsService.get(apiContext, apiVersion).map(_.map(_.fieldDefinitions))
 
     foFieldDefinitions.flatMap( _ match {
@@ -85,13 +86,13 @@ class SubscriptionFieldsService @Inject() (
     } yield fetch.map(asResponse)
   }
 
-  def get(subscriptionFieldsId: SubscriptionFieldsId): Future[Option[SubscriptionFieldsResponse]] = {
+  def getBySubscriptionFieldId(subscriptionFieldsId: SubscriptionFieldsId): Future[Option[SubscriptionFieldsResponse]] = {
     for {
       fetch <- repository.fetchByFieldsId(subscriptionFieldsId)
     } yield fetch.map(asResponse)
   }
 
-  def get(clientId: ClientId): Future[Option[BulkSubscriptionFieldsResponse]] = {
+  def getByClientId(clientId: ClientId): Future[Option[BulkSubscriptionFieldsResponse]] = {
     (for {
       fields <- repository.fetchByClientId(clientId)
     } yield fields.map(asResponse)) map {
@@ -102,7 +103,7 @@ class SubscriptionFieldsService @Inject() (
 
   def getAll: Future[BulkSubscriptionFieldsResponse] = {
     (for {
-      fields <- repository.fetchAll()
+      fields <- repository.fetchAll
     } yield fields.map(asResponse)) map (BulkSubscriptionFieldsResponse(_))
   }
 

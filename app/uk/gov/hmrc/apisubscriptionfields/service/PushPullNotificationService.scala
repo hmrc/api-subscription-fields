@@ -21,23 +21,32 @@ import javax.inject.{Inject, Singleton}
 import uk.gov.hmrc.apisubscriptionfields.model.FieldDefinition
 import scala.concurrent.Future
 import uk.gov.hmrc.apisubscriptionfields.model._
+import uk.gov.hmrc.apisubscriptionfields.model.Types._
 import cats.data.{NonEmptyList => NEL}
 import scala.concurrent.ExecutionContext
+import uk.gov.hmrc.http.HeaderCarrier
 
 @Singleton
 class PushPullNotificationService @Inject() (ppnsConnector: PushPullNotificationServiceConnector)(implicit ec: ExecutionContext) {
-  def makeTopicName(apiContext: ApiContext, apiVersion: ApiVersion, fieldDefinition: FieldDefinition) : String = {
+  private def makeTopicName(apiContext: ApiContext, apiVersion: ApiVersion, fieldDefinition: FieldDefinition) : String = {
     s"$apiContext-$apiVersion-${fieldDefinition.name}"
   }
 
-  def notifyOfAnyTopics(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion, fieldDefinitions: NEL[FieldDefinition]): Future[Unit] = {
-    val createTopicResponses : List[Future[TopicId]] =
+  private def subscribeToPPNS(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion, fieldDefinition: FieldDefinition, fieldValue: FieldValue)(implicit hc: HeaderCarrier) = {
+    for {
+      topicId <- ppnsConnector.ensureTopicIsCreated(makeTopicName(apiContext, apiVersion, fieldDefinition), clientId)
+      _ <- ppnsConnector.subscribe(clientId, topicId, fieldValue)
+    } yield ()
+  }
+
+  def subscribeToPPNS(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion, fieldDefinitions: NEL[FieldDefinition], fields: Fields)(implicit hc: HeaderCarrier): Future[Unit] = {
+    val subscriptionResponses : List[Future[Unit]] =
       fieldDefinitions
       .filter(_.`type` == FieldDefinitionType.PPNS_TOPIC )
       .map { fieldDefn =>
-        ppnsConnector.notifyOfTopic(makeTopicName(apiContext, apiVersion, fieldDefn), clientId)
+        subscribeToPPNS(clientId, apiContext, apiVersion, fieldDefn, fields(fieldDefn.name))
       }
 
-    Future.sequence(createTopicResponses).map(_ => ())
+    Future.sequence(subscriptionResponses).map(_ => ())
   }
 }

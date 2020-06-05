@@ -27,7 +27,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 class ApiFieldDefinitionsServiceSpec extends AsyncHmrcSpec with FieldDefinitionTestData {
 
-  private val mockApiFieldDefinitionsRepository = mock[ApiFieldDefinitionsRepository]
+  private val mockApiFieldDefinitionsRepository = mock[ApiFieldDefinitionsRepository]//(withSettings.verboseLogging)
   private val service = new ApiFieldDefinitionsService(mockApiFieldDefinitionsRepository)
 
   "getAll" should {

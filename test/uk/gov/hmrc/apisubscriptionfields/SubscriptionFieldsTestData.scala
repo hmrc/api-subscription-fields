@@ -33,10 +33,10 @@ trait SubscriptionFieldsTestData extends FieldDefinitionTestData with Validation
   final val SubscriptionFieldsMatchRegexValidation: Fields = Map(AlphanumericFieldName -> "ABC123abc", PasswordFieldName -> "Qw12@erty")
   final val SubscriptionFieldsDoNotMatchRegexValidation: Fields = Map(AlphanumericFieldName -> "ABC123abc=", PasswordFieldName -> "Qw12erty")
 
-  final val FakeApiSubscription = SubscriptionFields(fakeRawClientId, fakeRawContext, fakeRawVersion, FakeRawFieldsId, FakeSubscriptionFields)
+  final val FakeApiSubscription = SubscriptionFields(FakeClientId, fakeRawContext, fakeRawVersion, FakeRawFieldsId, FakeSubscriptionFields)
   final val FakeSubscriptionFieldsId = SubscriptionFieldsId(FakeRawFieldsId)
   final val FakeSubscriptionFieldsResponse: SubscriptionFieldsResponse =
-    SubscriptionFieldsResponse(fakeRawClientId, fakeRawContext, fakeRawVersion, FakeSubscriptionFieldsId, FakeSubscriptionFields)
+    SubscriptionFieldsResponse(FakeClientId, fakeRawContext, fakeRawVersion, FakeSubscriptionFieldsId, FakeSubscriptionFields)
   final val FakeValidSubsFieldValidationResponse: SubsFieldValidationResponse = ValidSubsFieldValidationResponse
 
   final val CallbackUrlFieldName: FieldName = "callbackUrl"
@@ -57,14 +57,14 @@ trait SubscriptionFieldsTestData extends FieldDefinitionTestData with Validation
     (PasswordFieldName -> FakeFieldErrorForPassword._2)
   ))
 
-  def subsFieldsFor(fields: Fields): SubscriptionFields = SubscriptionFields(fakeRawClientId,fakeRawContext, fakeRawVersion, FakeRawFieldsId, fields)
+  def subsFieldsFor(fields: Fields): SubscriptionFields = SubscriptionFields(FakeClientId,fakeRawContext, fakeRawVersion, FakeRawFieldsId, fields)
 
-  def createSubscriptionFieldsWithApiContext(clientId: String = fakeRawClientId, rawContext: String = fakeRawContext) = {
+  def createSubscriptionFieldsWithApiContext(clientId: ClientId = FakeClientId, rawContext: String = fakeRawContext) = {
     val subscriptionFields: Fields = Map(fieldN(1) -> "value_1", fieldN(2) -> "value_2", fieldN(3) -> "value_3")
     SubscriptionFields(clientId, rawContext, fakeRawVersion, FakeRawFieldsId, subscriptionFields)
   }
 
-  def uniqueClientId = UUID.randomUUID().toString
+  def uniqueClientId = ClientId(UUID.randomUUID())
 }
 
 object SubscriptionFieldsTestData extends SubscriptionFieldsTestData

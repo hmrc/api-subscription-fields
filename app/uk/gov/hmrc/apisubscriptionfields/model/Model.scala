@@ -58,4 +58,4 @@ case class FieldDefinition(
 
 case class ApiFieldDefinitions(apiContext: String, apiVersion: String, fieldDefinitions: NEL[FieldDefinition])
 
-case class SubscriptionFields(clientId: String, apiContext: String, apiVersion: String, fieldsId: UUID, fields: Fields)
+case class SubscriptionFields(clientId: ClientId, apiContext: String, apiVersion: String, fieldsId: UUID, fields: Fields)

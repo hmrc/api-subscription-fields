@@ -16,11 +16,9 @@
 
 package uk.gov.hmrc.apisubscriptionfields.repository
 
-import java.util.UUID
 import javax.inject.{Inject, Singleton}
 
 import com.google.inject.ImplementedBy
-import play.api.libs.json._
 import reactivemongo.api.indexes.IndexType
 import reactivemongo.bson.BSONObjectID
 import reactivemongo.play.json._
@@ -30,6 +28,8 @@ import Types.IsInsert
 import uk.gov.hmrc.mongo.ReactiveRepository
 import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
 import scala.concurrent.Future
+import play.api.libs.json.Json
+import play.api.libs.json.JsObject
 
 @ImplementedBy(classOf[SubscriptionFieldsMongoRepository])
 trait SubscriptionFieldsRepository {
@@ -39,12 +39,31 @@ trait SubscriptionFieldsRepository {
   def fetch(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion): Future[Option[SubscriptionFields]]
   def fetchByFieldsId(fieldsId: SubscriptionFieldsId): Future[Option[SubscriptionFields]]
   def fetchByClientId(clientId: ClientId): Future[List[SubscriptionFields]]
-  def fetchAll(): Future[List[SubscriptionFields]]
+  def fetchAll: Future[List[SubscriptionFields]]
 
   def delete(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion): Future[Boolean]
 
   def delete(clientId: ClientId): Future[Boolean]
 }
+
+
+ // N.B. These are because old values in the db have Strings rather than UUIDs.
+trait DbJsonFormatters 
+    extends NonEmptyListFormatters 
+    with AccessRequirementsFormatters
+    with ModelJsonFormatters
+{
+  import play.api.libs.json._
+  import play.api.libs.json._
+
+  implicit val RawClientIdWriteJF: OWrites[ClientId] = (__ \ "clientId" ).write[String].contramap(clientId => clientId.value.toString)
+  implicit val RawClientIdReadJF: Reads[ClientId] = new Reads.UUIDReader(true).flatMap { uuid => Reads.pure(ClientId(uuid)) }
+
+  implicit val SubscriptionFieldsIdjsonFormat = Json.valueFormat[SubscriptionFieldsId]
+  implicit val SubscriptionFieldsJF = Json.format[SubscriptionFields]
+
+}
+
 
 @Singleton
 class SubscriptionFieldsMongoRepository @Inject()(mongoDbProvider: MongoDbProvider)
@@ -56,7 +75,7 @@ class SubscriptionFieldsMongoRepository @Inject()(mongoDbProvider: MongoDbProvid
   )
   with SubscriptionFieldsRepository
   with MongoCrudHelper[SubscriptionFields]
-  with JsonFormatters {
+  with DbJsonFormatters {
 
   override val mongoCollection: JSONCollection = collection
 
@@ -93,36 +112,36 @@ class SubscriptionFieldsMongoRepository @Inject()(mongoDbProvider: MongoDbProvid
   }
 
   override def fetch(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion): Future[Option[SubscriptionFields]] = {
-    getOne(subscriptionFieldsSelector(clientId.value, apiContext.value, apiVersion.value))
+    getOne(subscriptionFieldsSelector(clientId, apiContext.value, apiVersion.value))
   }
 
   override def fetchByFieldsId(fieldsId: SubscriptionFieldsId): Future[Option[SubscriptionFields]] = {
-    getOne(fieldsIdSelector(fieldsId.value))
+    getOne(fieldsIdSelector(fieldsId))
   }
 
   override def fetchByClientId(clientId: ClientId): Future[List[SubscriptionFields]] = {
-    getMany(clientIdSelector(clientId.value))
+    getMany(clientIdSelector(clientId))
   }
 
-  override def fetchAll(): Future[List[SubscriptionFields]] = {
+  override def fetchAll: Future[List[SubscriptionFields]] = {
     getMany(Json.obj())
   }
 
   override def delete(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion): Future[Boolean] = {
-    deleteOne(subscriptionFieldsSelector(clientId.value, apiContext.value, apiVersion.value))
+    deleteOne(subscriptionFieldsSelector(clientId, apiContext.value, apiVersion.value))
   }
 
   override def delete(clientId: ClientId): Future[Boolean] = {
-    deleteMany(clientIdSelector(clientId.value))
+    deleteMany(clientIdSelector(clientId))
   }
 
-  private def clientIdSelector(clientId: String) = Json.obj("clientId" -> clientId)
+  private def clientIdSelector(clientId: ClientId) = Json.obj("clientId" -> clientId.raw)
 
-  private def fieldsIdSelector(fieldsId: UUID) = Json.obj("fieldsId" -> fieldsId)
+  private def fieldsIdSelector(fieldsId: SubscriptionFieldsId) = Json.obj("fieldsId" -> fieldsId.value.toString)
 
-  private def subscriptionFieldsSelector(clientId: String, apiContext: String, apiVersion: String): JsObject = {
+  private def subscriptionFieldsSelector(clientId: ClientId, apiContext: String, apiVersion: String): JsObject = {
     Json.obj(
-      "clientId"   -> clientId,
+      "clientId"   -> clientId.value.toString,
       "apiContext" -> apiContext,
       "apiVersion" -> apiVersion
     )

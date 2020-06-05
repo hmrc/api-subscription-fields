@@ -37,7 +37,7 @@ class SubscriptionFieldsControllerGetSpec extends AsyncHmrcSpec with Subscriptio
 
   private val responseJsonString =
     """{
-      |  "clientId": "afsdknbw34ty4hebdv",
+      |  "clientId": "b624ef7f-8fb5-4ae1-add5-168ebc9fdfcc",
       |  "apiContext": "ciao-api",
       |  "apiVersion": "1.0",
       |  "fieldsId":"327d9145-4965-4d28-a2c5-39dedee50334",
@@ -53,7 +53,7 @@ class SubscriptionFieldsControllerGetSpec extends AsyncHmrcSpec with Subscriptio
     """{
       |  "subscriptions": [
       |    {
-      |      "clientId": "afsdknbw34ty4hebdv",
+      |      "clientId": "b624ef7f-8fb5-4ae1-add5-168ebc9fdfcc",
       |      "apiContext": "ciao-api",
       |      "apiVersion": "1.0",
       |      "fieldsId": "327d9145-4965-4d28-a2c5-39dedee50334",
@@ -63,7 +63,7 @@ class SubscriptionFieldsControllerGetSpec extends AsyncHmrcSpec with Subscriptio
       |      }
       |    },
       |    {
-      |      "clientId": "afsdknbw34ty4hebdv",
+      |      "clientId": "b624ef7f-8fb5-4ae1-add5-168ebc9fdfcc",
       |      "apiContext": "ciao-api",
       |      "apiVersion": "2.0",
       |      "fieldsId": "327d9145-4965-4d28-a2c5-39dedee50335",
@@ -114,7 +114,7 @@ class SubscriptionFieldsControllerGetSpec extends AsyncHmrcSpec with Subscriptio
   "GET /field/{fields-id}" should {
 
     "return OK when the expected record exists in the repo" in {
-      when(mockSubscriptionFieldsService.get(FakeFieldsId)).thenReturn(successful(Some(responseModel)))
+      when(mockSubscriptionFieldsService.getBySubscriptionFieldId(FakeFieldsId)).thenReturn(successful(Some(responseModel)))
 
       val result = controller.getSubscriptionFieldsByFieldsId(FakeFieldsId)(FakeRequest())
 
@@ -123,7 +123,7 @@ class SubscriptionFieldsControllerGetSpec extends AsyncHmrcSpec with Subscriptio
     }
 
     "return NOT_FOUND when not in the repo" in {
-      when(mockSubscriptionFieldsService.get(FakeFieldsId)).thenReturn(successful(None))
+      when(mockSubscriptionFieldsService.getBySubscriptionFieldId(FakeFieldsId)).thenReturn(successful(None))
 
       val result: Future[Result] = controller.getSubscriptionFieldsByFieldsId(FakeFieldsId)(FakeRequest())
 
@@ -133,7 +133,7 @@ class SubscriptionFieldsControllerGetSpec extends AsyncHmrcSpec with Subscriptio
     }
 
     "return INTERNAL_SERVER_ERROR when service throws exception" in {
-      when(mockSubscriptionFieldsService.get(FakeFieldsId)).thenReturn(failed(emulatedFailure))
+      when(mockSubscriptionFieldsService.getBySubscriptionFieldId(FakeFieldsId)).thenReturn(failed(emulatedFailure))
 
       val result: Future[Result] = controller.getSubscriptionFieldsByFieldsId(FakeFieldsId)(FakeRequest())
 
@@ -146,7 +146,7 @@ class SubscriptionFieldsControllerGetSpec extends AsyncHmrcSpec with Subscriptio
   "GET /field/application/{client-id}" should {
 
     "return OK when the expected record exists in the repo" in {
-      when(mockSubscriptionFieldsService.get(FakeClientId)).thenReturn(successful(Some(bulkResponseModel)))
+      when(mockSubscriptionFieldsService.getByClientId(FakeClientId)).thenReturn(successful(Some(bulkResponseModel)))
 
       val result = controller.getBulkSubscriptionFieldsByClientId(FakeClientId)(FakeRequest())
 
@@ -155,7 +155,7 @@ class SubscriptionFieldsControllerGetSpec extends AsyncHmrcSpec with Subscriptio
     }
 
     "return NOT_FOUND when not in the repo" in {
-      when(mockSubscriptionFieldsService.get(FakeClientId)).thenReturn(successful(None))
+      when(mockSubscriptionFieldsService.getByClientId(FakeClientId)).thenReturn(successful(None))
 
       val result = controller.getBulkSubscriptionFieldsByClientId(FakeClientId)(FakeRequest())
 
@@ -165,7 +165,7 @@ class SubscriptionFieldsControllerGetSpec extends AsyncHmrcSpec with Subscriptio
     }
 
     "return INTERNAL_SERVER_ERROR when service throws exception" in {
-      when(mockSubscriptionFieldsService.get(FakeClientId)).thenReturn(failed(emulatedFailure))
+      when(mockSubscriptionFieldsService.getByClientId(FakeClientId)).thenReturn(failed(emulatedFailure))
 
       val result = controller.getBulkSubscriptionFieldsByClientId(FakeClientId)(FakeRequest())
 

@@ -17,34 +17,40 @@
 package uk.gov.hmrc.apisubscriptionfields.connector
 
 import javax.inject.{Inject, Singleton}
+import uk.gov.hmrc.play.bootstrap.http.HttpClient
 import uk.gov.hmrc.play.http.metrics._
-
 import uk.gov.hmrc.apisubscriptionfields.config.ApplicationConfig
 import scala.concurrent.{ExecutionContext, Future}
-import scala.concurrent.Future.{successful}
 import uk.gov.hmrc.apisubscriptionfields.model.ClientId
-import java.{util => ju}
 import uk.gov.hmrc.apisubscriptionfields.model.TopicId
-
-// TODO - formatters
-// TODO - private[connector]
-
-case class CreateTopicRequest(topicName: String, clientId: ClientId)
-
-private[connector] case class CreateTopicResponse(uuid: ju.UUID)
+import uk.gov.hmrc.http.HeaderCarrier
+import scala.util.control.NonFatal
 
 @Singleton
-class PushPullNotificationServiceConnector @Inject()(appConfig: ApplicationConfig, val apiMetrics: ApiMetrics)(implicit ec: ExecutionContext) extends RecordMetrics {
+class PushPullNotificationServiceConnector @Inject()(http: HttpClient, appConfig: ApplicationConfig, val apiMetrics: ApiMetrics)(implicit ec: ExecutionContext) extends RecordMetrics {
+  import  uk.gov.hmrc.apisubscriptionfields.connector.JsonFormatters._
+
   val api = API("api-subscription-fields")
 
   private lazy val externalServiceUri = appConfig.pushPullNotificationServiceURL
 
-  def notifyOfTopic(topicName: String, clientId: ClientId): Future[TopicId] = {
+  def ensureTopicIsCreated(topicName: String, clientId: ClientId)(implicit hc: HeaderCarrier): Future[TopicId] = {
     val payload = CreateTopicRequest(topicName, clientId)
-    println(s"Yeah - PUT $externalServiceUri with payload $payload")
 
-    val response = CreateTopicResponse(ju.UUID.randomUUID)    // TODO really a call
+    http.PUT[CreateTopicRequest, CreateTopicResponse](s"$externalServiceUri/topics", payload)
+    .map(_.topicId)
+    .recover {
+      case NonFatal(e) => throw new RuntimeException(s"Unexpected response from $externalServiceUri: ${e.getMessage}")
+    }
+  }
 
-    successful(TopicId(response.uuid)) // TODO - not random
+  def subscribe(clientId: ClientId, topicId: TopicId, callbackUrl: String)(implicit hc: HeaderCarrier): Future[TopicId] = {
+    val payload = UpdateSubscribersRequest(List(SubscribersRequest(callbackUrl, "API_PUSH_SUBSCRIBER", Some(clientId))))
+  
+    http.PUT[UpdateSubscribersRequest, UpdateSubscribersResponse](s"$externalServiceUri/topics/${topicId.value.toString}/subscribers", payload)
+    .map(_.topicId)
+    .recover {
+      case NonFatal(e) => throw new RuntimeException(s"Unexpected response from $externalServiceUri: ${e.getMessage}")
+    }
   }
 }

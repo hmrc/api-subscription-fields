@@ -28,6 +28,7 @@ trait ApplicationConfig {
 class ApplicationConfigImpl @Inject()(config: Configuration) extends ApplicationConfig {
   private val HOCON = config.underlying
 
-  val pushPullNotificationServiceURL = HOCON.getString("push-pull-notification-service.uri")
+  // Moving away from complex layers configurations
+  val pushPullNotificationServiceURL = HOCON.getString("microservice.services.push-pull-notification.uri")
 }
 

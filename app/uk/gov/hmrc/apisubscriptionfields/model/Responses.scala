@@ -21,6 +21,11 @@ import play.api.libs.json.{JsObject, Json}
 import cats.data.NonEmptyList
 import Types._
 
+sealed trait SubsFieldsUpsertResponse
+case object NotFoundSubsFieldsUpsertResponse extends SubsFieldsUpsertResponse
+case class FailedValidationSubsFieldsUpsertResponse(errorResponses: Map[FieldName, String]) extends SubsFieldsUpsertResponse
+case class SuccessfulSubsFieldsUpsertResponse(wrapped: SubscriptionFieldsResponse, isInsert: Boolean) extends SubsFieldsUpsertResponse
+
 case class SubscriptionFieldsResponse(clientId: String, apiContext: String, apiVersion: String, fieldsId: SubscriptionFieldsId, fields: Fields)
 
 case class BulkSubscriptionFieldsResponse(subscriptions: Seq[SubscriptionFieldsResponse])
@@ -30,9 +35,7 @@ case class ApiFieldDefinitionsResponse(apiContext: String, apiVersion: String, f
 case class BulkApiFieldDefinitionsResponse(apis: Seq[ApiFieldDefinitionsResponse])
 
 sealed trait SubsFieldValidationResponse
-
 case object ValidSubsFieldValidationResponse extends SubsFieldValidationResponse
-
 case class InvalidSubsFieldValidationResponse(errorResponses: Map[FieldName, String]) extends SubsFieldValidationResponse
 
 object ErrorCode extends Enumeration {

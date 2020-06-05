@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.apisubscriptionfields.acceptance
+package uk.gov.hmrc.apisubscriptionfields
 
 import java.util.UUID
 
@@ -28,23 +28,21 @@ import play.api.mvc.request.RequestTarget
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.modules.reactivemongo.ReactiveMongoComponent
-import uk.gov.hmrc.apisubscriptionfields.RequestHeaders
-import uk.gov.hmrc.apisubscriptionfields.model.JsonFormatters._
 import uk.gov.hmrc.apisubscriptionfields.model._
-import Types.Fields
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
 import cats.data.NonEmptyList
-import uk.gov.hmrc.apisubscriptionfields.FieldDefinitionTestData
+import uk.gov.hmrc.apisubscriptionfields.controller.Helper
 
 trait AcceptanceTestSpec extends FeatureSpec
   with GivenWhenThen
   with BeforeAndAfterAll
   with Matchers
   with GuiceOneServerPerSuite
-  with FieldDefinitionTestData {
+  with FieldDefinitionTestData
+  with Helper {
 
   protected val ValidRequest = FakeRequest()
     .withHeaders(RequestHeaders.ACCEPT_HMRC_JSON_HEADER)
@@ -67,17 +65,11 @@ trait AcceptanceTestSpec extends FeatureSpec
   protected val SampleFields1 = Map(fieldN(1) -> "http://www.example.com/some-endpoint", fieldN(2) -> "value2")
   protected val SampleFields2 = Map(fieldN(1) -> "https://www.example2.com/updated", fieldN(3) -> "value3")
 
-  protected def validSubscriptionPutRequest(fields: Fields): FakeRequest[AnyContentAsJson] =
-    validSubscriptionPutRequest(SubscriptionFieldsRequest(fields))
-
-  protected def validSubscriptionPutRequest(contents: SubscriptionFieldsRequest): FakeRequest[AnyContentAsJson] =
-    fakeRequestWithHeaders.withMethod(PUT).withJsonBody(Json.toJson(contents))
+  protected def validSubscriptionPutRequest(fields: Types.Fields): FakeRequest[AnyContentAsJson] =
+    fakeRequestWithHeaders.withMethod(PUT).withJsonBody(Json.toJson(makeSubscriptionFieldsRequest(fields)))
 
   protected def validDefinitionPutRequest(fieldDefinitions: NonEmptyList[FieldDefinition]): FakeRequest[AnyContentAsJson] =
-    validDefinitionPutRequest(FieldDefinitionsRequest(fieldDefinitions))
-
-  protected def validDefinitionPutRequest(contents: FieldDefinitionsRequest): FakeRequest[AnyContentAsJson] =
-    fakeRequestWithHeaders.withMethod(PUT).withJsonBody(Json.toJson(contents))
+    fakeRequestWithHeaders.withMethod(PUT).withJsonBody(Json.toJson(makeFieldDefinitionsRequest(fieldDefinitions)))
 
   protected def fakeRequestWithHeaders: FakeRequest[AnyContentAsEmpty.type] = {
     FakeRequest().withHeaders(RequestHeaders.ACCEPT_HMRC_JSON_HEADER, RequestHeaders.CONTENT_TYPE_HEADER)
@@ -87,6 +79,7 @@ trait AcceptanceTestSpec extends FeatureSpec
     s"/field/application/$clientId/context/$apiContext/version/$apiVersion"
 
   override def fakeApplication(): Application = new GuiceApplicationBuilder().configure(Map(
+    "metrics.jvm" -> false,
     "run.mode" -> "Stub",
     "Test.microservice.services.api-subscription-fields.host" -> ExternalServicesConfig.Host,
     "Test.microservice.services.api-subscription-fields.port" -> ExternalServicesConfig.Port

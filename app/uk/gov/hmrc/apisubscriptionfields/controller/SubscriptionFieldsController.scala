@@ -88,17 +88,15 @@ class SubscriptionFieldsController @Inject()(cc: ControllerComponents, service: 
         Future.successful(UnprocessableEntity(JsErrorResponse(INVALID_REQUEST_PAYLOAD, "At least one field must be specified")))
       }
       else {
-        service.validate(clientId, apiContext, apiVersion, payload.fields) flatMap {
-            case ValidSubsFieldValidationResponse => {
-              service.upsert(clientId, apiContext, apiVersion, payload.fields) map {
-                case (response, true) => Created(Json.toJson(response))
-                case (response, false) => Ok(Json.toJson(response))
-              }
-            }
-            case InvalidSubsFieldValidationResponse(fieldErrorMessages) => Future.successful(BadRequest(Json.toJson(fieldErrorMessages)))
-          }
-        } recover recovery
+        service.upsert(clientId, apiContext, apiVersion, payload.fields).map( _ match {
+          case NotFoundSubsFieldsUpsertResponse                             => BadRequest(Json.toJson("reason" -> "field definitions not found")) // TODO
+          case FailedValidationSubsFieldsUpsertResponse(fieldErrorMessages) => BadRequest(Json.toJson(fieldErrorMessages))
+          case SuccessfulSubsFieldsUpsertResponse(response, true)           => Created(Json.toJson(response))
+          case SuccessfulSubsFieldsUpsertResponse(response, false)          => Ok(Json.toJson(response))
+        })
+        .recover(recovery)
       }
+    }
   }
 
   def deleteSubscriptionFields(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion): Action[AnyContent] = Action.async { _ =>

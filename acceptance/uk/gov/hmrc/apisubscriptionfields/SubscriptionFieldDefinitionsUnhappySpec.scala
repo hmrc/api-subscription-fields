@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.apisubscriptionfields.acceptance
+package uk.gov.hmrc.apisubscriptionfields
 
 import org.scalatest.OptionValues
 import play.api.libs.json.Json
 import play.api.mvc._
 import play.api.mvc.request.RequestTarget
 import play.api.test.Helpers._
-import uk.gov.hmrc.apisubscriptionfields.SubscriptionFieldsTestData
 import uk.gov.hmrc.apisubscriptionfields.model.ErrorCode.{INVALID_REQUEST_PAYLOAD, NOT_FOUND_CODE}
 import uk.gov.hmrc.apisubscriptionfields.model.JsErrorResponse
 

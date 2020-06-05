@@ -57,9 +57,11 @@ trait SubscriptionFieldsTestData extends FieldDefinitionTestData with Validation
     (PasswordFieldName -> FakeFieldErrorForPassword._2)
   ))
 
+  def subsFieldsFor(fields: Fields): SubscriptionFields = SubscriptionFields(fakeRawClientId,fakeRawContext, fakeRawVersion, FakeRawFieldsId, fields)
+
   def createSubscriptionFieldsWithApiContext(clientId: String = fakeRawClientId, rawContext: String = fakeRawContext) = {
     val subscriptionFields: Fields = Map(fieldN(1) -> "value_1", fieldN(2) -> "value_2", fieldN(3) -> "value_3")
-    SubscriptionFields(clientId, rawContext, fakeRawVersion, UUID.randomUUID(), subscriptionFields)
+    SubscriptionFields(clientId, rawContext, fakeRawVersion, FakeRawFieldsId, subscriptionFields)
   }
 
   def uniqueClientId = UUID.randomUUID().toString

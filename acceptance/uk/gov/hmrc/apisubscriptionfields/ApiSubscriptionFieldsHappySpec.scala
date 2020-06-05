@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.apisubscriptionfields.acceptance
+package uk.gov.hmrc.apisubscriptionfields
 
 import org.scalatest.OptionValues
 import org.scalatest.BeforeAndAfterAll
@@ -25,7 +25,6 @@ import play.api.mvc.request.RequestTarget
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.apisubscriptionfields.model._
-import uk.gov.hmrc.apisubscriptionfields.{FieldDefinitionTestData, SubscriptionFieldsTestData}
 import scala.concurrent.Future
 import scala.concurrent.Await
 import scala.concurrent.duration._
@@ -38,7 +37,7 @@ class ApiSubscriptionFieldsHappySpec extends AcceptanceTestSpec
   with BeforeAndAfterAll {
 
   override def beforeAll() {
-    val putRequest = validDefinitionPutRequest(FieldDefinitionsRequest(NelOfFieldDefinitions))
+    val putRequest = validDefinitionPutRequest(NelOfFieldDefinitions)
       .withTarget( RequestTarget(uriString="", path=definitionEndpoint(fakeRawContext, fakeRawVersion), queryString = Map.empty))
 
     Await.result(route(app, putRequest).get, 10.seconds)
@@ -79,7 +78,7 @@ class ApiSubscriptionFieldsHappySpec extends AcceptanceTestSpec
 
     def createSubscriptionFieldsRequest(): FakeRequest[AnyContentAsJson] = {
       createRequest(PUT, subscriptionFieldsEndpoint(fakeRawClientId, fakeRawContext, fakeRawVersion))
-        .withJsonBody(Json.toJson(SubscriptionFieldsRequest(SampleFields1)))
+        .withJsonBody(Json.toJson(makeSubscriptionFieldsRequest(SampleFields1)))
     }
 
     def createSubscriptionFields()= {

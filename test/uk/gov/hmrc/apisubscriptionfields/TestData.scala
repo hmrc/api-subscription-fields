@@ -23,7 +23,7 @@ import play.api.http.MimeTypes
 import uk.gov.hmrc.apisubscriptionfields.model._
 
 trait TestData {
-  final val unit = ()
+
   type EmulatedFailure = UnsupportedOperationException
   final val emulatedFailure = new EmulatedFailure("Emulated failure.")
   final val fakeRawClientId = UUID.randomUUID().toString

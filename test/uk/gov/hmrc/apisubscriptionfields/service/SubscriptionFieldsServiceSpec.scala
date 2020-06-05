@@ -118,27 +118,32 @@ class SubscriptionFieldsServiceSpec extends AsyncHmrcSpec with SubscriptionField
   }
 
   "upsert" should {
+    val fields: Types.Fields = SubscriptionFieldsMatchRegexValidation
+    val subscriptionFields: SubscriptionFields = subsFieldsFor(fields)
+
     "return false when updating an existing api subscription fields" in {
-      when(mockSubscriptionFieldsIdRepository.saveAtomic(FakeApiSubscription)).thenReturn(successful((FakeApiSubscription, false)))
+      when(mockApiFieldDefinitionsService.get(FakeContext, FakeVersion)).thenReturn(successful(Some(FakeApiFieldDefinitionsResponseWithRegex)))
+      when(mockSubscriptionFieldsIdRepository.saveAtomic(*)).thenReturn(successful((subscriptionFields, false)))
 
-      val result = await(service.upsert(FakeClientId, FakeContext, FakeVersion, FakeSubscriptionFields))
+      val result = await(service.upsert(FakeClientId, FakeContext, FakeVersion, SubscriptionFieldsMatchRegexValidation))
 
-      result shouldBe ((SubscriptionFieldsResponse(fakeRawClientId, fakeRawContext, fakeRawVersion, FakeFieldsId, FakeSubscriptionFields), false))
+      result shouldBe (SuccessfulSubsFieldsUpsertResponse(SubscriptionFieldsResponse(fakeRawClientId, fakeRawContext, fakeRawVersion, FakeFieldsId, fields), false))
     }
 
     "return true when creating a new api subscription fields" in {
-      when(mockSubscriptionFieldsIdRepository.saveAtomic(FakeApiSubscription)).thenReturn(successful((FakeApiSubscription, true)))
+      when(mockApiFieldDefinitionsService.get(FakeContext, FakeVersion)).thenReturn(successful(Some(FakeApiFieldDefinitionsResponseWithRegex)))
+      when(mockSubscriptionFieldsIdRepository.saveAtomic(*)).thenReturn(successful((subscriptionFields, true)))
 
-      val result = await(service.upsert(FakeClientId, FakeContext, FakeVersion, FakeSubscriptionFields))
+      val result = await(service.upsert(FakeClientId, FakeContext, FakeVersion, SubscriptionFieldsMatchRegexValidation))
 
-      result shouldBe ((SubscriptionFieldsResponse(fakeRawClientId, fakeRawContext, fakeRawVersion, FakeFieldsId, FakeSubscriptionFields), true))
+      result shouldBe (SuccessfulSubsFieldsUpsertResponse(SubscriptionFieldsResponse(fakeRawClientId, fakeRawContext, fakeRawVersion, FakeFieldsId, fields), true))
     }
 
     "propagate the error" in {
-      when(mockSubscriptionFieldsIdRepository.saveAtomic(FakeApiSubscription)).thenReturn(failed(emulatedFailure))
+      when(mockSubscriptionFieldsIdRepository.saveAtomic(*)).thenReturn(failed(emulatedFailure))
 
       val caught = intercept[EmulatedFailure] {
-        await(service.upsert(FakeClientId, FakeContext, FakeVersion, FakeSubscriptionFields))
+        await(service.upsert(FakeClientId, FakeContext, FakeVersion, SubscriptionFieldsMatchRegexValidation))
       }
 
       caught shouldBe emulatedFailure
@@ -170,29 +175,15 @@ class SubscriptionFieldsServiceSpec extends AsyncHmrcSpec with SubscriptionField
       await(service.delete(FakeClientId)) shouldBe false
     }
   }
-  "validate" should {
-    import eu.timepit.refined.auto._
-    "returns ValidSubsFieldValidationResponse when fields are Valid " in {
-      when(mockApiFieldDefinitionsService get (FakeContext, FakeVersion)).thenReturn(successful(Some(FakeApiFieldDefinitionsResponseWithRegex)))
-
-      await(service.validate(FakeClientId, FakeContext, FakeVersion, SubscriptionFieldsMatchRegexValidation)) shouldBe ValidSubsFieldValidationResponse
-    }
-
-    "returns InvalidSubsFieldValidationResponse when fields are Invalid " in {
-      when(mockApiFieldDefinitionsService get(FakeContext, FakeVersion)).thenReturn(successful(Some(FakeApiFieldDefinitionsResponseWithRegex)))
-
-      await(service.validate(FakeClientId, FakeContext, FakeVersion, SubscriptionFieldsDoNotMatchRegexValidation)) shouldBe FakeInvalidSubsFieldValidationResponse2
-    }
-  }
 
   def theErrorMessage(i: Int) = s"error message $i"
   val validationGroup1: ValidationGroup = ValidationGroup(theErrorMessage(1), NonEmptyList(mixedCaseRule, List(atLeastThreeLongRule)))
 
   "validate value against group" should {
-
     "return true when the value is both mixed case and at least 3 long" in {
       SubscriptionFieldsService.validateAgainstGroup(validationGroup1, mixedCaseValue) shouldBe true
     }
+
     "return false when the value is not mixed case or not at least 3 long" in {
       val hasNumeralsValue = "A345"
       val veryShortMixedCase = "Ab"
@@ -208,6 +199,7 @@ class SubscriptionFieldsServiceSpec extends AsyncHmrcSpec with SubscriptionField
     "succeed when no validation is present on the field defintion" in {
       SubscriptionFieldsService.validateAgainstDefinition(fieldDefintionWithoutValidation, lowerCaseValue) shouldBe None
     }
+
     "return FieldError when validation on the field defintion does not match the value" in {
       val hasNumeralsValue = "A345"
       SubscriptionFieldsService.validateAgainstDefinition(fieldDefinitionWithValidation, hasNumeralsValue) shouldBe

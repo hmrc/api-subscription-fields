@@ -24,10 +24,9 @@ import Types._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import scala.concurrent.Future.{successful}
 import cats.data.NonEmptyList
 import uk.gov.hmrc.apisubscriptionfields.repository.SubscriptionFieldsRepository
-import cats.data.OptionT
-import cats.implicits._
 
 @Singleton
 class UUIDCreator {
@@ -42,32 +41,34 @@ class SubscriptionFieldsService @Inject() (
                                           pushPullNotificationService: PushPullNotificationService) {
 
 
-  def validate(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion, fields: Fields): Future[SubsFieldValidationResponse] = {
-    def asResponse(fieldDefinitions: NonEmptyList[FieldDefinition]): SubsFieldValidationResponse = {
-      import SubscriptionFieldsService.{validateAgainstValidationRules, validateFieldNamesAreDefined}
-
-      validateAgainstValidationRules(fieldDefinitions, fields) ++ validateFieldNamesAreDefined(fieldDefinitions,fields) match {
-        case FieldErrorMap.empty => ValidSubsFieldValidationResponse
-        case errs: FieldErrorMap => InvalidSubsFieldValidationResponse(errorResponses = errs)
-      }
+  private def validate(fields: Fields, fieldDefinitions: NonEmptyList[FieldDefinition]): SubsFieldValidationResponse = {
+    SubscriptionFieldsService.validateAgainstValidationRules(fieldDefinitions, fields) ++ SubscriptionFieldsService.validateFieldNamesAreDefined(fieldDefinitions,fields) match {
+      case FieldErrorMap.empty => ValidSubsFieldValidationResponse
+      case errs: FieldErrorMap => InvalidSubsFieldValidationResponse(errorResponses = errs)
     }
-
-    (for {
-      fieldDefinitionResponse <- OptionT(apiFieldDefinitionsService.get(apiContext, apiVersion))
-      fieldDefinitions = fieldDefinitionResponse.fieldDefinitions
-      _ <- OptionT.liftF(pushPullNotificationService.notifyOfAnyTopics(clientId, apiContext, apiVersion, fieldDefinitions))
-    }
-    yield asResponse(fieldDefinitions))
-    .value
-    .flatMap(_ match {
-      case Some(sfr) => Future.successful(sfr)
-      case None => Future.failed(new RuntimeException)
-    })
   }
 
-  def upsert(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion, subscriptionFields: Fields): Future[(SubscriptionFieldsResponse, IsInsert)] = {
-    val fields = SubscriptionFields(clientId.value, apiContext.value, apiVersion.value, uuidCreator.uuid(), subscriptionFields)
-    repository.saveAtomic(fields).map(tuple => (asResponse(tuple._1), tuple._2))
+  private def upsert(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion, fields: Fields, fieldDefinitions: NonEmptyList[FieldDefinition]): Future[SuccessfulSubsFieldsUpsertResponse] = {
+    val subscriptionFields = SubscriptionFields(clientId.value, apiContext.value, apiVersion.value, uuidCreator.uuid(), fields)
+
+    for {
+      result  <- repository.saveAtomic(subscriptionFields).map(tuple => (asResponse(tuple._1), tuple._2))
+      _       <- pushPullNotificationService.notifyOfAnyTopics(clientId, apiContext, apiVersion, fieldDefinitions)
+    } yield SuccessfulSubsFieldsUpsertResponse(result._1, result._2)
+  }
+
+  def upsert(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion, fields: Fields): Future[SubsFieldsUpsertResponse] = {
+    val foFieldDefinitions: Future[Option[NonEmptyList[FieldDefinition]]] = apiFieldDefinitionsService.get(apiContext, apiVersion).map(_.map(_.fieldDefinitions))
+
+    foFieldDefinitions.flatMap( _ match {
+      case None                   => successful(NotFoundSubsFieldsUpsertResponse)
+      case Some(fieldDefinitions) => {
+        validate(fields, fieldDefinitions) match {
+          case ValidSubsFieldValidationResponse                       => upsert(clientId, apiContext, apiVersion, fields, fieldDefinitions)
+          case InvalidSubsFieldValidationResponse(fieldErrorMessages) => successful(FailedValidationSubsFieldsUpsertResponse(fieldErrorMessages))
+        }
+      }
+    })
   }
 
   def delete(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion): Future[Boolean] = {
@@ -105,6 +106,7 @@ class SubscriptionFieldsService @Inject() (
     } yield fields.map(asResponse)) map (BulkSubscriptionFieldsResponse(_))
   }
 
+  // TODO use reads for using actual value types instead of Strings
   private def asResponse(apiSubscription: SubscriptionFields): SubscriptionFieldsResponse = {
     SubscriptionFieldsResponse(
       clientId = apiSubscription.clientId,

@@ -64,7 +64,7 @@ trait SubscriptionFieldsTestData extends FieldDefinitionTestData with Validation
     SubscriptionFields(clientId, rawContext, fakeRawVersion, FakeRawFieldsId, subscriptionFields)
   }
 
-  def uniqueClientId = ClientId(UUID.randomUUID())
+  def uniqueClientId = ClientId(UUID.randomUUID().toString)
 }
 
 object SubscriptionFieldsTestData extends SubscriptionFieldsTestData

@@ -26,8 +26,8 @@ trait TestData {
 
   type EmulatedFailure = UnsupportedOperationException
   final val emulatedFailure = new EmulatedFailure("Emulated failure.")
-  final val fakeRawClientId = UUID.randomUUID()
-  final val fakeRawClientId2 = UUID.randomUUID()
+  final val fakeRawClientId = UUID.randomUUID().toString
+  final val fakeRawClientId2 = UUID.randomUUID().toString
   final val fakeRawContext = "acontext"
   final val fakeRawContext2 = "acontext2"
   final val fakeRawVersion = "1.0.2"

@@ -31,8 +31,10 @@ class SubscriptionFieldsServiceSpec extends AsyncHmrcSpec with SubscriptionField
   trait Setup {
     val mockSubscriptionFieldsRepository = mock[SubscriptionFieldsMongoRepository]
     val mockApiFieldDefinitionsService = mock[ApiFieldDefinitionsService]
-    val mockPushPullNotificationService = mock[PushPullNotificationService]
-    
+
+    // TODO - write some tests for this
+    val mockPushPullNotificationService = mock[PushPullNotificationService](org.mockito.Mockito.withSettings().verboseLogging())
+
     val mockUuidCreator = new UUIDCreator {
       override def uuid(): ju.UUID = FakeRawFieldsId
     }
@@ -42,7 +44,6 @@ class SubscriptionFieldsServiceSpec extends AsyncHmrcSpec with SubscriptionField
     val service = new SubscriptionFieldsService(mockSubscriptionFieldsRepository, mockUuidCreator, mockApiFieldDefinitionsService, mockPushPullNotificationService)
 
   }
-  // TODO - write some tests for this
 
   "getAll" should {
     "return an empty list when no entry exists in the database collection" in new Setup {
@@ -123,62 +124,64 @@ class SubscriptionFieldsServiceSpec extends AsyncHmrcSpec with SubscriptionField
     }
   }
 
-  // "upsert" should {
-  //   val fields: Types.Fields = SubscriptionFieldsMatchRegexValidation
-  //   val subscriptionFields: SubscriptionFields = subsFieldsFor(fields)
+  "upsert" should {
+    val fields: Types.Fields = SubscriptionFieldsMatchRegexValidation
+    val subscriptionFields: SubscriptionFields = subsFieldsFor(fields)
+      val ppnsResponse: Future[Unit] = successful(())
 
-  //   "return false when updating an existing api subscription fields" in new Setup {
-  //     when(mockPushPullNotificationService.subscribeToPPNS(*, *, * ,*, *)(*)).thenReturn(successful(()))
-  //     when(mockApiFieldDefinitionsService.get(FakeContext, FakeVersion)).thenReturn(successful(Some(FakeApiFieldDefinitionsResponseWithRegex)))
-  //     when(mockSubscriptionFieldsRepository.saveAtomic(*)).thenReturn(successful((subscriptionFields, false)))
+    "return false when updating an existing `api subscription fields" in new Setup {
+      when(mockApiFieldDefinitionsService.get(FakeContext, FakeVersion)).thenReturn(successful(Some(FakeApiFieldDefinitionsResponseWithRegex)))
+      when(mockPushPullNotificationService.subscribeToPPNS(eqTo(FakeClientId), eqTo(FakeContext), eqTo(FakeVersion), any, eqTo(fields))(any)).thenReturn(ppnsResponse)
+      when(mockSubscriptionFieldsRepository.saveAtomic(*)).thenReturn(successful((subscriptionFields, false)))
 
-  //     val result = await(service.upsert(FakeClientId, FakeContext, FakeVersion, SubscriptionFieldsMatchRegexValidation))
+      val result = await(service.upsert(FakeClientId, FakeContext, FakeVersion, SubscriptionFieldsMatchRegexValidation))
 
-  //     result shouldBe (SuccessfulSubsFieldsUpsertResponse(SubscriptionFieldsResponse(FakeClientId, fakeRawContext, fakeRawVersion, FakeFieldsId, fields), false))
-  //   }
+      result shouldBe (SuccessfulSubsFieldsUpsertResponse(SubscriptionFieldsResponse(FakeClientId, fakeRawContext, fakeRawVersion, FakeFieldsId, fields), false))
+    }
 
-  //   "return true when creating a new api subscription fields" in new Setup {
-  //     when(mockPushPullNotificationService.subscribeToPPNS(*, *, * ,*, *)(*)).thenReturn(successful(()))
-  //     when(mockApiFieldDefinitionsService.get(FakeContext, FakeVersion)).thenReturn(successful(Some(FakeApiFieldDefinitionsResponseWithRegex)))
-  //     when(mockSubscriptionFieldsRepository.saveAtomic(*)).thenReturn(successful((subscriptionFields, true)))
+    "return true when creating a new api subscription fields" in new Setup {
+      when(mockApiFieldDefinitionsService.get(FakeContext, FakeVersion)).thenReturn(successful(Some(FakeApiFieldDefinitionsResponseWithRegex)))
+      when(mockPushPullNotificationService.subscribeToPPNS(eqTo(FakeClientId), eqTo(FakeContext), eqTo(FakeVersion), any, eqTo(fields))(any)).thenReturn(ppnsResponse)
+      when(mockSubscriptionFieldsRepository.saveAtomic(*)).thenReturn(successful((subscriptionFields, true)))
 
-  //     val result = await(service.upsert(FakeClientId, FakeContext, FakeVersion, SubscriptionFieldsMatchRegexValidation))
+      val result = await(service.upsert(FakeClientId, FakeContext, FakeVersion, SubscriptionFieldsMatchRegexValidation))
 
-  //     result shouldBe (SuccessfulSubsFieldsUpsertResponse(SubscriptionFieldsResponse(FakeClientId, fakeRawContext, fakeRawVersion, FakeFieldsId, fields), true))
-  //   }
+      result shouldBe (SuccessfulSubsFieldsUpsertResponse(SubscriptionFieldsResponse(FakeClientId, fakeRawContext, fakeRawVersion, FakeFieldsId, fields), true))
+    }
 
-  //   "propagate the error" in new Setup {
-  //     when(mockSubscriptionFieldsRepository.saveAtomic(*)).thenReturn(failed(emulatedFailure))
+    "propagate the error" in new Setup {
+      when(mockApiFieldDefinitionsService.get(FakeContext, FakeVersion)).thenReturn(successful(Some(FakeApiFieldDefinitionsResponseWithRegex)))
+      when(mockSubscriptionFieldsRepository.saveAtomic(*)).thenReturn(failed(emulatedFailure))
 
-  //     val caught = intercept[EmulatedFailure] {
-  //       await(service.upsert(FakeClientId, FakeContext, FakeVersion, SubscriptionFieldsMatchRegexValidation))
-  //     }
+      val caught = intercept[EmulatedFailure] {
+        await(service.upsert(FakeClientId, FakeContext, FakeVersion, SubscriptionFieldsMatchRegexValidation))
+      }
 
-  //     caught shouldBe emulatedFailure
-  //   }
-  // }
+      caught shouldBe emulatedFailure
+    }
+  }
 
   "delete" should {
     "return true when the entry exists in the database collection" in new Setup {
-      when(mockSubscriptionFieldsRepository delete (FakeClientId, FakeContext, FakeVersion)).thenReturn(successful(true))
+      when(mockSubscriptionFieldsRepository.delete(FakeClientId, FakeContext,FakeVersion)).thenReturn(successful(true))
 
       await(service.delete(FakeClientId, FakeContext, FakeVersion)) shouldBe true
     }
 
     "return false when the entry does not exist in the database collection" in new Setup {
-      when(mockSubscriptionFieldsRepository delete (FakeClientId, FakeContext, FakeVersion)).thenReturn(successful(false))
+      when(mockSubscriptionFieldsRepository.delete(FakeClientId, FakeContext,FakeVersion)).thenReturn(successful(false))
 
       await(service.delete(FakeClientId, FakeContext, FakeVersion)) shouldBe false
     }
 
     "return true when the client ID exists in the database collection" in new Setup {
-      when(mockSubscriptionFieldsRepository delete (FakeClientId)).thenReturn(successful(true))
+      when(mockSubscriptionFieldsRepository.delete(FakeClientId)).thenReturn(successful(true))
 
       await(service.delete(FakeClientId)) shouldBe true
     }
 
     "return false when the client ID does not exist in the database collection" in new Setup {
-      when(mockSubscriptionFieldsRepository delete (FakeClientId)).thenReturn(successful(false))
+      when(mockSubscriptionFieldsRepository.delete(FakeClientId)).thenReturn(successful(false))
 
       await(service.delete(FakeClientId)) shouldBe false
     }

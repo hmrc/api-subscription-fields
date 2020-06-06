@@ -95,10 +95,11 @@ object AccessRequirementsFormatters extends AccessRequirementsFormatters
 trait SpecialJsonFormatters {
   implicit val ClientIdJF = Json.valueFormat[ClientId]
   implicit val TopicIdJF = Json.valueFormat[TopicId]
+  implicit val SubscriptionFieldsIdjsonFormat = Json.valueFormat[SubscriptionFieldsId]
 }
 
 trait ModelJsonFormatters {
-  self: NonEmptyListFormatters 
+  self: NonEmptyListFormatters
         with AccessRequirementsFormatters =>
 
   import be.venneborg.refined.play.RefinedJsonFormats._
@@ -162,12 +163,10 @@ trait ModelJsonFormatters {
 }
 
 trait JsonFormatters
-    extends NonEmptyListFormatters 
+    extends NonEmptyListFormatters
     with AccessRequirementsFormatters
     with SpecialJsonFormatters
     with ModelJsonFormatters {
-
-  implicit val SubscriptionFieldsIdjsonFormat = Json.valueFormat[SubscriptionFieldsId]
 
   implicit val SubscriptionFieldsResponseJF = Json.format[SubscriptionFieldsResponse]
   implicit val SubscriptionFieldsJF = Json.format[SubscriptionFields]

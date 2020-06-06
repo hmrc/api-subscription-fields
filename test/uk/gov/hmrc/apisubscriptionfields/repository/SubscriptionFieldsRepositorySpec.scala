@@ -63,7 +63,7 @@ class SubscriptionFieldsRepositorySpec extends AsyncHmrcSpec
 
   private def createApiSubscriptionFields(clientId: ClientId = FakeClientId): SubscriptionFields = {
     val fields = Map(fieldN(1) -> "value_1", fieldN(2) -> "value_2", fieldN(3) -> "value_3")
-    SubscriptionFields(clientId, fakeRawContext, fakeRawVersion, clientId.value, fields)
+    SubscriptionFields(clientId, fakeRawContext, fakeRawVersion, UUID.randomUUID(), fields)
   }
 
   private def collectionSize: Int = {
@@ -116,7 +116,7 @@ class SubscriptionFieldsRepositorySpec extends AsyncHmrcSpec
     }
 
     "return an empty list when clientId is not found" in {
-      await(repository.fetchByClientId(ClientId(UUID.randomUUID))) shouldBe List()
+      await(repository.fetchByClientId(ClientId(UUID.randomUUID.toString))) shouldBe List()
     }
 
   }
@@ -137,7 +137,7 @@ class SubscriptionFieldsRepositorySpec extends AsyncHmrcSpec
       }
       collectionSize shouldBe 3
 
-      val found = await(repository.fetch(ClientId(UUID.randomUUID()), FakeContext, FakeVersion))
+      val found = await(repository.fetch(ClientId(UUID.randomUUID().toString), FakeContext, FakeVersion))
       found shouldBe None
     }
   }
@@ -196,7 +196,7 @@ class SubscriptionFieldsRepositorySpec extends AsyncHmrcSpec
       }
       collectionSize shouldBe 3
 
-      await(repository.delete(ClientId(UUID.randomUUID()), FakeContext, FakeVersion))
+      await(repository.delete(ClientId(UUID.randomUUID().toString), FakeContext, FakeVersion))
       collectionSize shouldBe 3
     }
 
@@ -219,7 +219,7 @@ class SubscriptionFieldsRepositorySpec extends AsyncHmrcSpec
       }
       collectionSize shouldBe 3
 
-      await(repository.delete(ClientId(UUID.randomUUID())))
+      await(repository.delete(ClientId(UUID.randomUUID().toString)))
       collectionSize shouldBe 3
     }
   }

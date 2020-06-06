@@ -35,8 +35,8 @@ object Binders {
   )
 
   implicit object clientIdPathBindable extends PathBindable.Parsing[ClientId](
-    s => ClientId(ju.UUID.fromString(s)),
-    _.value.toString,
+    ClientId.apply,
+    _.value,
       (key: String, e: Exception) => "Cannot parse parameter %s as ClientId: %s".format(key, e.getMessage)
   )
 

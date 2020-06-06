@@ -19,9 +19,7 @@ package uk.gov.hmrc.apisubscriptionfields.model
 import java.{util => ju}
 
 
-case class ClientId(value: ju.UUID) extends AnyVal {
-  def raw: String = value.toString
-}
+case class ClientId(value: String) extends AnyVal
 
 case class ApiContext(value: String) extends AnyVal
 

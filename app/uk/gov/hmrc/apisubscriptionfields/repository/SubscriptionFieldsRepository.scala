@@ -47,24 +47,6 @@ trait SubscriptionFieldsRepository {
 }
 
 
- // N.B. These are because old values in the db have Strings rather than UUIDs.
-trait DbJsonFormatters 
-    extends NonEmptyListFormatters 
-    with AccessRequirementsFormatters
-    with ModelJsonFormatters
-{
-  import play.api.libs.json._
-  import play.api.libs.json._
-
-  implicit val RawClientIdWriteJF: OWrites[ClientId] = (__ \ "clientId" ).write[String].contramap(clientId => clientId.value.toString)
-  implicit val RawClientIdReadJF: Reads[ClientId] = new Reads.UUIDReader(true).flatMap { uuid => Reads.pure(ClientId(uuid)) }
-
-  implicit val SubscriptionFieldsIdjsonFormat = Json.valueFormat[SubscriptionFieldsId]
-  implicit val SubscriptionFieldsJF = Json.format[SubscriptionFields]
-
-}
-
-
 @Singleton
 class SubscriptionFieldsMongoRepository @Inject()(mongoDbProvider: MongoDbProvider)
   extends ReactiveRepository[SubscriptionFields, BSONObjectID](
@@ -75,7 +57,7 @@ class SubscriptionFieldsMongoRepository @Inject()(mongoDbProvider: MongoDbProvid
   )
   with SubscriptionFieldsRepository
   with MongoCrudHelper[SubscriptionFields]
-  with DbJsonFormatters {
+  with JsonFormatters {
 
   override val mongoCollection: JSONCollection = collection
 
@@ -135,13 +117,13 @@ class SubscriptionFieldsMongoRepository @Inject()(mongoDbProvider: MongoDbProvid
     deleteMany(clientIdSelector(clientId))
   }
 
-  private def clientIdSelector(clientId: ClientId) = Json.obj("clientId" -> clientId.raw)
+  private def clientIdSelector(clientId: ClientId) = Json.obj("clientId" -> clientId.value)
 
   private def fieldsIdSelector(fieldsId: SubscriptionFieldsId) = Json.obj("fieldsId" -> fieldsId.value.toString)
 
   private def subscriptionFieldsSelector(clientId: ClientId, apiContext: String, apiVersion: String): JsObject = {
     Json.obj(
-      "clientId"   -> clientId.value.toString,
+      "clientId"   -> clientId.value,
       "apiContext" -> apiContext,
       "apiVersion" -> apiVersion
     )

@@ -53,7 +53,8 @@ def test(scope: String = "test,acceptance") = Seq(
   "org.scalatestplus.play" %% "scalatestplus-play" % "3.1.3" % scope,
   "org.mockito" %% "mockito-scala-scalatest" % "1.14.4" % scope,
   "org.pegdown" % "pegdown" % "1.6.0" % scope,
-  "com.typesafe.play" %% "play-test" % play.core.PlayVersion.current % scope
+  "com.typesafe.play" %% "play-test" % play.core.PlayVersion.current % scope,
+  "com.github.tomakehurst" % "wiremock-jre8" % "2.26.3" % scope
 )
 
 val appName = "api-subscription-fields"

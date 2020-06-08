@@ -51,7 +51,7 @@ val overrides: Seq[ModuleID] = Seq(
 def test(scope: String = "test,acceptance") = Seq(
   "uk.gov.hmrc" %% "reactivemongo-test" % "4.16.0-play-26" % scope,
   "org.scalatestplus.play" %% "scalatestplus-play" % "3.1.3" % scope,
-  "org.mockito" %% "mockito-scala-scalatest" % "1.7.1" % scope,
+  "org.mockito" %% "mockito-scala-scalatest" % "1.14.4" % scope,
   "org.pegdown" % "pegdown" % "1.6.0" % scope,
   "com.typesafe.play" %% "play-test" % play.core.PlayVersion.current % scope
 )

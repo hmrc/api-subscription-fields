@@ -28,8 +28,9 @@ import uk.gov.hmrc.http.HeaderCarrier
 
 @Singleton
 class PushPullNotificationService @Inject() (ppnsConnector: PushPullNotificationServiceConnector)(implicit ec: ExecutionContext) {
-  private def makeTopicName(apiContext: ApiContext, apiVersion: ApiVersion, fieldDefinition: FieldDefinition) : String = {
-    s"$apiContext-$apiVersion-${fieldDefinition.name}"
+  def makeTopicName(apiContext: ApiContext, apiVersion: ApiVersion, fieldDefinition: FieldDefinition) : String = {
+    val separator = "/"
+    s"${apiContext.value}${separator}${apiVersion.value}${separator}${fieldDefinition.name.value}"
   }
 
   private def subscribeToPPNS(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion, fieldDefinition: FieldDefinition, fieldValue: FieldValue)(implicit hc: HeaderCarrier) = {

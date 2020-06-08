@@ -25,19 +25,21 @@ import uk.gov.hmrc.apisubscriptionfields.model.ClientId
 import uk.gov.hmrc.apisubscriptionfields.model.TopicId
 import uk.gov.hmrc.http.HeaderCarrier
 import scala.util.control.NonFatal
+import play.api.http.HeaderNames.USER_AGENT
 
 @Singleton
 class PushPullNotificationServiceConnector @Inject()(http: HttpClient, appConfig: ApplicationConfig, val apiMetrics: ApiMetrics)(implicit ec: ExecutionContext) extends RecordMetrics {
   import  uk.gov.hmrc.apisubscriptionfields.connector.JsonFormatters._
 
   val api = API("api-subscription-fields")
+  val extraHeader = Seq(USER_AGENT -> api.name)
 
   private lazy val externalServiceUri = appConfig.pushPullNotificationServiceURL
 
   def ensureTopicIsCreated(topicName: String, clientId: ClientId)(implicit hc: HeaderCarrier): Future[TopicId] = {
     val payload = CreateTopicRequest(topicName, clientId)
 
-    http.PUT[CreateTopicRequest, CreateTopicResponse](s"$externalServiceUri/topics", payload)
+    http.PUT[CreateTopicRequest, CreateTopicResponse](s"$externalServiceUri/topics", payload, extraHeader)
     .map(_.topicId)
     .recover {
       case NonFatal(e) => throw new RuntimeException(s"Unexpected response from $externalServiceUri: ${e.getMessage}")
@@ -46,8 +48,8 @@ class PushPullNotificationServiceConnector @Inject()(http: HttpClient, appConfig
 
   def subscribe(clientId: ClientId, topicId: TopicId, callbackUrl: String)(implicit hc: HeaderCarrier): Future[TopicId] = {
     val payload = UpdateSubscribersRequest(List(SubscribersRequest(callbackUrl, "API_PUSH_SUBSCRIBER", Some(clientId))))
-  
-    http.PUT[UpdateSubscribersRequest, UpdateSubscribersResponse](s"$externalServiceUri/topics/${topicId.value.toString}/subscribers", payload)
+
+    http.PUT[UpdateSubscribersRequest, UpdateSubscribersResponse](s"$externalServiceUri/topics/${topicId.value.toString}/subscribers", payload, extraHeader)
     .map(_.topicId)
     .recover {
       case NonFatal(e) => throw new RuntimeException(s"Unexpected response from $externalServiceUri: ${e.getMessage}")

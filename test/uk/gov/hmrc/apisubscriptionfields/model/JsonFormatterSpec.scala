@@ -26,7 +26,7 @@ class JsonFormatterSpec extends WordSpec with Matchers with JsonFormatters with 
   import play.api.libs.json._
 
   private val fakeFields = Map(fieldN(1) -> "v1")
-  private val subscriptionFieldsResponse = SubscriptionFieldsResponse(FakeClientId, fakeRawContext, fakeRawVersion, FakeFieldsId, fakeFields)
+  private val subscriptionFieldsResponse = SubscriptionFieldsResponse(FakeClientId, FakeContext, FakeVersion, FakeFieldsId, fakeFields)
   private val bulkSubscriptionFieldsResponse = BulkSubscriptionFieldsResponse(Seq(subscriptionFieldsResponse))
 
   private val fakeApiFieldDefinitionsResponse = ApiFieldDefinitionsResponse(fakeRawContext, fakeRawVersion, NonEmptyList.one(FakeFieldDefinitionUrl))

@@ -63,7 +63,7 @@ class SubscriptionFieldsRepositorySpec extends AsyncHmrcSpec
 
   private def createApiSubscriptionFields(clientId: ClientId = FakeClientId): SubscriptionFields = {
     val fields = Map(fieldN(1) -> "value_1", fieldN(2) -> "value_2", fieldN(3) -> "value_3")
-    SubscriptionFields(clientId, fakeRawContext, fakeRawVersion, UUID.randomUUID(), fields)
+    SubscriptionFields(clientId, FakeContext, FakeVersion, UUID.randomUUID(), fields)
   }
 
   private def collectionSize: Int = {
@@ -71,7 +71,7 @@ class SubscriptionFieldsRepositorySpec extends AsyncHmrcSpec
   }
 
   private def selector(s: SubscriptionFields) = {
-    BSONDocument("clientId" -> s.clientId.value.toString, "apiContext" -> s.apiContext, "apiVersion" -> s.apiVersion)
+    BSONDocument("clientId" -> s.clientId.value, "apiContext" -> s.apiContext.value, "apiVersion" -> s.apiVersion.value)
   }
 
   "saveAtomic" should {
@@ -186,7 +186,7 @@ class SubscriptionFieldsRepositorySpec extends AsyncHmrcSpec
       await(repository.saveAtomic(apiSubscription))
       collectionSize shouldBe 1
 
-      await(repository.delete(apiSubscription.clientId, ApiContext(apiSubscription.apiContext), ApiVersion(apiSubscription.apiVersion))) shouldBe true
+      await(repository.delete(apiSubscription.clientId, apiSubscription.apiContext, apiSubscription.apiVersion)) shouldBe true
       collectionSize shouldBe 0
     }
 
@@ -239,7 +239,7 @@ class SubscriptionFieldsRepositorySpec extends AsyncHmrcSpec
       await(repository.saveAtomic(apiSubscription))
       collectionSize shouldBe 1
 
-      await(repository.saveByFieldsId(apiSubscription.copy(apiVersion = "2.2")))
+      await(repository.saveByFieldsId(apiSubscription.copy(apiVersion = ApiVersion("2.2"))))
       collectionSize shouldBe 1
     }
 
@@ -247,7 +247,7 @@ class SubscriptionFieldsRepositorySpec extends AsyncHmrcSpec
       await(repository.saveAtomic(apiSubscription))
       collectionSize shouldBe 1
 
-      await(repository.saveAtomic(apiSubscription.copy(apiContext = fakeRawContext2, fieldsId = UUID.randomUUID())))
+      await(repository.saveAtomic(apiSubscription.copy(apiContext = FakeContext2, fieldsId = UUID.randomUUID())))
       collectionSize shouldBe 2
     }
   }

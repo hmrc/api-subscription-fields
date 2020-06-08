@@ -21,8 +21,6 @@ import org.scalatest.BeforeAndAfterEach
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.mvc._
-import play.api.test.FakeRequest
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock._
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig
@@ -34,8 +32,6 @@ import uk.gov.hmrc.apisubscriptionfields.AsyncHmrcSpec
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.apisubscriptionfields.model.TopicId
 import uk.gov.hmrc.apisubscriptionfields.model.ClientId
-import uk.gov.hmrc.http.logging.Authorization
-import play.api.http.HeaderNames
 
 class PushPullNotificationServiceConnectorSpec
     extends AsyncHmrcSpec

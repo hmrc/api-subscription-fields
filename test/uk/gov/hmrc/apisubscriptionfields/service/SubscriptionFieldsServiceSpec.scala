@@ -31,8 +31,6 @@ class SubscriptionFieldsServiceSpec extends AsyncHmrcSpec with SubscriptionField
   trait Setup {
     val mockSubscriptionFieldsRepository = mock[SubscriptionFieldsMongoRepository]
     val mockApiFieldDefinitionsService = mock[ApiFieldDefinitionsService]
-
-    // TODO - write some tests for this
     val mockPushPullNotificationService = mock[PushPullNotificationService](org.mockito.Mockito.withSettings().verboseLogging())
 
     val mockUuidCreator = new UUIDCreator {
@@ -136,7 +134,7 @@ class SubscriptionFieldsServiceSpec extends AsyncHmrcSpec with SubscriptionField
 
       val result = await(service.upsert(FakeClientId, FakeContext, FakeVersion, SubscriptionFieldsMatchRegexValidation))
 
-      result shouldBe (SuccessfulSubsFieldsUpsertResponse(SubscriptionFieldsResponse(FakeClientId, fakeRawContext, fakeRawVersion, FakeFieldsId, fields), false))
+      result shouldBe (SuccessfulSubsFieldsUpsertResponse(SubscriptionFieldsResponse(FakeClientId, FakeContext, FakeVersion, FakeFieldsId, fields), false))
     }
 
     "return true when creating a new api subscription fields" in new Setup {
@@ -146,7 +144,7 @@ class SubscriptionFieldsServiceSpec extends AsyncHmrcSpec with SubscriptionField
 
       val result = await(service.upsert(FakeClientId, FakeContext, FakeVersion, SubscriptionFieldsMatchRegexValidation))
 
-      result shouldBe (SuccessfulSubsFieldsUpsertResponse(SubscriptionFieldsResponse(FakeClientId, fakeRawContext, fakeRawVersion, FakeFieldsId, fields), true))
+      result shouldBe (SuccessfulSubsFieldsUpsertResponse(SubscriptionFieldsResponse(FakeClientId, FakeContext, FakeVersion, FakeFieldsId, fields), true))
     }
 
     "propagate the error" in new Setup {

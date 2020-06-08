@@ -39,7 +39,6 @@ case class ValidationGroup(errorMessage: String, rules: NEL[ValidationRule])
 object FieldDefinitionType extends Enumeration {
   type FieldDefinitionType = Value
 
-  // TODO - complete "since" when release is ready
   @deprecated("We don't use URL type for any validation", since = "0.5x")
   val URL = Value("URL")
   val SECURE_TOKEN = Value("SecureToken")
@@ -58,4 +57,4 @@ case class FieldDefinition(
 
 case class ApiFieldDefinitions(apiContext: String, apiVersion: String, fieldDefinitions: NEL[FieldDefinition])
 
-case class SubscriptionFields(clientId: ClientId, apiContext: String, apiVersion: String, fieldsId: UUID, fields: Fields)
+case class SubscriptionFields(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion, fieldsId: UUID, fields: Fields)

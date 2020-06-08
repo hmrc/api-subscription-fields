@@ -129,12 +129,8 @@ class SubscriptionFieldsMongoRepository @Inject()(mongoDbProvider: MongoDbProvid
     )
   }
 
-  private def subscriptionFieldsSelector(subscription: SubscriptionFields): JsObject = {
-    Json.obj(
-      "clientId"   -> subscription.clientId.value,
-      "apiContext" -> subscription.apiContext,
-      "apiVersion" -> subscription.apiVersion
-    )
-  }
+  private def subscriptionFieldsSelector(subscription: SubscriptionFields): JsObject = subscriptionFieldsSelector(
+    subscription.clientId, subscription.apiContext, subscription.apiVersion
+  )
 
 }

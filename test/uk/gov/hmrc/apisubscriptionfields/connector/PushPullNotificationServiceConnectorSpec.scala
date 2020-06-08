@@ -72,20 +72,17 @@ class PushPullNotificationServiceConnectorSpec
 
   trait Setup {
 
-    val authToken = "123"
-    implicit lazy val request: Request[AnyContent] = FakeRequest().withHeaders( HeaderNames.AUTHORIZATION -> authToken )
-
     val topicName = "topic-name"
     val clientId = ClientId("client-id")
     val topicId = TopicId(ju.UUID.randomUUID())
-    val response: CreateTopicResponse = CreateTopicResponse(topicId)
 
     val connector = app.injector.instanceOf[PushPullNotificationServiceConnector]
   }
 
   "PPNS Connector" should {
-    "send proper request" in new Setup {
+    "send proper request to post topics" in new Setup {
       val requestBody = Json.stringify(Json.toJson(CreateTopicRequest(topicName, clientId)))
+      val response: CreateTopicResponse = CreateTopicResponse(topicId)
 
       val path = "/topics"
       wireMockServer.stubFor(
@@ -95,13 +92,11 @@ class PushPullNotificationServiceConnectorSpec
           .withBody(Json.stringify(Json.toJson(response)))
           .withStatus(OK)))
 
-      implicit val hc: HeaderCarrier = HeaderCarrier().copy(authorization = Some(Authorization(authToken)))
+      implicit val hc: HeaderCarrier = HeaderCarrier()
 
-      // Send request by using your HTTP client
       val ret = await(connector.ensureTopicIsCreated(topicName, clientId))
       ret shouldBe topicId
 
-      // Verify the request is valid
       wireMockServer.verify(
         putRequestedFor(urlPathEqualTo(path))
         .withHeader("Content-Type", equalTo("application/json"))
@@ -109,6 +104,30 @@ class PushPullNotificationServiceConnectorSpec
       )
     }
 
-      // Assert response body itself if necessary
+    "send proper request to subscribe" in new Setup {
+      val callbackUrl = "my-callback"
+      val updateRequest: UpdateSubscribersRequest = UpdateSubscribersRequest(List(SubscribersRequest(callbackUrl, "API_PUSH_SUBSCRIBER", Some(clientId))))
+      val requestBody = Json.stringify(Json.toJson(updateRequest))
+      val response: UpdateSubscribersResponse = UpdateSubscribersResponse(topicId)
+
+      val path = s"/topics/${topicId.value}/subscribers"
+      wireMockServer.stubFor(
+        put(path).withRequestBody(equalTo(requestBody))
+        .willReturn(aResponse()
+          .withHeader("Content-Type", "application/json")
+          .withBody(Json.stringify(Json.toJson(response)))
+          .withStatus(OK)))
+
+      implicit val hc: HeaderCarrier = HeaderCarrier()
+
+      val ret = await(connector.subscribe(clientId, topicId, callbackUrl))
+      ret shouldBe topicId
+
+      wireMockServer.verify(
+        putRequestedFor(urlPathEqualTo(path))
+        .withHeader("Content-Type", equalTo("application/json"))
+        .withHeader("User-Agent", equalTo("api-subscription-fields"))
+      )
+    }
   }
 }

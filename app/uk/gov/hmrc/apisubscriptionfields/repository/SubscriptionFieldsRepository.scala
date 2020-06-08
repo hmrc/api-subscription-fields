@@ -94,7 +94,7 @@ class SubscriptionFieldsMongoRepository @Inject()(mongoDbProvider: MongoDbProvid
   }
 
   override def fetch(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion): Future[Option[SubscriptionFields]] = {
-    getOne(subscriptionFieldsSelector(clientId, apiContext.value, apiVersion.value))
+    getOne(subscriptionFieldsSelector(clientId, apiContext, apiVersion))
   }
 
   override def fetchByFieldsId(fieldsId: SubscriptionFieldsId): Future[Option[SubscriptionFields]] = {
@@ -110,7 +110,7 @@ class SubscriptionFieldsMongoRepository @Inject()(mongoDbProvider: MongoDbProvid
   }
 
   override def delete(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion): Future[Boolean] = {
-    deleteOne(subscriptionFieldsSelector(clientId, apiContext.value, apiVersion.value))
+    deleteOne(subscriptionFieldsSelector(clientId, apiContext, apiVersion))
   }
 
   override def delete(clientId: ClientId): Future[Boolean] = {
@@ -121,16 +121,20 @@ class SubscriptionFieldsMongoRepository @Inject()(mongoDbProvider: MongoDbProvid
 
   private def fieldsIdSelector(fieldsId: SubscriptionFieldsId) = Json.obj("fieldsId" -> fieldsId.value.toString)
 
-  private def subscriptionFieldsSelector(clientId: ClientId, apiContext: String, apiVersion: String): JsObject = {
+  private def subscriptionFieldsSelector(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion): JsObject = {
     Json.obj(
       "clientId"   -> clientId.value,
-      "apiContext" -> apiContext,
-      "apiVersion" -> apiVersion
+      "apiContext" -> apiContext.value,
+      "apiVersion" -> apiVersion.value
     )
   }
 
   private def subscriptionFieldsSelector(subscription: SubscriptionFields): JsObject = {
-    subscriptionFieldsSelector(subscription.clientId, subscription.apiContext, subscription.apiVersion)
+    Json.obj(
+      "clientId"   -> subscription.clientId.value,
+      "apiContext" -> subscription.apiContext,
+      "apiVersion" -> subscription.apiVersion
+    )
   }
 
 }

@@ -48,8 +48,8 @@ class ApiFieldDefinitionsServiceSpec extends AsyncHmrcSpec with FieldDefinitionT
       val result = await(service.getAll)
 
       val expectedResponse = BulkApiFieldDefinitionsResponse(apis = Seq(
-        ApiFieldDefinitionsResponse(FakeContext, FakeVersion, NonEmptyList.one(FakeFieldDefinitionUrl)),
-        ApiFieldDefinitionsResponse(FakeContext2, FakeVersion, NonEmptyList.one(FakeFieldDefinitionString))))
+        ApiFieldDefinitions(FakeContext, FakeVersion, NonEmptyList.one(FakeFieldDefinitionUrl)),
+        ApiFieldDefinitions(FakeContext2, FakeVersion, NonEmptyList.one(FakeFieldDefinitionString))))
       result shouldBe expectedResponse
     }
   }
@@ -78,7 +78,7 @@ class ApiFieldDefinitionsServiceSpec extends AsyncHmrcSpec with FieldDefinitionT
 
       val result = await(service.upsert(FakeContext, FakeVersion, NelOfFieldDefinitions))
 
-      result shouldBe ((ApiFieldDefinitionsResponse(FakeContext, FakeVersion, NelOfFieldDefinitions), false))
+      result shouldBe ((ApiFieldDefinitions(FakeContext, FakeVersion, NelOfFieldDefinitions), false))
     }
 
     "return true when creating a new fields definition" in {
@@ -86,7 +86,7 @@ class ApiFieldDefinitionsServiceSpec extends AsyncHmrcSpec with FieldDefinitionT
 
       val result = await(service.upsert(FakeContext, FakeVersion, NelOfFieldDefinitions))
 
-      result shouldBe ((ApiFieldDefinitionsResponse(FakeContext, FakeVersion, NelOfFieldDefinitions), true))
+      result shouldBe ((ApiFieldDefinitions(FakeContext, FakeVersion, NelOfFieldDefinitions), true))
     }
 
     "propagate the error" in {

@@ -47,7 +47,7 @@ class SubscriptionFieldsControllerGetSpec extends AsyncHmrcSpec with Subscriptio
       |  }
       |}""".stripMargin
   private val responseJson = Json.parse(responseJsonString)
-  private val responseModel = responseJson.as[SubscriptionFieldsResponse]
+  private val responseModel = responseJson.as[SubscriptionFields]
 
   private val bulkResponseJsonString =
     """{

@@ -28,15 +28,14 @@ trait SubscriptionFieldsTestData extends FieldDefinitionTestData with Validation
   final val FakeRawFieldsId = UUID.randomUUID()
   final val FakeFieldsId = SubscriptionFieldsId(FakeRawFieldsId)
 
-  final val EmptyResponse: Future[Option[SubscriptionFieldsResponse]] = Future.successful(None)
+  final val EmptyResponse: Future[Option[SubscriptionFields]] = Future.successful(None)
   final val FakeSubscriptionFields: Map[FieldName, String] = Map(fieldN(1) -> "X", fieldN(2) -> "Y")
   final val SubscriptionFieldsMatchRegexValidation: Fields = Map(AlphanumericFieldName -> "ABC123abc", PasswordFieldName -> "Qw12@erty")
   final val SubscriptionFieldsDoNotMatchRegexValidation: Fields = Map(AlphanumericFieldName -> "ABC123abc=", PasswordFieldName -> "Qw12erty")
 
   final val FakeApiSubscription = SubscriptionFields(FakeClientId, FakeContext, FakeVersion, FakeFieldsId, FakeSubscriptionFields)
   final val FakeSubscriptionFieldsId = SubscriptionFieldsId(FakeRawFieldsId)
-  final val FakeSubscriptionFieldsResponse: SubscriptionFieldsResponse =
-    SubscriptionFieldsResponse(FakeClientId, FakeContext, FakeVersion, FakeSubscriptionFieldsId, FakeSubscriptionFields)
+  final val FakeSubscriptionFieldsResponse: SubscriptionFields = SubscriptionFields(FakeClientId, FakeContext, FakeVersion, FakeSubscriptionFieldsId, FakeSubscriptionFields)
   final val FakeValidSubsFieldValidationResponse: SubsFieldValidationResponse = ValidSubsFieldValidationResponse
 
   final val CallbackUrlFieldName: FieldName = "callbackUrl"

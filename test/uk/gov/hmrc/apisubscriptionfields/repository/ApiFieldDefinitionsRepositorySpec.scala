@@ -19,7 +19,7 @@ package uk.gov.hmrc.apisubscriptionfields.repository
 import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach}
 import reactivemongo.api.DB
 import reactivemongo.bson.BSONDocument
-import uk.gov.hmrc.apisubscriptionfields.model.{ApiContext, ApiVersion, ApiFieldDefinitions, JsonFormatters}
+import uk.gov.hmrc.apisubscriptionfields.model.{ApiContext, ApiFieldDefinitions, JsonFormatters}
 import uk.gov.hmrc.apisubscriptionfields.FieldDefinitionTestData
 import uk.gov.hmrc.mongo.MongoSpecSupport
 import uk.gov.hmrc.apisubscriptionfields.AsyncHmrcSpec

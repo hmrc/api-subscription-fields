@@ -58,8 +58,8 @@ class SubscriptionFieldsServiceSpec extends AsyncHmrcSpec with SubscriptionField
 
       val expectedResponse = BulkSubscriptionFieldsResponse(subscriptions =
         List(
-          SubscriptionFieldsResponse(sf1.clientId, sf1.apiContext, sf1.apiVersion, sf1.fieldsId, sf1.fields),
-          SubscriptionFieldsResponse(sf2.clientId, sf2.apiContext, sf2.apiVersion, sf2.fieldsId, sf2.fields)
+          SubscriptionFields(sf1.clientId, sf1.apiContext, sf1.apiVersion, sf1.fieldsId, sf1.fields),
+          SubscriptionFields(sf2.clientId, sf2.apiContext, sf2.apiVersion, sf2.fieldsId, sf2.fields)
         )
       )
 
@@ -84,8 +84,8 @@ class SubscriptionFieldsServiceSpec extends AsyncHmrcSpec with SubscriptionField
       result shouldBe Some(
         BulkSubscriptionFieldsResponse(subscriptions =
           Seq(
-            SubscriptionFieldsResponse(sf1.clientId, sf1.apiContext, sf1.apiVersion, sf1.fieldsId, sf1.fields),
-            SubscriptionFieldsResponse(sf2.clientId, sf2.apiContext, sf2.apiVersion, sf2.fieldsId, sf2.fields)
+            SubscriptionFields(sf1.clientId, sf1.apiContext, sf1.apiVersion, sf1.fieldsId, sf1.fields),
+            SubscriptionFields(sf2.clientId, sf2.apiContext, sf2.apiVersion, sf2.fieldsId, sf2.fields)
           )
         )
       )
@@ -134,7 +134,7 @@ class SubscriptionFieldsServiceSpec extends AsyncHmrcSpec with SubscriptionField
 
       val result = await(service.upsert(FakeClientId, FakeContext, FakeVersion, SubscriptionFieldsMatchRegexValidation))
 
-      result shouldBe (SuccessfulSubsFieldsUpsertResponse(SubscriptionFieldsResponse(FakeClientId, FakeContext, FakeVersion, FakeFieldsId, fields), false))
+      result shouldBe (SuccessfulSubsFieldsUpsertResponse(SubscriptionFields(FakeClientId, FakeContext, FakeVersion, FakeFieldsId, fields), false))
     }
 
     "return true when creating a new api subscription fields" in new Setup {
@@ -144,7 +144,7 @@ class SubscriptionFieldsServiceSpec extends AsyncHmrcSpec with SubscriptionField
 
       val result = await(service.upsert(FakeClientId, FakeContext, FakeVersion, SubscriptionFieldsMatchRegexValidation))
 
-      result shouldBe (SuccessfulSubsFieldsUpsertResponse(SubscriptionFieldsResponse(FakeClientId, FakeContext, FakeVersion, FakeFieldsId, fields), true))
+      result shouldBe (SuccessfulSubsFieldsUpsertResponse(SubscriptionFields(FakeClientId, FakeContext, FakeVersion, FakeFieldsId, fields), true))
     }
 
     "propagate the error" in new Setup {

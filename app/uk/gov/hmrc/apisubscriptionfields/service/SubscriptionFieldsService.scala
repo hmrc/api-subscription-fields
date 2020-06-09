@@ -53,7 +53,7 @@ class SubscriptionFieldsService @Inject() (
     val subscriptionFields = SubscriptionFields(clientId, apiContext, apiVersion, SubscriptionFieldsId(uuidCreator.uuid()), fields)
 
     for {
-      result  <- repository.saveAtomic(subscriptionFields).map(tuple => (asResponse(tuple._1), tuple._2))
+      result  <- repository.saveAtomic(subscriptionFields)
       _       <- pushPullNotificationService.subscribeToPPNS(clientId, apiContext, apiVersion, fieldDefinitions, fields)
     } yield SuccessfulSubsFieldsUpsertResponse(result._1, result._2)
   }
@@ -80,22 +80,23 @@ class SubscriptionFieldsService @Inject() (
     repository.delete(clientId)
   }
 
-  def get(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion): Future[Option[SubscriptionFieldsResponse]] = {
+  def get(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion): Future[Option[SubscriptionFields]] = {
     for {
       fetch <- repository.fetch(clientId, apiContext, apiVersion)
-    } yield fetch.map(asResponse)
+    } yield fetch
   }
 
-  def getBySubscriptionFieldId(subscriptionFieldsId: SubscriptionFieldsId): Future[Option[SubscriptionFieldsResponse]] = {
+  def getBySubscriptionFieldId(subscriptionFieldsId: SubscriptionFieldsId): Future[Option[SubscriptionFields]] = {
     for {
       fetch <- repository.fetchByFieldsId(subscriptionFieldsId)
-    } yield fetch.map(asResponse)
+    } yield fetch
   }
 
   def getByClientId(clientId: ClientId): Future[Option[BulkSubscriptionFieldsResponse]] = {
     (for {
       fields <- repository.fetchByClientId(clientId)
-    } yield fields.map(asResponse)) map {
+    } yield fields)
+    .map {
       case Nil => None
       case fs  => Some(BulkSubscriptionFieldsResponse(subscriptions = fs))
     }
@@ -104,19 +105,10 @@ class SubscriptionFieldsService @Inject() (
   def getAll: Future[BulkSubscriptionFieldsResponse] = {
     (for {
       fields <- repository.fetchAll
-    } yield fields.map(asResponse)) map (BulkSubscriptionFieldsResponse(_))
+    } yield fields)
+    .map (BulkSubscriptionFieldsResponse(_))
   }
 
-  // TODO use reads for using actual value types instead of Strings
-  private def asResponse(apiSubscription: SubscriptionFields): SubscriptionFieldsResponse = {
-    SubscriptionFieldsResponse(
-      clientId = apiSubscription.clientId,
-      apiContext = apiSubscription.apiContext,
-      apiVersion = apiSubscription.apiVersion,
-      fieldsId = apiSubscription.fieldsId,
-      fields = apiSubscription.fields
-    )
-  }
 }
 
 object SubscriptionFieldsService {

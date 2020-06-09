@@ -18,23 +18,16 @@ package uk.gov.hmrc.apisubscriptionfields.model
 
 import play.api.libs.json.Json.JsValueWrapper
 import play.api.libs.json.{JsObject, Json}
-import cats.data.NonEmptyList
 import Types._
 
 sealed trait SubsFieldsUpsertResponse
 case object NotFoundSubsFieldsUpsertResponse extends SubsFieldsUpsertResponse
 case class FailedValidationSubsFieldsUpsertResponse(errorResponses: Map[FieldName, String]) extends SubsFieldsUpsertResponse
-case class SuccessfulSubsFieldsUpsertResponse(wrapped: SubscriptionFieldsResponse, isInsert: Boolean) extends SubsFieldsUpsertResponse
+case class SuccessfulSubsFieldsUpsertResponse(wrapped: SubscriptionFields, isInsert: Boolean) extends SubsFieldsUpsertResponse
 
-// TODO - remove this due to duplication with SubscriptionFields
-case class SubscriptionFieldsResponse(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion, fieldsId: SubscriptionFieldsId, fields: Fields)
+case class BulkSubscriptionFieldsResponse(subscriptions: Seq[SubscriptionFields])
 
-case class BulkSubscriptionFieldsResponse(subscriptions: Seq[SubscriptionFieldsResponse])
-
-// TODO - remove this due to duplication with ApiFieldDefinitions
-case class ApiFieldDefinitionsResponse(apiContext: ApiContext, apiVersion: ApiVersion, fieldDefinitions: NonEmptyList[FieldDefinition])
-
-case class BulkApiFieldDefinitionsResponse(apis: Seq[ApiFieldDefinitionsResponse])
+case class BulkApiFieldDefinitionsResponse(apis: Seq[ApiFieldDefinitions])
 
 sealed trait SubsFieldValidationResponse
 case object ValidSubsFieldValidationResponse extends SubsFieldValidationResponse

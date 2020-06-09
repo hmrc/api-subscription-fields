@@ -69,11 +69,11 @@ class ApiSubscriptionFieldsHappySpec extends AcceptanceTestSpec
       status(resultFuture) shouldBe CREATED
 
       And("the response body should be a valid response")
-      val sfr = contentAsJson(resultFuture).validate[SubscriptionFieldsResponse]
+      val sfr = contentAsJson(resultFuture).validate[SubscriptionFields]
       val fieldsId = sfr.get.fieldsId
 
       sfr.isSuccess shouldBe true
-      sfr.get shouldBe SubscriptionFieldsResponse(FakeClientId, ApiContext("acontext"), ApiVersion("1.0.2"), fieldsId, SampleFields1)
+      sfr.get shouldBe SubscriptionFields(FakeClientId, ApiContext("acontext"), ApiVersion("1.0.2"), fieldsId, SampleFields1)
     }
 
     def createSubscriptionFieldsRequest(): FakeRequest[AnyContentAsJson] = {
@@ -102,11 +102,11 @@ class ApiSubscriptionFieldsHappySpec extends AcceptanceTestSpec
       status(resultFuture) shouldBe OK
 
       And("the response body should be a valid response")
-      val sfr = contentAsJson(resultFuture).validate[SubscriptionFieldsResponse]
+      val sfr = contentAsJson(resultFuture).validate[SubscriptionFields]
       val fieldsId = sfr.get.fieldsId
 
       sfr.isSuccess shouldBe true
-      sfr.get shouldBe SubscriptionFieldsResponse(FakeClientId, ApiContext("acontext"), ApiVersion("1.0.2"), fieldsId, SampleFields1)
+      sfr.get shouldBe SubscriptionFields(FakeClientId, ApiContext("acontext"), ApiVersion("1.0.2"), fieldsId, SampleFields1)
     }
 
     scenario("the API is called to GET all existing subscription fields") {
@@ -130,7 +130,7 @@ class ApiSubscriptionFieldsHappySpec extends AcceptanceTestSpec
       val fieldsId = sfr.get.subscriptions.head.fieldsId
 
       sfr.isSuccess shouldBe true
-      sfr.get shouldBe BulkSubscriptionFieldsResponse(Seq(SubscriptionFieldsResponse(FakeClientId, ApiContext("acontext"), ApiVersion("1.0.2"), fieldsId, SampleFields1)))
+      sfr.get shouldBe BulkSubscriptionFieldsResponse(Seq(SubscriptionFields(FakeClientId, ApiContext("acontext"), ApiVersion("1.0.2"), fieldsId, SampleFields1)))
     }
 
     scenario("the API is called to GET with a known fieldsId") {
@@ -151,7 +151,7 @@ class ApiSubscriptionFieldsHappySpec extends AcceptanceTestSpec
       status(resultFuture) shouldBe OK
 
       And("the response body should be a valid response")
-      val sfr = contentAsJson(resultFuture).validate[SubscriptionFieldsResponse]
+      val sfr = contentAsJson(resultFuture).validate[SubscriptionFields]
 
       Given("a request with a known fieldsId")
       val fieldsId = sfr.get.fieldsId
@@ -167,10 +167,10 @@ class ApiSubscriptionFieldsHappySpec extends AcceptanceTestSpec
       val resultFieldsIdFuture = result.value
 
       status(resultFieldsIdFuture) shouldBe OK
-      val sfrFieldsId = contentAsJson(resultFuture).validate[SubscriptionFieldsResponse]
+      val sfrFieldsId = contentAsJson(resultFuture).validate[SubscriptionFields]
 
       sfrFieldsId.isSuccess shouldBe true
-      sfrFieldsId.get shouldBe SubscriptionFieldsResponse(FakeClientId, ApiContext("acontext"), ApiVersion("1.0.2"), fieldsId, SampleFields1)
+      sfrFieldsId.get shouldBe SubscriptionFields(FakeClientId, ApiContext("acontext"), ApiVersion("1.0.2"), fieldsId, SampleFields1)
     }
 
     scenario("the API is called to GET existing subscription fields by application clientId") {
@@ -195,7 +195,7 @@ class ApiSubscriptionFieldsHappySpec extends AcceptanceTestSpec
       val fieldsId = sfr.get.subscriptions.head.fieldsId
 
       sfr.isSuccess shouldBe true
-      sfr.get shouldBe BulkSubscriptionFieldsResponse(Seq(SubscriptionFieldsResponse(FakeClientId, ApiContext("acontext"), ApiVersion("1.0.2"), fieldsId, SampleFields1)))
+      sfr.get shouldBe BulkSubscriptionFieldsResponse(Seq(SubscriptionFields(FakeClientId, ApiContext("acontext"), ApiVersion("1.0.2"), fieldsId, SampleFields1)))
     }
 
     scenario("the API is called to update existing subscription fields") {
@@ -215,11 +215,11 @@ class ApiSubscriptionFieldsHappySpec extends AcceptanceTestSpec
       status(resultFuture) shouldBe OK
 
       And("the response body should be a valid response")
-      val sfr = contentAsJson(resultFuture).validate[SubscriptionFieldsResponse]
+      val sfr = contentAsJson(resultFuture).validate[SubscriptionFields]
       val fieldsId = sfr.get.fieldsId
 
       sfr.isSuccess shouldBe true
-      sfr.get shouldBe SubscriptionFieldsResponse(FakeClientId, ApiContext("acontext"), ApiVersion("1.0.2"), fieldsId, SampleFields2)
+      sfr.get shouldBe SubscriptionFields(FakeClientId, ApiContext("acontext"), ApiVersion("1.0.2"), fieldsId, SampleFields2)
     }
 
     scenario("the API is called to DELETE existing subscription fields") {

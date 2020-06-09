@@ -151,14 +151,10 @@ trait JsonFormatters
   }
 
   implicit val ApiFieldDefinitionsJF: OFormat[ApiFieldDefinitions] = Json.format[ApiFieldDefinitions]
-
-
-  implicit val ApiFieldDefinitionsResponseJF = Json.format[ApiFieldDefinitionsResponse]
   implicit val BulkApiFieldDefinitionsResponseJF = Json.format[BulkApiFieldDefinitionsResponse]
   implicit val SubsFieldValidationResponseJF: OFormat[SubsFieldValidationResponse] = derived.withTypeTag.oformat(ShortClassName)
   implicit val InvalidSubsFieldValidationResponseJF = Json.format[InvalidSubsFieldValidationResponse]
 
-  implicit val SubscriptionFieldsResponseJF = Json.format[SubscriptionFieldsResponse]
   implicit val SubscriptionFieldsJF = Json.format[SubscriptionFields]
   implicit val BulkSubscriptionFieldsResponseJF = Json.format[BulkSubscriptionFieldsResponse]
 }

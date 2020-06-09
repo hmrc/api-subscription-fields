@@ -87,7 +87,7 @@ class SubscriptionFieldsMongoRepository @Inject()(mongoDbProvider: MongoDbProvid
     saveAtomic(
       selector = subscriptionFieldsSelector(subscription),
       updateOperations = Json.obj(
-        "$setOnInsert" -> Json.obj("fieldsId" -> subscription.fieldsId.toString),
+        "$setOnInsert" -> Json.obj("fieldsId" -> subscription.fieldsId),
         "$set" -> Json.obj("fields" -> Json.toJson(subscription.fields))
       )
     )
@@ -119,7 +119,7 @@ class SubscriptionFieldsMongoRepository @Inject()(mongoDbProvider: MongoDbProvid
 
   private def clientIdSelector(clientId: ClientId) = Json.obj("clientId" -> clientId.value)
 
-  private def fieldsIdSelector(fieldsId: SubscriptionFieldsId) = Json.obj("fieldsId" -> fieldsId.value.toString)
+  private def fieldsIdSelector(fieldsId: SubscriptionFieldsId) = Json.obj("fieldsId" -> fieldsId.value)
 
   private def subscriptionFieldsSelector(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion): JsObject = {
     Json.obj(

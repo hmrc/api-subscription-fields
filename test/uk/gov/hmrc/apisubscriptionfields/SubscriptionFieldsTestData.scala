@@ -33,7 +33,7 @@ trait SubscriptionFieldsTestData extends FieldDefinitionTestData with Validation
   final val SubscriptionFieldsMatchRegexValidation: Fields = Map(AlphanumericFieldName -> "ABC123abc", PasswordFieldName -> "Qw12@erty")
   final val SubscriptionFieldsDoNotMatchRegexValidation: Fields = Map(AlphanumericFieldName -> "ABC123abc=", PasswordFieldName -> "Qw12erty")
 
-  final val FakeApiSubscription = SubscriptionFields(FakeClientId, FakeContext, FakeVersion, FakeRawFieldsId, FakeSubscriptionFields)
+  final val FakeApiSubscription = SubscriptionFields(FakeClientId, FakeContext, FakeVersion, FakeFieldsId, FakeSubscriptionFields)
   final val FakeSubscriptionFieldsId = SubscriptionFieldsId(FakeRawFieldsId)
   final val FakeSubscriptionFieldsResponse: SubscriptionFieldsResponse =
     SubscriptionFieldsResponse(FakeClientId, FakeContext, FakeVersion, FakeSubscriptionFieldsId, FakeSubscriptionFields)
@@ -57,12 +57,12 @@ trait SubscriptionFieldsTestData extends FieldDefinitionTestData with Validation
     (PasswordFieldName -> FakeFieldErrorForPassword._2)
   ))
 
-  def subsFieldsFor(fields: Fields): SubscriptionFields = SubscriptionFields(FakeClientId,FakeContext, FakeVersion, FakeRawFieldsId, fields)
+  def subsFieldsFor(fields: Fields): SubscriptionFields = SubscriptionFields(FakeClientId,FakeContext, FakeVersion, FakeFieldsId, fields)
 
   // TODO sort this
   def createSubscriptionFieldsWithApiContext(clientId: ClientId = FakeClientId, rawContext: String = fakeRawContext) = {
     val subscriptionFields: Fields = Map(fieldN(1) -> "value_1", fieldN(2) -> "value_2", fieldN(3) -> "value_3")
-    SubscriptionFields(clientId, ApiContext(rawContext), ApiVersion(fakeRawVersion), FakeRawFieldsId, subscriptionFields)
+    SubscriptionFields(clientId, ApiContext(rawContext), ApiVersion(fakeRawVersion), FakeFieldsId, subscriptionFields)
   }
 
   def uniqueClientId = ClientId(UUID.randomUUID().toString)

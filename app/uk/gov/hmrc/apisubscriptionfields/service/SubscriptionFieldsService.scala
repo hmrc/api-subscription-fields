@@ -50,7 +50,7 @@ class SubscriptionFieldsService @Inject() (
   }
 
   private def upsert(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion, fields: Fields, fieldDefinitions: NonEmptyList[FieldDefinition])(implicit hc: HeaderCarrier): Future[SuccessfulSubsFieldsUpsertResponse] = {
-    val subscriptionFields = SubscriptionFields(clientId, apiContext, apiVersion, uuidCreator.uuid(), fields)
+    val subscriptionFields = SubscriptionFields(clientId, apiContext, apiVersion, SubscriptionFieldsId(uuidCreator.uuid()), fields)
 
     for {
       result  <- repository.saveAtomic(subscriptionFields).map(tuple => (asResponse(tuple._1), tuple._2))
@@ -113,7 +113,7 @@ class SubscriptionFieldsService @Inject() (
       clientId = apiSubscription.clientId,
       apiContext = apiSubscription.apiContext,
       apiVersion = apiSubscription.apiVersion,
-      fieldsId = SubscriptionFieldsId(apiSubscription.fieldsId),
+      fieldsId = apiSubscription.fieldsId,
       fields = apiSubscription.fields
     )
   }

@@ -46,7 +46,7 @@ class SubscriptionFieldsRepositorySpec extends AsyncHmrcSpec
     import play.api.libs.json._
 
     def saveByFieldsId(subscription: SubscriptionFields): Future[(SubscriptionFields, IsInsert)] = {
-      save(subscription, Json.obj("fieldsId" -> subscription.fieldsId))
+      save(subscription, Json.obj("fieldsId" -> subscription.fieldsId.value))
     }
 
   }
@@ -63,7 +63,7 @@ class SubscriptionFieldsRepositorySpec extends AsyncHmrcSpec
 
   private def createApiSubscriptionFields(clientId: ClientId = FakeClientId): SubscriptionFields = {
     val fields = Map(fieldN(1) -> "value_1", fieldN(2) -> "value_2", fieldN(3) -> "value_3")
-    SubscriptionFields(clientId, FakeContext, FakeVersion, UUID.randomUUID(), fields)
+    SubscriptionFields(clientId, FakeContext, FakeVersion, SubscriptionFieldsId(UUID.randomUUID()), fields)
   }
 
   private def collectionSize: Int = {
@@ -148,7 +148,7 @@ class SubscriptionFieldsRepositorySpec extends AsyncHmrcSpec
       await(repository.saveAtomic(apiSubscription))
       collectionSize shouldBe 1
 
-      await(repository.fetchByFieldsId(SubscriptionFieldsId(apiSubscription.fieldsId))) shouldBe Some(apiSubscription)
+      await(repository.fetchByFieldsId(apiSubscription.fieldsId)) shouldBe Some(apiSubscription)
     }
 
     "return `None` when the `fieldsId` doesn't match any record in the collection" in {
@@ -231,7 +231,7 @@ class SubscriptionFieldsRepositorySpec extends AsyncHmrcSpec
       await(repository.saveAtomic(apiSubscription))
       collectionSize shouldBe 1
 
-      await(repository.saveAtomic(apiSubscription.copy(fieldsId = UUID.randomUUID())))
+      await(repository.saveAtomic(apiSubscription.copy(fieldsId = SubscriptionFieldsId(UUID.randomUUID()))))
       collectionSize shouldBe 1
     }
 
@@ -247,7 +247,7 @@ class SubscriptionFieldsRepositorySpec extends AsyncHmrcSpec
       await(repository.saveAtomic(apiSubscription))
       collectionSize shouldBe 1
 
-      await(repository.saveAtomic(apiSubscription.copy(apiContext = FakeContext2, fieldsId = UUID.randomUUID())))
+      await(repository.saveAtomic(apiSubscription.copy(apiContext = FakeContext2, fieldsId = SubscriptionFieldsId(UUID.randomUUID()))))
       collectionSize shouldBe 2
     }
   }

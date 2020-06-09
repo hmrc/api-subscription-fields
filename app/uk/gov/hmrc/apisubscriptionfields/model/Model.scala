@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.apisubscriptionfields.model
 
-import java.util.UUID
 import cats.data.{NonEmptyList => NEL}
 import uk.gov.hmrc.apisubscriptionfields.model.FieldDefinitionType.FieldDefinitionType
 import eu.timepit.refined._
@@ -57,4 +56,4 @@ case class FieldDefinition(
 
 case class ApiFieldDefinitions(apiContext: String, apiVersion: String, fieldDefinitions: NEL[FieldDefinition])
 
-case class SubscriptionFields(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion, fieldsId: UUID, fields: Fields)
+case class SubscriptionFields(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion, fieldsId: SubscriptionFieldsId, fields: Fields)

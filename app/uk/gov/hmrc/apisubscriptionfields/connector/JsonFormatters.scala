@@ -21,7 +21,7 @@ import uk.gov.hmrc.apisubscriptionfields.model.SpecialJsonFormatters
 
 trait JsonFormatters extends SpecialJsonFormatters {
   implicit val createTopicRequestJF = Json.format[CreateTopicRequest]
-  implicit val createTopicResponsetJF = Json.format[CreateTopicResponse]
+  implicit val createTopicResponseJF = Json.format[CreateTopicResponse]
   implicit val subscribersRequestJF = Json.format[SubscribersRequest]
   implicit val updateSubscribersRequestJF = Json.format[UpdateSubscribersRequest]
   implicit val updateSubscribersResponseJF = Json.format[UpdateSubscribersResponse]

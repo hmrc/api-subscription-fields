@@ -21,7 +21,7 @@ import play.api.mvc._
 import play.api.test.Helpers._
 import play.api.test._
 import uk.gov.hmrc.apisubscriptionfields.FieldDefinitionTestData
-import uk.gov.hmrc.apisubscriptionfields.model.{FieldDefinitionsRequest, JsonFormatters}
+import uk.gov.hmrc.apisubscriptionfields.model.JsonFormatters
 import uk.gov.hmrc.apisubscriptionfields.service.ApiFieldDefinitionsService
 import uk.gov.hmrc.apisubscriptionfields.AsyncHmrcSpec
 

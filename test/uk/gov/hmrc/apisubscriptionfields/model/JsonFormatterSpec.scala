@@ -26,11 +26,11 @@ class JsonFormatterSpec extends WordSpec with Matchers with JsonFormatters with 
   import play.api.libs.json._
 
   private val fakeFields = Map(fieldN(1) -> "v1")
-  private val subscriptionFieldsResponse = SubscriptionFieldsResponse(fakeRawClientId, fakeRawContext, fakeRawVersion, FakeFieldsId, fakeFields)
-  private val bulkSubscriptionFieldsResponse = BulkSubscriptionFieldsResponse(Seq(subscriptionFieldsResponse))
+  private val subscriptionFields = SubscriptionFields(FakeClientId, FakeContext, FakeVersion, FakeFieldsId, fakeFields)
+  private val bulkSubscriptionFieldsResponse = BulkSubscriptionFieldsResponse(Seq(subscriptionFields))
 
-  private val fakeApiFieldDefinitionsResponse = ApiFieldDefinitionsResponse(fakeRawContext, fakeRawVersion, NonEmptyList.one(FakeFieldDefinitionUrl))
-  private val fakeApiFieldDefinitionsResponseEmptyValidation = ApiFieldDefinitionsResponse(fakeRawContext, fakeRawVersion, NonEmptyList.one(FakeFieldDefinitionUrlValidationEmpty))
+  private val fakeApiFieldDefinitionsResponse = ApiFieldDefinitions(FakeContext, FakeVersion, NonEmptyList.one(FakeFieldDefinitionUrl))
+  private val fakeApiFieldDefinitionsResponseEmptyValidation = ApiFieldDefinitions(FakeContext, FakeVersion, NonEmptyList.one(FakeFieldDefinitionUrlValidationEmpty))
   private val bulkFieldsDefinitionResponse = BulkApiFieldDefinitionsResponse(Seq(fakeApiFieldDefinitionsResponse))
 
   private def objectAsJsonString[A](a: A)(implicit t: Writes[A]) = Json.asciiStringify(Json.toJson(a))
@@ -42,20 +42,20 @@ class JsonFormatterSpec extends WordSpec with Matchers with JsonFormatters with 
   private val fieldDefinitionEmptyValidationJson =
     s"""{"apiContext":"$fakeRawContext","apiVersion":"$fakeRawVersion","fieldDefinitions":[{"name":"fieldB","description":"desc1","hint":"hint1","type":"URL","shortDescription":"short description"}]}"""
 
-  "SubscriptionFieldsResponse" should {
+  "SubscriptionFields" should {
     "marshal json" in {
-      objectAsJsonString(subscriptionFieldsResponse) shouldBe subscriptionFieldJson
+      objectAsJsonString(subscriptionFields) shouldBe subscriptionFieldJson
     }
 
     "unmarshal text" in {
-      Json.parse(subscriptionFieldJson).validate[SubscriptionFieldsResponse] match {
-        case JsSuccess(r, _) => r shouldBe subscriptionFieldsResponse
+      Json.parse(subscriptionFieldJson).validate[SubscriptionFields] match {
+        case JsSuccess(r, _) => r shouldBe subscriptionFields
         case JsError(e)      => fail(s"Should have parsed json text but got $e")
       }
     }
   }
 
-  "ApiFieldDefinitionsResponse" should {
+  "ApiFieldDefinitions" should {
     "marshal json" in {
       objectAsJsonString(fakeApiFieldDefinitionsResponse) shouldBe fieldDefinitionJson
     }
@@ -65,14 +65,14 @@ class JsonFormatterSpec extends WordSpec with Matchers with JsonFormatters with 
     }
 
     "unmarshal text" in {
-      Json.parse(fieldDefinitionJson).validate[ApiFieldDefinitionsResponse] match {
+      Json.parse(fieldDefinitionJson).validate[ApiFieldDefinitions] match {
         case JsSuccess(r, _) => r shouldBe fakeApiFieldDefinitionsResponse
         case JsError(e)      => fail(s"Should have parsed json text but got $e")
       }
     }
 
     "unmarshal text  when ValidationGroup is empty" in {
-      Json.parse(fieldDefinitionEmptyValidationJson).validate[ApiFieldDefinitionsResponse] match {
+      Json.parse(fieldDefinitionEmptyValidationJson).validate[ApiFieldDefinitions] match {
         case JsSuccess(r, _) => r shouldBe fakeApiFieldDefinitionsResponseEmptyValidation
         case JsError(e)      => fail(s"Should have parsed json text but got $e")
       }

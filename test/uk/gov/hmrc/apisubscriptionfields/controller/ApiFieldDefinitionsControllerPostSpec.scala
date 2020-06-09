@@ -21,11 +21,12 @@ import play.api.mvc._
 import play.api.test.Helpers._
 import play.api.test._
 import uk.gov.hmrc.apisubscriptionfields.FieldDefinitionTestData
-import uk.gov.hmrc.apisubscriptionfields.model.{FieldDefinitionsRequest, JsonFormatters}
+import uk.gov.hmrc.apisubscriptionfields.model.JsonFormatters
 import uk.gov.hmrc.apisubscriptionfields.service.ApiFieldDefinitionsService
 import uk.gov.hmrc.apisubscriptionfields.AsyncHmrcSpec
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
+import cats.data.NonEmptyList
 
 class ApiFieldDefinitionsControllerPostSpec extends AsyncHmrcSpec
   with FieldDefinitionTestData
@@ -34,6 +35,8 @@ class ApiFieldDefinitionsControllerPostSpec extends AsyncHmrcSpec
 
   private val mockFieldDefintionService = mock[ApiFieldDefinitionsService]
   private val controller = new ApiFieldDefinitionsController(stubControllerComponents(), mockFieldDefintionService)
+
+  final val FakeValidRegexFieldsDefinitionRequest = FieldDefinitionsRequest(NonEmptyList.fromListUnsafe(List(FakeFieldDefinitionAlphnumericField, FakeFieldDefinitionPassword)))
 
   "validateFieldsDefinition" should {
     "return OK when FieldDefinitionsRequest is valid" in {
@@ -46,7 +49,7 @@ class ApiFieldDefinitionsControllerPostSpec extends AsyncHmrcSpec
 
     "return BadRequest when FieldDefinitionsRequest is invalid" in {
       val json = Json.parse(jsonInvalidRegexFieldsDefinitionRequest)
-      
+
       testSubmitResult(mkRequest(json)) { result =>
         status(result) shouldBe BAD_REQUEST
       }

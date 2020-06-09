@@ -80,7 +80,7 @@ class ApiFieldDefinitionsController @Inject() (cc: ControllerComponents, service
     } recover recovery
   }
 
-  private def asActionResult(eventualMaybeResponse: Future[Option[ApiFieldDefinitionsResponse]], apiContext: ApiContext, apiVersion: ApiVersion) = {
+  private def asActionResult(eventualMaybeResponse: Future[Option[ApiFieldDefinitions]], apiContext: ApiContext, apiVersion: ApiVersion) = {
     eventualMaybeResponse map {
       case Some(subscriptionFields) => Ok(Json.toJson(subscriptionFields))
       case None => notFoundResponse(apiContext, apiVersion)

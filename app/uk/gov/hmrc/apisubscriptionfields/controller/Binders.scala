@@ -18,7 +18,7 @@ package uk.gov.hmrc.apisubscriptionfields.controller
 
 import play.api.mvc.PathBindable
 import uk.gov.hmrc.apisubscriptionfields.model.{ApiContext,ApiVersion, ClientId, SubscriptionFieldsId}
-import java.util.UUID
+import java.{util => ju}
 
 object Binders {
 
@@ -41,7 +41,7 @@ object Binders {
   )
 
   implicit object subscriptionFieldsIdPathBindable extends PathBindable.Parsing[SubscriptionFieldsId](
-    (s) => SubscriptionFieldsId(UUID.fromString(s)),
+    s => SubscriptionFieldsId(ju.UUID.fromString(s)),
     _.value.toString,
       (key: String, e: Exception) => "Cannot parse parameter %s as SubscriptionFieldsId: %s".format(key, e.getMessage)
   )

@@ -14,11 +14,21 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.apisubscriptionfields.model
+package uk.gov.hmrc.apisubscriptionfields.config
 
-import cats.data.NonEmptyList
-import Types._
+import com.google.inject.{ImplementedBy, Inject, Singleton}
+import play.api.Configuration
 
-case class SubscriptionFieldsRequest(fields: Fields)
+@ImplementedBy(classOf[ApplicationConfigImpl])
+trait ApplicationConfig {
+  def pushPullNotificationServiceURL: String
+}
 
-case class FieldDefinitionsRequest(fieldDefinitions: NonEmptyList[FieldDefinition])
+@Singleton
+class ApplicationConfigImpl @Inject()(config: Configuration) extends ApplicationConfig {
+  private val HOCON = config.underlying
+
+  // Moving away from complex layers configurations
+  val pushPullNotificationServiceURL = HOCON.getString("microservice.services.push-pull-notification.uri")
+}
+

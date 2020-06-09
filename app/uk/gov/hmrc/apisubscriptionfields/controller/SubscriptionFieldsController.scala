@@ -39,12 +39,12 @@ class SubscriptionFieldsController @Inject()(cc: ControllerComponents, service: 
     s"Subscription fields not found for (${clientId.value}, ${apiContext.value}, ${apiVersion.value})"
   }
 
-  private def notFoundMessage(subscriptionFieldsId: SubscriptionFieldsId): String = {
+  private def fieldIdNotFoundMessage(subscriptionFieldsId: SubscriptionFieldsId): String = {
     s"FieldsId (${subscriptionFieldsId.value.toString}) was not found"
   }
 
-  private def notFoundMessage(clientId: ClientId): String = {
-    s"ClientId (${clientId.value}) was not found"
+  private def clientIdNotFoundMessage(clientId: ClientId): String = {
+    s"ClientId (${clientId.value.toString}) was not found"
   }
 
   def getSubscriptionFields(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion): Action[AnyContent] = Action.async { _ =>
@@ -53,13 +53,13 @@ class SubscriptionFieldsController @Inject()(cc: ControllerComponents, service: 
   }
 
   def getSubscriptionFieldsByFieldsId(subscriptionFieldsId: SubscriptionFieldsId): Action[AnyContent] = Action.async { _ =>
-    val eventualMaybeResponse = service.get(subscriptionFieldsId)
-    asActionResult(eventualMaybeResponse, notFoundMessage(subscriptionFieldsId))
+    val eventualMaybeResponse = service.getBySubscriptionFieldId(subscriptionFieldsId)
+    asActionResult(eventualMaybeResponse, fieldIdNotFoundMessage(subscriptionFieldsId))
   }
 
   def getBulkSubscriptionFieldsByClientId(clientId: ClientId): Action[AnyContent] = Action.async { _ =>
-    val eventualMaybeResponse = service.get(clientId)
-    asBulkActionResult(eventualMaybeResponse, notFoundMessage(clientId))
+    val eventualMaybeResponse = service.getByClientId(clientId)
+    asBulkActionResult(eventualMaybeResponse, clientIdNotFoundMessage(clientId))
   }
 
   def getAllSubscriptionFields: Action[AnyContent] = Action.async { _ =>
@@ -88,17 +88,15 @@ class SubscriptionFieldsController @Inject()(cc: ControllerComponents, service: 
         Future.successful(UnprocessableEntity(JsErrorResponse(INVALID_REQUEST_PAYLOAD, "At least one field must be specified")))
       }
       else {
-        service.validate(apiContext, apiVersion, payload.fields) flatMap {
-            case ValidSubsFieldValidationResponse => {
-              service.upsert(clientId, apiContext, apiVersion, payload.fields) map {
-                case (response, true) => Created(Json.toJson(response))
-                case (response, false) => Ok(Json.toJson(response))
-              }
-            }
-            case InvalidSubsFieldValidationResponse(fieldErrorMessages) => Future.successful(BadRequest(Json.toJson(fieldErrorMessages)))
-          }
-        } recover recovery
+        service.upsert(clientId, apiContext, apiVersion, payload.fields).map( _ match {
+          case NotFoundSubsFieldsUpsertResponse                             => BadRequest(Json.toJson("reason" -> "field definitions not found")) // TODO
+          case FailedValidationSubsFieldsUpsertResponse(fieldErrorMessages) => BadRequest(Json.toJson(fieldErrorMessages))
+          case SuccessfulSubsFieldsUpsertResponse(response, true)           => Created(Json.toJson(response))
+          case SuccessfulSubsFieldsUpsertResponse(response, false)          => Ok(Json.toJson(response))
+        })
+        .recover(recovery)
       }
+    }
   }
 
   def deleteSubscriptionFields(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion): Action[AnyContent] = Action.async { _ =>
@@ -111,7 +109,7 @@ class SubscriptionFieldsController @Inject()(cc: ControllerComponents, service: 
   def deleteAllSubscriptionFieldsForClient(clientId: ClientId): Action[AnyContent] = Action.async { _ =>
     service.delete(clientId) map {
       case true => NoContent
-      case false => notFoundResponse(notFoundMessage(clientId))
+      case false => notFoundResponse(clientIdNotFoundMessage(clientId))
     } recover recovery
   }
 

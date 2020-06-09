@@ -14,15 +14,13 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.apisubscriptionfields.acceptance
+package uk.gov.hmrc.apisubscriptionfields
 
 import org.scalatest.OptionValues
 import play.api.mvc._
 import play.api.mvc.request.RequestTarget
 import play.api.test.Helpers._
 import uk.gov.hmrc.apisubscriptionfields.model._
-import uk.gov.hmrc.apisubscriptionfields.{FieldDefinitionTestData, SubscriptionFieldsTestData}
-
 import scala.concurrent.Future
 
 class SubscriptionFieldDefinitionsHappySpec extends AcceptanceTestSpec
@@ -37,7 +35,7 @@ class SubscriptionFieldDefinitionsHappySpec extends AcceptanceTestSpec
 
     scenario("the API is called to store some new fields definitions") {
       Given("Definitiions are created ")
-      val putRequest = validDefinitionPutRequest(FieldDefinitionsRequest(NelOfFieldDefinitions))
+      val putRequest = validDefinitionPutRequest(NelOfFieldDefinitions)
         .withTarget( RequestTarget(uriString="", path=definitionEndpoint(fakeRawContext, fakeRawVersion), queryString = Map.empty))
 
       When("a PUT request with data is sent to the API")
@@ -50,10 +48,10 @@ class SubscriptionFieldDefinitionsHappySpec extends AcceptanceTestSpec
       status(putResultFuture) shouldBe CREATED
 
       And("the response body should be a valid response")
-      val sfr = contentAsJson(putResultFuture).validate[ApiFieldDefinitionsResponse]
+      val sfr = contentAsJson(putResultFuture).validate[ApiFieldDefinitions]
 
       sfr.isSuccess shouldBe true
-      sfr.get shouldBe ApiFieldDefinitionsResponse(fakeRawContext, fakeRawVersion, NelOfFieldDefinitions)
+      sfr.get shouldBe ApiFieldDefinitions(FakeContext, FakeVersion, NelOfFieldDefinitions)
     }
 
 
@@ -76,7 +74,7 @@ class SubscriptionFieldDefinitionsHappySpec extends AcceptanceTestSpec
       status(resultFuture) shouldBe OK
 
       And("the response body should be a valid response")
-      val fdr = contentAsJson(resultFuture).validate[ApiFieldDefinitionsResponse]
+      val fdr = contentAsJson(resultFuture).validate[ApiFieldDefinitions]
 
       fdr.isSuccess shouldBe true
       fdr.get shouldBe FakeApiFieldDefinitionsResponse
@@ -108,7 +106,7 @@ class SubscriptionFieldDefinitionsHappySpec extends AcceptanceTestSpec
     scenario("the API is called to update some existing fields definitions") {
 
       Given("a request with valid payload")
-      val request =  validDefinitionPutRequest(FieldDefinitionsRequest(NelOfFieldDefinitions))
+      val request =  validDefinitionPutRequest(NelOfFieldDefinitions)
         .withTarget( RequestTarget(uriString="", path=definitionEndpoint(fakeRawContext, fakeRawVersion), queryString = Map.empty))
 
       When("a PUT request with data is sent to the API")
@@ -120,10 +118,10 @@ class SubscriptionFieldDefinitionsHappySpec extends AcceptanceTestSpec
       status(resultFuture) shouldBe OK
 
       And("the response body should be a valid response")
-      val sfr = contentAsJson(resultFuture).validate[ApiFieldDefinitionsResponse]
+      val sfr = contentAsJson(resultFuture).validate[ApiFieldDefinitions]
 
       sfr.isSuccess shouldBe true
-      sfr.get shouldBe ApiFieldDefinitionsResponse(fakeRawContext, fakeRawVersion, NelOfFieldDefinitions)
+      sfr.get shouldBe ApiFieldDefinitions(FakeContext, FakeVersion, NelOfFieldDefinitions)
     }
 
     scenario("the API is called to delete some existing fields definitions") {

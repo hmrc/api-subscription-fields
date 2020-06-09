@@ -20,13 +20,12 @@ import play.api.libs.json.{JsDefined, JsString, Json}
 import play.api.test.{FakeRequest, StubControllerComponentsFactory}
 import play.api.test.Helpers._
 import uk.gov.hmrc.apisubscriptionfields.FieldDefinitionTestData
-import uk.gov.hmrc.apisubscriptionfields.model.{BulkApiFieldDefinitionsResponse, ApiFieldDefinitionsResponse, JsonFormatters}
+import uk.gov.hmrc.apisubscriptionfields.model.{ApiFieldDefinitions, BulkApiFieldDefinitionsResponse, JsonFormatters}
 import uk.gov.hmrc.apisubscriptionfields.service.ApiFieldDefinitionsService
 import uk.gov.hmrc.apisubscriptionfields.AsyncHmrcSpec
 
 import scala.concurrent.Future.{successful,failed}
 import scala.concurrent.ExecutionContext.Implicits.global
-import uk.gov.hmrc.apisubscriptionfields.model.ApiFieldDefinitionsResponse
 
 class ApiFieldDefinitionsControllerGetSpec
   extends AsyncHmrcSpec
@@ -74,7 +73,7 @@ class ApiFieldDefinitionsControllerGetSpec
       |  ]
       |}""".stripMargin
   private val responseJson = Json.parse(responseJsonString)
-  private val responseModel = responseJson.as[ApiFieldDefinitionsResponse]
+  private val responseModel = responseJson.as[ApiFieldDefinitions]
 
   private val allResponseJsonString =
     """{

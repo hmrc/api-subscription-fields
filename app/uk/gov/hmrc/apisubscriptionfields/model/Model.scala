@@ -54,6 +54,6 @@ case class FieldDefinition(
   validation: Option[ValidationGroup] = None,
   access: AccessRequirements = AccessRequirements.Default)
 
-case class ApiFieldDefinitions(apiContext: String, apiVersion: String, fieldDefinitions: NEL[FieldDefinition])
+case class ApiFieldDefinitions(apiContext: ApiContext, apiVersion: ApiVersion, fieldDefinitions: NEL[FieldDefinition])
 
 case class SubscriptionFields(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion, fieldsId: SubscriptionFieldsId, fields: Fields)

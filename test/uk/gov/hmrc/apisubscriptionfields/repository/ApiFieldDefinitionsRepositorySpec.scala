@@ -53,7 +53,7 @@ class ApiFieldDefinitionsRepositorySpec extends AsyncHmrcSpec
     await(repository.collection.count())
   }
 
-  private def createApiFieldDefinitions = ApiFieldDefinitions(fakeRawContext, fakeRawVersion, NelOfFieldDefinitions)
+  private def createApiFieldDefinitions = ApiFieldDefinitions(FakeContext, FakeVersion, NelOfFieldDefinitions)
 
   private trait Setup {
     val definitions: ApiFieldDefinitions = createApiFieldDefinitions
@@ -125,7 +125,7 @@ class ApiFieldDefinitionsRepositorySpec extends AsyncHmrcSpec
       await(repository.save(definitions))
       collectionSize shouldBe 1
 
-      await(repository.delete(ApiContext(definitions.apiContext), ApiVersion(definitions.apiVersion))) shouldBe true
+      await(repository.delete(definitions.apiContext, definitions.apiVersion)) shouldBe true
       collectionSize shouldBe 0
     }
 
@@ -150,6 +150,6 @@ class ApiFieldDefinitionsRepositorySpec extends AsyncHmrcSpec
   }
 
   private def selector(fd: ApiFieldDefinitions) = {
-    BSONDocument("apiContext" -> fd.apiContext, "apiVersion" -> fd.apiVersion)
+    BSONDocument("apiContext" -> fd.apiContext.value, "apiVersion" -> fd.apiVersion.value)
   }
 }

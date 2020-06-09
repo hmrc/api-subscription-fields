@@ -78,17 +78,17 @@ class ApiFieldDefinitionsMongoRepository @Inject() (mongoDbProvider: MongoDbProv
   }
 
   private def selectorFor(apiContext: ApiContext, apiVersion: ApiVersion): JsObject = {
-    selector(apiContext.value, apiVersion.value)
+    selector(apiContext, apiVersion)
   }
 
   private def selectorFor(fd: ApiFieldDefinitions): JsObject = {
     selector(fd.apiContext, fd.apiVersion)
   }
 
-  private def selector(apiContext: String, apiVersion: String): JsObject = {
+  private def selector(apiContext: ApiContext, apiVersion: ApiVersion): JsObject = {
     Json.obj(
-      "apiContext" -> apiContext,
-      "apiVersion" -> apiVersion
+      "apiContext" -> apiContext.value,
+      "apiVersion" -> apiVersion.value
     )
   }
 }

@@ -29,8 +29,8 @@ class JsonFormatterSpec extends WordSpec with Matchers with JsonFormatters with 
   private val subscriptionFieldsResponse = SubscriptionFieldsResponse(FakeClientId, FakeContext, FakeVersion, FakeFieldsId, fakeFields)
   private val bulkSubscriptionFieldsResponse = BulkSubscriptionFieldsResponse(Seq(subscriptionFieldsResponse))
 
-  private val fakeApiFieldDefinitionsResponse = ApiFieldDefinitionsResponse(fakeRawContext, fakeRawVersion, NonEmptyList.one(FakeFieldDefinitionUrl))
-  private val fakeApiFieldDefinitionsResponseEmptyValidation = ApiFieldDefinitionsResponse(fakeRawContext, fakeRawVersion, NonEmptyList.one(FakeFieldDefinitionUrlValidationEmpty))
+  private val fakeApiFieldDefinitionsResponse = ApiFieldDefinitionsResponse(FakeContext, FakeVersion, NonEmptyList.one(FakeFieldDefinitionUrl))
+  private val fakeApiFieldDefinitionsResponseEmptyValidation = ApiFieldDefinitionsResponse(FakeContext, FakeVersion, NonEmptyList.one(FakeFieldDefinitionUrlValidationEmpty))
   private val bulkFieldsDefinitionResponse = BulkApiFieldDefinitionsResponse(Seq(fakeApiFieldDefinitionsResponse))
 
   private def objectAsJsonString[A](a: A)(implicit t: Writes[A]) = Json.asciiStringify(Json.toJson(a))

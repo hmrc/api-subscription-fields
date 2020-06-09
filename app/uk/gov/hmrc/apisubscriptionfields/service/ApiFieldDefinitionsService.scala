@@ -28,7 +28,7 @@ import uk.gov.hmrc.apisubscriptionfields.repository.ApiFieldDefinitionsRepositor
 class ApiFieldDefinitionsService @Inject() (repository: ApiFieldDefinitionsRepository)(implicit ec: ExecutionContext) {
 
   def upsert(apiContext: ApiContext, apiVersion: ApiVersion, fieldDefinitions: NonEmptyList[FieldDefinition]): Future[(ApiFieldDefinitionsResponse, IsInsert)] = {
-    val definitions = ApiFieldDefinitions(apiContext.value, apiVersion.value, fieldDefinitions)
+    val definitions = ApiFieldDefinitions(apiContext, apiVersion, fieldDefinitions)
     repository.save(definitions).map {
       case (fd: ApiFieldDefinitions, inserted: IsInsert) => (asResponse(fd), inserted)
     }

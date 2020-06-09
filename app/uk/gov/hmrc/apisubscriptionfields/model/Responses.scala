@@ -26,11 +26,13 @@ case object NotFoundSubsFieldsUpsertResponse extends SubsFieldsUpsertResponse
 case class FailedValidationSubsFieldsUpsertResponse(errorResponses: Map[FieldName, String]) extends SubsFieldsUpsertResponse
 case class SuccessfulSubsFieldsUpsertResponse(wrapped: SubscriptionFieldsResponse, isInsert: Boolean) extends SubsFieldsUpsertResponse
 
+// TODO - remove this due to duplication with SubscriptionFields
 case class SubscriptionFieldsResponse(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion, fieldsId: SubscriptionFieldsId, fields: Fields)
 
 case class BulkSubscriptionFieldsResponse(subscriptions: Seq[SubscriptionFieldsResponse])
 
-case class ApiFieldDefinitionsResponse(apiContext: String, apiVersion: String, fieldDefinitions: NonEmptyList[FieldDefinition])
+// TODO - remove this due to duplication with ApiFieldDefinitions
+case class ApiFieldDefinitionsResponse(apiContext: ApiContext, apiVersion: ApiVersion, fieldDefinitions: NonEmptyList[FieldDefinition])
 
 case class BulkApiFieldDefinitionsResponse(apis: Seq[ApiFieldDefinitionsResponse])
 

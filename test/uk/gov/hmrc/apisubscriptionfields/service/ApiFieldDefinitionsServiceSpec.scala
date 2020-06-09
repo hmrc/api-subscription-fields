@@ -27,7 +27,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 class ApiFieldDefinitionsServiceSpec extends AsyncHmrcSpec with FieldDefinitionTestData {
 
-  private val mockApiFieldDefinitionsRepository = mock[ApiFieldDefinitionsRepository]//(withSettings.verboseLogging)
+  private val mockApiFieldDefinitionsRepository = mock[ApiFieldDefinitionsRepository]
   private val service = new ApiFieldDefinitionsService(mockApiFieldDefinitionsRepository)
 
   "getAll" should {
@@ -40,16 +40,16 @@ class ApiFieldDefinitionsServiceSpec extends AsyncHmrcSpec with FieldDefinitionT
     }
 
     "return a list of all entries" in {
-      val fd1 = createApiFieldDefinitions(apiContext = "api-1", fieldDefinitions = NonEmptyList.one(FakeFieldDefinitionUrl))
-      val fd2 = createApiFieldDefinitions(apiContext = "api-2", fieldDefinitions = NonEmptyList.one(FakeFieldDefinitionString))
+      val fd1 = createApiFieldDefinitions(apiContext = FakeContext, fieldDefinitions = NonEmptyList.one(FakeFieldDefinitionUrl))
+      val fd2 = createApiFieldDefinitions(apiContext = FakeContext2, fieldDefinitions = NonEmptyList.one(FakeFieldDefinitionString))
 
       when(mockApiFieldDefinitionsRepository.fetchAll()).thenReturn(successful(List(fd1, fd2)))
 
       val result = await(service.getAll)
 
       val expectedResponse = BulkApiFieldDefinitionsResponse(apis = Seq(
-        ApiFieldDefinitionsResponse("api-1", fakeRawVersion, NonEmptyList.one(FakeFieldDefinitionUrl)),
-        ApiFieldDefinitionsResponse("api-2", fakeRawVersion, NonEmptyList.one(FakeFieldDefinitionString))))
+        ApiFieldDefinitionsResponse(FakeContext, FakeVersion, NonEmptyList.one(FakeFieldDefinitionUrl)),
+        ApiFieldDefinitionsResponse(FakeContext2, FakeVersion, NonEmptyList.one(FakeFieldDefinitionString))))
       result shouldBe expectedResponse
     }
   }
@@ -78,7 +78,7 @@ class ApiFieldDefinitionsServiceSpec extends AsyncHmrcSpec with FieldDefinitionT
 
       val result = await(service.upsert(FakeContext, FakeVersion, NelOfFieldDefinitions))
 
-      result shouldBe ((ApiFieldDefinitionsResponse(fakeRawContext, fakeRawVersion, NelOfFieldDefinitions), false))
+      result shouldBe ((ApiFieldDefinitionsResponse(FakeContext, FakeVersion, NelOfFieldDefinitions), false))
     }
 
     "return true when creating a new fields definition" in {
@@ -86,7 +86,7 @@ class ApiFieldDefinitionsServiceSpec extends AsyncHmrcSpec with FieldDefinitionT
 
       val result = await(service.upsert(FakeContext, FakeVersion, NelOfFieldDefinitions))
 
-      result shouldBe ((ApiFieldDefinitionsResponse(fakeRawContext, fakeRawVersion, NelOfFieldDefinitions), true))
+      result shouldBe ((ApiFieldDefinitionsResponse(FakeContext, FakeVersion, NelOfFieldDefinitions), true))
     }
 
     "propagate the error" in {

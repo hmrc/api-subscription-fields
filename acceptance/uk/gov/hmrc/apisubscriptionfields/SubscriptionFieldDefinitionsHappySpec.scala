@@ -51,7 +51,7 @@ class SubscriptionFieldDefinitionsHappySpec extends AcceptanceTestSpec
       val sfr = contentAsJson(putResultFuture).validate[ApiFieldDefinitionsResponse]
 
       sfr.isSuccess shouldBe true
-      sfr.get shouldBe ApiFieldDefinitionsResponse(fakeRawContext, fakeRawVersion, NelOfFieldDefinitions)
+      sfr.get shouldBe ApiFieldDefinitionsResponse(FakeContext, FakeVersion, NelOfFieldDefinitions)
     }
 
 
@@ -121,7 +121,7 @@ class SubscriptionFieldDefinitionsHappySpec extends AcceptanceTestSpec
       val sfr = contentAsJson(resultFuture).validate[ApiFieldDefinitionsResponse]
 
       sfr.isSuccess shouldBe true
-      sfr.get shouldBe ApiFieldDefinitionsResponse(fakeRawContext, fakeRawVersion, NelOfFieldDefinitions)
+      sfr.get shouldBe ApiFieldDefinitionsResponse(FakeContext, FakeVersion, NelOfFieldDefinitions)
     }
 
     scenario("the API is called to delete some existing fields definitions") {

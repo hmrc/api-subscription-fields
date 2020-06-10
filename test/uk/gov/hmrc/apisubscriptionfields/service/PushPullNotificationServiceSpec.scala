@@ -33,6 +33,7 @@ class PushPullNotificationServiceSpec extends AsyncHmrcSpec with SubscriptionFie
   val clientId: ClientId = ClientId(ju.UUID.randomUUID().toString)
   val apiContext: ApiContext = ApiContext("aContext")
   val apiVersion: ApiVersion = ApiVersion("aVersion")
+  val subscriptionFieldsId: SubscriptionFieldsId = SubscriptionFieldsId(ju.UUID.randomUUID())
 
   trait Setup {
     val mockPPNSConnector = mock[PushPullNotificationServiceConnector]
@@ -54,15 +55,15 @@ class PushPullNotificationServiceSpec extends AsyncHmrcSpec with SubscriptionFie
     "succeed and return topicId when fields with a PPNS_TOPIC are provided" in new Setup {
 
       when(mockPPNSConnector.ensureTopicIsCreated(eqTo(expectedTopicName), any[ClientId])(*)).thenReturn(successful(topicId))
-      when(mockPPNSConnector.subscribe(clientId,topicId,callbackUrl)(hc)).thenReturn(successful(topicId))
+      when(mockPPNSConnector.subscribe(subscriptionFieldsId,topicId,callbackUrl)(hc)).thenReturn(successful(topicId))
 
-      await(service.subscribeToPPNS(clientId, apiContext, apiVersion, fieldDefns, fields)) shouldBe (())
+      await(service.subscribeToPPNS(clientId, apiContext, apiVersion, subscriptionFieldsId, fieldDefns, fields)) shouldBe (())
     }
 
     "gracefully do nothing when no PPNS_TOPIC field is provided" in new Setup {
       val localFieldDefns: NEL[FieldDefinition] = NEL.of(fieldDef2)
       val localFields: Types.Fields = Map(fieldN(2) -> "something else")
-      await(service.subscribeToPPNS(clientId, apiContext, apiVersion, localFieldDefns, localFields)) shouldBe (())
+      await(service.subscribeToPPNS(clientId, apiContext, apiVersion, subscriptionFieldsId, localFieldDefns, localFields)) shouldBe (())
 
       verify(mockPPNSConnector, never).ensureTopicIsCreated(*, any[ClientId])(*)
     }
@@ -71,16 +72,16 @@ class PushPullNotificationServiceSpec extends AsyncHmrcSpec with SubscriptionFie
       when(mockPPNSConnector.ensureTopicIsCreated(*, any[ClientId])(*)).thenReturn(failed(new RuntimeException))
 
       intercept[RuntimeException] {
-        await(service.subscribeToPPNS(clientId, apiContext, apiVersion, fieldDefns, fields))
+        await(service.subscribeToPPNS(clientId, apiContext, apiVersion, subscriptionFieldsId, fieldDefns, fields))
       }
     }
 
     "fail when subscribe to topic fails" in new Setup {
       when(mockPPNSConnector.ensureTopicIsCreated((*), any[ClientId])(*)).thenReturn(successful(topicId))
-      when(mockPPNSConnector.subscribe(clientId,topicId,callbackUrl)(hc)).thenReturn(failed(new RuntimeException))
+      when(mockPPNSConnector.subscribe(subscriptionFieldsId,topicId,callbackUrl)(hc)).thenReturn(failed(new RuntimeException))
 
       intercept[RuntimeException] {
-        await(service.subscribeToPPNS(clientId, apiContext, apiVersion, fieldDefns, fields))
+        await(service.subscribeToPPNS(clientId, apiContext, apiVersion, subscriptionFieldsId, fieldDefns, fields))
       }
     }
   }

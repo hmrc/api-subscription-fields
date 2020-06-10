@@ -34,8 +34,7 @@ trait SubscriptionFieldsTestData extends FieldDefinitionTestData with Validation
   final val SubscriptionFieldsDoNotMatchRegexValidation: Fields = Map(AlphanumericFieldName -> "ABC123abc=", PasswordFieldName -> "Qw12erty")
 
   final val FakeApiSubscription = SubscriptionFields(FakeClientId, FakeContext, FakeVersion, FakeFieldsId, FakeSubscriptionFields)
-  final val FakeSubscriptionFieldsId = SubscriptionFieldsId(FakeRawFieldsId)
-  final val FakeSubscriptionFieldsResponse: SubscriptionFields = SubscriptionFields(FakeClientId, FakeContext, FakeVersion, FakeSubscriptionFieldsId, FakeSubscriptionFields)
+  final val FakeSubscriptionFieldsResponse: SubscriptionFields = SubscriptionFields(FakeClientId, FakeContext, FakeVersion, FakeFieldsId, FakeSubscriptionFields)
   final val FakeValidSubsFieldValidationResponse: SubsFieldValidationResponse = ValidSubsFieldValidationResponse
 
   final val CallbackUrlFieldName: FieldName = "callbackUrl"

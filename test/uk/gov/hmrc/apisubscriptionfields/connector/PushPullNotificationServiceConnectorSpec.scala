@@ -30,7 +30,7 @@ import com.github.tomakehurst.wiremock.client.WireMock
 import org.scalatest.BeforeAndAfterAll
 import uk.gov.hmrc.apisubscriptionfields.AsyncHmrcSpec
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.apisubscriptionfields.model.TopicId
+import uk.gov.hmrc.apisubscriptionfields.model.{SubscriptionFieldsId, TopicId}
 import uk.gov.hmrc.apisubscriptionfields.model.ClientId
 
 class PushPullNotificationServiceConnectorSpec
@@ -70,6 +70,7 @@ class PushPullNotificationServiceConnectorSpec
 
     val topicName = "topic-name"
     val clientId = ClientId("client-id")
+    val subscriptionFieldsId = SubscriptionFieldsId(ju.UUID.randomUUID)
     val topicId = TopicId(ju.UUID.randomUUID())
 
     val connector = app.injector.instanceOf[PushPullNotificationServiceConnector]
@@ -102,7 +103,7 @@ class PushPullNotificationServiceConnectorSpec
 
     "send proper request to subscribe" in new Setup {
       val callbackUrl = "my-callback"
-      val updateRequest: UpdateSubscribersRequest = UpdateSubscribersRequest(List(SubscribersRequest(callbackUrl, "API_PUSH_SUBSCRIBER", Some(clientId))))
+      val updateRequest: UpdateSubscribersRequest = UpdateSubscribersRequest(List(SubscribersRequest(callbackUrl, "API_PUSH_SUBSCRIBER", Some(subscriptionFieldsId))))
       val requestBody = Json.stringify(Json.toJson(updateRequest))
       val response: UpdateSubscribersResponse = UpdateSubscribersResponse(topicId)
 
@@ -116,7 +117,7 @@ class PushPullNotificationServiceConnectorSpec
 
       implicit val hc: HeaderCarrier = HeaderCarrier()
 
-      val ret = await(connector.subscribe(clientId, topicId, callbackUrl))
+      val ret = await(connector.subscribe(subscriptionFieldsId, topicId, callbackUrl))
       ret shouldBe topicId
 
       wireMockServer.verify(

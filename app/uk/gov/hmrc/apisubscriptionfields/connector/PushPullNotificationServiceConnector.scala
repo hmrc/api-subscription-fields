@@ -25,6 +25,7 @@ import uk.gov.hmrc.apisubscriptionfields.model.ClientId
 import uk.gov.hmrc.apisubscriptionfields.model.TopicId
 import uk.gov.hmrc.http.HeaderCarrier
 import scala.util.control.NonFatal
+import uk.gov.hmrc.apisubscriptionfields.model.SubscriptionFieldsId
 
 @Singleton
 class PushPullNotificationServiceConnector @Inject()(http: HttpClient, appConfig: ApplicationConfig, val apiMetrics: ApiMetrics)(implicit ec: ExecutionContext) extends RecordMetrics {
@@ -44,8 +45,8 @@ class PushPullNotificationServiceConnector @Inject()(http: HttpClient, appConfig
     }
   }
 
-  def subscribe(clientId: ClientId, topicId: TopicId, callbackUrl: String)(implicit hc: HeaderCarrier): Future[TopicId] = {
-    val payload = UpdateSubscribersRequest(List(SubscribersRequest(callbackUrl, "API_PUSH_SUBSCRIBER", Some(clientId))))
+  def subscribe(subscriberFieldsId: SubscriptionFieldsId, topicId: TopicId, callbackUrl: String)(implicit hc: HeaderCarrier): Future[TopicId] = {
+    val payload = UpdateSubscribersRequest(List(SubscribersRequest(callbackUrl, "API_PUSH_SUBSCRIBER", Some(subscriberFieldsId))))
 
     http.PUT[UpdateSubscribersRequest, UpdateSubscribersResponse](s"$externalServiceUri/topics/${topicId.value.toString}/subscribers", payload)
     .map(_.topicId)

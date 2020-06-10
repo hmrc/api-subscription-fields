@@ -17,11 +17,12 @@
 package uk.gov.hmrc.apisubscriptionfields.connector
 
 import play.api.libs.json._
-import uk.gov.hmrc.apisubscriptionfields.model.{ClientId, TopicId}
+import uk.gov.hmrc.apisubscriptionfields.model.{ClientId, TopicId, SubscriptionFieldsId}
 
 trait JsonFormatters {
   implicit val clientIdJF = Json.valueFormat[ClientId]
   implicit val topicIdJF = Json.valueFormat[TopicId]
+  implicit val subscriptionFieldsIdJF = Json.valueFormat[SubscriptionFieldsId]
 
   implicit val createTopicRequestJF = Json.format[CreateTopicRequest]
   implicit val createTopicResponseJF = Json.format[CreateTopicResponse]

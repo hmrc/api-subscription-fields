@@ -33,19 +33,19 @@ class PushPullNotificationService @Inject() (ppnsConnector: PushPullNotification
     s"${apiContext.value}${separator}${apiVersion.value}${separator}${fieldDefinition.name.value}"
   }
 
-  private def subscribeToPPNS(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion, fieldDefinition: FieldDefinition, fieldValue: FieldValue)(implicit hc: HeaderCarrier) = {
+  private def subscribeToPPNS(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion, subscriptionFieldsId: SubscriptionFieldsId, fieldDefinition: FieldDefinition, fieldValue: FieldValue)(implicit hc: HeaderCarrier) = {
     for {
       topicId <- ppnsConnector.ensureTopicIsCreated(makeTopicName(apiContext, apiVersion, fieldDefinition), clientId)
-      _ <- ppnsConnector.subscribe(clientId, topicId, fieldValue)
+      _ <- ppnsConnector.subscribe(subscriptionFieldsId, topicId, fieldValue)
     } yield ()
   }
 
-  def subscribeToPPNS(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion, fieldDefinitions: NEL[FieldDefinition], fields: Fields)(implicit hc: HeaderCarrier): Future[Unit] = {
+  def subscribeToPPNS(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion, subscriptionFieldsId: SubscriptionFieldsId, fieldDefinitions: NEL[FieldDefinition], fields: Fields)(implicit hc: HeaderCarrier): Future[Unit] = {
     val subscriptionResponses : List[Future[Unit]] =
       fieldDefinitions
       .filter(_.`type` == FieldDefinitionType.PPNS_TOPIC )
       .map { fieldDefn =>
-        subscribeToPPNS(clientId, apiContext, apiVersion, fieldDefn, fields(fieldDefn.name))
+        subscribeToPPNS(clientId, apiContext, apiVersion, subscriptionFieldsId, fieldDefn, fields(fieldDefn.name))
       }
 
     Future.sequence(subscriptionResponses).map(_ => ())

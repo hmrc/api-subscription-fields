@@ -22,15 +22,19 @@ import eu.timepit.refined._
 import Types._
 
 sealed trait ValidationRule {
-  def validate(value: FieldValue): Boolean
+  def validate(value: FieldValue): Boolean = {
+    if (value == "") true
+    else validateAgainstRule(value)
+  }
+  protected def validateAgainstRule(value: FieldValue): Boolean
 }
 
 case class RegexValidationRule(regex: RegexExpr) extends ValidationRule {
-  def validate(value: FieldValue): Boolean = value.matches(regex.value)
+  def validateAgainstRule(value: FieldValue): Boolean = value.matches(regex.value)
 }
 
 case object UrlValidationRule extends ValidationRule {
-  def validate(value: FieldValue): Boolean = refineV[NonFtpUrl](value).isRight
+  def validateAgainstRule(value: FieldValue): Boolean = refineV[NonFtpUrl](value).isRight
 }
 
 case class ValidationGroup(errorMessage: String, rules: NEL[ValidationRule])

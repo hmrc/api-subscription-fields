@@ -38,7 +38,7 @@ class PushPullNotificationServiceConnector @Inject()(http: HttpClient, appConfig
   def ensureBoxIsCreated(boxName: String, clientId: ClientId)(implicit hc: HeaderCarrier): Future[BoxId] = {
     val payload = CreateBoxRequest(boxName, clientId)
 
-    http.PUT[CreateBoxRequest, CreateBoxResponse](s"$externalServiceUri/boxes", payload)
+    http.PUT[CreateBoxRequest, CreateBoxResponse](s"$externalServiceUri/box", payload)
     .map(_.boxId)
     .recover {
       case NonFatal(e) => throw new RuntimeException(s"Unexpected response from $externalServiceUri: ${e.getMessage}")
@@ -48,7 +48,7 @@ class PushPullNotificationServiceConnector @Inject()(http: HttpClient, appConfig
   def subscribe(subscriberFieldsId: SubscriptionFieldsId, boxId: BoxId, callbackUrl: String)(implicit hc: HeaderCarrier): Future[Unit] = {
     val payload = UpdateSubscribersRequest(List(SubscribersRequest(callbackUrl, "API_PUSH_SUBSCRIBER", Some(subscriberFieldsId))))
 
-    http.PUT[UpdateSubscribersRequest, UpdateSubscribersResponse](s"$externalServiceUri/boxes/${boxId.value.toString}/subscribers", payload)
+    http.PUT[UpdateSubscribersRequest, UpdateSubscribersResponse](s"$externalServiceUri/box/${boxId.value.toString}/subscribers", payload)
     .map(_ => ())
     .recover {
       case NonFatal(e) => throw new RuntimeException(s"Unexpected response from $externalServiceUri: ${e.getMessage}")

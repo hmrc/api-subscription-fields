@@ -77,11 +77,11 @@ class PushPullNotificationServiceConnectorSpec
   }
 
   "PPNS Connector" should {
-    "send proper request to post boxes" in new Setup {
+    "send proper request to post box" in new Setup {
       val requestBody = Json.stringify(Json.toJson(CreateBoxRequest(boxName, clientId)))
       val response: CreateBoxResponse = CreateBoxResponse(boxId)
 
-      val path = "/boxes"
+      val path = "/box"
       wireMockServer.stubFor(
         put(path).withRequestBody(equalTo(requestBody))
         .willReturn(aResponse()
@@ -107,7 +107,7 @@ class PushPullNotificationServiceConnectorSpec
       val requestBody = Json.stringify(Json.toJson(updateRequest))
       val response: UpdateSubscribersResponse = UpdateSubscribersResponse(boxId)
 
-      val path = s"/boxes/${boxId.value}/subscribers"
+      val path = s"/box/${boxId.value}/subscribers"
       wireMockServer.stubFor(
         put(path).withRequestBody(equalTo(requestBody))
         .willReturn(aResponse()

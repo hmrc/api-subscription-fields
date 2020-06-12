@@ -45,11 +45,11 @@ class PushPullNotificationServiceConnector @Inject()(http: HttpClient, appConfig
     }
   }
 
-  def subscribe(subscriberFieldsId: SubscriptionFieldsId, topicId: TopicId, callbackUrl: String)(implicit hc: HeaderCarrier): Future[TopicId] = {
+  def subscribe(subscriberFieldsId: SubscriptionFieldsId, topicId: TopicId, callbackUrl: String)(implicit hc: HeaderCarrier): Future[Unit] = {
     val payload = UpdateSubscribersRequest(List(SubscribersRequest(callbackUrl, "API_PUSH_SUBSCRIBER", Some(subscriberFieldsId))))
 
     http.PUT[UpdateSubscribersRequest, UpdateSubscribersResponse](s"$externalServiceUri/topics/${topicId.value.toString}/subscribers", payload)
-    .map(_.topicId)
+    .map(_ => ())
     .recover {
       case NonFatal(e) => throw new RuntimeException(s"Unexpected response from $externalServiceUri: ${e.getMessage}")
     }

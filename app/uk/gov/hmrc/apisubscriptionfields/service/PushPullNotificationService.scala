@@ -33,10 +33,10 @@ class PushPullNotificationService @Inject() (ppnsConnector: PushPullNotification
     s"${apiContext.value}${separator}${apiVersion.value}${separator}${fieldDefinition.name.value}"
   }
 
-  private def subscribeToPPNS(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion, subscriptionFieldsId: SubscriptionFieldsId, fieldDefinition: FieldDefinition, fieldValue: FieldValue)(implicit hc: HeaderCarrier) = {
+  private def subscribeToPPNS(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion, subscriptionFieldsId: SubscriptionFieldsId, fieldDefinition: FieldDefinition, oFieldValue: Option[FieldValue])(implicit hc: HeaderCarrier) = {
     for {
       topicId <- ppnsConnector.ensureTopicIsCreated(makeTopicName(apiContext, apiVersion, fieldDefinition), clientId)
-      _ <- ppnsConnector.subscribe(subscriptionFieldsId, topicId, fieldValue)
+      _ <- oFieldValue.fold(Future.successful(()))(fieldValue => ppnsConnector.subscribe(subscriptionFieldsId, topicId, fieldValue))
     } yield ()
   }
 
@@ -45,7 +45,7 @@ class PushPullNotificationService @Inject() (ppnsConnector: PushPullNotification
       fieldDefinitions
       .filter(_.`type` == FieldDefinitionType.PPNS_TOPIC )
       .map { fieldDefn =>
-        subscribeToPPNS(clientId, apiContext, apiVersion, subscriptionFieldsId, fieldDefn, fields(fieldDefn.name))
+        subscribeToPPNS(clientId, apiContext, apiVersion, subscriptionFieldsId, fieldDefn, fields.get(fieldDefn.name))
       }
 
     Future.sequence(subscriptionResponses).map(_ => ())

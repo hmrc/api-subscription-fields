@@ -22,7 +22,7 @@ import uk.gov.hmrc.play.http.metrics._
 import uk.gov.hmrc.apisubscriptionfields.config.ApplicationConfig
 import scala.concurrent.{ExecutionContext, Future}
 import uk.gov.hmrc.apisubscriptionfields.model.ClientId
-import uk.gov.hmrc.apisubscriptionfields.model.TopicId
+import uk.gov.hmrc.apisubscriptionfields.model.BoxId
 import uk.gov.hmrc.http.HeaderCarrier
 import scala.util.control.NonFatal
 import uk.gov.hmrc.apisubscriptionfields.model.SubscriptionFieldsId
@@ -35,21 +35,21 @@ class PushPullNotificationServiceConnector @Inject()(http: HttpClient, appConfig
 
   private lazy val externalServiceUri = appConfig.pushPullNotificationServiceURL
 
-  def ensureTopicIsCreated(topicName: String, clientId: ClientId)(implicit hc: HeaderCarrier): Future[TopicId] = {
-    val payload = CreateTopicRequest(topicName, clientId)
+  def ensureBoxIsCreated(boxName: String, clientId: ClientId)(implicit hc: HeaderCarrier): Future[BoxId] = {
+    val payload = CreateBoxRequest(boxName, clientId)
 
-    http.PUT[CreateTopicRequest, CreateTopicResponse](s"$externalServiceUri/topics", payload)
-    .map(_.topicId)
+    http.PUT[CreateBoxRequest, CreateBoxResponse](s"$externalServiceUri/boxes", payload)
+    .map(_.boxId)
     .recover {
       case NonFatal(e) => throw new RuntimeException(s"Unexpected response from $externalServiceUri: ${e.getMessage}")
     }
   }
 
-  def subscribe(subscriberFieldsId: SubscriptionFieldsId, topicId: TopicId, callbackUrl: String)(implicit hc: HeaderCarrier): Future[TopicId] = {
+  def subscribe(subscriberFieldsId: SubscriptionFieldsId, boxId: BoxId, callbackUrl: String)(implicit hc: HeaderCarrier): Future[Unit] = {
     val payload = UpdateSubscribersRequest(List(SubscribersRequest(callbackUrl, "API_PUSH_SUBSCRIBER", Some(subscriberFieldsId))))
 
-    http.PUT[UpdateSubscribersRequest, UpdateSubscribersResponse](s"$externalServiceUri/topics/${topicId.value.toString}/subscribers", payload)
-    .map(_.topicId)
+    http.PUT[UpdateSubscribersRequest, UpdateSubscribersResponse](s"$externalServiceUri/boxes/${boxId.value.toString}/subscribers", payload)
+    .map(_ => ())
     .recover {
       case NonFatal(e) => throw new RuntimeException(s"Unexpected response from $externalServiceUri: ${e.getMessage}")
     }

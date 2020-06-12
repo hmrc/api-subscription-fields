@@ -18,4 +18,4 @@ package uk.gov.hmrc.apisubscriptionfields.model
 
 import java.{util => ju}
 
-case class TopicId(value: ju.UUID) extends AnyVal
+case class BoxId(value: ju.UUID) extends AnyVal

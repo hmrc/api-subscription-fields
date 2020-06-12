@@ -16,14 +16,14 @@
 
 package uk.gov.hmrc.apisubscriptionfields.connector
 
-import uk.gov.hmrc.apisubscriptionfields.model.{TopicId, ClientId, SubscriptionFieldsId}
+import uk.gov.hmrc.apisubscriptionfields.model.{BoxId, ClientId, SubscriptionFieldsId}
 
-private[connector] case class CreateTopicRequest(topicName: String, clientId: ClientId)
+private[connector] case class CreateBoxRequest(boxName: String, clientId: ClientId)
 
-private[connector] case class CreateTopicResponse(topicId: TopicId)
+private[connector] case class CreateBoxResponse(boxId: BoxId)
 
 private[connector] case class SubscribersRequest(callBackUrl: String, subscriberType: String, subscriberId: Option[SubscriptionFieldsId] = None)
 
 private[connector] case class UpdateSubscribersRequest(subscribers: List[SubscribersRequest])
 
-private[connector] case class UpdateSubscribersResponse(topicId: TopicId)
+private[connector] case class UpdateSubscribersResponse(boxId: BoxId)

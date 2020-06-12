@@ -30,7 +30,7 @@ import com.github.tomakehurst.wiremock.client.WireMock
 import org.scalatest.BeforeAndAfterAll
 import uk.gov.hmrc.apisubscriptionfields.AsyncHmrcSpec
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.apisubscriptionfields.model.{SubscriptionFieldsId, TopicId}
+import uk.gov.hmrc.apisubscriptionfields.model.{SubscriptionFieldsId, BoxId}
 import uk.gov.hmrc.apisubscriptionfields.model.ClientId
 
 class PushPullNotificationServiceConnectorSpec
@@ -68,20 +68,20 @@ class PushPullNotificationServiceConnectorSpec
 
   trait Setup {
 
-    val topicName = "topic-name"
+    val boxName = "box-name"
     val clientId = ClientId("client-id")
     val subscriptionFieldsId = SubscriptionFieldsId(ju.UUID.randomUUID)
-    val topicId = TopicId(ju.UUID.randomUUID())
+    val boxId = BoxId(ju.UUID.randomUUID())
 
     val connector = app.injector.instanceOf[PushPullNotificationServiceConnector]
   }
 
   "PPNS Connector" should {
-    "send proper request to post topics" in new Setup {
-      val requestBody = Json.stringify(Json.toJson(CreateTopicRequest(topicName, clientId)))
-      val response: CreateTopicResponse = CreateTopicResponse(topicId)
+    "send proper request to post boxes" in new Setup {
+      val requestBody = Json.stringify(Json.toJson(CreateBoxRequest(boxName, clientId)))
+      val response: CreateBoxResponse = CreateBoxResponse(boxId)
 
-      val path = "/topics"
+      val path = "/boxes"
       wireMockServer.stubFor(
         put(path).withRequestBody(equalTo(requestBody))
         .willReturn(aResponse()
@@ -91,8 +91,8 @@ class PushPullNotificationServiceConnectorSpec
 
       implicit val hc: HeaderCarrier = HeaderCarrier()
 
-      val ret = await(connector.ensureTopicIsCreated(topicName, clientId))
-      ret shouldBe topicId
+      val ret = await(connector.ensureBoxIsCreated(boxName, clientId))
+      ret shouldBe (boxId)
 
       wireMockServer.verify(
         putRequestedFor(urlPathEqualTo(path))
@@ -105,9 +105,9 @@ class PushPullNotificationServiceConnectorSpec
       val callbackUrl = "my-callback"
       val updateRequest: UpdateSubscribersRequest = UpdateSubscribersRequest(List(SubscribersRequest(callbackUrl, "API_PUSH_SUBSCRIBER", Some(subscriptionFieldsId))))
       val requestBody = Json.stringify(Json.toJson(updateRequest))
-      val response: UpdateSubscribersResponse = UpdateSubscribersResponse(topicId)
+      val response: UpdateSubscribersResponse = UpdateSubscribersResponse(boxId)
 
-      val path = s"/topics/${topicId.value}/subscribers"
+      val path = s"/boxes/${boxId.value}/subscribers"
       wireMockServer.stubFor(
         put(path).withRequestBody(equalTo(requestBody))
         .willReturn(aResponse()
@@ -117,8 +117,8 @@ class PushPullNotificationServiceConnectorSpec
 
       implicit val hc: HeaderCarrier = HeaderCarrier()
 
-      val ret = await(connector.subscribe(subscriptionFieldsId, topicId, callbackUrl))
-      ret shouldBe topicId
+      val ret = await(connector.subscribe(subscriptionFieldsId, boxId, callbackUrl))
+      ret shouldBe (())
 
       wireMockServer.verify(
         putRequestedFor(urlPathEqualTo(path))

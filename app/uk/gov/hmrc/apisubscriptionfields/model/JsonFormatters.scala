@@ -102,7 +102,7 @@ trait JsonFormatters
   import play.api.libs.json._
 
   implicit val ClientIdJF = Json.valueFormat[ClientId]
-  implicit val TopicIdJF = Json.valueFormat[TopicId]
+  implicit val BoxIdJF = Json.valueFormat[BoxId]
   implicit val SubscriptionFieldsIdjsonFormat = Json.valueFormat[SubscriptionFieldsId]
   implicit val ApiContextJF = Json.valueFormat[ApiContext]
   implicit val ApiVersionJF = Json.valueFormat[ApiVersion]

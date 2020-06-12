@@ -189,10 +189,10 @@ class JsonFormatterSpec extends WordSpec with Matchers with JsonFormatters with 
     }
 
     "unmarshal json string into a FieldDefinition" in {
-      val json = """{"name":"fieldB","description":"desc1","hint":"hint1","type":"PPNSTopic","shortDescription":"short description"}"""
+      val json = """{"name":"fieldB","description":"desc1","hint":"hint1","type":"PPNSField","shortDescription":"short description"}"""
 
       Json.fromJson[FieldDefinition](Json.parse(json)) match {
-        case JsSuccess(r, _) => r.`type` shouldBe PPNS_TOPIC
+        case JsSuccess(r, _) => r.`type` shouldBe PPNS_FIELD
         case JsError(e)      => fail(s"Should have parsed json text but got $e")
       }
     }

@@ -55,9 +55,25 @@ class PushPullNotificationServiceSpec extends AsyncHmrcSpec with SubscriptionFie
     "succeed and return topicId when fields with a PPNS_TOPIC are provided" in new Setup {
 
       when(mockPPNSConnector.ensureTopicIsCreated(eqTo(expectedTopicName), any[ClientId])(*)).thenReturn(successful(topicId))
-      when(mockPPNSConnector.subscribe(subscriptionFieldsId,topicId,callbackUrl)(hc)).thenReturn(successful(topicId))
+      when(mockPPNSConnector.subscribe(subscriptionFieldsId,topicId,callbackUrl)(hc)).thenReturn(successful(()))
 
       await(service.subscribeToPPNS(clientId, apiContext, apiVersion, subscriptionFieldsId, fieldDefns, fields)) shouldBe (())
+    }
+
+    "succeed and return topicId when fields with a PPNS_TOPIC but no field value is provided" in new Setup {
+
+      when(mockPPNSConnector.ensureTopicIsCreated(eqTo(expectedTopicName), any[ClientId])(*)).thenReturn(successful(topicId))
+      val fieldsWithNoCallbackUrl = Map(fieldN(2) -> "Some other")
+
+      await(service.subscribeToPPNS(clientId, apiContext, apiVersion, subscriptionFieldsId, fieldDefns, fieldsWithNoCallbackUrl)) shouldBe (())
+    }
+
+    "succeed and return topicId when fields with a PPNS_TOPIC but empty field value is provided" in new Setup {
+
+      when(mockPPNSConnector.ensureTopicIsCreated(eqTo(expectedTopicName), any[ClientId])(*)).thenReturn(successful(topicId))
+      val fieldsWithNoCallbackUrl = Map(fieldN(1) -> "", fieldN(2) -> "Some other")
+
+      await(service.subscribeToPPNS(clientId, apiContext, apiVersion, subscriptionFieldsId, fieldDefns, fieldsWithNoCallbackUrl)) shouldBe (())
     }
 
     "gracefully do nothing when no PPNS_TOPIC field is provided" in new Setup {

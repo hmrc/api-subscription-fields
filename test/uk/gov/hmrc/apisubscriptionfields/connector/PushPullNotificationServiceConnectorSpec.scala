@@ -92,7 +92,7 @@ class PushPullNotificationServiceConnectorSpec
       implicit val hc: HeaderCarrier = HeaderCarrier()
 
       val ret = await(connector.ensureTopicIsCreated(topicName, clientId))
-      ret shouldBe topicId
+      ret shouldBe (topicId)
 
       wireMockServer.verify(
         putRequestedFor(urlPathEqualTo(path))
@@ -118,7 +118,7 @@ class PushPullNotificationServiceConnectorSpec
       implicit val hc: HeaderCarrier = HeaderCarrier()
 
       val ret = await(connector.subscribe(subscriptionFieldsId, topicId, callbackUrl))
-      ret shouldBe topicId
+      ret shouldBe (())
 
       wireMockServer.verify(
         putRequestedFor(urlPathEqualTo(path))

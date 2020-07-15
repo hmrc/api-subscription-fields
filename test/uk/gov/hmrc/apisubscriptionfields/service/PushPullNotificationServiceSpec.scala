@@ -33,7 +33,6 @@ class PushPullNotificationServiceSpec extends AsyncHmrcSpec with SubscriptionFie
   val clientId: ClientId = ClientId(ju.UUID.randomUUID().toString)
   val apiContext: ApiContext = ApiContext("aContext")
   val apiVersion: ApiVersion = ApiVersion("aVersion")
-  val subscriptionFieldsId: SubscriptionFieldsId = SubscriptionFieldsId(ju.UUID.randomUUID())
 
   trait Setup {
     val mockPPNSConnector = mock[PushPullNotificationServiceConnector]
@@ -55,9 +54,9 @@ class PushPullNotificationServiceSpec extends AsyncHmrcSpec with SubscriptionFie
     "succeed and return boxId when fields with a PPNS_FIELD are provided" in new Setup {
 
       when(mockPPNSConnector.ensureBoxIsCreated(eqTo(expectedTopicName), any[ClientId])(*)).thenReturn(successful(boxId))
-      when(mockPPNSConnector.subscribe(subscriptionFieldsId,boxId,callbackUrl)(hc)).thenReturn(successful(()))
+      when(mockPPNSConnector.subscribe(boxId, callbackUrl)(hc)).thenReturn(successful(()))
 
-      await(service.subscribeToPPNS(clientId, apiContext, apiVersion, subscriptionFieldsId, fieldDefns, fields)) shouldBe (())
+      await(service.subscribeToPPNS(clientId, apiContext, apiVersion, fieldDefns, fields)) shouldBe (())
     }
 
     "succeed and return boxId when fields with a PPNS_FIELD but no field value is provided" in new Setup {
@@ -65,7 +64,7 @@ class PushPullNotificationServiceSpec extends AsyncHmrcSpec with SubscriptionFie
       when(mockPPNSConnector.ensureBoxIsCreated(eqTo(expectedTopicName), any[ClientId])(*)).thenReturn(successful(boxId))
       val fieldsWithNoCallbackUrl = Map(fieldN(2) -> "Some other")
 
-      await(service.subscribeToPPNS(clientId, apiContext, apiVersion, subscriptionFieldsId, fieldDefns, fieldsWithNoCallbackUrl)) shouldBe (())
+      await(service.subscribeToPPNS(clientId, apiContext, apiVersion, fieldDefns, fieldsWithNoCallbackUrl)) shouldBe (())
     }
 
     "succeed and return boxId when fields with a PPNS_FIELD but empty field value is provided" in new Setup {
@@ -73,13 +72,13 @@ class PushPullNotificationServiceSpec extends AsyncHmrcSpec with SubscriptionFie
       when(mockPPNSConnector.ensureBoxIsCreated(eqTo(expectedTopicName), any[ClientId])(*)).thenReturn(successful(boxId))
       val fieldsWithBlankCallbackUrl = Map(fieldN(1) -> "", fieldN(2) -> "Some other")
 
-      await(service.subscribeToPPNS(clientId, apiContext, apiVersion, subscriptionFieldsId, fieldDefns, fieldsWithBlankCallbackUrl)) shouldBe (())
+      await(service.subscribeToPPNS(clientId, apiContext, apiVersion, fieldDefns, fieldsWithBlankCallbackUrl)) shouldBe (())
     }
 
     "gracefully do nothing when no PPNS_FIELD field is provided" in new Setup {
       val localFieldDefns: NEL[FieldDefinition] = NEL.of(fieldDef2)
       val localFields: Types.Fields = Map(fieldN(2) -> "something else")
-      await(service.subscribeToPPNS(clientId, apiContext, apiVersion, subscriptionFieldsId, localFieldDefns, localFields)) shouldBe (())
+      await(service.subscribeToPPNS(clientId, apiContext, apiVersion, localFieldDefns, localFields)) shouldBe (())
 
       verify(mockPPNSConnector, never).ensureBoxIsCreated(*, any[ClientId])(*)
     }
@@ -88,16 +87,16 @@ class PushPullNotificationServiceSpec extends AsyncHmrcSpec with SubscriptionFie
       when(mockPPNSConnector.ensureBoxIsCreated(*, any[ClientId])(*)).thenReturn(failed(new RuntimeException))
 
       intercept[RuntimeException] {
-        await(service.subscribeToPPNS(clientId, apiContext, apiVersion, subscriptionFieldsId, fieldDefns, fields))
+        await(service.subscribeToPPNS(clientId, apiContext, apiVersion, fieldDefns, fields))
       }
     }
 
     "fail when subscribe to box fails" in new Setup {
       when(mockPPNSConnector.ensureBoxIsCreated((*), any[ClientId])(*)).thenReturn(successful(boxId))
-      when(mockPPNSConnector.subscribe(subscriptionFieldsId,boxId,callbackUrl)(hc)).thenReturn(failed(new RuntimeException))
+      when(mockPPNSConnector.subscribe(boxId, callbackUrl)(hc)).thenReturn(failed(new RuntimeException))
 
       intercept[RuntimeException] {
-        await(service.subscribeToPPNS(clientId, apiContext, apiVersion, subscriptionFieldsId, fieldDefns, fields))
+        await(service.subscribeToPPNS(clientId, apiContext, apiVersion, fieldDefns, fields))
       }
     }
   }

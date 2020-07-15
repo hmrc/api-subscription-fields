@@ -17,20 +17,19 @@
 package uk.gov.hmrc.apisubscriptionfields.connector
 
 import javax.inject.{Inject, Singleton}
+import uk.gov.hmrc.apisubscriptionfields.config.ApplicationConfig
+import uk.gov.hmrc.apisubscriptionfields.model.{BoxId, ClientId}
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
 import uk.gov.hmrc.play.http.metrics._
-import uk.gov.hmrc.apisubscriptionfields.config.ApplicationConfig
+
 import scala.concurrent.{ExecutionContext, Future}
-import uk.gov.hmrc.apisubscriptionfields.model.ClientId
-import uk.gov.hmrc.apisubscriptionfields.model.BoxId
-import uk.gov.hmrc.http.HeaderCarrier
 import scala.util.control.NonFatal
-import uk.gov.hmrc.apisubscriptionfields.model.SubscriptionFieldsId
 
 @Singleton
 class PushPullNotificationServiceConnector @Inject()(http: HttpClient, appConfig: ApplicationConfig, val apiMetrics: ApiMetrics)
                                                     (implicit ec: ExecutionContext) extends RecordMetrics {
-  import  uk.gov.hmrc.apisubscriptionfields.connector.JsonFormatters._
+  import uk.gov.hmrc.apisubscriptionfields.connector.JsonFormatters._
 
   val api = API("api-subscription-fields")
 
@@ -46,8 +45,8 @@ class PushPullNotificationServiceConnector @Inject()(http: HttpClient, appConfig
     }
   }
 
-  def subscribe(subscriberFieldsId: SubscriptionFieldsId, boxId: BoxId, callbackUrl: String)(implicit hc: HeaderCarrier): Future[Unit] = {
-    val payload = UpdateSubscriberRequest(SubscriberRequest(callbackUrl, "API_PUSH_SUBSCRIBER", Some(subscriberFieldsId)))
+  def subscribe(boxId: BoxId, callbackUrl: String)(implicit hc: HeaderCarrier): Future[Unit] = {
+    val payload = UpdateSubscriberRequest(SubscriberRequest(callbackUrl, "API_PUSH_SUBSCRIBER"))
 
     http.PUT[UpdateSubscriberRequest, UpdateSubscriberResponse](s"$externalServiceUri/box/${boxId.value.toString}/subscriber", payload)
     .map(_ => ())

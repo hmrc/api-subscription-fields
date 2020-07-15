@@ -22,8 +22,8 @@ private[connector] case class CreateBoxRequest(boxName: String, clientId: Client
 
 private[connector] case class CreateBoxResponse(boxId: BoxId)
 
-private[connector] case class SubscribersRequest(callBackUrl: String, subscriberType: String, subscriberId: Option[SubscriptionFieldsId] = None)
+private[connector] case class SubscriberRequest(callBackUrl: String, subscriberType: String, subscriberId: Option[SubscriptionFieldsId] = None)
 
-private[connector] case class UpdateSubscribersRequest(subscribers: List[SubscribersRequest])
+private[connector] case class UpdateSubscriberRequest(subscriber: SubscriberRequest)
 
-private[connector] case class UpdateSubscribersResponse(boxId: BoxId)
+private[connector] case class UpdateSubscriberResponse(boxId: BoxId)

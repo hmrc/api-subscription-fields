@@ -105,7 +105,7 @@ class PushPullNotificationServiceConnectorSpec
 
     "send proper request to subscribe" in new Setup {
       val callbackUrl = "my-callback"
-      val updateRequest: UpdateSubscriberRequest = UpdateSubscriberRequest(SubscriberRequest(callbackUrl, "API_PUSH_SUBSCRIBER", Some(subscriptionFieldsId)))
+      val updateRequest: UpdateSubscriberRequest = UpdateSubscriberRequest(SubscriberRequest(callbackUrl, "API_PUSH_SUBSCRIBER"))
       val requestBody = Json.stringify(Json.toJson(updateRequest))
       val response: UpdateSubscriberResponse = UpdateSubscriberResponse(boxId)
 
@@ -119,8 +119,8 @@ class PushPullNotificationServiceConnectorSpec
 
       implicit val hc: HeaderCarrier = HeaderCarrier()
 
-      val ret = await(connector.subscribe(subscriptionFieldsId, boxId, callbackUrl))
-      ret shouldBe (())
+      val ret = await(connector.subscribe(boxId, callbackUrl))
+      ret shouldBe ()
 
       wireMockServer.verify(
         putRequestedFor(urlPathEqualTo(path))

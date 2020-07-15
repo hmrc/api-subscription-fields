@@ -24,7 +24,7 @@ import Types._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import scala.concurrent.Future.{successful}
+import scala.concurrent.Future.successful
 import cats.data.NonEmptyList
 import uk.gov.hmrc.apisubscriptionfields.repository.SubscriptionFieldsRepository
 import uk.gov.hmrc.http.HeaderCarrier
@@ -55,7 +55,7 @@ class SubscriptionFieldsService @Inject() (
 
     for {
       result  <- repository.saveAtomic(subscriptionFields)
-      _       <- pushPullNotificationService.subscribeToPPNS(clientId, apiContext, apiVersion, subscriptionFieldsId, fieldDefinitions, fields)
+      _       <- pushPullNotificationService.subscribeToPPNS(clientId, apiContext, apiVersion, fieldDefinitions, fields)
     } yield SuccessfulSubsFieldsUpsertResponse(result._1, result._2)
   }
 

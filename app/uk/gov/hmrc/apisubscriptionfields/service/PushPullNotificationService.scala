@@ -27,25 +27,31 @@ import scala.concurrent.ExecutionContext
 import uk.gov.hmrc.http.HeaderCarrier
 
 @Singleton
-class PushPullNotificationService @Inject() (ppnsConnector: PushPullNotificationServiceConnector)(implicit ec: ExecutionContext) {
+class PushPullNotificationService @Inject()(ppnsConnector: PushPullNotificationServiceConnector)(implicit ec: ExecutionContext) {
   def makeBoxName(apiContext: ApiContext, apiVersion: ApiVersion, fieldDefinition: FieldDefinition) : String = {
     val separator = "##"
     s"${apiContext.value}${separator}${apiVersion.value}${separator}${fieldDefinition.name.value}"
   }
 
-  private def subscribeToPPNS(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion, subscriptionFieldsId: SubscriptionFieldsId, fieldDefinition: FieldDefinition, oFieldValue: Option[FieldValue])(implicit hc: HeaderCarrier) = {
+  private def subscribeToPPNS(clientId: ClientId,
+                              apiContext: ApiContext,
+                              apiVersion: ApiVersion,
+                              fieldDefinition: FieldDefinition,
+                              oFieldValue: Option[FieldValue])
+                             (implicit hc: HeaderCarrier) = {
     for {
       boxId <- ppnsConnector.ensureBoxIsCreated(makeBoxName(apiContext, apiVersion, fieldDefinition), clientId)
-      _ <- oFieldValue.fold(Future.successful(()))(fieldValue => ppnsConnector.subscribe(subscriptionFieldsId, boxId, fieldValue))
+      _ <- oFieldValue.fold(Future.successful(()))(fieldValue => ppnsConnector.subscribe(boxId, fieldValue))
     } yield ()
   }
 
-  def subscribeToPPNS(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion, subscriptionFieldsId: SubscriptionFieldsId, fieldDefinitions: NEL[FieldDefinition], fields: Fields)(implicit hc: HeaderCarrier): Future[Unit] = {
+  def subscribeToPPNS(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion, fieldDefinitions: NEL[FieldDefinition], fields: Fields)
+                     (implicit hc: HeaderCarrier): Future[Unit] = {
     val subscriptionResponses : List[Future[Unit]] =
       fieldDefinitions
       .filter(_.`type` == FieldDefinitionType.PPNS_FIELD )
       .map { fieldDefn =>
-        subscribeToPPNS(clientId, apiContext, apiVersion, subscriptionFieldsId, fieldDefn, fields.get(fieldDefn.name).filterNot(_.isEmpty))
+        subscribeToPPNS(clientId, apiContext, apiVersion, fieldDefn, fields.get(fieldDefn.name).filterNot(_.isEmpty))
       }
 
     Future.sequence(subscriptionResponses).map(_ => ())

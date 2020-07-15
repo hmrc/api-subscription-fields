@@ -17,6 +17,7 @@
 package uk.gov.hmrc.apisubscriptionfields.connector
 
 import java.{util => ju}
+
 import org.scalatest.BeforeAndAfterEach
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.Application
@@ -28,9 +29,10 @@ import play.api.libs.json.Json
 import play.api.http.Status.OK
 import com.github.tomakehurst.wiremock.client.WireMock
 import org.scalatest.BeforeAndAfterAll
+import play.api.http.HeaderNames.{CONTENT_TYPE, USER_AGENT}
 import uk.gov.hmrc.apisubscriptionfields.AsyncHmrcSpec
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.apisubscriptionfields.model.{SubscriptionFieldsId, BoxId}
+import uk.gov.hmrc.apisubscriptionfields.model.{BoxId, SubscriptionFieldsId}
 import uk.gov.hmrc.apisubscriptionfields.model.ClientId
 
 class PushPullNotificationServiceConnectorSpec
@@ -85,7 +87,7 @@ class PushPullNotificationServiceConnectorSpec
       wireMockServer.stubFor(
         put(path).withRequestBody(equalTo(requestBody))
         .willReturn(aResponse()
-          .withHeader("Content-Type", "application/json")
+          .withHeader(CONTENT_TYPE, "application/json")
           .withBody(Json.stringify(Json.toJson(response)))
           .withStatus(OK)))
 
@@ -96,22 +98,22 @@ class PushPullNotificationServiceConnectorSpec
 
       wireMockServer.verify(
         putRequestedFor(urlPathEqualTo(path))
-        .withHeader("Content-Type", equalTo("application/json"))
-        .withHeader("User-Agent", equalTo("api-subscription-fields"))
+        .withHeader(CONTENT_TYPE, equalTo("application/json"))
+        .withHeader(USER_AGENT, equalTo("api-subscription-fields"))
       )
     }
 
     "send proper request to subscribe" in new Setup {
       val callbackUrl = "my-callback"
-      val updateRequest: UpdateSubscribersRequest = UpdateSubscribersRequest(List(SubscribersRequest(callbackUrl, "API_PUSH_SUBSCRIBER", Some(subscriptionFieldsId))))
+      val updateRequest: UpdateSubscriberRequest = UpdateSubscriberRequest(SubscriberRequest(callbackUrl, "API_PUSH_SUBSCRIBER", Some(subscriptionFieldsId)))
       val requestBody = Json.stringify(Json.toJson(updateRequest))
-      val response: UpdateSubscribersResponse = UpdateSubscribersResponse(boxId)
+      val response: UpdateSubscriberResponse = UpdateSubscriberResponse(boxId)
 
-      val path = s"/box/${boxId.value}/subscribers"
+      val path = s"/box/${boxId.value}/subscriber"
       wireMockServer.stubFor(
         put(path).withRequestBody(equalTo(requestBody))
         .willReturn(aResponse()
-          .withHeader("Content-Type", "application/json")
+          .withHeader(CONTENT_TYPE, "application/json")
           .withBody(Json.stringify(Json.toJson(response)))
           .withStatus(OK)))
 
@@ -122,8 +124,8 @@ class PushPullNotificationServiceConnectorSpec
 
       wireMockServer.verify(
         putRequestedFor(urlPathEqualTo(path))
-        .withHeader("Content-Type", equalTo("application/json"))
-        .withHeader("User-Agent", equalTo("api-subscription-fields"))
+        .withHeader(CONTENT_TYPE, equalTo("application/json"))
+        .withHeader(USER_AGENT, equalTo("api-subscription-fields"))
       )
     }
   }

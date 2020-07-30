@@ -27,7 +27,7 @@ import scala.language.postfixOps
 
 val compile = Seq(
   "uk.gov.hmrc" %% "bootstrap-play-26" % "1.4.0",
-  "uk.gov.hmrc" %% "simple-reactivemongo" % "7.22.0-play-26",
+  "uk.gov.hmrc" %% "simple-reactivemongo" % "7.30.0-play-26",
   "org.julienrf" %% "play-json-derived-codecs" % "6.0.0",
   "com.typesafe.play" %% "play-json" % "2.7.1",
   "uk.gov.hmrc" %% "http-metrics" % "1.10.0",
@@ -49,7 +49,7 @@ val overrides: Seq[ModuleID] = Seq(
 )
 
 def test(scope: String = "test,acceptance") = Seq(
-  "uk.gov.hmrc" %% "reactivemongo-test" % "4.16.0-play-26" % scope,
+  "uk.gov.hmrc" %% "reactivemongo-test" % "4.21.0-play-26" % scope,
   "org.scalatestplus.play" %% "scalatestplus-play" % "3.1.3" % scope,
   "org.mockito" %% "mockito-scala-scalatest" % "1.14.4" % scope,
   "org.pegdown" % "pegdown" % "1.6.0" % scope,

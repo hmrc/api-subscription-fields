@@ -56,7 +56,6 @@ def test(scope: String = "test,acceptance") = Seq(
   "org.pegdown" % "pegdown" % "1.6.0" % scope,
   "com.typesafe.play" %% "play-test" % play.core.PlayVersion.current % scope,
   "com.github.tomakehurst" % "wiremock-jre8" % "2.26.3" % scope
-  // "org.scalatest" % "scalatest-funspec" % "3.0.8" % scope
 )
 
 val appName = "api-subscription-fields"

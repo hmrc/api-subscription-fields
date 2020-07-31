@@ -33,7 +33,8 @@ val compile = Seq(
   "uk.gov.hmrc" %% "http-metrics" % "1.10.0",
   "org.typelevel" %% "cats-core" % "2.1.0",
   "eu.timepit" %% "refined"                 % "0.9.13",
-  "be.venneborg" %% "play26-refined" % "0.5.0"
+  "be.venneborg" %% "play26-refined" % "0.5.0",
+  "commons-validator" % "commons-validator" % "1.6"
 )
 
 // we need to override the akka version for now as newer versions are not compatible with reactivemongo
@@ -55,6 +56,7 @@ def test(scope: String = "test,acceptance") = Seq(
   "org.pegdown" % "pegdown" % "1.6.0" % scope,
   "com.typesafe.play" %% "play-test" % play.core.PlayVersion.current % scope,
   "com.github.tomakehurst" % "wiremock-jre8" % "2.26.3" % scope
+  // "org.scalatest" % "scalatest-funspec" % "3.0.8" % scope
 )
 
 val appName = "api-subscription-fields"

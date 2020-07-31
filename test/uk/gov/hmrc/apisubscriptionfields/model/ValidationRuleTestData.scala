@@ -29,6 +29,6 @@ trait ValidationRuleTestData {
   val atLeastTenLongRule: ValidationRule = RegexValidationRule("""^.{10}.*$""")
 
   val validUrl = "https://www.example.com/here/and/there"
-  val invalidUrls = List("www.example.com", "ftp://example.com/abc")
+  val invalidUrls = List("www.example.com", "ftp://example.com/abc", "https://www example.com", "https://www&example.com", "https://www,example.com")
 
 }

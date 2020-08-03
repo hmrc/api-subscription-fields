@@ -47,6 +47,10 @@ class UrlValidationRuleSpec extends FunSpec with ValidationRuleTestData with Mat
     UrlValidationRule.validate(validUrl) shouldBe true
   }
 
+  describe("pass for localhost") {
+    UrlValidationRule.validate(localValidUrl) shouldBe true
+  }
+
   describe("return true when the value is blank") {
     UrlValidationRule.validate("") shouldBe true
   }

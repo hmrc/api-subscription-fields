@@ -33,8 +33,13 @@ case class RegexValidationRule(regex: RegexExpr) extends ValidationRule {
   def validateAgainstRule(value: FieldValue): Boolean = value.matches(regex.value)
 }
 
+// Taken from: https://stackoverflow.com/a/5078838
 case object UrlValidationRule extends ValidationRule {
-  def validateAgainstRule(value: FieldValue): Boolean = refineV[NonFtpUrl](value).isRight
+  def validateAgainstRule(value: FieldValue): Boolean = {
+    val schemes = Array("http","https")
+    val urlValidator = new org.apache.commons.validator.routines.UrlValidator(schemes)
+    urlValidator.isValid(value)
+  }
 }
 
 case class ValidationGroup(errorMessage: String, rules: NEL[ValidationRule])

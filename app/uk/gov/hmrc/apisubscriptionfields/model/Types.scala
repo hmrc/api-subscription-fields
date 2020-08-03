@@ -23,7 +23,6 @@ import eu.timepit.refined.boolean._
 
 object Types {
   type RegexExpr = String Refined Regex
-  type NonFtpUrl = Url And Not[StartsWith[W.`"ftp"`.T]]
 
   type FieldNameRegex = MatchesRegex[W.`"^[a-zA-Z]+$"`.T]
   type FieldName = Refined[String,FieldNameRegex]

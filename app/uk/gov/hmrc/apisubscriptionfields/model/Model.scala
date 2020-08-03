@@ -18,6 +18,7 @@ package uk.gov.hmrc.apisubscriptionfields.model
 
 import cats.data.{NonEmptyList => NEL}
 import uk.gov.hmrc.apisubscriptionfields.model.FieldDefinitionType.FieldDefinitionType
+import org.apache.commons.validator.routines.UrlValidator
 import eu.timepit.refined._
 import Types._
 
@@ -37,7 +38,7 @@ case class RegexValidationRule(regex: RegexExpr) extends ValidationRule {
 case object UrlValidationRule extends ValidationRule {
   def validateAgainstRule(value: FieldValue): Boolean = {
     val schemes = Array("http","https")
-    val urlValidator = new org.apache.commons.validator.routines.UrlValidator(schemes)
+    val urlValidator = new org.apache.commons.validator.routines.UrlValidator(schemes, UrlValidator.ALLOW_LOCAL_URLS)
     urlValidator.isValid(value)
   }
 }

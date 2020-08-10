@@ -61,8 +61,9 @@ class PushPullNotificationServiceConnector @Inject()(http: HttpClient, appConfig
     val payload = UpdateCallBackUrlRequest(callbackUrl)
 
     http.PUT[UpdateCallBackUrlRequest, UpdateCallBackUrlResponse](s"$externalServiceUri/box/${boxId.value.toString}/callback", payload)
-    .map(response => 
-    if(response.successful) PPNSCallBackUrlSuccessResponse else response.errorMessage.fold(PPNSCallBackUrlFailedResponse("Unknown Error"))(PPNSCallBackUrlFailedResponse(_))
+    .map(response =>
+      if(response.successful) PPNSCallBackUrlSuccessResponse
+      else response.errorMessage.fold(PPNSCallBackUrlFailedResponse("Unknown Error"))(PPNSCallBackUrlFailedResponse)
     ).recover {
       case NonFatal(e) => throw new RuntimeException(s"Unexpected response from $externalServiceUri: ${e.getMessage}")
     }

@@ -126,11 +126,12 @@ class SubscriptionFieldsServiceSpec extends AsyncHmrcSpec with SubscriptionField
   "upsert" should {
     val fields: Types.Fields = SubscriptionFieldsMatchRegexValidation
     val subscriptionFields: SubscriptionFields = subsFieldsFor(fields)
-      val ppnsResponse: Future[Unit] = successful(())
+    val ppnsResponse = successful(PPNSCallBackUrlSuccessResponse)
 
     "return false when updating an existing `api subscription fields" in new Setup {
       when(mockApiFieldDefinitionsService.get(FakeContext, FakeVersion)).thenReturn(successful(Some(FakeApiFieldDefinitionsResponseWithRegex)))
-      when(mockPushPullNotificationService.subscribeToPPNS(eqTo(FakeClientId), eqTo(FakeContext), eqTo(FakeVersion), any, eqTo(fields))(any)).thenReturn(ppnsResponse)
+      when(mockPushPullNotificationService.subscribeToPPNS(eqTo(FakeClientId), eqTo(FakeContext), eqTo(FakeVersion), any, any[FieldDefinition])(any))
+        .thenReturn(ppnsResponse)
       when(mockSubscriptionFieldsRepository.saveAtomic(*)).thenReturn(successful((subscriptionFields, false)))
 
       val result = await(service.upsert(FakeClientId, FakeContext, FakeVersion, SubscriptionFieldsMatchRegexValidation))
@@ -140,7 +141,8 @@ class SubscriptionFieldsServiceSpec extends AsyncHmrcSpec with SubscriptionField
 
     "return true when creating a new api subscription fields" in new Setup {
       when(mockApiFieldDefinitionsService.get(FakeContext, FakeVersion)).thenReturn(successful(Some(FakeApiFieldDefinitionsResponseWithRegex)))
-      when(mockPushPullNotificationService.subscribeToPPNS(eqTo(FakeClientId), eqTo(FakeContext), eqTo(FakeVersion), any, eqTo(fields))(any)).thenReturn(ppnsResponse)
+      when(mockPushPullNotificationService.subscribeToPPNS(eqTo(FakeClientId), eqTo(FakeContext), eqTo(FakeVersion), any, any[FieldDefinition])(any))
+        .thenReturn(ppnsResponse)
       when(mockSubscriptionFieldsRepository.saveAtomic(*)).thenReturn(successful((subscriptionFields, true)))
 
       val result = await(service.upsert(FakeClientId, FakeContext, FakeVersion, SubscriptionFieldsMatchRegexValidation))

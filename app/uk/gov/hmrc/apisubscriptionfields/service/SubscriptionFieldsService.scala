@@ -50,27 +50,31 @@ class SubscriptionFieldsService @Inject() (
     }
   }
 
-  private def upsert(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion, fields: Fields, fieldDefinitions: NonEmptyList[FieldDefinition])(implicit hc: HeaderCarrier): Future[SuccessfulSubsFieldsUpsertResponse] = {
+  private def upsertSubscriptionFields(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion, fields: Fields)
+                                      (implicit hc: HeaderCarrier): Future[SuccessfulSubsFieldsUpsertResponse] = {
     val subscriptionFieldsId = SubscriptionFieldsId(uuidCreator.uuid())
     val subscriptionFields = SubscriptionFields(clientId, apiContext, apiVersion, subscriptionFieldsId, fields)
 
-    for {
-      result  <- repository.saveAtomic(subscriptionFields)
-//      _       <- pushPullNotificationService.subscribeToPPNS(clientId, apiContext, apiVersion, fieldDefinitions, fields)
-    } yield SuccessfulSubsFieldsUpsertResponse(result._1, result._2)
+    repository.saveAtomic(subscriptionFields)
+      .map(result => SuccessfulSubsFieldsUpsertResponse(result._1, result._2))
   }
 
-  def handlePPNS(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion, fieldDefinitions: NEL[FieldDefinition], fields: Fields)(implicit hc: HeaderCarrier): Future[SubsFieldsUpsertResponse] ={
-    val ppnsField: Option[FieldDefinition] = fieldDefinitions.find(_.`type` == FieldDefinitionType.PPNS_FIELD)
+  def handlePPNS(clientId: ClientId,
+                 apiContext: ApiContext,
+                 apiVersion: ApiVersion,
+                 fieldDefinitions: NEL[FieldDefinition],
+                 fields: Fields)(implicit hc: HeaderCarrier): Future[SubsFieldsUpsertResponse] = {
+    val ppnsFieldDefinition: Option[FieldDefinition] = fieldDefinitions.find(_.`type` == FieldDefinitionType.PPNS_FIELD)
 
-    ppnsField.fold(upsert(clientId, apiContext, apiVersion, fields, fieldDefinitions))
-    { fieldDefn => 
-      val callBackUrl= fields.get(fieldDefn.name).filterNot(_.isEmpty)
-        callBackUrl.fold[Future[PPNSCallBackUrlValidationResponse]](Future.successful(PPNSCallBackUrlSuccessResponse))(
-         pushPullNotificationService.subscribeToPPNS(clientId, apiContext, apiVersion, _, fieldDefn)
-        ).flatMap {
-        case PPNSCallBackUrlSuccessResponse =>  upsert(clientId, apiContext, apiVersion, fields, fieldDefinitions)
-        case PPNSCallBackUrlFailedResponse(error) => Future.successful(FailedPPNSSubsFieldsUpsertResponse(Map(fieldDefn.name -> error)))
+    ppnsFieldDefinition.fold[Future[SubsFieldsUpsertResponse]](upsertSubscriptionFields(clientId, apiContext, apiVersion, fields))
+    { fieldDefinition =>
+      val callBackUrl: Option[FieldValue] = fields.get(fieldDefinition.name).filterNot(_.isEmpty)
+      val callBackResponse: Future[PPNSCallBackUrlValidationResponse] =
+        callBackUrl.fold[Future[PPNSCallBackUrlValidationResponse]](Future.successful(PPNSCallBackUrlSuccessResponse))(pushPullNotificationService.subscribeToPPNS(clientId, apiContext, apiVersion, _, fieldDefinition))
+
+      callBackResponse.flatMap {
+        case PPNSCallBackUrlSuccessResponse =>  upsertSubscriptionFields(clientId, apiContext, apiVersion, fields)
+        case PPNSCallBackUrlFailedResponse(error) => Future.successful(FailedPPNSSubsFieldsUpsertResponse(Map(fieldDefinition.name -> error)))
       }
     }
 

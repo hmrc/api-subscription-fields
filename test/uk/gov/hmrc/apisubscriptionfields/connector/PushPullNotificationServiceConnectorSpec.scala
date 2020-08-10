@@ -32,8 +32,7 @@ import org.scalatest.BeforeAndAfterAll
 import play.api.http.HeaderNames.{CONTENT_TYPE, USER_AGENT}
 import uk.gov.hmrc.apisubscriptionfields.AsyncHmrcSpec
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.apisubscriptionfields.model.{BoxId, SubscriptionFieldsId}
-import uk.gov.hmrc.apisubscriptionfields.model.ClientId
+import uk.gov.hmrc.apisubscriptionfields.model._
 
 class PushPullNotificationServiceConnectorSpec
     extends AsyncHmrcSpec
@@ -76,57 +75,97 @@ class PushPullNotificationServiceConnectorSpec
     val boxId = BoxId(ju.UUID.randomUUID())
 
     val connector = app.injector.instanceOf[PushPullNotificationServiceConnector]
-  }
 
-  "PPNS Connector" should {
-    "send proper request to post box" in new Setup {
-      val requestBody = Json.stringify(Json.toJson(CreateBoxRequest(boxName, clientId)))
-      val response: CreateBoxResponse = CreateBoxResponse(boxId)
-
-      val path = "/box"
-      wireMockServer.stubFor(
+    def primeStub(path: String, requestBody: String, responseBody: String){
+        wireMockServer.stubFor(
         put(path).withRequestBody(equalTo(requestBody))
         .willReturn(aResponse()
           .withHeader(CONTENT_TYPE, "application/json")
-          .withBody(Json.stringify(Json.toJson(response)))
+          .withBody(responseBody)
           .withStatus(OK)))
+    }
 
-      implicit val hc: HeaderCarrier = HeaderCarrier()
-
-      val ret = await(connector.ensureBoxIsCreated(boxName, clientId))
-      ret shouldBe (boxId)
-
-      wireMockServer.verify(
+    def verifyMock(path: String){
+        wireMockServer.verify(
         putRequestedFor(urlPathEqualTo(path))
         .withHeader(CONTENT_TYPE, equalTo("application/json"))
         .withHeader(USER_AGENT, equalTo("api-subscription-fields"))
       )
     }
+          implicit val hc: HeaderCarrier = HeaderCarrier()
+  }
+
+  "PPNS Connector" should {
+    "send proper request to post box" in new Setup {
+      val requestBody = Json.stringify(Json.toJson(CreateBoxRequest(boxName, clientId)))
+      val responseBody = Json.stringify(Json.toJson(CreateBoxResponse(boxId)))
+
+      val path = "/box"
+      primeStub(path, requestBody, responseBody)
+
+      val ret = await(connector.ensureBoxIsCreated(boxName, clientId))
+      ret shouldBe (boxId)
+
+     verifyMock(path)
+    }
 
     "send proper request to subscribe" in new Setup {
       val callbackUrl = "my-callback"
-      val updateRequest: UpdateSubscriberRequest = UpdateSubscriberRequest(SubscriberRequest(callbackUrl, "API_PUSH_SUBSCRIBER"))
-      val requestBody = Json.stringify(Json.toJson(updateRequest))
-      val response: UpdateSubscriberResponse = UpdateSubscriberResponse(boxId)
+      val requestBody = Json.stringify(Json.toJson(UpdateSubscriberRequest(SubscriberRequest(callbackUrl, "API_PUSH_SUBSCRIBER"))))
+      val responseBody = Json.stringify(Json.toJson(UpdateSubscriberResponse(boxId)))
 
       val path = s"/box/${boxId.value}/subscriber"
-      wireMockServer.stubFor(
-        put(path).withRequestBody(equalTo(requestBody))
-        .willReturn(aResponse()
-          .withHeader(CONTENT_TYPE, "application/json")
-          .withBody(Json.stringify(Json.toJson(response)))
-          .withStatus(OK)))
-
-      implicit val hc: HeaderCarrier = HeaderCarrier()
+     primeStub(path, requestBody, responseBody)
 
       val ret = await(connector.subscribe(boxId, callbackUrl))
       ret shouldBe ()
 
-      wireMockServer.verify(
-        putRequestedFor(urlPathEqualTo(path))
-        .withHeader(CONTENT_TYPE, equalTo("application/json"))
-        .withHeader(USER_AGENT, equalTo("api-subscription-fields"))
-      )
+      verifyMock(path)
+    }
+    
+  
+
+     "send proper request to update callback and map response on success" in new Setup {
+      val callbackUrl = "my-callback"
+      val requestBody = Json.stringify(Json.toJson(UpdateCallBackUrlRequest(callbackUrl)))
+      val responseBody = Json.stringify(Json.toJson(UpdateCallBackUrlResponse(true, None)))
+
+      val path = s"/box/${boxId.value}/callback"
+     primeStub(path, requestBody, responseBody)
+
+      val ret: PPNSCallBackUrlValidationResponse = await(connector.updateCallBackUrl(boxId, callbackUrl))
+      ret shouldBe PPNSCallBackUrlSuccessResponse
+
+    verifyMock(path)
+    }
+
+
+     "send proper request to update callback and map response on failure" in new Setup {
+      val callbackUrl = "my-callback"
+      val requestBody = Json.stringify(Json.toJson( UpdateCallBackUrlRequest(callbackUrl)))
+      val responseBody = Json.stringify(Json.toJson(UpdateCallBackUrlResponse(false, Some("some error"))))
+
+      val path = s"/box/${boxId.value}/callback"
+      primeStub(path, requestBody, responseBody)
+
+      val ret: PPNSCallBackUrlValidationResponse = await(connector.updateCallBackUrl(boxId, callbackUrl))
+      ret shouldBe PPNSCallBackUrlFailedResponse("some error")
+
+     verifyMock(path)
+    }
+
+    "send proper request to update callback and map response on failure with Unknown Error" in new Setup {
+      val callbackUrl = "my-callback"
+      val requestBody = Json.stringify(Json.toJson(UpdateCallBackUrlRequest(callbackUrl)))
+      val responseBody = Json.stringify(Json.toJson(UpdateCallBackUrlResponse(false, None)))
+
+      val path = s"/box/${boxId.value}/callback"
+      primeStub(path, requestBody, responseBody)
+
+      val ret: PPNSCallBackUrlValidationResponse = await(connector.updateCallBackUrl(boxId, callbackUrl))
+      ret shouldBe PPNSCallBackUrlFailedResponse("Unknown Error")
+
+     verifyMock(path)
     }
   }
 }

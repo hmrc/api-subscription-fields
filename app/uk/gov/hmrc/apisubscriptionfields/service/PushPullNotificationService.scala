@@ -21,8 +21,6 @@ import javax.inject.{Inject, Singleton}
 import uk.gov.hmrc.apisubscriptionfields.model.FieldDefinition
 import scala.concurrent.Future
 import uk.gov.hmrc.apisubscriptionfields.model._
-import uk.gov.hmrc.apisubscriptionfields.model.Types._
-import cats.data.{NonEmptyList => NEL}
 import scala.concurrent.ExecutionContext
 import uk.gov.hmrc.http.HeaderCarrier
 
@@ -33,27 +31,27 @@ class PushPullNotificationService @Inject()(ppnsConnector: PushPullNotificationS
     s"${apiContext.value}${separator}${apiVersion.value}${separator}${fieldDefinition.name.value}"
   }
 
-  private def subscribeToPPNS(clientId: ClientId,
+  def subscribeToPPNS(clientId: ClientId,
                               apiContext: ApiContext,
                               apiVersion: ApiVersion,
-                              fieldDefinition: FieldDefinition,
-                              oFieldValue: Option[FieldValue])
-                             (implicit hc: HeaderCarrier) = {
+                              callBackUrl: String,
+                              fieldDefinition: FieldDefinition)
+                             (implicit hc: HeaderCarrier): Future[PPNSCallBackUrlValidationResponse] = {
     for {
       boxId <- ppnsConnector.ensureBoxIsCreated(makeBoxName(apiContext, apiVersion, fieldDefinition), clientId)
-      _ <- oFieldValue.fold(Future.successful(()))(fieldValue => ppnsConnector.subscribe(boxId, fieldValue))
-    } yield ()
+      result <- ppnsConnector.updateCallBackUrl(boxId, callBackUrl)
+    } yield result
   }
 
-  def subscribeToPPNS(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion, fieldDefinitions: NEL[FieldDefinition], fields: Fields)
-                     (implicit hc: HeaderCarrier): Future[Unit] = {
-    val subscriptionResponses : List[Future[Unit]] =
-      fieldDefinitions
-      .filter(_.`type` == FieldDefinitionType.PPNS_FIELD )
-      .map { fieldDefn =>
-        subscribeToPPNS(clientId, apiContext, apiVersion, fieldDefn, fields.get(fieldDefn.name).filterNot(_.isEmpty))
-      }
+  // def subscribeToPPNS(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion, fieldDefinitions: NEL[FieldDefinition], fields: Fields)
+  //                    (implicit hc: HeaderCarrier): Future[PPNSCallBackUrlValidationResponse] = {
+  //   val subscriptionResponses : List[Future[Unit]] =
+  //     fieldDefinitions
+  //     .filter(_.`type` == FieldDefinitionType.PPNS_FIELD )
+  //     .map { fieldDefn =>
+  //       subscribeToPPNS(clientId, apiContext, apiVersion, fieldDefn, fields.get(fieldDefn.name).filterNot(_.isEmpty))
+  //     }
 
-    Future.sequence(subscriptionResponses).map(_ => ())
-  }
+  //   Future.sequence(subscriptionResponses).map(_ => ())
+  // }
 }

@@ -29,6 +29,8 @@ trait JsonFormatters {
   implicit val subscriberRequestJF = Json.format[SubscriberRequest]
   implicit val updateSubscriberRequestJF = Json.format[UpdateSubscriberRequest]
   implicit val updateSubscriberResponseJF = Json.format[UpdateSubscriberResponse]
+  implicit val updateCallBackUrlRequestJF = Json.format[UpdateCallBackUrlRequest]
+  implicit val updateCallBackUrlResponseJF = Json.format[UpdateCallBackUrlResponse]
 }
 
 object JsonFormatters extends JsonFormatters

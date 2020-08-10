@@ -28,6 +28,7 @@ import scala.concurrent.Future.successful
 import cats.data.NonEmptyList
 import uk.gov.hmrc.apisubscriptionfields.repository.SubscriptionFieldsRepository
 import uk.gov.hmrc.http.HeaderCarrier
+import cats.data.{NonEmptyList => NEL}
 
 @Singleton
 class UUIDCreator {
@@ -55,8 +56,24 @@ class SubscriptionFieldsService @Inject() (
 
     for {
       result  <- repository.saveAtomic(subscriptionFields)
-      _       <- pushPullNotificationService.subscribeToPPNS(clientId, apiContext, apiVersion, fieldDefinitions, fields)
+//      _       <- pushPullNotificationService.subscribeToPPNS(clientId, apiContext, apiVersion, fieldDefinitions, fields)
     } yield SuccessfulSubsFieldsUpsertResponse(result._1, result._2)
+  }
+
+  def handlePPNS(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion, fieldDefinitions: NEL[FieldDefinition], fields: Fields)(implicit hc: HeaderCarrier): Future[SubsFieldsUpsertResponse] ={
+    val ppnsField: Option[FieldDefinition] = fieldDefinitions.find(_.`type` == FieldDefinitionType.PPNS_FIELD)
+
+    ppnsField.fold(upsert(clientId, apiContext, apiVersion, fields, fieldDefinitions))
+    { fieldDefn => 
+      val callBackUrl= fields.get(fieldDefn.name).filterNot(_.isEmpty)
+        callBackUrl.fold[Future[PPNSCallBackUrlValidationResponse]](Future.successful(PPNSCallBackUrlSuccessResponse))(
+         pushPullNotificationService.subscribeToPPNS(clientId, apiContext, apiVersion, _, fieldDefn)
+        ).flatMap {
+        case PPNSCallBackUrlSuccessResponse =>  upsert(clientId, apiContext, apiVersion, fields, fieldDefinitions)
+        case PPNSCallBackUrlFailedResponse(error) => Future.successful(FailedPPNSSubsFieldsUpsertResponse(Map(fieldDefn.name -> error)))
+      }
+    }
+
   }
 
   def upsert(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion, fields: Fields)(implicit hc: HeaderCarrier): Future[SubsFieldsUpsertResponse] = {
@@ -66,7 +83,7 @@ class SubscriptionFieldsService @Inject() (
       case None                   => successful(NotFoundSubsFieldsUpsertResponse)
       case Some(fieldDefinitions) => {
         validate(fields, fieldDefinitions) match {
-          case ValidSubsFieldValidationResponse                       => upsert(clientId, apiContext, apiVersion, fields, fieldDefinitions)
+          case ValidSubsFieldValidationResponse                       => handlePPNS(clientId, apiContext, apiVersion, fieldDefinitions, fields)
           case InvalidSubsFieldValidationResponse(fieldErrorMessages) => successful(FailedValidationSubsFieldsUpsertResponse(fieldErrorMessages))
         }
       }

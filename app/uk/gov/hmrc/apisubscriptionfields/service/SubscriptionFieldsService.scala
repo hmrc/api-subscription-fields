@@ -66,16 +66,18 @@ class SubscriptionFieldsService @Inject() (
                  fields: Fields)(implicit hc: HeaderCarrier): Future[SubsFieldsUpsertResponse] = {
     val ppnsFieldDefinition: Option[FieldDefinition] = fieldDefinitions.find(_.`type` == FieldDefinitionType.PPNS_FIELD)
 
-    ppnsFieldDefinition.fold[Future[SubsFieldsUpsertResponse]](upsertSubscriptionFields(clientId, apiContext, apiVersion, fields))
-    { fieldDefinition =>
-      val callBackUrl: Option[FieldValue] = fields.get(fieldDefinition.name).filterNot(_.isEmpty)
-      val callBackResponse: Future[PPNSCallBackUrlValidationResponse] =
-        callBackUrl.fold[Future[PPNSCallBackUrlValidationResponse]](Future.successful(PPNSCallBackUrlSuccessResponse))(pushPullNotificationService.subscribeToPPNS(clientId, apiContext, apiVersion, _, fieldDefinition))
-
-      callBackResponse.flatMap {
-        case PPNSCallBackUrlSuccessResponse =>  upsertSubscriptionFields(clientId, apiContext, apiVersion, fields)
-        case PPNSCallBackUrlFailedResponse(error) => Future.successful(FailedPPNSSubsFieldsUpsertResponse(Map(fieldDefinition.name -> error)))
-      }
+    ppnsFieldDefinition match {
+      case Some(fieldDefinition)   =>
+        val callBackUrl: Option[FieldValue] = fields.get(fieldDefinition.name).filterNot(_.isEmpty)
+        val callBackResponse: Future[PPNSCallBackUrlValidationResponse] = callBackUrl match {
+            case Some(fieldValue) => pushPullNotificationService.subscribeToPPNS(clientId, apiContext, apiVersion, fieldValue, fieldDefinition)
+            case None => Future.successful(PPNSCallBackUrlSuccessResponse)
+          }
+        callBackResponse.flatMap {
+          case PPNSCallBackUrlSuccessResponse =>  upsertSubscriptionFields(clientId, apiContext, apiVersion, fields)
+          case PPNSCallBackUrlFailedResponse(error) => Future.successful(FailedPPNSSubsFieldsUpsertResponse(Map(fieldDefinition.name -> error)))
+        }
+      case None =>  upsertSubscriptionFields(clientId, apiContext, apiVersion, fields)
     }
 
   }

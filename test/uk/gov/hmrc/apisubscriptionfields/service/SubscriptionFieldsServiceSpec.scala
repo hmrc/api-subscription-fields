@@ -126,28 +126,55 @@ class SubscriptionFieldsServiceSpec extends AsyncHmrcSpec with SubscriptionField
   "upsert" should {
     val fields: Types.Fields = SubscriptionFieldsMatchRegexValidation
     val subscriptionFields: SubscriptionFields = subsFieldsFor(fields)
-    val ppnsResponse = successful(PPNSCallBackUrlSuccessResponse)
+    val ppnsSuccessResponse = successful(PPNSCallBackUrlSuccessResponse)
+    val ppnsFailureResponse = successful(PPNSCallBackUrlFailedResponse("An Error Occurred"))
 
-    "return false when updating an existing `api subscription fields" in new Setup {
+    "return false when updating an existing `api subscription fields (no PPNS)" in new Setup {
       when(mockApiFieldDefinitionsService.get(FakeContext, FakeVersion)).thenReturn(successful(Some(FakeApiFieldDefinitionsResponseWithRegex)))
-      when(mockPushPullNotificationService.subscribeToPPNS(eqTo(FakeClientId), eqTo(FakeContext), eqTo(FakeVersion), any, any[FieldDefinition])(any))
-        .thenReturn(ppnsResponse)
       when(mockSubscriptionFieldsRepository.saveAtomic(*)).thenReturn(successful((subscriptionFields, false)))
 
       val result = await(service.upsert(FakeClientId, FakeContext, FakeVersion, SubscriptionFieldsMatchRegexValidation))
 
       result shouldBe (SuccessfulSubsFieldsUpsertResponse(SubscriptionFields(FakeClientId, FakeContext, FakeVersion, FakeFieldsId, fields), false))
+      verifyZeroInteractions(mockPushPullNotificationService)
+    }
+
+    "return false when updating an existing `api subscription fields (has PPNS)" in new Setup {
+      when(mockApiFieldDefinitionsService.get(FakeContext, FakeVersion)).thenReturn(successful(Some(FakeApiFieldDefinitionsResponsePPNSWithRegex)))
+      when(mockPushPullNotificationService.subscribeToPPNS(eqTo(FakeClientId), eqTo(FakeContext), eqTo(FakeVersion), any, any[FieldDefinition])(any))
+        .thenReturn(ppnsSuccessResponse)
+      when(mockSubscriptionFieldsRepository.saveAtomic(*)).thenReturn(successful((subscriptionFields, false)))
+
+      val result = await(service.upsert(FakeClientId, FakeContext, FakeVersion, SubscriptionFieldsMatchRegexValidationPPNS))
+
+      result shouldBe (SuccessfulSubsFieldsUpsertResponse(SubscriptionFields(FakeClientId, FakeContext, FakeVersion, FakeFieldsId, fields), false))
+
+      verify(mockPushPullNotificationService).subscribeToPPNS(eqTo(FakeClientId), eqTo(FakeContext), eqTo(FakeVersion), any, any[FieldDefinition])(any)
+
+    }
+
+    "return FailedPPNSSubsFieldsUpsertResponse when updating an existing `api subscription fields and PPNS service returns failure" in new Setup {
+      when(mockApiFieldDefinitionsService.get(FakeContext, FakeVersion)).thenReturn(successful(Some(FakeApiFieldDefinitionsResponsePPNSWithRegex)))
+      when(mockPushPullNotificationService.subscribeToPPNS(eqTo(FakeClientId), eqTo(FakeContext), eqTo(FakeVersion), any, any[FieldDefinition])(any))
+        .thenReturn(ppnsFailureResponse)
+
+      val result = await(service.upsert(FakeClientId, FakeContext, FakeVersion, SubscriptionFieldsMatchRegexValidationPPNS))
+
+      result shouldBe FailedPPNSSubsFieldsUpsertResponse(Map(PPNSFieldFieldName -> "An Error Occurred"))
+
+      verify(mockPushPullNotificationService).subscribeToPPNS(eqTo(FakeClientId), eqTo(FakeContext), eqTo(FakeVersion), any, any[FieldDefinition])(any)
+      verifyZeroInteractions(mockSubscriptionFieldsRepository)
     }
 
     "return true when creating a new api subscription fields" in new Setup {
       when(mockApiFieldDefinitionsService.get(FakeContext, FakeVersion)).thenReturn(successful(Some(FakeApiFieldDefinitionsResponseWithRegex)))
-      when(mockPushPullNotificationService.subscribeToPPNS(eqTo(FakeClientId), eqTo(FakeContext), eqTo(FakeVersion), any, any[FieldDefinition])(any))
-        .thenReturn(ppnsResponse)
+
       when(mockSubscriptionFieldsRepository.saveAtomic(*)).thenReturn(successful((subscriptionFields, true)))
 
       val result = await(service.upsert(FakeClientId, FakeContext, FakeVersion, SubscriptionFieldsMatchRegexValidation))
 
       result shouldBe (SuccessfulSubsFieldsUpsertResponse(SubscriptionFields(FakeClientId, FakeContext, FakeVersion, FakeFieldsId, fields), true))
+      verifyZeroInteractions(mockPushPullNotificationService)
     }
 
     "propagate the error" in new Setup {

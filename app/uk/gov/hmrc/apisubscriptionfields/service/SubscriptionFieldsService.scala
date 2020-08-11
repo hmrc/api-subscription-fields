@@ -67,8 +67,8 @@ class SubscriptionFieldsService @Inject() (
     val ppnsFieldDefinition: Option[FieldDefinition] = fieldDefinitions.find(_.`type` == FieldDefinitionType.PPNS_FIELD)
 
     ppnsFieldDefinition match {
-      case Some(fieldDefinition)   =>
-        val callBackUrl: Option[FieldValue] = fields.get(fieldDefinition.name).filterNot(_.isEmpty)
+      case Some(fieldDefinition) =>
+        val callBackUrl: Option[FieldValue] = fields.get(fieldDefinition.name)
         val callBackResponse: Future[PPNSCallBackUrlValidationResponse] = callBackUrl match {
             case Some(fieldValue) => pushPullNotificationService.subscribeToPPNS(clientId, apiContext, apiVersion, fieldValue, fieldDefinition)
             case None => Future.successful(PPNSCallBackUrlSuccessResponse)
@@ -82,8 +82,10 @@ class SubscriptionFieldsService @Inject() (
 
   }
 
-  def upsert(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion, fields: Fields)(implicit hc: HeaderCarrier): Future[SubsFieldsUpsertResponse] = {
-    val foFieldDefinitions: Future[Option[NonEmptyList[FieldDefinition]]] = apiFieldDefinitionsService.get(apiContext, apiVersion).map(_.map(_.fieldDefinitions))
+  def upsert(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion, fields: Fields)
+            (implicit hc: HeaderCarrier): Future[SubsFieldsUpsertResponse] = {
+    val foFieldDefinitions: Future[Option[NonEmptyList[FieldDefinition]]] =
+      apiFieldDefinitionsService.get(apiContext, apiVersion).map(_.map(_.fieldDefinitions))
 
     foFieldDefinitions.flatMap( _ match {
       case None                   => successful(NotFoundSubsFieldsUpsertResponse)

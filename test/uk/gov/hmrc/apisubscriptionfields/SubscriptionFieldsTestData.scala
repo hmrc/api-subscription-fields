@@ -33,6 +33,7 @@ trait SubscriptionFieldsTestData extends FieldDefinitionTestData with Validation
   final val SubscriptionFieldsMatchRegexValidation: Fields = Map(AlphanumericFieldName -> "ABC123abc", PasswordFieldName -> "Qw12@erty")
   final val SubscriptionFieldsMatchRegexValidationPPNS: Fields = Map(AlphanumericFieldName -> "ABC123abc", PasswordFieldName -> "Qw12@erty", PPNSFieldFieldName -> "https://www.mycallbackurl.com")
   final val SubscriptionFieldsDoNotMatchRegexValidationPPNS: Fields = Map(AlphanumericFieldName -> "ABC123abc", PasswordFieldName -> "Qw12@erty", PPNSFieldFieldName -> "foo")
+  final val SubscriptionFieldsEmptyValueRegexValidationPPNS: Fields = Map(AlphanumericFieldName -> "ABC123abc", PasswordFieldName -> "Qw12@erty", PPNSFieldFieldName -> "")
   final val SubscriptionFieldsDoNotMatchRegexValidation: Fields = Map(AlphanumericFieldName -> "ABC123abc=", PasswordFieldName -> "Qw12erty")
 
   final val FakeApiSubscription = SubscriptionFields(FakeClientId, FakeContext, FakeVersion, FakeFieldsId, FakeSubscriptionFields)

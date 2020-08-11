@@ -75,7 +75,7 @@ class SubscriptionFieldsService @Inject() (
           }
         callBackResponse.flatMap {
           case PPNSCallBackUrlSuccessResponse =>  upsertSubscriptionFields(clientId, apiContext, apiVersion, fields)
-          case PPNSCallBackUrlFailedResponse(error) => Future.successful(FailedPPNSSubsFieldsUpsertResponse(Map(fieldDefinition.name -> error)))
+          case PPNSCallBackUrlFailedResponse(error) => Future.successful(FailedValidationSubsFieldsUpsertResponse(Map(fieldDefinition.name -> error)))
         }
       case None =>  upsertSubscriptionFields(clientId, apiContext, apiVersion, fields)
     }

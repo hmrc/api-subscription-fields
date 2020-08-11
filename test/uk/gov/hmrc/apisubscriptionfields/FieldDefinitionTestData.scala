@@ -58,7 +58,7 @@ trait FieldDefinitionTestData extends TestData {
   final val FakeValidationForPassword: ValidationGroup =
     ValidationGroup("Needs to be at least 8 chars with at least one lowercase, uppercase and special char", NonEmptyList.one(PasswordRegexRule))
   final val FakeValidationForPPNS: ValidationGroup =
-    ValidationGroup("CallBAckURl Validation", NonEmptyList.one(CallBackUrlRegexRule))
+    ValidationGroup("CallBackUrl Validation", NonEmptyList.one(CallBackUrlRegexRule))
 
 
   final val FakeFieldDefinitionAlphnumericField = FieldDefinition(

@@ -24,7 +24,6 @@ sealed trait SubsFieldsUpsertResponse
 case object NotFoundSubsFieldsUpsertResponse extends SubsFieldsUpsertResponse
 case class FailedValidationSubsFieldsUpsertResponse(errorResponses: Map[FieldName, String]) extends SubsFieldsUpsertResponse
 case class SuccessfulSubsFieldsUpsertResponse(wrapped: SubscriptionFields, isInsert: Boolean) extends SubsFieldsUpsertResponse
-case class FailedPPNSSubsFieldsUpsertResponse(errorResponses: Map[FieldName, String]) extends SubsFieldsUpsertResponse
 
 case class BulkSubscriptionFieldsResponse(subscriptions: Seq[SubscriptionFields])
 

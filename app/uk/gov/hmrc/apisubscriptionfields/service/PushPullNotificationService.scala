@@ -43,15 +43,4 @@ class PushPullNotificationService @Inject()(ppnsConnector: PushPullNotificationS
     } yield result
   }
 
-  // def subscribeToPPNS(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion, fieldDefinitions: NEL[FieldDefinition], fields: Fields)
-  //                    (implicit hc: HeaderCarrier): Future[PPNSCallBackUrlValidationResponse] = {
-  //   val subscriptionResponses : List[Future[Unit]] =
-  //     fieldDefinitions
-  //     .filter(_.`type` == FieldDefinitionType.PPNS_FIELD )
-  //     .map { fieldDefn =>
-  //       subscribeToPPNS(clientId, apiContext, apiVersion, fieldDefn, fields.get(fieldDefn.name).filterNot(_.isEmpty))
-  //     }
-
-  //   Future.sequence(subscriptionResponses).map(_ => ())
-  // }
 }

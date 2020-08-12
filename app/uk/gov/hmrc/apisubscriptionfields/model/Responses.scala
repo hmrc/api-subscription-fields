@@ -33,6 +33,10 @@ sealed trait SubsFieldValidationResponse
 case object ValidSubsFieldValidationResponse extends SubsFieldValidationResponse
 case class InvalidSubsFieldValidationResponse(errorResponses: Map[FieldName, String]) extends SubsFieldValidationResponse
 
+sealed trait PPNSCallBackUrlValidationResponse
+case object PPNSCallBackUrlSuccessResponse extends PPNSCallBackUrlValidationResponse
+case class PPNSCallBackUrlFailedResponse(errorMsg: String) extends PPNSCallBackUrlValidationResponse
+
 object ErrorCode extends Enumeration {
   type ErrorCode = Value
 

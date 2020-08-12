@@ -34,6 +34,7 @@ trait FieldDefinitionTestData extends TestData {
 
   final val AlphanumericFieldName: FieldName = "alphanumericField"
   final val PasswordFieldName: FieldName = "password"
+  final val PPNSFieldFieldName: FieldName = "callbackurl"
 
   final val FakeValidationRule: RegexValidationRule = RegexValidationRule(".*")
 
@@ -52,9 +53,14 @@ trait FieldDefinitionTestData extends TestData {
 
   final val AlphaNumericRegexRule: RegexValidationRule = RegexValidationRule("^[a-zA-Z0-9]+$")
   final val PasswordRegexRule: RegexValidationRule = RegexValidationRule("^(?=.{8,})(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=]).*$")
+  final val CallBackUrlRegexRule: RegexValidationRule = RegexValidationRule("^https.*")
   final val FakeValidationForAlphanumeric: ValidationGroup = ValidationGroup("Needs to be alpha numeric", NonEmptyList.one(AlphaNumericRegexRule))
   final val FakeValidationForPassword: ValidationGroup =
     ValidationGroup("Needs to be at least 8 chars with at least one lowercase, uppercase and special char", NonEmptyList.one(PasswordRegexRule))
+  final val FakeValidationForPPNS: ValidationGroup =
+    ValidationGroup("CallBackUrl Validation", NonEmptyList.one(CallBackUrlRegexRule))
+
+
   final val FakeFieldDefinitionAlphnumericField = FieldDefinition(
     "alphanumericField",
     "an alphanumeric filed",
@@ -65,9 +71,16 @@ trait FieldDefinitionTestData extends TestData {
   )
   final val FakeFieldDefinitionPassword =
     FieldDefinition("password", "password", "this is your password", FieldDefinitionType.SECURE_TOKEN, "password", Some(FakeValidationForPassword))
+
+  final val FakeFieldDefinitionPPNSFields =
+    FieldDefinition("callbackurl", "callbackurl", "please enter a callback url", FieldDefinitionType.PPNS_FIELD, "callbackurl", Some(FakeValidationForPPNS))
   final val FakeApiFieldDefinitionssWithRegex = NonEmptyList.fromListUnsafe(List(FakeFieldDefinitionAlphnumericField, FakeFieldDefinitionPassword))
+  final val FakeApiFieldDefinitionsPPNSWithRegex = NonEmptyList.fromListUnsafe(List(FakeFieldDefinitionAlphnumericField, FakeFieldDefinitionPassword, FakeFieldDefinitionPPNSFields))
+
   final val FakeApiFieldDefinitionsWithRegex = ApiFieldDefinitions(FakeContext, FakeVersion, FakeApiFieldDefinitionssWithRegex)
   final val FakeApiFieldDefinitionsResponseWithRegex: ApiFieldDefinitions = ApiFieldDefinitions(FakeContext, FakeVersion, FakeApiFieldDefinitionssWithRegex)
+
+  final val FakeApiFieldDefinitionsResponsePPNSWithRegex: ApiFieldDefinitions = ApiFieldDefinitions(FakeContext, FakeVersion, FakeApiFieldDefinitionsPPNSWithRegex)
 
 
   final val jsonInvalidRegexFieldsDefinitionRequest =

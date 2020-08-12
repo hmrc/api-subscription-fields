@@ -18,13 +18,15 @@ package uk.gov.hmrc.apisubscriptionfields.connector
 
 import javax.inject.{Inject, Singleton}
 import uk.gov.hmrc.apisubscriptionfields.config.ApplicationConfig
-import uk.gov.hmrc.apisubscriptionfields.model.{BoxId, ClientId}
+import uk.gov.hmrc.apisubscriptionfields.model.{BoxId, ClientId, PPNSCallBackUrlValidationResponse, PPNSCallBackUrlSuccessResponse, PPNSCallBackUrlFailedResponse}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
 import uk.gov.hmrc.play.http.metrics._
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.control.NonFatal
+import uk.gov.hmrc.apisubscriptionfields.model.PPNSCallBackUrlSuccessResponse
+import uk.gov.hmrc.apisubscriptionfields.model.PPNSCallBackUrlFailedResponse
 
 @Singleton
 class PushPullNotificationServiceConnector @Inject()(http: HttpClient, appConfig: ApplicationConfig, val apiMetrics: ApiMetrics)
@@ -51,6 +53,18 @@ class PushPullNotificationServiceConnector @Inject()(http: HttpClient, appConfig
     http.PUT[UpdateSubscriberRequest, UpdateSubscriberResponse](s"$externalServiceUri/box/${boxId.value.toString}/subscriber", payload)
     .map(_ => ())
     .recover {
+      case NonFatal(e) => throw new RuntimeException(s"Unexpected response from $externalServiceUri: ${e.getMessage}")
+    }
+  }
+
+  def updateCallBackUrl(clientId: ClientId, boxId: BoxId, callbackUrl: String)(implicit hc: HeaderCarrier): Future[PPNSCallBackUrlValidationResponse] = {
+    val payload = UpdateCallBackUrlRequest(clientId, callbackUrl)
+
+    http.PUT[UpdateCallBackUrlRequest, UpdateCallBackUrlResponse](s"$externalServiceUri/box/${boxId.value.toString}/callback", payload)
+    .map(response =>
+      if(response.successful) PPNSCallBackUrlSuccessResponse
+      else response.errorMessage.fold(PPNSCallBackUrlFailedResponse("Unknown Error"))(PPNSCallBackUrlFailedResponse)
+    ).recover {
       case NonFatal(e) => throw new RuntimeException(s"Unexpected response from $externalServiceUri: ${e.getMessage}")
     }
   }

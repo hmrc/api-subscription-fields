@@ -57,8 +57,8 @@ class PushPullNotificationServiceConnector @Inject()(http: HttpClient, appConfig
     }
   }
 
-  def updateCallBackUrl(boxId: BoxId, callbackUrl: String)(implicit hc: HeaderCarrier): Future[PPNSCallBackUrlValidationResponse] = {
-    val payload = UpdateCallBackUrlRequest(callbackUrl)
+  def updateCallBackUrl(clientId: ClientId, boxId: BoxId, callbackUrl: String)(implicit hc: HeaderCarrier): Future[PPNSCallBackUrlValidationResponse] = {
+    val payload = UpdateCallBackUrlRequest(clientId, callbackUrl)
 
     http.PUT[UpdateCallBackUrlRequest, UpdateCallBackUrlResponse](s"$externalServiceUri/box/${boxId.value.toString}/callback", payload)
     .map(response =>

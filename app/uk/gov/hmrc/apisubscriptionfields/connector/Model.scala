@@ -28,6 +28,6 @@ private[connector] case class UpdateSubscriberRequest(subscriber: SubscriberRequ
 
 private[connector] case class UpdateSubscriberResponse(boxId: BoxId)
 
-private[connector] case class UpdateCallBackUrlRequest(callBackUrl: String)
+private[connector] case class UpdateCallBackUrlRequest(clientId: ClientId, callbackUrl: String)
 
 private[connector] case class UpdateCallBackUrlResponse(successful: Boolean, errorMessage: Option[String])

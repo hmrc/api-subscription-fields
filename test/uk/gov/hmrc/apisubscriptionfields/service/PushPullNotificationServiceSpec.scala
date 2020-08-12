@@ -54,25 +54,25 @@ class PushPullNotificationServiceSpec extends AsyncHmrcSpec with SubscriptionFie
 
     "succeed and return PPNSCallBackUrlSuccessResponse when update of callback URL is successful" in new Setup {
       when(mockPPNSConnector.ensureBoxIsCreated(eqTo(expectedTopicName), eqTo(clientId))(*)).thenReturn(successful(boxId))
-      when(mockPPNSConnector.updateCallBackUrl(boxId, callbackUrl)(hc)).thenReturn(successful(PPNSCallBackUrlSuccessResponse))
+      when(mockPPNSConnector.updateCallBackUrl(clientId, boxId, callbackUrl)(hc)).thenReturn(successful(PPNSCallBackUrlSuccessResponse))
 
       val result: PPNSCallBackUrlValidationResponse = await(service.subscribeToPPNS(clientId, apiContext, apiVersion, callbackUrl, ppnsFieldDefinition))
 
       result shouldBe PPNSCallBackUrlSuccessResponse
       verify(mockPPNSConnector).ensureBoxIsCreated(eqTo(expectedTopicName), eqTo(clientId))(*)
-      verify(mockPPNSConnector).updateCallBackUrl(eqTo(boxId), eqTo(callbackUrl))(*)
+      verify(mockPPNSConnector).updateCallBackUrl(eqTo(clientId), eqTo(boxId), eqTo(callbackUrl))(*)
     }
 
     "return PPNSCallBackUrlFailedResponse when update of callback URL fails" in new Setup {
       val errorMessage = "Error Message"
       when(mockPPNSConnector.ensureBoxIsCreated(eqTo(expectedTopicName), eqTo(clientId))(*)).thenReturn(successful(boxId))
-      when(mockPPNSConnector.updateCallBackUrl(boxId, callbackUrl)(hc)).thenReturn(successful(PPNSCallBackUrlFailedResponse(errorMessage)))
+      when(mockPPNSConnector.updateCallBackUrl(clientId, boxId, callbackUrl)(hc)).thenReturn(successful(PPNSCallBackUrlFailedResponse(errorMessage)))
 
       val result: PPNSCallBackUrlValidationResponse = await(service.subscribeToPPNS(clientId, apiContext, apiVersion, callbackUrl, ppnsFieldDefinition))
 
       result shouldBe PPNSCallBackUrlFailedResponse(errorMessage)
       verify(mockPPNSConnector).ensureBoxIsCreated(eqTo(expectedTopicName), eqTo(clientId))(*)
-      verify(mockPPNSConnector).updateCallBackUrl(eqTo(boxId), eqTo(callbackUrl))(*)
+      verify(mockPPNSConnector).updateCallBackUrl(eqTo(clientId), eqTo(boxId), eqTo(callbackUrl))(*)
     }
 
    "fail when box creation fails" in new Setup {
@@ -85,7 +85,7 @@ class PushPullNotificationServiceSpec extends AsyncHmrcSpec with SubscriptionFie
 
    "fail when update callback url fails" in new Setup {
       when(mockPPNSConnector.ensureBoxIsCreated(eqTo(expectedTopicName), eqTo(clientId))(*)).thenReturn(successful(boxId))
-      when(mockPPNSConnector.updateCallBackUrl(boxId, callbackUrl)(hc)).thenReturn(failed(new RuntimeException))
+      when(mockPPNSConnector.updateCallBackUrl(clientId, boxId, callbackUrl)(hc)).thenReturn(failed(new RuntimeException))
 
      intercept[RuntimeException] {
        await(service.subscribeToPPNS(clientId, apiContext, apiVersion, callbackUrl, ppnsFieldDefinition))

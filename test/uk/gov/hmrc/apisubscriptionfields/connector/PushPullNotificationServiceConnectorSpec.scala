@@ -127,13 +127,13 @@ class PushPullNotificationServiceConnectorSpec
 
      "send proper request to update callback and map response on success" in new Setup {
       val callbackUrl = "my-callback"
-      val requestBody = Json.stringify(Json.toJson(UpdateCallBackUrlRequest(callbackUrl)))
+      val requestBody = Json.stringify(Json.toJson(UpdateCallBackUrlRequest(clientId, callbackUrl)))
       val responseBody = Json.stringify(Json.toJson(UpdateCallBackUrlResponse(true, None)))
 
       val path = s"/box/${boxId.value}/callback"
      primeStub(path, requestBody, responseBody)
 
-      val ret: PPNSCallBackUrlValidationResponse = await(connector.updateCallBackUrl(boxId, callbackUrl))
+      val ret: PPNSCallBackUrlValidationResponse = await(connector.updateCallBackUrl(clientId, boxId, callbackUrl))
       ret shouldBe PPNSCallBackUrlSuccessResponse
 
     verifyMock(path)
@@ -142,13 +142,13 @@ class PushPullNotificationServiceConnectorSpec
 
      "send proper request to update callback and map response on failure" in new Setup {
       val callbackUrl = "my-callback"
-      val requestBody = Json.stringify(Json.toJson( UpdateCallBackUrlRequest(callbackUrl)))
+      val requestBody = Json.stringify(Json.toJson( UpdateCallBackUrlRequest(clientId, callbackUrl)))
       val responseBody = Json.stringify(Json.toJson(UpdateCallBackUrlResponse(false, Some("some error"))))
 
       val path = s"/box/${boxId.value}/callback"
       primeStub(path, requestBody, responseBody)
 
-      val ret: PPNSCallBackUrlValidationResponse = await(connector.updateCallBackUrl(boxId, callbackUrl))
+      val ret: PPNSCallBackUrlValidationResponse = await(connector.updateCallBackUrl(clientId, boxId, callbackUrl))
       ret shouldBe PPNSCallBackUrlFailedResponse("some error")
 
      verifyMock(path)
@@ -156,13 +156,13 @@ class PushPullNotificationServiceConnectorSpec
 
     "send proper request to update callback and map response on failure with Unknown Error" in new Setup {
       val callbackUrl = "my-callback"
-      val requestBody = Json.stringify(Json.toJson(UpdateCallBackUrlRequest(callbackUrl)))
+      val requestBody = Json.stringify(Json.toJson(UpdateCallBackUrlRequest(clientId, callbackUrl)))
       val responseBody = Json.stringify(Json.toJson(UpdateCallBackUrlResponse(false, None)))
 
       val path = s"/box/${boxId.value}/callback"
       primeStub(path, requestBody, responseBody)
 
-      val ret: PPNSCallBackUrlValidationResponse = await(connector.updateCallBackUrl(boxId, callbackUrl))
+      val ret: PPNSCallBackUrlValidationResponse = await(connector.updateCallBackUrl(clientId, boxId, callbackUrl))
       ret shouldBe PPNSCallBackUrlFailedResponse("Unknown Error")
 
      verifyMock(path)

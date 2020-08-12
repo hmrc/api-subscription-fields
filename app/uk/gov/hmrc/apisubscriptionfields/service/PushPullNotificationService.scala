@@ -39,7 +39,7 @@ class PushPullNotificationService @Inject()(ppnsConnector: PushPullNotificationS
                              (implicit hc: HeaderCarrier): Future[PPNSCallBackUrlValidationResponse] = {
     for {
       boxId <- ppnsConnector.ensureBoxIsCreated(makeBoxName(apiContext, apiVersion, fieldDefinition), clientId)
-      result <- ppnsConnector.updateCallBackUrl(boxId, callBackUrl)
+      result <- ppnsConnector.updateCallBackUrl(clientId, boxId, callBackUrl)
     } yield result
   }
 

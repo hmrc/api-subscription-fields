@@ -140,6 +140,20 @@ class PushPullNotificationServiceConnectorSpec
     verifyMock(path)
     }
 
+    "send proper request to update callback (when callback is empty) and map response on success" in new Setup {
+      val callbackUrl = ""
+      val requestBody: String = Json.stringify(Json.toJson(UpdateCallBackUrlRequest(clientId, callbackUrl)))
+      val responseBody: String = Json.stringify(Json.toJson(UpdateCallBackUrlResponse(successful = true, None)))
+
+      val path = s"/box/${boxId.value}/callback"
+      primeStub(path, requestBody, responseBody)
+
+      val ret: PPNSCallBackUrlValidationResponse = await(connector.updateCallBackUrl(clientId, boxId, callbackUrl))
+      ret shouldBe PPNSCallBackUrlSuccessResponse
+
+      verifyMock(path)
+    }
+
 
      "send proper request to update callback and map response on failure" in new Setup {
       val callbackUrl = "my-callback"

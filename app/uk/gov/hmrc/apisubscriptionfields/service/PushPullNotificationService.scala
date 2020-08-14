@@ -16,11 +16,15 @@
 
 package uk.gov.hmrc.apisubscriptionfields.service
 
+
 import uk.gov.hmrc.apisubscriptionfields.connector.PushPullNotificationServiceConnector
 import javax.inject.{Inject, Singleton}
 import uk.gov.hmrc.apisubscriptionfields.model.FieldDefinition
+import uk.gov.hmrc.apisubscriptionfields.model.Types.FieldValue
+
 import scala.concurrent.Future
 import uk.gov.hmrc.apisubscriptionfields.model._
+
 import scala.concurrent.ExecutionContext
 import uk.gov.hmrc.http.HeaderCarrier
 
@@ -34,12 +38,15 @@ class PushPullNotificationService @Inject()(ppnsConnector: PushPullNotificationS
   def subscribeToPPNS(clientId: ClientId,
                               apiContext: ApiContext,
                               apiVersion: ApiVersion,
-                              callBackUrl: String,
+                              oFieldValue: Option[FieldValue],
                               fieldDefinition: FieldDefinition)
                              (implicit hc: HeaderCarrier): Future[PPNSCallBackUrlValidationResponse] = {
     for {
       boxId <- ppnsConnector.ensureBoxIsCreated(makeBoxName(apiContext, apiVersion, fieldDefinition), clientId)
-      result <- ppnsConnector.updateCallBackUrl(clientId, boxId, callBackUrl)
+      result <- oFieldValue match {
+        case Some(value) => ppnsConnector.updateCallBackUrl (clientId, boxId, value)
+        case None => Future.successful(PPNSCallBackUrlSuccessResponse)
+      }
     } yield result
   }
 

@@ -18,6 +18,7 @@ package uk.gov.hmrc.apisubscriptionfields.connector
 
 import java.{util => ju}
 
+import akka.stream.Materializer
 import org.scalatest.BeforeAndAfterEach
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.Application
@@ -49,7 +50,7 @@ class PushPullNotificationServiceConnectorSpec
       .configure(("microservice.services.push-pull-notification.uri", s"http://$stubHost:$stubPort"))
       .build()
 
-  implicit lazy val materializer = app.materializer
+  implicit lazy val materializer: Materializer = app.materializer
 
   // Run wiremock server on local machine with specified port.
   private val wireMockServer = new WireMockServer(wireMockConfig().port(stubPort))
@@ -70,11 +71,11 @@ class PushPullNotificationServiceConnectorSpec
   trait Setup {
 
     val boxName = "box-name"
-    val clientId = ClientId("client-id")
-    val subscriptionFieldsId = SubscriptionFieldsId(ju.UUID.randomUUID)
-    val boxId = BoxId(ju.UUID.randomUUID())
+    val clientId: ClientId = ClientId("client-id")
+    val subscriptionFieldsId: SubscriptionFieldsId = SubscriptionFieldsId(ju.UUID.randomUUID)
+    val boxId: BoxId = BoxId(ju.UUID.randomUUID())
 
-    val connector = app.injector.instanceOf[PushPullNotificationServiceConnector]
+    val connector: PushPullNotificationServiceConnector = app.injector.instanceOf[PushPullNotificationServiceConnector]
 
     def primeStub(path: String, requestBody: String, responseBody: String){
         wireMockServer.stubFor(
@@ -97,27 +98,27 @@ class PushPullNotificationServiceConnectorSpec
 
   "PPNS Connector" should {
     "send proper request to post box" in new Setup {
-      val requestBody = Json.stringify(Json.toJson(CreateBoxRequest(boxName, clientId)))
-      val responseBody = Json.stringify(Json.toJson(CreateBoxResponse(boxId)))
+      val requestBody: String = Json.stringify(Json.toJson(CreateBoxRequest(boxName, clientId)))
+      val responseBody: String = Json.stringify(Json.toJson(CreateBoxResponse(boxId)))
 
       val path = "/box"
       primeStub(path, requestBody, responseBody)
 
-      val ret = await(connector.ensureBoxIsCreated(boxName, clientId))
-      ret shouldBe (boxId)
+      val ret: BoxId = await(connector.ensureBoxIsCreated(boxName, clientId))
+      ret shouldBe boxId
 
      verifyMock(path)
     }
 
     "send proper request to subscribe" in new Setup {
       val callbackUrl = "my-callback"
-      val requestBody = Json.stringify(Json.toJson(UpdateSubscriberRequest(SubscriberRequest(callbackUrl, "API_PUSH_SUBSCRIBER"))))
-      val responseBody = Json.stringify(Json.toJson(UpdateSubscriberResponse(boxId)))
+      val requestBody: String = Json.stringify(Json.toJson(UpdateSubscriberRequest(SubscriberRequest(callbackUrl, "API_PUSH_SUBSCRIBER"))))
+      val responseBody: String = Json.stringify(Json.toJson(UpdateSubscriberResponse(boxId)))
 
       val path = s"/box/${boxId.value}/subscriber"
      primeStub(path, requestBody, responseBody)
 
-      val ret = await(connector.subscribe(boxId, callbackUrl))
+      val ret: Unit = await(connector.subscribe(boxId, callbackUrl))
       ret shouldBe ()
 
       verifyMock(path)
@@ -127,8 +128,8 @@ class PushPullNotificationServiceConnectorSpec
 
      "send proper request to update callback and map response on success" in new Setup {
       val callbackUrl = "my-callback"
-      val requestBody = Json.stringify(Json.toJson(UpdateCallBackUrlRequest(clientId, callbackUrl)))
-      val responseBody = Json.stringify(Json.toJson(UpdateCallBackUrlResponse(true, None)))
+      val requestBody: String = Json.stringify(Json.toJson(UpdateCallBackUrlRequest(clientId, callbackUrl)))
+      val responseBody: String = Json.stringify(Json.toJson(UpdateCallBackUrlResponse(successful = true, None)))
 
       val path = s"/box/${boxId.value}/callback"
      primeStub(path, requestBody, responseBody)
@@ -142,8 +143,8 @@ class PushPullNotificationServiceConnectorSpec
 
      "send proper request to update callback and map response on failure" in new Setup {
       val callbackUrl = "my-callback"
-      val requestBody = Json.stringify(Json.toJson( UpdateCallBackUrlRequest(clientId, callbackUrl)))
-      val responseBody = Json.stringify(Json.toJson(UpdateCallBackUrlResponse(false, Some("some error"))))
+      val requestBody: String = Json.stringify(Json.toJson( UpdateCallBackUrlRequest(clientId, callbackUrl)))
+      val responseBody: String = Json.stringify(Json.toJson(UpdateCallBackUrlResponse(successful = false, Some("some error"))))
 
       val path = s"/box/${boxId.value}/callback"
       primeStub(path, requestBody, responseBody)
@@ -156,8 +157,8 @@ class PushPullNotificationServiceConnectorSpec
 
     "send proper request to update callback and map response on failure with Unknown Error" in new Setup {
       val callbackUrl = "my-callback"
-      val requestBody = Json.stringify(Json.toJson(UpdateCallBackUrlRequest(clientId, callbackUrl)))
-      val responseBody = Json.stringify(Json.toJson(UpdateCallBackUrlResponse(false, None)))
+      val requestBody: String = Json.stringify(Json.toJson(UpdateCallBackUrlRequest(clientId, callbackUrl)))
+      val responseBody: String = Json.stringify(Json.toJson(UpdateCallBackUrlResponse(successful = false, None)))
 
       val path = s"/box/${boxId.value}/callback"
       primeStub(path, requestBody, responseBody)

@@ -68,7 +68,7 @@ class SubscriptionFieldsService @Inject() (
 
     ppnsFieldDefinition match {
       case Some(fieldDefinition) =>
-        val oFieldValue: Option[FieldValue] = fields.get(fieldDefinition.name).filterNot(_.isEmpty)
+        val oFieldValue: Option[FieldValue] = fields.get(fieldDefinition.name)
         pushPullNotificationService.subscribeToPPNS(clientId, apiContext, apiVersion, oFieldValue, fieldDefinition).flatMap {
           case PPNSCallBackUrlSuccessResponse =>  upsertSubscriptionFields(clientId, apiContext, apiVersion, fields)
           case PPNSCallBackUrlFailedResponse(error) => Future.successful(FailedValidationSubsFieldsUpsertResponse(Map(fieldDefinition.name -> error)))

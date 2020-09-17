@@ -19,7 +19,6 @@ package uk.gov.hmrc.apisubscriptionfields.model
 import uk.gov.hmrc.apisubscriptionfields.SubscriptionFieldsTestData
 import uk.gov.hmrc.apisubscriptionfields.FieldDefinitionTestData
 import uk.gov.hmrc.apisubscriptionfields.HmrcSpec
-import org.scalatest.FunSpec
 import org.scalatest.Matchers
 
 class ModelSpec extends HmrcSpec with SubscriptionFieldsTestData with FieldDefinitionTestData with ValidationRuleTestData {
@@ -42,24 +41,28 @@ class ModelSpec extends HmrcSpec with SubscriptionFieldsTestData with FieldDefin
   }
 }
 
-class UrlValidationRuleSpec extends FunSpec with ValidationRuleTestData with Matchers {
-  describe("pass for a matching value") {
-    UrlValidationRule.validate(validUrl) shouldBe true
-  }
+class UrlValidationRuleSpec extends HmrcSpec with ValidationRuleTestData with Matchers {
+  "url validation rule" should {
+    "pass for a matching value" in {
+      UrlValidationRule.validate(validUrl) shouldBe true
+    }
 
-  describe("pass for localhost") {
-    UrlValidationRule.validate(localValidUrl) shouldBe true
-  }
+    "pass for localhost" in {
+      UrlValidationRule.validate(localValidUrl) shouldBe true
+    }
 
-  describe("return true when the value is blank") {
-    UrlValidationRule.validate("") shouldBe true
-  }
+    "return true when the value is blank" in {
+      UrlValidationRule.validate("") shouldBe true
+    }
 
-  describe("invalid urls") {
-   invalidUrls.map(invalidUrl =>  {
-     it(s"$invalidUrl should not be valid") {
-       UrlValidationRule.validate(invalidUrl) shouldBe false
-     }
-   })
+    "invalid urls" in {
+      invalidUrls.map(invalidUrl =>  {
+        UrlValidationRule.validate(invalidUrl) shouldBe false
+      })
+    }
+
+    "handles internal mdtp domains in url" in {
+     UrlValidationRule.validate("https://who-cares.mdtp/pathy/mcpathface") shouldBe true
+    }
   }
 }

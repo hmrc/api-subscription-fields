@@ -19,8 +19,8 @@ package uk.gov.hmrc.apisubscriptionfields.model
 import cats.data.{NonEmptyList => NEL}
 import uk.gov.hmrc.apisubscriptionfields.model.FieldDefinitionType.FieldDefinitionType
 import org.apache.commons.validator.routines.UrlValidator
-import eu.timepit.refined._
 import Types._
+import org.apache.commons.validator.routines.DomainValidator
 
 sealed trait ValidationRule {
   def validate(value: FieldValue): Boolean = {
@@ -36,9 +36,11 @@ case class RegexValidationRule(regex: RegexExpr) extends ValidationRule {
 
 // Taken from: https://stackoverflow.com/a/5078838
 case object UrlValidationRule extends ValidationRule {
+  DomainValidator.updateTLDOverride(DomainValidator.ArrayType.GENERIC_PLUS, Array("mdtp"));
+  private val schemes = Array("http","https")
+  private lazy val urlValidator = new org.apache.commons.validator.routines.UrlValidator(schemes, UrlValidator.ALLOW_LOCAL_URLS)
+
   def validateAgainstRule(value: FieldValue): Boolean = {
-    val schemes = Array("http","https")
-    val urlValidator = new org.apache.commons.validator.routines.UrlValidator(schemes, UrlValidator.ALLOW_LOCAL_URLS)
     urlValidator.isValid(value)
   }
 }

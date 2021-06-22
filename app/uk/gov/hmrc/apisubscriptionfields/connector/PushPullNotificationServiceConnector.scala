@@ -21,8 +21,9 @@ import uk.gov.hmrc.apisubscriptionfields.config.ApplicationConfig
 import uk.gov.hmrc.apisubscriptionfields.model.Types.FieldValue
 import uk.gov.hmrc.apisubscriptionfields.model._
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.bootstrap.http.HttpClient
+import uk.gov.hmrc.http.HttpClient
 import uk.gov.hmrc.play.http.metrics._
+import uk.gov.hmrc.http.HttpReads.Implicits._
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.control.NonFatal
@@ -58,13 +59,13 @@ class PushPullNotificationServiceConnector @Inject()(http: HttpClient, appConfig
 
   def updateCallBackUrl(clientId: ClientId, boxId: BoxId, callbackUrl: FieldValue)
                        (implicit hc: HeaderCarrier): Future[PPNSCallBackUrlValidationResponse] = {
-        val payload = UpdateCallBackUrlRequest(clientId, callbackUrl)
-        http.PUT[UpdateCallBackUrlRequest, UpdateCallBackUrlResponse](s"$externalServiceUri/box/${boxId.value.toString}/callback", payload)
-          .map(response =>
-            if (response.successful) PPNSCallBackUrlSuccessResponse
-            else response.errorMessage.fold(PPNSCallBackUrlFailedResponse("Unknown Error"))(PPNSCallBackUrlFailedResponse)
-          ).recover {
-          case NonFatal(e) => throw new RuntimeException(s"Unexpected response from $externalServiceUri: ${e.getMessage}")
-        }
+    val payload = UpdateCallBackUrlRequest(clientId, callbackUrl)
+    http.PUT[UpdateCallBackUrlRequest, UpdateCallBackUrlResponse](s"$externalServiceUri/box/${boxId.value.toString}/callback", payload)
+      .map(response =>
+        if (response.successful) PPNSCallBackUrlSuccessResponse
+        else response.errorMessage.fold(PPNSCallBackUrlFailedResponse("Unknown Error"))(PPNSCallBackUrlFailedResponse)
+      ).recover {
+      case NonFatal(e) => throw new RuntimeException(s"Unexpected response from $externalServiceUri: ${e.getMessage}")
+    }
   }
 }

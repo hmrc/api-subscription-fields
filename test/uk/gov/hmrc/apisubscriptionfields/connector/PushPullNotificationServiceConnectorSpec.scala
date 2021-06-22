@@ -119,7 +119,7 @@ class PushPullNotificationServiceConnectorSpec
      primeStub(path, requestBody, responseBody)
 
       val ret: Unit = await(connector.subscribe(boxId, callbackUrl))
-      ret shouldBe ()
+      ret shouldBe (())
 
       verifyMock(path)
     }

@@ -25,7 +25,6 @@ import scala.concurrent.Future.{successful,failed}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.apisubscriptionfields.connector.PushPullNotificationServiceConnector
 import scala.concurrent.ExecutionContext.Implicits.global
-import cats.data.{NonEmptyList => NEL}
 
 class PushPullNotificationServiceSpec extends AsyncHmrcSpec with SubscriptionFieldsTestData with FieldDefinitionTestData {
 
@@ -47,9 +46,6 @@ class PushPullNotificationServiceSpec extends AsyncHmrcSpec with SubscriptionFie
       val callbackUrl = "123"
       val oCallbackUrl = Some(callbackUrl)
       val ppnsFieldDefinition = FieldDefinition(ppnsFieldName, "description-1", "hint-1", PPNS_FIELD, "short-description-1" )
-      val fieldDef2 = FieldDefinition(fieldN(2), "description-2", "hint-2", STRING, "short-description-2" )
-      val fieldDefns: NEL[FieldDefinition] = NEL.of(ppnsFieldDefinition, fieldDef2)
-      val fields: Types.Fields = Map(fieldN(1) -> oCallbackUrl.value, fieldN(2) -> "something else")
       val expectedTopicName = s"${apiContext.value}##${apiVersion.value}##$ppnsFieldName"
 
 

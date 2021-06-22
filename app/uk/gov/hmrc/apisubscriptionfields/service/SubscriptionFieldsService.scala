@@ -50,8 +50,7 @@ class SubscriptionFieldsService @Inject() (
     }
   }
 
-  private def upsertSubscriptionFields(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion, fields: Fields)
-                                      (implicit hc: HeaderCarrier): Future[SuccessfulSubsFieldsUpsertResponse] = {
+  private def upsertSubscriptionFields(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion, fields: Fields): Future[SuccessfulSubsFieldsUpsertResponse] = {
     val subscriptionFieldsId = SubscriptionFieldsId(uuidCreator.uuid())
     val subscriptionFields = SubscriptionFields(clientId, apiContext, apiVersion, subscriptionFieldsId, fields)
 

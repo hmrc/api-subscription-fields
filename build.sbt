@@ -44,7 +44,7 @@ resolvers ++= Seq(
   Resolver.sonatypeRepo("snapshots")
   )
 
-lazy val plugins: Seq[Plugins] = Seq(PlayScala, SbtAutoBuildPlugin, SbtGitVersioning, SbtDistributablesPlugin, SbtArtifactory)
+lazy val plugins: Seq[Plugins] = Seq(PlayScala, SbtAutoBuildPlugin, SbtDistributablesPlugin)
 lazy val playSettings: Seq[Setting[_]] = Seq.empty
 
 lazy val AcceptanceTest = config("acceptance") extend Test
@@ -58,9 +58,7 @@ lazy val microservice = Project(appName, file("."))
   .settings(defaultSettings(): _*)
   .settings(acceptanceTestSettings: _*)
   .settings(scalaVersion := "2.12.12")
-  .settings(
-    inConfig(AcceptanceTest)(BloopDefaults.configSettings)
-  )
+  .settings(ScoverageSettings())
   .settings(
     routesImport ++= Seq(
       "uk.gov.hmrc.apisubscriptionfields.model._",
@@ -72,7 +70,6 @@ lazy val microservice = Project(appName, file("."))
     dependencyOverrides ++= overrides,
     evictionWarningOptions in update := EvictionWarningOptions.default.withWarnScalaVersionEviction(false)
   )
-  .settings(scoverageSettings)
   .settings(
     fork in Test := false,
     addTestReportOption(Test, "test-reports"),
@@ -83,20 +80,13 @@ lazy val microservice = Project(appName, file("."))
 
 lazy val acceptanceTestSettings =
   inConfig(AcceptanceTest)(Defaults.testSettings) ++
+  inConfig(AcceptanceTest)(BloopDefaults.configSettings) ++
     Seq(
       unmanagedSourceDirectories in AcceptanceTest := Seq(baseDirectory.value / "acceptance"),
       fork in AcceptanceTest := false,
       parallelExecution in AcceptanceTest := false,
       addTestReportOption(AcceptanceTest, "acceptance-reports")
     )
-
-lazy val scoverageSettings: Seq[Setting[_]] = Seq(
-  coverageExcludedPackages := "<empty>;Reverse.*;.*model.*;.*config.*;.*(AuthService|BuildInfo|Routes).*;.*.application;.*.definition",
-  coverageMinimum := 94,
-  coverageFailOnMinimum := true,
-  coverageHighlighting := true,
-  parallelExecution in Test := false
-)
 
 def onPackageName(rootPackage: String): String => Boolean = { testName => testName startsWith rootPackage }
 

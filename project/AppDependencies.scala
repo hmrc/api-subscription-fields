@@ -9,7 +9,7 @@ object AppDependencies {
     "uk.gov.hmrc"               %% "simple-reactivemongo"             % "7.30.0-play-26",
     "org.julienrf"              %% "play-json-derived-codecs"         % "6.0.0",
     "com.typesafe.play"         %% "play-json"                        % "2.8.1",
-    "uk.gov.hmrc"               %% "http-metrics"                     % "1.11.0",
+    "uk.gov.hmrc"               %% "http-metrics"                     % "2.1.0-play-26",
     "org.typelevel"             %% "cats-core"                        % "2.1.0",
     "eu.timepit"                %% "refined"                          % "0.9.13",
     "be.venneborg"              %% "play26-refined"                   % "0.5.0",

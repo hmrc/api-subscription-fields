@@ -25,18 +25,6 @@ import bloop.integrations.sbt.BloopDefaults
 
 import scala.language.postfixOps
 
-// we need to override the akka version for now as newer versions are not compatible with reactivemongo
-lazy val akkaVersion = "2.5.23"
-lazy val akkaHttpVersion = "10.0.15"
-
-val overrides: Seq[ModuleID] = Seq(
-  "com.typesafe.akka" %% "akka-stream" % akkaVersion,
-  "com.typesafe.akka" %% "akka-protobuf" % akkaVersion,
-  "com.typesafe.akka" %% "akka-slf4j" % akkaVersion,
-  "com.typesafe.akka" %% "akka-actor" % akkaVersion,
-  "com.typesafe.akka" %% "akka-http-core" % akkaHttpVersion
-)
-
 val appName = "api-subscription-fields"
 
 resolvers ++= Seq(
@@ -67,7 +55,6 @@ lazy val microservice = Project(appName, file("."))
   )
   .settings(
     libraryDependencies ++= AppDependencies(),
-    dependencyOverrides ++= overrides,
     evictionWarningOptions in update := EvictionWarningOptions.default.withWarnScalaVersionEviction(false)
   )
   .settings(

@@ -11,3 +11,5 @@
 
 # Add all the application routes to the prod.routes file
 ->         /                          prod.Routes
+
+PUT        /api-subscription-fields/test-only/field/application/:clientId/context/:apiContext/version/:apiVersion/fieldsId/:fieldsId     uk.gov.hmrc.apisubscriptionfields.controller.testonly.TestOnlySubscriptionFieldsController.upsertSubscriptionFields(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion, fieldsId: SubscriptionFieldsId)

@@ -22,6 +22,7 @@ import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin
 import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin._
 import uk.gov.hmrc.versioning.SbtGitVersioning
 import bloop.integrations.sbt.BloopDefaults
+import play.sbt.PlayImport.PlayKeys.playDefaultPort
 
 import scala.language.postfixOps
 
@@ -30,7 +31,7 @@ val appName = "api-subscription-fields"
 resolvers ++= Seq(
   Resolver.sonatypeRepo("releases"),
   Resolver.sonatypeRepo("snapshots")
-  )
+)
 
 lazy val plugins: Seq[Plugins] = Seq(PlayScala, SbtAutoBuildPlugin, SbtDistributablesPlugin)
 lazy val playSettings: Seq[Setting[_]] = Seq.empty
@@ -64,10 +65,11 @@ lazy val microservice = Project(appName, file("."))
   )
   .settings(majorVersion := 0)
   .settings(scalacOptions ++= Seq("-Ypartial-unification"))
+  .settings(playDefaultPort := 9650)
 
 lazy val acceptanceTestSettings =
   inConfig(AcceptanceTest)(Defaults.testSettings) ++
-  inConfig(AcceptanceTest)(BloopDefaults.configSettings) ++
+    inConfig(AcceptanceTest)(BloopDefaults.configSettings) ++
     Seq(
       unmanagedSourceDirectories in AcceptanceTest := Seq(baseDirectory.value / "acceptance"),
       fork in AcceptanceTest := false,

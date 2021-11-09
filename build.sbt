@@ -22,7 +22,6 @@ import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin
 import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin._
 import uk.gov.hmrc.versioning.SbtGitVersioning
 import bloop.integrations.sbt.BloopDefaults
-import play.sbt.PlayImport.PlayKeys.playDefaultPort
 
 import scala.language.postfixOps
 
@@ -65,7 +64,6 @@ lazy val microservice = Project(appName, file("."))
   )
   .settings(majorVersion := 0)
   .settings(scalacOptions ++= Seq("-Ypartial-unification"))
-  .settings(playDefaultPort := 9650)
 
 lazy val acceptanceTestSettings =
   inConfig(AcceptanceTest)(Defaults.testSettings) ++

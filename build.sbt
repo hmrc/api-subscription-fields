@@ -30,7 +30,7 @@ val appName = "api-subscription-fields"
 resolvers ++= Seq(
   Resolver.sonatypeRepo("releases"),
   Resolver.sonatypeRepo("snapshots")
-)
+  )
 
 lazy val plugins: Seq[Plugins] = Seq(PlayScala, SbtAutoBuildPlugin, SbtDistributablesPlugin)
 lazy val playSettings: Seq[Setting[_]] = Seq.empty
@@ -67,7 +67,7 @@ lazy val microservice = Project(appName, file("."))
 
 lazy val acceptanceTestSettings =
   inConfig(AcceptanceTest)(Defaults.testSettings) ++
-    inConfig(AcceptanceTest)(BloopDefaults.configSettings) ++
+  inConfig(AcceptanceTest)(BloopDefaults.configSettings) ++
     Seq(
       unmanagedSourceDirectories in AcceptanceTest := Seq(baseDirectory.value / "acceptance"),
       fork in AcceptanceTest := false,

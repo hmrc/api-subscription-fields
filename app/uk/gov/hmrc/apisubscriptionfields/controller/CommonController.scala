@@ -16,17 +16,17 @@
 
 package uk.gov.hmrc.apisubscriptionfields.controller
 
-import play.api.Logger
 import play.api.libs.json._
 import play.api.mvc.{Request, Result}
 import uk.gov.hmrc.apisubscriptionfields.model.ErrorCode._
 import uk.gov.hmrc.apisubscriptionfields.model.JsErrorResponse
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendBaseController
+import uk.gov.hmrc.apisubscriptionfields.utils.ApplicationLogger
 
 import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
 
-trait CommonController extends BackendBaseController {
+trait CommonController extends BackendBaseController with ApplicationLogger {
 
   override protected def withJsonBody[T]
   (f: (T) => Future[Result])(implicit request: Request[JsValue], m: Manifest[T], reads: Reads[T]): Future[Result] = {
@@ -38,7 +38,7 @@ trait CommonController extends BackendBaseController {
   }
 
   private def jsonError(errorText: String) = {
-    Logger.error(s"A JSON error occurred: $errorText")
+    appLogger.error(s"A JSON error occurred: $errorText")
     Future.successful(UnprocessableEntity(JsErrorResponse(INVALID_REQUEST_PAYLOAD, "A JSON error occurred")))
   }
 
@@ -47,7 +47,7 @@ trait CommonController extends BackendBaseController {
   }
 
   private[controller] def handleException(e: Throwable) = {
-    Logger.error(s"An unexpected error occurred: ${e.getMessage}", e)
+    appLogger.error(s"An unexpected error occurred: ${e.getMessage}", e)
     InternalServerError(JsErrorResponse(UNKNOWN_ERROR, "An unexpected error occurred"))
   }
 }

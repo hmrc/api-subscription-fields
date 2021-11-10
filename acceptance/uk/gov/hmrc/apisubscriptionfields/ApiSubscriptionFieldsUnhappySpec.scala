@@ -17,21 +17,22 @@
 package uk.gov.hmrc.apisubscriptionfields
 
 import org.scalatest.OptionValues
-import play.api.Logger
 import play.api.libs.json.Json
 import play.api.mvc._
 import play.api.test.Helpers._
 import uk.gov.hmrc.apisubscriptionfields.model.ErrorCode.{INVALID_REQUEST_PAYLOAD, NOT_FOUND_CODE}
 import uk.gov.hmrc.apisubscriptionfields.model.JsErrorResponse
+import uk.gov.hmrc.apisubscriptionfields.utils.ApplicationLogger
 
 import scala.concurrent.Future
 
 class ApiSubscriptionFieldsUnhappySpec extends AcceptanceTestSpec
   with OptionValues
-  with SubscriptionFieldsTestData {
+  with SubscriptionFieldsTestData
+  with ApplicationLogger {
 
   feature("Subscription-Fields") {
-    Logger.logger.info(s"App.mode = ${app.mode.toString}")
+    appLogger.logger.info(s"App.mode = ${app.mode.toString}")
 
     scenario("the API is called to GET non-existing subscription fields") {
 

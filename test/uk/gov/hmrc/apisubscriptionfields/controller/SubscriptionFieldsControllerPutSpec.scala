@@ -17,7 +17,6 @@
 package uk.gov.hmrc.apisubscriptionfields.controller
 
 import akka.actor.ActorSystem
-import akka.stream.{ActorMaterializer, Materializer}
 import play.api.libs.json.{Json, JsValue}
 import play.api.mvc._
 import play.api.test.{FakeRequest, StubControllerComponentsFactory}
@@ -39,8 +38,7 @@ class SubscriptionFieldsControllerPutSpec
   private val mockSubscriptionFieldsService = mock[SubscriptionFieldsService]
   private val controller = new SubscriptionFieldsController(stubControllerComponents(), mockSubscriptionFieldsService)
   implicit private val actorSystem = ActorSystem("test")
-  implicit private val mat: Materializer = ActorMaterializer.create(actorSystem)
-  
+   
   def subsFieldServiceUpsertReturns(response: SubsFieldsUpsertResponse) = {
     when(mockSubscriptionFieldsService.upsert(eqTo(FakeClientId), eqTo(FakeContext), eqTo(FakeVersion), eqTo(FakeSubscriptionFields))(*)).thenReturn(successful(response))
   }

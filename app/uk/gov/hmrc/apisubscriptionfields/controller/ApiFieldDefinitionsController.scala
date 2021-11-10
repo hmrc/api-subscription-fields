@@ -25,18 +25,18 @@ import uk.gov.hmrc.apisubscriptionfields.model._
 import uk.gov.hmrc.apisubscriptionfields.service.ApiFieldDefinitionsService
 import scala.concurrent.Future
 import scala.util.{Try,Success,Failure}
-import play.api.Logger
 import java.util.UUID
 import scala.concurrent.ExecutionContext
+import uk.gov.hmrc.apisubscriptionfields.utils.ApplicationLogger
 
 @Singleton
-class ApiFieldDefinitionsController @Inject() (cc: ControllerComponents, service: ApiFieldDefinitionsService)(implicit ec: ExecutionContext) extends CommonController {
+class ApiFieldDefinitionsController @Inject() (cc: ControllerComponents, service: ApiFieldDefinitionsService)(implicit ec: ExecutionContext) extends CommonController with ApplicationLogger {
 
   import JsonFormatters._
 
   private def badRequestWithTag(fn: (UUID) => String): Result = {
     val errorTag = java.util.UUID.randomUUID()
-    Logger.warn(fn(errorTag))
+    appLogger.warn(fn(errorTag))
     BadRequest(s"""{"tag": "$errorTag"}""")
   }
 

@@ -20,7 +20,6 @@ import play.api.libs.json._
 import reactivemongo.play.json._
 import reactivemongo.play.json.collection.JSONCollection
 
-import play.api.Logger
 import reactivemongo.api.Cursor
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -52,7 +51,7 @@ trait MongoCrudHelper[T] extends MongoIndexCreator with MongoErrorHandler {
 
   private def handleError(selector: JsObject, findAndModifyResult: mongoCollection.BatchCommands.FindAndModifyCommand.FindAndModifyResult) = {
     val error = s"Error upserting database for $selector."
-    Logger.error(s"$error lastError: ${findAndModifyResult.lastError}")
+    appLogger.error(s"$error lastError: ${findAndModifyResult.lastError}")
     throw new RuntimeException(error)
   }
 

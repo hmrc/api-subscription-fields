@@ -18,7 +18,6 @@ package uk.gov.hmrc.apisubscriptionfields
 
 import org.scalatest.OptionValues
 import org.scalatest.BeforeAndAfterAll
-import play.api.Logger
 import play.api.libs.json.Json
 import play.api.mvc._
 import play.api.mvc.request.RequestTarget
@@ -28,13 +27,15 @@ import uk.gov.hmrc.apisubscriptionfields.model._
 import scala.concurrent.Future
 import scala.concurrent.Await
 import scala.concurrent.duration._
+import uk.gov.hmrc.apisubscriptionfields.utils.ApplicationLogger
 
 class ApiSubscriptionFieldsHappySpec extends AcceptanceTestSpec
   with OptionValues
   with JsonFormatters
   with SubscriptionFieldsTestData
   with FieldDefinitionTestData
-  with BeforeAndAfterAll {
+  with BeforeAndAfterAll 
+  with ApplicationLogger {
 
   override def beforeAll() {
     val putRequest = validDefinitionPutRequest(NelOfFieldDefinitions)
@@ -54,7 +55,7 @@ class ApiSubscriptionFieldsHappySpec extends AcceptanceTestSpec
 
   feature("Subscription-Fields") {
 
-    Logger.logger.info(s"App.mode = ${app.mode.toString}")
+    appLogger.logger.info(s"App.mode = ${app.mode.toString}")
 
     scenario("the API is called to store some values for a new subscription field") {
       val request: Request[AnyContentAsJson] =  createSubscriptionFieldsRequest()

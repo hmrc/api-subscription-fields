@@ -16,11 +16,11 @@
 
 package uk.gov.hmrc.apisubscriptionfields.repository
 
-import play.api.Logger
 import reactivemongo.api.commands.{UpdateWriteResult, WriteResult}
 import uk.gov.hmrc.apisubscriptionfields.model.Types.IsInsert
+import uk.gov.hmrc.apisubscriptionfields.utils.ApplicationLogger
 
-trait MongoErrorHandler {
+trait MongoErrorHandler extends ApplicationLogger {
 
   def handleDeleteError(result: WriteResult, exceptionMsg: => String): Boolean = {
     handleError(result, databaseAltered, exceptionMsg)
@@ -41,7 +41,7 @@ trait MongoErrorHandler {
     result.writeConcernError.fold(f(result)) {
       errMsg => {
         val errorMsg = s"""$exceptionMsg. $errMsg"""
-        Logger.error(errorMsg)
+        appLogger.error(errorMsg)
         throw new RuntimeException(errorMsg)
       }
     }

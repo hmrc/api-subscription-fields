@@ -2,9 +2,9 @@ import scoverage.ScoverageKeys._
   
 object ScoverageSettings {
   def apply() = Seq(
-    coverageMinimum := 94.00,
+    coverageMinimumStmtTotal := 94.00,
+    coverageMinimumBranchTotal := 94.00,
     coverageFailOnMinimum := true,
-    coverageHighlighting := true,
 
     // Semicolon-separated list of regexs matching classes to exclude
     coverageExcludedPackages := Seq(

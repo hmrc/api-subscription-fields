@@ -45,7 +45,7 @@ lazy val microservice = Project(appName, file("."))
   .settings(publishingSettings: _*)
   .settings(defaultSettings(): _*)
   .settings(acceptanceTestSettings: _*)
-  .settings(scalaVersion := "2.12.12")
+  .settings(scalaVersion := "2.12.15")
   .settings(ScoverageSettings())
   .settings(
     routesImport ++= Seq(
@@ -55,12 +55,12 @@ lazy val microservice = Project(appName, file("."))
   )
   .settings(
     libraryDependencies ++= AppDependencies(),
-    evictionWarningOptions in update := EvictionWarningOptions.default.withWarnScalaVersionEviction(false)
+    update / evictionWarningOptions := EvictionWarningOptions.default.withWarnScalaVersionEviction(false)
   )
   .settings(
-    fork in Test := false,
+    Test / fork := false,
     addTestReportOption(Test, "test-reports"),
-    parallelExecution in Test := false
+    Test / parallelExecution := false
   )
   .settings(majorVersion := 0)
   .settings(scalacOptions ++= Seq("-Ypartial-unification"))
@@ -69,9 +69,9 @@ lazy val acceptanceTestSettings =
   inConfig(AcceptanceTest)(Defaults.testSettings) ++
   inConfig(AcceptanceTest)(BloopDefaults.configSettings) ++
     Seq(
-      unmanagedSourceDirectories in AcceptanceTest := Seq(baseDirectory.value / "acceptance"),
-      fork in AcceptanceTest := false,
-      parallelExecution in AcceptanceTest := false,
+      AcceptanceTest / unmanagedSourceDirectories := Seq(baseDirectory.value / "acceptance"),
+      AcceptanceTest / fork := false,
+      AcceptanceTest / parallelExecution := false,
       addTestReportOption(AcceptanceTest, "acceptance-reports")
     )
 

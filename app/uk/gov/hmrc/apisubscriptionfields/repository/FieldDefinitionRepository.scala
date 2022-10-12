@@ -63,7 +63,6 @@ class ApiFieldDefinitionsMongoRepository @Inject() (mongo: MongoComponent)
     ))
     with ApiFieldDefinitionsRepository
     with ApplicationLogger {
-//    with MongoCrudHelper[ApiFieldDefinitions] {
 
   override lazy val collection: MongoCollection[ApiFieldDefinitions] =
     CollectionFactory

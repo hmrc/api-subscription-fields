@@ -174,14 +174,14 @@ class SubscriptionFieldsMongoRepository @Inject()(mongo: MongoComponent)
       equal("apiVersion", Codecs.toBson(apiVersion.value)))
     collection.deleteOne(query)
       .toFuture()
-      .map(_.wasAcknowledged())
+      .map(_.getDeletedCount > 0)
   }
 
   override def delete(clientId: ClientId): Future[Boolean] = {
     val query = equal("clientId", Codecs.toBson(clientId.value))
     collection.deleteMany(query)
       .toFuture()
-      .map(_.wasAcknowledged())
+      .map(_.getDeletedCount > 0)
   }
 
 }

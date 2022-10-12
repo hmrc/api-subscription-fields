@@ -99,12 +99,6 @@ class ApiFieldDefinitionsMongoRepository @Inject() (mongo: MongoComponent)
           newDefinitions <- collection.insertOne(definitions).toFuture().map(_ => definitions)
         } yield (newDefinitions, true)
     }
-
-//    collection
-//      .findOneAndUpdate(Filters.and(equal("apiContext", Codecs.toBson(definitions.apiContext.value)),
-//        equal("apiVersion", Codecs.toBson(definitions.apiVersion.value))),
-//        definitions
-//    ).map(_.asInstanceOf[ApiFieldDefinitions]).head
   }
 
   override def fetch(apiContext: ApiContext, apiVersion: ApiVersion): Future[Option[ApiFieldDefinitions]] = {
@@ -117,14 +111,10 @@ class ApiFieldDefinitionsMongoRepository @Inject() (mongo: MongoComponent)
   }
 
   override def delete(apiContext: ApiContext, apiVersion: ApiVersion): Future[Boolean] = {
+    appLogger.info(s"delete apiContext value ${apiContext.value} and apiVersion value ${apiVersion.value}")
     collection.deleteOne(Filters.and(equal("apiContext", Codecs.toBson(apiContext.value)),
       equal("apiVersion", Codecs.toBson(apiVersion.value))))
       .toFuture()
-      .map(_.wasAcknowledged())
-
-//      .head().map(result => result.getDeletedCount > 0) recoverWith {
-//      case NonFatal(e) =>
-//        appLogger.error(s"Could not delete entity for apiContext ${apiContext.value} and apiVersion ${apiVersion.value}")
-//        Future.successful(false)}
+      .map(_.getDeletedCount > 0)
   }
 }

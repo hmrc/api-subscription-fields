@@ -31,6 +31,7 @@ import uk.gov.hmrc.mongo.MongoComponent
 import scala.concurrent.{ExecutionContext, Future}
 import play.api.libs.json.Json
 import play.api.libs.json.JsObject
+import uk.gov.hmrc.apisubscriptionfields.utils.ApplicationLogger
 import uk.gov.hmrc.mongo.play.json.{Codecs, CollectionFactory, PlayMongoRepository}
 
 @ImplementedBy(classOf[SubscriptionFieldsMongoRepository])
@@ -79,6 +80,7 @@ class SubscriptionFieldsMongoRepository @Inject()(mongo: MongoComponent)
 //    ReactiveMongoFormats.objectIdFormats
 //  )
   with SubscriptionFieldsRepository
+  with ApplicationLogger
 //  with MongoCrudHelper[SubscriptionFields]
   with JsonFormatters {
 //
@@ -128,7 +130,6 @@ class SubscriptionFieldsMongoRepository @Inject()(mongo: MongoComponent)
       equal("apiContext", Codecs.toBson(subscription.apiContext.value)),
       equal("apiVersion", Codecs.toBson(subscription.apiVersion.value)))
 
-
     collection.find(query).headOption flatMap {
       case Some(_: SubscriptionFields) =>
         for {
@@ -143,21 +144,6 @@ class SubscriptionFieldsMongoRepository @Inject()(mongo: MongoComponent)
           newSubscriptionFields <- collection.insertOne(subscription).toFuture().map(_ => subscription)
         } yield (newSubscriptionFields, true)
     }
-//
-//
-//    saveAtomic(
-//      selector = subscriptionFieldsSelector(subscription),
-//      updateOperations = Json.obj(
-//        "$setOnInsert" -> Json.obj("fieldsId" -> subscription.fieldsId),
-//        "$set" -> Json.obj("fields" -> Json.toJson(subscription.fields))
-//      )
-//    )
-//
-//    collection
-//      .findOneAndReplace(Filters.and(equal("apiContext", Codecs.toBson(definitions.apiContext.value)),
-//        equal("apiVersion", Codecs.toBson(definitions.apiVersion.value))),
-//        definitions
-//      ).map(_.asInstanceOf[ApiFieldDefinitions]).head
   }
 
   override def fetch(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion): Future[Option[SubscriptionFields]] = {

@@ -45,11 +45,16 @@ class ApiFieldDefinitionsRepositorySpec extends AnyWordSpec
     await(repository.collection.drop.toFuture())
   }
 
+  override protected def afterEach() {
+    super.afterEach()
+    await(repository.collection.drop.toFuture())
+  }
+
   def collectionSize: Long = {
     await(repository.collection.countDocuments().toFuture())
   }
 
-  def createApiFieldDefinitions(apiContext: ApiContext = FakeContext) = ApiFieldDefinitions(apiContext = FakeContext, FakeVersion, NelOfFieldDefinitions)
+  def createApiFieldDefinitions(apiContext: ApiContext = FakeContext) = ApiFieldDefinitions(apiContext, FakeVersion, NelOfFieldDefinitions)
 
   trait Setup {
     val definitions: ApiFieldDefinitions = createApiFieldDefinitions()
@@ -62,7 +67,7 @@ class ApiFieldDefinitionsRepositorySpec extends AnyWordSpec
 
       await(repository.save(definitions)) shouldBe ((definitions, true))
       collectionSize shouldBe 1
-      await(repository.collection.find(selector(definitions)).toFuture()) shouldBe Some(definitions)
+      await(repository.collection.find(selector(definitions)).headOption()) shouldBe Some(definitions)
     }
 
     "update the record in the collection" in new Setup {
@@ -74,7 +79,7 @@ class ApiFieldDefinitionsRepositorySpec extends AnyWordSpec
       val edited = definitions.copy(fieldDefinitions = NelOfFieldDefinitions)
       await(repository.save(edited)) shouldBe ((edited, false))
       collectionSize shouldBe 1
-      await(repository.collection.find(selector(edited)).toFuture()) shouldBe Some(edited)
+      await(repository.collection.find(selector(edited)).headOption()) shouldBe Some(edited)
     }
   }
 

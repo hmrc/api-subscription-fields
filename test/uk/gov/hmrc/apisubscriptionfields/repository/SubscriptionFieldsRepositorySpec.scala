@@ -66,7 +66,7 @@ class SubscriptionFieldsRepositorySpec extends AsyncHmrcSpec
   private def selector(s: SubscriptionFields) = {
     Filters.and(Filters.equal("apiContext", Codecs.toBson(s.apiContext.value)),
       Filters.equal("apiVersion", Codecs.toBson(s.apiVersion.value)),
-      Filters.equal("clientId", Codecs.toBson(s.apiVersion.value)))
+      Filters.equal("clientId", Codecs.toBson(s.clientId.value)))
   }
 
   def saveByFieldsId(subscription: SubscriptionFields): Future[SubscriptionFields] = {
@@ -85,7 +85,7 @@ class SubscriptionFieldsRepositorySpec extends AsyncHmrcSpec
 
       await(repository.saveAtomic(apiSubscriptionFields)) shouldBe ((apiSubscriptionFields, true))
       collectionSize shouldBe 1
-      await(repository.collection.find(selector(apiSubscriptionFields)).toFuture()) shouldBe Some(apiSubscriptionFields)
+      await(repository.collection.find(selector(apiSubscriptionFields)).headOption()) shouldBe Some(apiSubscriptionFields)
     }
 
     "update the record in the collection" in {
@@ -97,7 +97,7 @@ class SubscriptionFieldsRepositorySpec extends AsyncHmrcSpec
       val edited = apiSubscriptionFields.copy(fields = Map(fieldN(4) -> "value_4"))
       await(repository.saveAtomic(edited)) shouldBe ((edited, false))
       collectionSize shouldBe 1
-      await(repository.collection.find(selector(edited)).toFuture()) shouldBe Some(edited)
+      await(repository.collection.find(selector(edited)).headOption()) shouldBe Some(edited)
     }
   }
 

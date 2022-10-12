@@ -17,7 +17,6 @@
 package uk.gov.hmrc.apisubscriptionfields
 
 import java.util.UUID
-
 import org.scalatest._
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 import play.api.Application
@@ -27,7 +26,6 @@ import play.api.mvc._
 import play.api.mvc.request.RequestTarget
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import play.modules.reactivemongo.ReactiveMongoComponent
 import uk.gov.hmrc.apisubscriptionfields.model._
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -35,6 +33,7 @@ import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
 import cats.data.NonEmptyList
 import uk.gov.hmrc.apisubscriptionfields.controller.Helper
+import uk.gov.hmrc.mongo.MongoComponent
 
 trait AcceptanceTestSpec extends FeatureSpec
   with GivenWhenThen
@@ -97,7 +96,7 @@ trait AcceptanceTestSpec extends FeatureSpec
   }
 
   private def dropDatabase(): Unit = {
-   await( app.injector.instanceOf[ReactiveMongoComponent].mongoConnector.db().drop())
+   await( app.injector.instanceOf[MongoComponent].database.drop().toFuture())
   }
 
   def createRequest(method: String, path: String) =

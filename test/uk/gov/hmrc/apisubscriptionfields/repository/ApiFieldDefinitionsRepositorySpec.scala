@@ -16,58 +16,53 @@
 
 package uk.gov.hmrc.apisubscriptionfields.repository
 
-import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach}
-import reactivemongo.api.DB
-import reactivemongo.bson.BSONDocument
-import uk.gov.hmrc.apisubscriptionfields.model.{ApiContext, ApiFieldDefinitions, JsonFormatters}
-import uk.gov.hmrc.apisubscriptionfields.FieldDefinitionTestData
-import uk.gov.hmrc.mongo.MongoSpecSupport
-import uk.gov.hmrc.apisubscriptionfields.AsyncHmrcSpec
+import org.mongodb.scala.model.Filters
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpec
+import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach, OptionValues}
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite
+import play.api.test.{DefaultAwaitTimeout, FutureAwaits}
+import uk.gov.hmrc.apisubscriptionfields.model.{ApiContext, ApiFieldDefinitions, ApiVersion, JsonFormatters}
+import uk.gov.hmrc.apisubscriptionfields.SubscriptionFieldsTestData.{FakeContext, FakeVersion, NelOfFieldDefinitions, uniqueApiContext}
+import uk.gov.hmrc.mongo.play.json.Codecs
+
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class ApiFieldDefinitionsRepositorySpec extends AsyncHmrcSpec
-  with BeforeAndAfterAll
-  with BeforeAndAfterEach
-  with MongoSpecSupport
-  with JsonFormatters
-  with FieldDefinitionTestData
-  { self =>
+class ApiFieldDefinitionsRepositorySpec extends AnyWordSpec
+  with GuiceOneAppPerSuite
+  with Matchers
+  with OptionValues
+  with DefaultAwaitTimeout
+  with FutureAwaits
+  with BeforeAndAfterEach {
 
-  private val mongoDbProvider = new MongoDbProvider {
-    override val mongo: () => DB = self.mongo
-  }
+  private val repository = app.injector.instanceOf[ApiFieldDefinitionsMongoRepository]
 
-  private val repository = new ApiFieldDefinitionsMongoRepository(mongoDbProvider)
+//    private val repository = new ApiFieldDefinitionsMongoRepository(mongoDbProvider)
 
-  override def beforeEach() {
+  override protected def beforeEach() {
     super.beforeEach()
-    await(repository.drop)
+    await(repository.collection.drop.toFuture())
   }
 
-  override def afterAll() {
-    super.afterAll()
-    await(repository.drop)
+  def collectionSize: Long = {
+    await(repository.collection.countDocuments().toFuture())
   }
 
-  private def collectionSize: Int = {
-    await(repository.collection.count())
-  }
+  def createApiFieldDefinitions(apiContext: ApiContext = FakeContext) = ApiFieldDefinitions(apiContext = FakeContext, FakeVersion, NelOfFieldDefinitions)
 
-  private def createApiFieldDefinitions = ApiFieldDefinitions(FakeContext, FakeVersion, NelOfFieldDefinitions)
-
-  private trait Setup {
-    val definitions: ApiFieldDefinitions = createApiFieldDefinitions
+  trait Setup {
+    val definitions: ApiFieldDefinitions = createApiFieldDefinitions()
   }
 
   "save" should {
-    import reactivemongo.play.json._
 
     "insert the record in the collection" in new Setup {
       collectionSize shouldBe 0
 
       await(repository.save(definitions)) shouldBe ((definitions, true))
       collectionSize shouldBe 1
-      await(repository.collection.find(selector(definitions)).one[ApiFieldDefinitions]) shouldBe Some(definitions)
+      await(repository.collection.find(selector(definitions)).toFuture()) shouldBe Some(definitions)
     }
 
     "update the record in the collection" in new Setup {
@@ -79,7 +74,7 @@ class ApiFieldDefinitionsRepositorySpec extends AsyncHmrcSpec
       val edited = definitions.copy(fieldDefinitions = NelOfFieldDefinitions)
       await(repository.save(edited)) shouldBe ((edited, false))
       collectionSize shouldBe 1
-      await(repository.collection.find(selector(edited)).one[ApiFieldDefinitions]) shouldBe Some(edited)
+      await(repository.collection.find(selector(edited)).toFuture()) shouldBe Some(edited)
     }
   }
 
@@ -120,7 +115,7 @@ class ApiFieldDefinitionsRepositorySpec extends AsyncHmrcSpec
 
   "delete" should {
     "remove the record with a specific fields definition" in {
-      val definitions = createApiFieldDefinitions
+      val definitions = createApiFieldDefinitions()
 
       await(repository.save(definitions))
       collectionSize shouldBe 1
@@ -130,7 +125,7 @@ class ApiFieldDefinitionsRepositorySpec extends AsyncHmrcSpec
     }
 
     "not alter the collection for unknown fields definition" in {
-      await(repository.save(createApiFieldDefinitions))
+      await(repository.save(createApiFieldDefinitions()))
       collectionSize shouldBe 1
 
       await(repository.delete(ApiContext("DOES_NOT_EXIST"), FakeVersion)) shouldBe false
@@ -150,6 +145,7 @@ class ApiFieldDefinitionsRepositorySpec extends AsyncHmrcSpec
   }
 
   private def selector(fd: ApiFieldDefinitions) = {
-    BSONDocument("apiContext" -> fd.apiContext.value, "apiVersion" -> fd.apiVersion.value)
+    Filters.and(Filters.equal("apiContext", Codecs.toBson(fd.apiContext.value)),
+      Filters.equal("apiVersion", Codecs.toBson(fd.apiVersion.value)))
   }
 }

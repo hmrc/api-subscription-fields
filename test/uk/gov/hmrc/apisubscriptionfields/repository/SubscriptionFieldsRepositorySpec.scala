@@ -17,48 +17,41 @@
 package uk.gov.hmrc.apisubscriptionfields.repository
 
 import java.util.UUID
-
-import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach}
-import reactivemongo.api.DB
-import reactivemongo.bson._
+import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach, OptionValues}
 import uk.gov.hmrc.apisubscriptionfields.model._
 import Types._
+import org.mongodb.scala.model.Updates.set
+import org.mongodb.scala.model.{Filters, FindOneAndUpdateOptions, ReturnDocument}
+import org.scalatest.matchers.should.Matchers
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite
+import play.api.test.{DefaultAwaitTimeout, FutureAwaits}
 import uk.gov.hmrc.apisubscriptionfields.SubscriptionFieldsTestData
-import uk.gov.hmrc.mongo.MongoSpecSupport
 import uk.gov.hmrc.apisubscriptionfields.AsyncHmrcSpec
+import uk.gov.hmrc.apisubscriptionfields.SubscriptionFieldsTestData.{FakeClientId, FakeClientId2, FakeContext, FakeContext2, FakeVersion, createSubscriptionFieldsWithApiContext, fakeRawContext2, fieldN, uniqueClientId}
+import uk.gov.hmrc.mongo.play.json.Codecs
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class SubscriptionFieldsRepositorySpec extends AsyncHmrcSpec
-  with BeforeAndAfterAll
-  with BeforeAndAfterEach
-  with MongoSpecSupport
-  with JsonFormatters
-  with SubscriptionFieldsTestData { self =>
+  with GuiceOneAppPerSuite
+  with Matchers
+  with OptionValues
+  with DefaultAwaitTimeout
+  with FutureAwaits
+  with BeforeAndAfterEach {
 
-  private val mongoDbProvider = new MongoDbProvider {
-    override val mongo: () => DB = self.mongo
-  }
+//  private val mongoDbProvider = new MongoDbProvider {
+//    override val mongo: () => DB = self.mongo
+//  }
+  private val repository = app.injector.instanceOf[SubscriptionFieldsMongoRepository]
 
-  private val repository = new SubscriptionFieldsMongoRepository(mongoDbProvider) {
 
     import play.api.libs.json._
 
-    def saveByFieldsId(subscription: SubscriptionFields): Future[(SubscriptionFields, IsInsert)] = {
-      save(subscription, Json.obj("fieldsId" -> subscription.fieldsId.value))
-    }
-
-  }
-
   override def beforeEach() {
     super.beforeEach()
-    await(repository.drop)
-  }
-
-  override def afterAll() {
-    super.afterAll()
-    await(repository.drop)
+    await(repository.collection.drop.toFuture())
   }
 
   private def createApiSubscriptionFields(clientId: ClientId = FakeClientId): SubscriptionFields = {
@@ -66,25 +59,33 @@ class SubscriptionFieldsRepositorySpec extends AsyncHmrcSpec
     SubscriptionFields(clientId, FakeContext, FakeVersion, SubscriptionFieldsId(UUID.randomUUID()), fields)
   }
 
-  private def collectionSize: Int = {
-    await(repository.collection.count())
+  private def collectionSize: Long = {
+    await(repository.collection.countDocuments().toFuture())
   }
 
   private def selector(s: SubscriptionFields) = {
-    BSONDocument("clientId" -> s.clientId.value, "apiContext" -> s.apiContext.value, "apiVersion" -> s.apiVersion.value)
+    Filters.and(Filters.equal("apiContext", Codecs.toBson(s.apiContext.value)),
+      Filters.equal("apiVersion", Codecs.toBson(s.apiVersion.value)),
+      Filters.equal("clientId", Codecs.toBson(s.apiVersion.value)))
+  }
+
+  def saveByFieldsId(subscription: SubscriptionFields): Future[SubscriptionFields] = {
+    val query = Filters.equal("fieldsId", Codecs.toBson(subscription.fieldsId.value))
+    repository.collection.findOneAndUpdate(filter = query,
+      update = set("fieldsId", Codecs.toBson(subscription.fieldsId.value)),
+      options = FindOneAndUpdateOptions().upsert(false).returnDocument(ReturnDocument.AFTER)
+    ).toFuture()
   }
 
   "saveAtomic" should {
     val apiSubscriptionFields = createApiSubscriptionFields()
-
-    import reactivemongo.play.json._
 
     "insert the record in the collection" in {
       collectionSize shouldBe 0
 
       await(repository.saveAtomic(apiSubscriptionFields)) shouldBe ((apiSubscriptionFields, true))
       collectionSize shouldBe 1
-      await(repository.collection.find(selector(apiSubscriptionFields)).one[SubscriptionFields]) shouldBe Some(apiSubscriptionFields)
+      await(repository.collection.find(selector(apiSubscriptionFields)).toFuture()) shouldBe Some(apiSubscriptionFields)
     }
 
     "update the record in the collection" in {
@@ -96,7 +97,7 @@ class SubscriptionFieldsRepositorySpec extends AsyncHmrcSpec
       val edited = apiSubscriptionFields.copy(fields = Map(fieldN(4) -> "value_4"))
       await(repository.saveAtomic(edited)) shouldBe ((edited, false))
       collectionSize shouldBe 1
-      await(repository.collection.find(selector(edited)).one[SubscriptionFields]) shouldBe Some(edited)
+      await(repository.collection.find(selector(edited)).toFuture()) shouldBe Some(edited)
     }
   }
 
@@ -239,7 +240,7 @@ class SubscriptionFieldsRepositorySpec extends AsyncHmrcSpec
       await(repository.saveAtomic(apiSubscription))
       collectionSize shouldBe 1
 
-      await(repository.saveByFieldsId(apiSubscription.copy(apiVersion = ApiVersion("2.2"))))
+      await(saveByFieldsId(apiSubscription.copy(apiVersion = ApiVersion("2.2"))))
       collectionSize shouldBe 1
     }
 

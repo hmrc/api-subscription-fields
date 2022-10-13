@@ -38,8 +38,6 @@ class ApiFieldDefinitionsRepositorySpec extends AnyWordSpec
 
   private val repository = app.injector.instanceOf[ApiFieldDefinitionsMongoRepository]
 
-//    private val repository = new ApiFieldDefinitionsMongoRepository(mongoDbProvider)
-
   override protected def beforeEach() {
     super.beforeEach()
     await(repository.collection.drop.toFuture())

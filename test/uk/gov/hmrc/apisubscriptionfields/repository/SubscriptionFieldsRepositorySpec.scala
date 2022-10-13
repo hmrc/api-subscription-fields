@@ -25,7 +25,6 @@ import org.mongodb.scala.model.{Filters, FindOneAndUpdateOptions, ReturnDocument
 import org.scalatest.matchers.should.Matchers
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.test.{DefaultAwaitTimeout, FutureAwaits}
-import uk.gov.hmrc.apisubscriptionfields.SubscriptionFieldsTestData
 import uk.gov.hmrc.apisubscriptionfields.AsyncHmrcSpec
 import uk.gov.hmrc.apisubscriptionfields.SubscriptionFieldsTestData.{FakeClientId, FakeClientId2, FakeContext, FakeContext2, FakeVersion, createSubscriptionFieldsWithApiContext, fakeRawContext2, fieldN, uniqueClientId}
 import uk.gov.hmrc.mongo.play.json.Codecs
@@ -41,9 +40,6 @@ class SubscriptionFieldsRepositorySpec extends AsyncHmrcSpec
   with FutureAwaits
   with BeforeAndAfterEach {
 
-//  private val mongoDbProvider = new MongoDbProvider {
-//    override val mongo: () => DB = self.mongo
-//  }
   private val repository = app.injector.instanceOf[SubscriptionFieldsMongoRepository]
 
 

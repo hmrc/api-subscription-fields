@@ -71,42 +71,10 @@ class SubscriptionFieldsMongoRepository @Inject()(mongo: MongoComponent)
           .name("fieldsIdIndex")
           .unique(true))
     ))
-//    {
 
-//  extends ReactiveRepository[SubscriptionFields, BSONObjectID](
-//    "subscriptionFields",
-//    mongoDbProvider.mongo,
-//    JsonFormatters.SubscriptionFieldsJF,
-//    ReactiveMongoFormats.objectIdFormats
-//  )
   with SubscriptionFieldsRepository
   with ApplicationLogger
-//  with MongoCrudHelper[SubscriptionFields]
   with JsonFormatters {
-//
-//  override val mongoCollection: JSONCollection = collection
-//
-//  override def indexes = Seq(
-//    createCompoundIndex(
-//      indexFieldMappings = Seq(
-//        "clientId"   -> IndexType.Ascending,
-//        "apiContext" -> IndexType.Ascending,
-//        "apiVersion" -> IndexType.Ascending
-//      ),
-//      indexName = Some("clientId-apiContext-apiVersion_Index"),
-//      isUnique = true
-//    ),
-//    createSingleFieldAscendingIndex(
-//      indexFieldKey = "clientId",
-//      indexName = Some("clientIdIndex"),
-//      isUnique = false
-//    ),
-//    createSingleFieldAscendingIndex(
-//      indexFieldKey = "fieldsId",
-//      indexName = Some("fieldsIdIndex"),
-//      isUnique = true
-//    )
-//  )
 
   override lazy val collection: MongoCollection[SubscriptionFields] =
     CollectionFactory

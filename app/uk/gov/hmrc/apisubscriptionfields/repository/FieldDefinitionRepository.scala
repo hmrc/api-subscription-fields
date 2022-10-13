@@ -33,7 +33,6 @@ import uk.gov.hmrc.mongo.play.json.{Codecs, CollectionFactory, PlayMongoReposito
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.control.NonFatal
 
 @ImplementedBy(classOf[ApiFieldDefinitionsMongoRepository])
 trait ApiFieldDefinitionsRepository {
@@ -110,7 +109,6 @@ class ApiFieldDefinitionsMongoRepository @Inject() (mongo: MongoComponent)
   }
 
   override def delete(apiContext: ApiContext, apiVersion: ApiVersion): Future[Boolean] = {
-    appLogger.info(s"delete apiContext value ${apiContext.value} and apiVersion value ${apiVersion.value}")
     collection.deleteOne(Filters.and(equal("apiContext", Codecs.toBson(apiContext.value)),
       equal("apiVersion", Codecs.toBson(apiVersion.value))))
       .toFuture()

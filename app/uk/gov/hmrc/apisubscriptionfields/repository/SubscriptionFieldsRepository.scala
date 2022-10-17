@@ -17,19 +17,22 @@
 package uk.gov.hmrc.apisubscriptionfields.repository
 
 import javax.inject.{Inject, Singleton}
-
 import com.google.inject.ImplementedBy
-import reactivemongo.api.indexes.IndexType
-import reactivemongo.bson.BSONObjectID
-import reactivemongo.play.json._
-import reactivemongo.play.json.collection.JSONCollection
 import uk.gov.hmrc.apisubscriptionfields.model._
 import Types.IsInsert
-import uk.gov.hmrc.mongo.ReactiveRepository
-import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
-import scala.concurrent.Future
+import akka.stream.Materializer
+import org.bson.codecs.configuration.CodecRegistries.{fromCodecs, fromRegistries}
+import org.mongodb.scala.model.Filters.{and, equal}
+import org.mongodb.scala.{MongoClient, MongoCollection}
+import org.mongodb.scala.model.{Filters, IndexModel, IndexOptions}
+import org.mongodb.scala.model.Indexes.ascending
+import uk.gov.hmrc.mongo.MongoComponent
+
+import scala.concurrent.{ExecutionContext, Future}
 import play.api.libs.json.Json
 import play.api.libs.json.JsObject
+import uk.gov.hmrc.apisubscriptionfields.utils.ApplicationLogger
+import uk.gov.hmrc.mongo.play.json.{Codecs, CollectionFactory, PlayMongoRepository}
 
 @ImplementedBy(classOf[SubscriptionFieldsMongoRepository])
 trait SubscriptionFieldsRepository {
@@ -48,89 +51,105 @@ trait SubscriptionFieldsRepository {
 
 
 @Singleton
-class SubscriptionFieldsMongoRepository @Inject()(mongoDbProvider: MongoDbProvider)
-  extends ReactiveRepository[SubscriptionFields, BSONObjectID](
-    "subscriptionFields",
-    mongoDbProvider.mongo,
-    JsonFormatters.SubscriptionFieldsJF,
-    ReactiveMongoFormats.objectIdFormats
-  )
+class SubscriptionFieldsMongoRepository @Inject()(mongo: MongoComponent)
+                                                 (implicit ec: ExecutionContext, val mat: Materializer)
+  extends PlayMongoRepository[SubscriptionFields](
+    collectionName = "subscriptionFields",
+    mongoComponent = mongo,
+    domainFormat = JsonFormatters.SubscriptionFieldsJF,
+    indexes = Seq(
+      IndexModel(ascending(List("clientId", "apiContext", "apiVersion"): _*),
+        IndexOptions()
+          .name("clientId-apiContext-apiVersion_Index")
+          .unique(true)),
+      IndexModel(ascending("clientId"),
+        IndexOptions()
+          .name("clientIdIndex")
+          .unique(false)),
+      IndexModel(ascending("fieldsId"),
+        IndexOptions()
+          .name("fieldsIdIndex")
+          .unique(true))
+    ))
+
   with SubscriptionFieldsRepository
-  with MongoCrudHelper[SubscriptionFields]
+  with ApplicationLogger
   with JsonFormatters {
 
-  override val mongoCollection: JSONCollection = collection
+  override lazy val collection: MongoCollection[SubscriptionFields] =
+    CollectionFactory
+      .collection(mongo.database, collectionName, domainFormat)
+      .withCodecRegistry(
+        fromRegistries(
+          fromCodecs(
+            Codecs.playFormatCodec(domainFormat),
+            Codecs.playFormatCodec(JsonFormatters.ApiContextJF),
+            Codecs.playFormatCodec(JsonFormatters.ApiVersionJF),
+            Codecs.playFormatCodec(JsonFormatters.SubscriptionFieldsIdjsonFormat),
+            Codecs.playFormatCodec(JsonFormatters.ValidationJF)
+          ),
+          MongoClient.DEFAULT_CODEC_REGISTRY
+        )
+      )
 
-  override def indexes = Seq(
-    createCompoundIndex(
-      indexFieldMappings = Seq(
-        "clientId"   -> IndexType.Ascending,
-        "apiContext" -> IndexType.Ascending,
-        "apiVersion" -> IndexType.Ascending
-      ),
-      indexName = Some("clientId-apiContext-apiVersion_Index"),
-      isUnique = true
-    ),
-    createSingleFieldAscendingIndex(
-      indexFieldKey = "clientId",
-      indexName = Some("clientIdIndex"),
-      isUnique = false
-    ),
-    createSingleFieldAscendingIndex(
-      indexFieldKey = "fieldsId",
-      indexName = Some("fieldsIdIndex"),
-      isUnique = true
-    )
-  )
 
   override def saveAtomic(subscription: SubscriptionFields): Future[(SubscriptionFields, IsInsert)] = {
-    saveAtomic(
-      selector = subscriptionFieldsSelector(subscription),
-      updateOperations = Json.obj(
-        "$setOnInsert" -> Json.obj("fieldsId" -> subscription.fieldsId),
-        "$set" -> Json.obj("fields" -> Json.toJson(subscription.fields))
-      )
-    )
+    val query = and(equal("clientId", Codecs.toBson(subscription.clientId.value)),
+      equal("apiContext", Codecs.toBson(subscription.apiContext.value)),
+      equal("apiVersion", Codecs.toBson(subscription.apiVersion.value)))
+
+    collection.find(query).headOption flatMap {
+      case Some(_: SubscriptionFields) =>
+        for {
+          updatedDefinitions <- collection.replaceOne(
+            filter = query,
+            replacement = subscription
+          ).toFuture().map(_ => subscription)
+        } yield (updatedDefinitions, false)
+
+      case None =>
+        for {
+          newSubscriptionFields <- collection.insertOne(subscription).toFuture().map(_ => subscription)
+        } yield (newSubscriptionFields, true)
+    }
   }
 
   override def fetch(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion): Future[Option[SubscriptionFields]] = {
-    getOne(subscriptionFieldsSelector(clientId, apiContext, apiVersion))
+    val query = and(equal("clientId", Codecs.toBson(clientId.value)),
+      equal("apiContext", Codecs.toBson(apiContext.value)),
+      equal("apiVersion", Codecs.toBson(apiVersion.value)))
+
+    collection.find(query).headOption()
   }
 
   override def fetchByFieldsId(fieldsId: SubscriptionFieldsId): Future[Option[SubscriptionFields]] = {
-    getOne(fieldsIdSelector(fieldsId))
+    val query = and(equal("fieldsId", Codecs.toBson(fieldsId.value)))
+    collection.find(query).headOption()
   }
 
   override def fetchByClientId(clientId: ClientId): Future[List[SubscriptionFields]] = {
-    getMany(clientIdSelector(clientId))
+    val query = equal("clientId", Codecs.toBson(clientId.value))
+    collection.find(query).toFuture().map(_.toList)
   }
 
   override def fetchAll: Future[List[SubscriptionFields]] = {
-    getMany(Json.obj())
+    collection.find().toFuture().map(_.toList)
   }
 
   override def delete(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion): Future[Boolean] = {
-    deleteOne(subscriptionFieldsSelector(clientId, apiContext, apiVersion))
+    val query = and(equal("clientId", Codecs.toBson(clientId.value)),
+      equal("apiContext", Codecs.toBson(apiContext.value)),
+      equal("apiVersion", Codecs.toBson(apiVersion.value)))
+    collection.deleteOne(query)
+      .toFuture()
+      .map(_.getDeletedCount > 0)
   }
 
   override def delete(clientId: ClientId): Future[Boolean] = {
-    deleteMany(clientIdSelector(clientId))
+    val query = equal("clientId", Codecs.toBson(clientId.value))
+    collection.deleteMany(query)
+      .toFuture()
+      .map(_.getDeletedCount > 0)
   }
-
-  private def clientIdSelector(clientId: ClientId) = Json.obj("clientId" -> clientId.value)
-
-  private def fieldsIdSelector(fieldsId: SubscriptionFieldsId) = Json.obj("fieldsId" -> fieldsId.value)
-
-  private def subscriptionFieldsSelector(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion): JsObject = {
-    Json.obj(
-      "clientId"   -> clientId.value,
-      "apiContext" -> apiContext.value,
-      "apiVersion" -> apiVersion.value
-    )
-  }
-
-  private def subscriptionFieldsSelector(subscription: SubscriptionFields): JsObject = subscriptionFieldsSelector(
-    subscription.clientId, subscription.apiContext, subscription.apiVersion
-  )
 
 }

@@ -51,8 +51,6 @@ object RequestHeaders {
 
   val CONTENT_TYPE_HEADER_INVALID: (String, String) = CONTENT_TYPE -> "application/vnd.hmrc.1.0+json"
 
-  val CONTENT_TYPE_HEADER_INVALID2: (String, String) = CONTENT_TYPE -> "application/vnd.hmrc.1.0+json"
-
   val ACCEPT_HMRC_JSON_HEADER: (String, String) = ACCEPT -> "application/vnd.hmrc.1.0+json"
 
   val ACCEPT_HEADER_INVALID: (String, String) = ACCEPT -> MimeTypes.JSON

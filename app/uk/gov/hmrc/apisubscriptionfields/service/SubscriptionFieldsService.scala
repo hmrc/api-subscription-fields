@@ -82,14 +82,17 @@ class SubscriptionFieldsService @Inject() (
     val foFieldDefinitions: Future[Option[NonEmptyList[FieldDefinition]]] =
       apiFieldDefinitionsService.get(apiContext, apiVersion).map(_.map(_.fieldDefinitions))
 
-    foFieldDefinitions.flatMap( _ match {
-      case None                   => successful(NotFoundSubsFieldsUpsertResponse)
-      case Some(fieldDefinitions) => {
-        validate(fields, fieldDefinitions) match {
-          case ValidSubsFieldValidationResponse                       => handlePPNS(clientId, apiContext, apiVersion, fieldDefinitions, fields)
-          case InvalidSubsFieldValidationResponse(fieldErrorMessages) => successful(FailedValidationSubsFieldsUpsertResponse(fieldErrorMessages))
-        }
-      }
+    get(clientId, apiContext, apiVersion).flatMap(_ match {
+      case Some(sfields) if (sfields.fields == fields) => Future.successful(SuccessfulSubsFieldsUpsertResponse(sfields, false))
+      case _ =>
+        foFieldDefinitions.flatMap( _ match {
+          case None                   => successful(NotFoundSubsFieldsUpsertResponse)
+          case Some(fieldDefinitions) =>
+            validate(fields, fieldDefinitions) match {
+              case ValidSubsFieldValidationResponse                       => handlePPNS(clientId, apiContext, apiVersion, fieldDefinitions, fields)
+              case InvalidSubsFieldValidationResponse(fieldErrorMessages) => successful(FailedValidationSubsFieldsUpsertResponse(fieldErrorMessages))
+            }
+        })
     })
   }
 

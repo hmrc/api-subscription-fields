@@ -37,10 +37,10 @@ class UUIDCreator {
 
 @Singleton
 class SubscriptionFieldsService @Inject() (
-                                          repository: SubscriptionFieldsRepository,
-                                          uuidCreator: UUIDCreator,
-                                          apiFieldDefinitionsService: ApiFieldDefinitionsService,
-                                          pushPullNotificationService: PushPullNotificationService) {
+                                            repository: SubscriptionFieldsRepository,
+                                            uuidCreator: UUIDCreator,
+                                            apiFieldDefinitionsService: ApiFieldDefinitionsService,
+                                            pushPullNotificationService: PushPullNotificationService) {
 
 
   private def validate(fields: Fields, fieldDefinitions: NonEmptyList[FieldDefinition]): SubsFieldValidationResponse = {
@@ -82,14 +82,17 @@ class SubscriptionFieldsService @Inject() (
     val foFieldDefinitions: Future[Option[NonEmptyList[FieldDefinition]]] =
       apiFieldDefinitionsService.get(apiContext, apiVersion).map(_.map(_.fieldDefinitions))
 
-    foFieldDefinitions.flatMap( _ match {
-      case None                   => successful(NotFoundSubsFieldsUpsertResponse)
-      case Some(fieldDefinitions) => {
-        validate(fields, fieldDefinitions) match {
-          case ValidSubsFieldValidationResponse                       => handlePPNS(clientId, apiContext, apiVersion, fieldDefinitions, fields)
-          case InvalidSubsFieldValidationResponse(fieldErrorMessages) => successful(FailedValidationSubsFieldsUpsertResponse(fieldErrorMessages))
-        }
-      }
+    get(clientId, apiContext, apiVersion).flatMap(_ match {
+      case Some(sfields) if (sfields.fields == fields) => Future.successful(SuccessfulSubsFieldsUpsertResponse(sfields, false))
+      case _ =>
+        foFieldDefinitions.flatMap( _ match {
+          case None                   => successful(NotFoundSubsFieldsUpsertResponse)
+          case Some(fieldDefinitions) =>
+            validate(fields, fieldDefinitions) match {
+              case ValidSubsFieldValidationResponse                       => handlePPNS(clientId, apiContext, apiVersion, fieldDefinitions, fields)
+              case InvalidSubsFieldValidationResponse(fieldErrorMessages) => successful(FailedValidationSubsFieldsUpsertResponse(fieldErrorMessages))
+            }
+        })
     })
   }
 
@@ -117,17 +120,17 @@ class SubscriptionFieldsService @Inject() (
     (for {
       fields <- repository.fetchByClientId(clientId)
     } yield fields)
-    .map {
-      case Nil => None
-      case fs  => Some(BulkSubscriptionFieldsResponse(subscriptions = fs))
-    }
+      .map {
+        case Nil => None
+        case fs  => Some(BulkSubscriptionFieldsResponse(subscriptions = fs))
+      }
   }
 
   def getAll: Future[BulkSubscriptionFieldsResponse] = {
     (for {
       fields <- repository.fetchAll
     } yield fields)
-    .map (BulkSubscriptionFieldsResponse(_))
+      .map (BulkSubscriptionFieldsResponse(_))
   }
 
 }

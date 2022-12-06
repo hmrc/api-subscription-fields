@@ -212,7 +212,6 @@ class SubscriptionFieldsServiceSpec extends AsyncHmrcSpec with SubscriptionField
       result shouldBe FailedValidationSubsFieldsUpsertResponse(Map(PPNSFieldFieldName -> "An Error Occurred"))
 
       verify(mockPushPullNotificationService).subscribeToPPNS(eqTo(FakeClientId), eqTo(FakeContext), eqTo(FakeVersion), any, any[FieldDefinition])(any)
-      //verifyZeroInteractions(mockSubscriptionFieldsRepository)
     }
 
     "return FailedValidationSubsFieldsUpsertResponse when updating an existing api subscription fields and PPNS field fails validation" in new Setup {
@@ -224,7 +223,6 @@ class SubscriptionFieldsServiceSpec extends AsyncHmrcSpec with SubscriptionField
       result shouldBe FailedValidationSubsFieldsUpsertResponse(Map(PPNSFieldFieldName -> "CallBackUrl Validation"))
 
       verifyZeroInteractions(mockPushPullNotificationService)
-      //verifyZeroInteractions(mockSubscriptionFieldsRepository)
     }
 
     "return true when creating a new api subscription fields" in new Setup {

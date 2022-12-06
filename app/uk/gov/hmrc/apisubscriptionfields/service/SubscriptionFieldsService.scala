@@ -37,10 +37,10 @@ class UUIDCreator {
 
 @Singleton
 class SubscriptionFieldsService @Inject() (
-                                            repository: SubscriptionFieldsRepository,
-                                            uuidCreator: UUIDCreator,
-                                            apiFieldDefinitionsService: ApiFieldDefinitionsService,
-                                            pushPullNotificationService: PushPullNotificationService) {
+                                          repository: SubscriptionFieldsRepository,
+                                          uuidCreator: UUIDCreator,
+                                          apiFieldDefinitionsService: ApiFieldDefinitionsService,
+                                          pushPullNotificationService: PushPullNotificationService) {
 
 
   private def validate(fields: Fields, fieldDefinitions: NonEmptyList[FieldDefinition]): SubsFieldValidationResponse = {
@@ -120,17 +120,17 @@ class SubscriptionFieldsService @Inject() (
     (for {
       fields <- repository.fetchByClientId(clientId)
     } yield fields)
-      .map {
-        case Nil => None
-        case fs  => Some(BulkSubscriptionFieldsResponse(subscriptions = fs))
-      }
+    .map {
+      case Nil => None
+      case fs  => Some(BulkSubscriptionFieldsResponse(subscriptions = fs))
+    }
   }
 
   def getAll: Future[BulkSubscriptionFieldsResponse] = {
     (for {
       fields <- repository.fetchAll
     } yield fields)
-      .map (BulkSubscriptionFieldsResponse(_))
+    .map (BulkSubscriptionFieldsResponse(_))
   }
 
 }

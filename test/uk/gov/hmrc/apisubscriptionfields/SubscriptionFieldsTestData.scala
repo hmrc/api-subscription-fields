@@ -30,7 +30,8 @@ trait SubscriptionFieldsTestData extends FieldDefinitionTestData with Validation
 
   final val EmptyResponse: Future[Option[SubscriptionFields]] = Future.successful(None)
   final val FakeSubscriptionFields: Map[FieldName, String] = Map(fieldN(1) -> "X", fieldN(2) -> "Y")
-  final val SubscriptionFieldsMatchRegexValidation: Fields = Map(AlphanumericFieldName -> "ABC123abc", PasswordFieldName -> "Qw12@erty")
+  final val SubscriptionFieldsMatchRegexValidation: Fields = Map(AlphanumericFieldName -> "ABC123ab", PasswordFieldName -> "Qw12@ert")
+  final val SubscriptionFieldsNonMatchRegexValidation: Fields = Map(AlphanumericFieldName -> "ABC123a", PasswordFieldName -> "Qw12@er")
   final val SubscriptionFieldsMatchRegexValidationPPNS: Fields = Map(AlphanumericFieldName -> "ABC123abc", PasswordFieldName -> "Qw12@erty", PPNSFieldFieldName -> "https://www.mycallbackurl.com")
   final val SubscriptionFieldsDoNotMatchRegexValidationPPNS: Fields = Map(AlphanumericFieldName -> "ABC123abc", PasswordFieldName -> "Qw12@erty", PPNSFieldFieldName -> "foo")
   final val SubscriptionFieldsEmptyValueRegexValidationPPNS: Fields = Map(AlphanumericFieldName -> "ABC123abc", PasswordFieldName -> "Qw12@erty", PPNSFieldFieldName -> "")
@@ -70,4 +71,3 @@ trait SubscriptionFieldsTestData extends FieldDefinitionTestData with Validation
 }
 
 object SubscriptionFieldsTestData extends SubscriptionFieldsTestData
-

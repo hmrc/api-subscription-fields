@@ -16,28 +16,28 @@
 
 package uk.gov.hmrc.apisubscriptionfields.repository
 
+import java.util.UUID
+
 import javax.inject.{Inject, Singleton}
 import com.google.inject.ImplementedBy
 import uk.gov.hmrc.apisubscriptionfields.model._
-import Types.IsInsert
+import Types.{Fields, IsInsert}
 import akka.stream.Materializer
 import org.bson.codecs.configuration.CodecRegistries.{fromCodecs, fromRegistries}
 import org.mongodb.scala.model.Filters.{and, equal}
 import org.mongodb.scala.{MongoClient, MongoCollection}
-import org.mongodb.scala.model.{Filters, IndexModel, IndexOptions}
+import org.mongodb.scala.model.{IndexModel, IndexOptions}
 import org.mongodb.scala.model.Indexes.ascending
 import uk.gov.hmrc.mongo.MongoComponent
 
 import scala.concurrent.{ExecutionContext, Future}
-import play.api.libs.json.Json
-import play.api.libs.json.JsObject
 import uk.gov.hmrc.apisubscriptionfields.utils.ApplicationLogger
 import uk.gov.hmrc.mongo.play.json.{Codecs, CollectionFactory, PlayMongoRepository}
 
 @ImplementedBy(classOf[SubscriptionFieldsMongoRepository])
 trait SubscriptionFieldsRepository {
 
-  def saveAtomic(subscription: SubscriptionFields): Future[(SubscriptionFields, IsInsert)]
+  def saveAtomic(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion, fields: Fields): Future[(SubscriptionFields, IsInsert)]
 
   def fetch(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion): Future[Option[SubscriptionFields]]
   def fetchByFieldsId(fieldsId: SubscriptionFieldsId): Future[Option[SubscriptionFields]]
@@ -49,9 +49,13 @@ trait SubscriptionFieldsRepository {
   def delete(clientId: ClientId): Future[Boolean]
 }
 
+@Singleton
+class UUIDCreator {
+  def uuid(): UUID = UUID.randomUUID()
+}
 
 @Singleton
-class SubscriptionFieldsMongoRepository @Inject()(mongo: MongoComponent)
+class SubscriptionFieldsMongoRepository @Inject()(mongo: MongoComponent, uuidCreator: UUIDCreator)
                                                  (implicit ec: ExecutionContext, val mat: Materializer)
   extends PlayMongoRepository[SubscriptionFields](
     collectionName = "subscriptionFields",
@@ -93,21 +97,24 @@ class SubscriptionFieldsMongoRepository @Inject()(mongo: MongoComponent)
       )
 
 
-  override def saveAtomic(subscription: SubscriptionFields): Future[(SubscriptionFields, IsInsert)] = {
-    val query = and(equal("clientId", Codecs.toBson(subscription.clientId.value)),
-      equal("apiContext", Codecs.toBson(subscription.apiContext.value)),
-      equal("apiVersion", Codecs.toBson(subscription.apiVersion.value)))
+  override def saveAtomic(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion, fields: Fields): Future[(SubscriptionFields, IsInsert)] = {
+    val query = and(equal("clientId", Codecs.toBson(clientId.value)),
+      equal("apiContext", Codecs.toBson(apiContext.value)),
+      equal("apiVersion", Codecs.toBson(apiVersion.value)))
 
     collection.find(query).headOption flatMap {
-      case Some(_: SubscriptionFields) =>
+      case Some(subscription: SubscriptionFields) =>
+        val updatedSubscription = subscription.copy(fields = fields)
         for {
           updatedDefinitions <- collection.replaceOne(
             filter = query,
-            replacement = subscription
-          ).toFuture().map(_ => subscription)
+            replacement = updatedSubscription
+          ).toFuture().map(_ => updatedSubscription)
         } yield (updatedDefinitions, false)
 
       case None =>
+        val subscriptionFieldsId = SubscriptionFieldsId(uuidCreator.uuid())
+        val subscription = SubscriptionFields(clientId, apiContext, apiVersion, subscriptionFieldsId, fields)
         for {
           newSubscriptionFields <- collection.insertOne(subscription).toFuture().map(_ => subscription)
         } yield (newSubscriptionFields, true)

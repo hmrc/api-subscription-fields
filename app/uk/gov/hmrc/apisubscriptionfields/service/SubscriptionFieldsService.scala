@@ -16,8 +16,6 @@
 
 package uk.gov.hmrc.apisubscriptionfields.service
 
-import java.util.UUID
-
 import javax.inject._
 import uk.gov.hmrc.apisubscriptionfields.model._
 import Types._
@@ -31,14 +29,8 @@ import uk.gov.hmrc.http.HeaderCarrier
 import cats.data.{NonEmptyList => NEL}
 
 @Singleton
-class UUIDCreator {
-  def uuid(): UUID = UUID.randomUUID()
-}
-
-@Singleton
 class SubscriptionFieldsService @Inject() (
                                           repository: SubscriptionFieldsRepository,
-                                          uuidCreator: UUIDCreator,
                                           apiFieldDefinitionsService: ApiFieldDefinitionsService,
                                           pushPullNotificationService: PushPullNotificationService) {
 
@@ -51,10 +43,7 @@ class SubscriptionFieldsService @Inject() (
   }
 
   private def upsertSubscriptionFields(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion, fields: Fields): Future[SuccessfulSubsFieldsUpsertResponse] = {
-    val subscriptionFieldsId = SubscriptionFieldsId(uuidCreator.uuid())
-    val subscriptionFields = SubscriptionFields(clientId, apiContext, apiVersion, subscriptionFieldsId, fields)
-
-    repository.saveAtomic(subscriptionFields)
+    repository.saveAtomic(clientId, apiContext, apiVersion, fields)
       .map(result => SuccessfulSubsFieldsUpsertResponse(result._1, result._2))
   }
 

@@ -17,7 +17,7 @@
 package uk.gov.hmrc.apisubscriptionfields.repository
 
 import java.util.UUID
-import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach, OptionValues}
+import org.scalatest.{BeforeAndAfterEach, OptionValues}
 import uk.gov.hmrc.apisubscriptionfields.model._
 import Types._
 import org.mongodb.scala.model.Updates.set
@@ -26,7 +26,7 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.test.{DefaultAwaitTimeout, FutureAwaits}
 import uk.gov.hmrc.apisubscriptionfields.AsyncHmrcSpec
-import uk.gov.hmrc.apisubscriptionfields.SubscriptionFieldsTestData.{FakeClientId, FakeClientId2, FakeContext, FakeContext2, FakeVersion, createSubscriptionFieldsWithApiContext, fakeRawContext2, fieldN, uniqueClientId}
+import uk.gov.hmrc.apisubscriptionfields.SubscriptionFieldsTestData.{FakeClientId, FakeClientId2, FakeContext, FakeContext2, FakeRawFieldsId, FakeVersion, createSubscriptionFieldsWithApiContext, fakeRawContext2, fieldN, uniqueClientId}
 import uk.gov.hmrc.mongo.play.json.Codecs
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -40,10 +40,11 @@ class SubscriptionFieldsRepositorySpec extends AsyncHmrcSpec
   with FutureAwaits
   with BeforeAndAfterEach {
 
+  val mockUuidCreator: UUIDCreator = new UUIDCreator {
+    override def uuid(): UUID = FakeRawFieldsId
+  }
+
   private val repository = app.injector.instanceOf[SubscriptionFieldsMongoRepository]
-
-
-    import play.api.libs.json._
 
   override def beforeEach() {
     super.beforeEach()
@@ -73,27 +74,44 @@ class SubscriptionFieldsRepositorySpec extends AsyncHmrcSpec
     ).toFuture()
   }
 
+  def saveAtomic(subscriptionFields: SubscriptionFields) =
+    repository.saveAtomic(subscriptionFields.clientId, subscriptionFields.apiContext, subscriptionFields.apiVersion, subscriptionFields.fields)
+
+  def validateResult(result: (SubscriptionFields, IsInsert), expectedSubscriptionFields: SubscriptionFields, expectedIsInsert: Boolean) = {
+    result._2 shouldBe expectedIsInsert
+    validateSubscriptionFields(result._1, expectedSubscriptionFields)
+  }
+
+  def validateSubscriptionFields(updated: SubscriptionFields, expected: SubscriptionFields) = {
+    updated.clientId shouldBe expected.clientId
+    updated.apiContext shouldBe expected.apiContext
+    updated.fields shouldBe expected.fields
+  }
+
   "saveAtomic" should {
     val apiSubscriptionFields = createApiSubscriptionFields()
-
     "insert the record in the collection" in {
       collectionSize shouldBe 0
 
-      await(repository.saveAtomic(apiSubscriptionFields)) shouldBe ((apiSubscriptionFields, true))
+      val result = await(saveAtomic(apiSubscriptionFields))
+      validateResult(result, apiSubscriptionFields, true)
       collectionSize shouldBe 1
-      await(repository.collection.find(selector(apiSubscriptionFields)).headOption()) shouldBe Some(apiSubscriptionFields)
+      await(repository.collection.find(selector(apiSubscriptionFields)).headOption()) shouldBe Some(result._1)
     }
 
     "update the record in the collection" in {
       collectionSize shouldBe 0
 
-      await(repository.saveAtomic(apiSubscriptionFields)) shouldBe ((apiSubscriptionFields, true))
+      val resultAfterCreate = await(saveAtomic(apiSubscriptionFields))
+      validateResult(resultAfterCreate, apiSubscriptionFields, true)
       collectionSize shouldBe 1
 
-      val edited = apiSubscriptionFields.copy(fields = Map(fieldN(4) -> "value_4"))
-      await(repository.saveAtomic(edited)) shouldBe ((edited, false))
+      val updatedSubscriptionFields = apiSubscriptionFields.copy(fields = Map(fieldN(4) -> "value_4"))
+      val resultAfterUpdate = await(saveAtomic(updatedSubscriptionFields))
+      validateResult(resultAfterUpdate, updatedSubscriptionFields, false)
+      resultAfterCreate._1.fieldsId shouldBe resultAfterUpdate._1.fieldsId
       collectionSize shouldBe 1
-      await(repository.collection.find(selector(edited)).headOption()) shouldBe Some(edited)
+      await(repository.collection.find(selector(updatedSubscriptionFields)).headOption()) shouldBe Some(resultAfterUpdate._1)
     }
   }
 
@@ -103,13 +121,18 @@ class SubscriptionFieldsRepositorySpec extends AsyncHmrcSpec
       val apiSubForApp1Context2 = createSubscriptionFieldsWithApiContext(rawContext = fakeRawContext2)
       val apiSubForApp2Context1 = createSubscriptionFieldsWithApiContext(clientId = FakeClientId2)
 
-      await(repository.saveAtomic(apiSubForApp1Context1))
-      await(repository.saveAtomic(apiSubForApp1Context2))
-      await(repository.saveAtomic(apiSubForApp2Context1))
+      await(saveAtomic(apiSubForApp1Context1))
+      await(saveAtomic(apiSubForApp1Context2))
+      await(saveAtomic(apiSubForApp2Context1))
       collectionSize shouldBe 3
 
-      await(repository.fetchByClientId(FakeClientId)) shouldBe List(apiSubForApp1Context1, apiSubForApp1Context2)
-      await(repository.fetchByClientId(FakeClientId2)) shouldBe List(apiSubForApp2Context1)
+      val result1 = await(repository.fetchByClientId(FakeClientId))
+
+      validateSubscriptionFields(result1.head, apiSubForApp1Context1)
+      validateSubscriptionFields(result1.tail.head, apiSubForApp1Context2)
+      val result2 = await(repository.fetchByClientId(FakeClientId2))
+      validateSubscriptionFields(result2.head, apiSubForApp2Context1)
+
     }
 
     "return an empty list when clientId is not found" in {
@@ -121,16 +144,20 @@ class SubscriptionFieldsRepositorySpec extends AsyncHmrcSpec
   "fetch using clientId, apiContext, apiVersion" should {
     "retrieve the correct record" in {
       val apiSubscription = createApiSubscriptionFields()
-      await(repository.saveAtomic(apiSubscription))
+      await(saveAtomic(apiSubscription))
       collectionSize shouldBe 1
 
-      await(repository.fetch(FakeClientId, FakeContext, FakeVersion)) shouldBe Some(apiSubscription)
+      val result = await(repository.fetch(FakeClientId, FakeContext, FakeVersion))
+      result match {
+        case None => fail
+        case Some(subscriptionFields: SubscriptionFields) => validateSubscriptionFields(subscriptionFields, apiSubscription)
+      }
     }
 
     "return None when no subscription fields are found in the collection" in {
       for (i <- 1 to 3) {
         val apiSubscription = createApiSubscriptionFields(clientId = uniqueClientId)
-        await(repository.saveAtomic(apiSubscription))
+        await(saveAtomic(apiSubscription))
       }
       collectionSize shouldBe 3
 
@@ -142,15 +169,20 @@ class SubscriptionFieldsRepositorySpec extends AsyncHmrcSpec
   "fetchByFieldsId" should {
     "retrieve the correct record from the `fieldsId` " in {
       val apiSubscription = createApiSubscriptionFields()
-      await(repository.saveAtomic(apiSubscription))
+      val savedSubscriptionFields = await(saveAtomic(apiSubscription))
       collectionSize shouldBe 1
 
-      await(repository.fetchByFieldsId(apiSubscription.fieldsId)) shouldBe Some(apiSubscription)
+      val result = await(repository.fetchByFieldsId(savedSubscriptionFields._1.fieldsId))
+
+      result match {
+        case None => fail
+        case Some(subscriptionFields: SubscriptionFields) => validateSubscriptionFields(subscriptionFields, apiSubscription)
+      }
     }
 
     "return `None` when the `fieldsId` doesn't match any record in the collection" in {
       for (i <- 1 to 3) {
-        await(repository.saveAtomic(createApiSubscriptionFields(clientId = uniqueClientId)))
+        await(saveAtomic(createApiSubscriptionFields(clientId = uniqueClientId)))
       }
       collectionSize shouldBe 3
 
@@ -163,12 +195,16 @@ class SubscriptionFieldsRepositorySpec extends AsyncHmrcSpec
       val subscriptionFields1 = createApiSubscriptionFields(clientId = uniqueClientId)
       val subscriptionFields2 = createApiSubscriptionFields(clientId = uniqueClientId)
       val subscriptionFields3 = createApiSubscriptionFields(clientId = uniqueClientId)
-      await(repository.saveAtomic(subscriptionFields1))
-      await(repository.saveAtomic(subscriptionFields2))
-      await(repository.saveAtomic(subscriptionFields3))
+      await(saveAtomic(subscriptionFields1))
+      await(saveAtomic(subscriptionFields2))
+      await(saveAtomic(subscriptionFields3))
       collectionSize shouldBe 3
 
-      await(repository.fetchAll) shouldBe List(subscriptionFields1, subscriptionFields2, subscriptionFields3)
+      val result = await(repository.fetchAll)
+      validateSubscriptionFields(result.head, subscriptionFields1)
+      validateSubscriptionFields(result.tail.head, subscriptionFields2)
+      validateSubscriptionFields(result.last, subscriptionFields3)
+
     }
 
     "return an empty list when there are no subscription fields in the collection" in {
@@ -180,7 +216,7 @@ class SubscriptionFieldsRepositorySpec extends AsyncHmrcSpec
     "remove the record with a specific subscription field" in {
       val apiSubscription: SubscriptionFields = createApiSubscriptionFields()
 
-      await(repository.saveAtomic(apiSubscription))
+      await(saveAtomic(apiSubscription))
       collectionSize shouldBe 1
 
       await(repository.delete(apiSubscription.clientId, apiSubscription.apiContext, apiSubscription.apiVersion)) shouldBe true
@@ -189,7 +225,7 @@ class SubscriptionFieldsRepositorySpec extends AsyncHmrcSpec
 
     "not alter the collection for unknown subscription fields" in {
       for (i <- 1 to 3) {
-        await(repository.saveAtomic(createApiSubscriptionFields(clientId = uniqueClientId)))
+        await(saveAtomic(createApiSubscriptionFields(clientId = uniqueClientId)))
       }
       collectionSize shouldBe 3
 
@@ -202,8 +238,8 @@ class SubscriptionFieldsRepositorySpec extends AsyncHmrcSpec
       val context1 = "customs/declarations"
       val context2 = "other-context"
 
-      await(repository.saveAtomic(createSubscriptionFieldsWithApiContext(clientId, context1)))
-      await(repository.saveAtomic(createSubscriptionFieldsWithApiContext(clientId, context2)))
+      await(saveAtomic(createSubscriptionFieldsWithApiContext(clientId, context1)))
+      await(saveAtomic(createSubscriptionFieldsWithApiContext(clientId, context2)))
       collectionSize shouldBe 2
 
       await(repository.delete(clientId)) shouldBe true
@@ -212,7 +248,7 @@ class SubscriptionFieldsRepositorySpec extends AsyncHmrcSpec
 
     "not alter the collection for other client IDs" in {
       for (i <- 1 to 3) {
-        await(repository.saveAtomic(createApiSubscriptionFields(clientId = uniqueClientId)))
+        await(saveAtomic(createApiSubscriptionFields(clientId = uniqueClientId)))
       }
       collectionSize shouldBe 3
 
@@ -225,15 +261,15 @@ class SubscriptionFieldsRepositorySpec extends AsyncHmrcSpec
     val apiSubscription = createApiSubscriptionFields(FakeClientId)
 
     "have a unique compound index based on `clientId`, `apiContext` and `apiVersion`" in {
-      await(repository.saveAtomic(apiSubscription))
+      await(saveAtomic(apiSubscription))
       collectionSize shouldBe 1
 
-      await(repository.saveAtomic(apiSubscription.copy(fieldsId = SubscriptionFieldsId(UUID.randomUUID()))))
+      await(saveAtomic(apiSubscription.copy(fieldsId = SubscriptionFieldsId(UUID.randomUUID()))))
       collectionSize shouldBe 1
     }
 
     "have a unique index based on `fieldsId`" in {
-      await(repository.saveAtomic(apiSubscription))
+      await(saveAtomic(apiSubscription))
       collectionSize shouldBe 1
 
       await(saveByFieldsId(apiSubscription.copy(apiVersion = ApiVersion("2.2"))))
@@ -241,10 +277,10 @@ class SubscriptionFieldsRepositorySpec extends AsyncHmrcSpec
     }
 
     "have a non-unique index based on `clientId`" in {
-      await(repository.saveAtomic(apiSubscription))
+      await(saveAtomic(apiSubscription))
       collectionSize shouldBe 1
 
-      await(repository.saveAtomic(apiSubscription.copy(apiContext = FakeContext2, fieldsId = SubscriptionFieldsId(UUID.randomUUID()))))
+      await(saveAtomic(apiSubscription.copy(apiContext = FakeContext2, fieldsId = SubscriptionFieldsId(UUID.randomUUID()))))
       collectionSize shouldBe 2
     }
   }

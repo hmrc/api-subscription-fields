@@ -20,7 +20,6 @@ import javax.inject._
 import uk.gov.hmrc.apisubscriptionfields.model._
 import Types._
 
-//import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.Future.successful
 import cats.data.NonEmptyList

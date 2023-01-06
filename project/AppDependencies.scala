@@ -4,8 +4,8 @@ import play.core.PlayVersion
 object AppDependencies {
   def apply(): Seq[ModuleID] = dependencies ++ testDependencies
 
-  private lazy val mongoVersion = "0.70.0"
-  private lazy val bootstrapVersion = "7.2.0"
+  private lazy val mongoVersion = "0.74.0"
+  private lazy val bootstrapVersion = "7.12.0"
 
   private lazy val dependencies = Seq(
     "uk.gov.hmrc"               %% "bootstrap-backend-play-28"        % bootstrapVersion,

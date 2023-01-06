@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 HM Revenue & Customs
+ * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,8 +20,7 @@ import javax.inject._
 import uk.gov.hmrc.apisubscriptionfields.model._
 import Types._
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.Future.successful
 import cats.data.NonEmptyList
 import uk.gov.hmrc.apisubscriptionfields.repository.SubscriptionFieldsRepository
@@ -32,7 +31,7 @@ import cats.data.{NonEmptyList => NEL}
 class SubscriptionFieldsService @Inject() (
                                           repository: SubscriptionFieldsRepository,
                                           apiFieldDefinitionsService: ApiFieldDefinitionsService,
-                                          pushPullNotificationService: PushPullNotificationService) {
+                                          pushPullNotificationService: PushPullNotificationService)(implicit ec: ExecutionContext) {
 
 
   private def validate(fields: Fields, fieldDefinitions: NonEmptyList[FieldDefinition]): SubsFieldValidationResponse = {

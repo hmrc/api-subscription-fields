@@ -78,4 +78,4 @@ lazy val acceptanceTestSettings =
 def onPackageName(rootPackage: String): String => Boolean = { testName => testName startsWith rootPackage }
 
 // Note that this task has to be scoped globally
-bloopAggregateSourceDependencies in Global := true
+Global / bloopAggregateSourceDependencies := true

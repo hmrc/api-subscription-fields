@@ -27,6 +27,16 @@ import scala.language.postfixOps
 
 val appName = "api-subscription-fields"
 
+ThisBuild / scalafixDependencies += "com.github.liancheng" %% "organize-imports" % "0.6.0"
+ 
+inThisBuild(
+  List(
+    scalaVersion := "2.12.15",
+    semanticdbEnabled := true,
+    semanticdbVersion := scalafixSemanticdb.revision
+  )
+)
+
 resolvers ++= Seq(
   Resolver.sonatypeRepo("releases"),
   Resolver.sonatypeRepo("snapshots")

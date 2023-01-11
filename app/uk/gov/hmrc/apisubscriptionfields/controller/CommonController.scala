@@ -16,15 +16,16 @@
 
 package uk.gov.hmrc.apisubscriptionfields.controller
 
-import play.api.libs.json._
-import play.api.mvc.{Request, Result}
-import uk.gov.hmrc.apisubscriptionfields.model.ErrorCode._
-import uk.gov.hmrc.apisubscriptionfields.model.JsErrorResponse
-import uk.gov.hmrc.play.bootstrap.backend.controller.BackendBaseController
-import uk.gov.hmrc.apisubscriptionfields.utils.ApplicationLogger
-
 import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
+
+import play.api.libs.json._
+import play.api.mvc.{Request, Result}
+import uk.gov.hmrc.play.bootstrap.backend.controller.BackendBaseController
+
+import uk.gov.hmrc.apisubscriptionfields.model.ErrorCode._
+import uk.gov.hmrc.apisubscriptionfields.model.JsErrorResponse
+import uk.gov.hmrc.apisubscriptionfields.utils.ApplicationLogger
 
 trait CommonController extends BackendBaseController with ApplicationLogger {
 

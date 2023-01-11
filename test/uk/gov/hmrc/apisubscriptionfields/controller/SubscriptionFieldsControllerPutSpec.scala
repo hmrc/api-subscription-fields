@@ -16,18 +16,20 @@
 
 package uk.gov.hmrc.apisubscriptionfields.controller
 
-import akka.actor.ActorSystem
-import play.api.libs.json.{Json, JsValue}
-import play.api.mvc._
-import play.api.test.{FakeRequest, StubControllerComponentsFactory}
-import uk.gov.hmrc.apisubscriptionfields.model._
-import uk.gov.hmrc.apisubscriptionfields.service.SubscriptionFieldsService
-import uk.gov.hmrc.apisubscriptionfields.{AsyncHmrcSpec, SubscriptionFieldsTestData}
-
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.Future.successful
+
+import akka.actor.ActorSystem
+
+import play.api.libs.json.{JsValue, Json}
+import play.api.mvc._
 import play.api.test.Helpers._
+import play.api.test.{FakeRequest, StubControllerComponentsFactory}
+
+import uk.gov.hmrc.apisubscriptionfields.model._
+import uk.gov.hmrc.apisubscriptionfields.service.SubscriptionFieldsService
+import uk.gov.hmrc.apisubscriptionfields.{AsyncHmrcSpec, SubscriptionFieldsTestData}
 
 class SubscriptionFieldsControllerPutSpec extends AsyncHmrcSpec with SubscriptionFieldsTestData with JsonFormatters with StubControllerComponentsFactory {
 

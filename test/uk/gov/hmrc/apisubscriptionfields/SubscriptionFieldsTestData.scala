@@ -17,10 +17,10 @@
 package uk.gov.hmrc.apisubscriptionfields
 
 import java.util.UUID
-
-import uk.gov.hmrc.apisubscriptionfields.model._
-import Types._
 import scala.concurrent.Future
+
+import uk.gov.hmrc.apisubscriptionfields.model.Types._
+import uk.gov.hmrc.apisubscriptionfields.model._
 
 trait SubscriptionFieldsTestData extends FieldDefinitionTestData with ValidationRuleTestData {
   import eu.timepit.refined.auto._

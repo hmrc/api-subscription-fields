@@ -17,22 +17,23 @@
 package uk.gov.hmrc.apisubscriptionfields.repository
 
 import java.util.UUID
-
 import javax.inject.{Inject, Singleton}
-import com.google.inject.ImplementedBy
-import uk.gov.hmrc.apisubscriptionfields.model._
-import Types.{Fields, IsInsert}
+import scala.concurrent.{ExecutionContext, Future}
+
 import akka.stream.Materializer
+import com.google.inject.ImplementedBy
 import org.bson.codecs.configuration.CodecRegistries.{fromCodecs, fromRegistries}
 import org.mongodb.scala.model.Filters.{and, equal}
-import org.mongodb.scala.{MongoClient, MongoCollection}
-import org.mongodb.scala.model.{IndexModel, IndexOptions}
 import org.mongodb.scala.model.Indexes.ascending
-import uk.gov.hmrc.mongo.MongoComponent
+import org.mongodb.scala.model.{IndexModel, IndexOptions}
+import org.mongodb.scala.{MongoClient, MongoCollection}
 
-import scala.concurrent.{ExecutionContext, Future}
-import uk.gov.hmrc.apisubscriptionfields.utils.ApplicationLogger
+import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.play.json.{Codecs, CollectionFactory, PlayMongoRepository}
+
+import uk.gov.hmrc.apisubscriptionfields.model.Types.{Fields, IsInsert}
+import uk.gov.hmrc.apisubscriptionfields.model._
+import uk.gov.hmrc.apisubscriptionfields.utils.ApplicationLogger
 
 @ImplementedBy(classOf[SubscriptionFieldsMongoRepository])
 trait SubscriptionFieldsRepository {

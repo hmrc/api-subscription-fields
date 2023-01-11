@@ -16,10 +16,9 @@
 
 package uk.gov.hmrc.apisubscriptionfields.model
 
-import uk.gov.hmrc.apisubscriptionfields.SubscriptionFieldsTestData
-import uk.gov.hmrc.apisubscriptionfields.FieldDefinitionTestData
-import uk.gov.hmrc.apisubscriptionfields.HmrcSpec
 import org.scalatest.Matchers
+
+import uk.gov.hmrc.apisubscriptionfields.{FieldDefinitionTestData, HmrcSpec, SubscriptionFieldsTestData}
 
 class ModelSpec extends HmrcSpec with SubscriptionFieldsTestData with FieldDefinitionTestData with ValidationRuleTestData {
   "RegexValidationRule" should {

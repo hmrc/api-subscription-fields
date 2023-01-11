@@ -16,9 +16,10 @@
 
 package uk.gov.hmrc.apisubscriptionfields.controller
 
-import uk.gov.hmrc.apisubscriptionfields.model.Types._
-import uk.gov.hmrc.apisubscriptionfields.model.FieldDefinition
 import cats.data.NonEmptyList
+
+import uk.gov.hmrc.apisubscriptionfields.model.FieldDefinition
+import uk.gov.hmrc.apisubscriptionfields.model.Types._
 
 private[controller] case class SubscriptionFieldsRequest(fields: Fields)
 

@@ -17,14 +17,15 @@
 package uk.gov.hmrc.apisubscriptionfields.service
 
 import java.{util => ju}
-import uk.gov.hmrc.apisubscriptionfields.model._
-import uk.gov.hmrc.apisubscriptionfields.model.FieldDefinitionType._
-import uk.gov.hmrc.apisubscriptionfields.{FieldDefinitionTestData, SubscriptionFieldsTestData}
-import uk.gov.hmrc.apisubscriptionfields.AsyncHmrcSpec
-import scala.concurrent.Future.{successful, failed}
-import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.apisubscriptionfields.connector.PushPullNotificationServiceConnector
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future.{failed, successful}
+
+import uk.gov.hmrc.http.HeaderCarrier
+
+import uk.gov.hmrc.apisubscriptionfields.connector.PushPullNotificationServiceConnector
+import uk.gov.hmrc.apisubscriptionfields.model.FieldDefinitionType._
+import uk.gov.hmrc.apisubscriptionfields.model._
+import uk.gov.hmrc.apisubscriptionfields.{AsyncHmrcSpec, FieldDefinitionTestData, SubscriptionFieldsTestData}
 
 class PushPullNotificationServiceSpec extends AsyncHmrcSpec with SubscriptionFieldsTestData with FieldDefinitionTestData {
 

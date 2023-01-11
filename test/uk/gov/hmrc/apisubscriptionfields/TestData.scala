@@ -20,6 +20,7 @@ import java.util.UUID
 
 import play.api.http.HeaderNames.{ACCEPT, CONTENT_TYPE}
 import play.api.http.MimeTypes
+
 import uk.gov.hmrc.apisubscriptionfields.model._
 
 trait TestData {

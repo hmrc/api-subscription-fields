@@ -19,20 +19,21 @@ package uk.gov.hmrc.apisubscriptionfields.connector
 import java.{util => ju}
 
 import akka.stream.Materializer
-import org.scalatest.BeforeAndAfterEach
-import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-import play.api.Application
-import play.api.inject.guice.GuiceApplicationBuilder
 import com.github.tomakehurst.wiremock.WireMockServer
+import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.client.WireMock._
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig
-import play.api.libs.json.Json
-import play.api.http.Status.OK
-import com.github.tomakehurst.wiremock.client.WireMock
-import org.scalatest.BeforeAndAfterAll
+import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach}
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite
+
+import play.api.Application
 import play.api.http.HeaderNames.{CONTENT_TYPE, USER_AGENT}
-import uk.gov.hmrc.apisubscriptionfields.AsyncHmrcSpec
+import play.api.http.Status.OK
+import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.libs.json.Json
 import uk.gov.hmrc.http.HeaderCarrier
+
+import uk.gov.hmrc.apisubscriptionfields.AsyncHmrcSpec
 import uk.gov.hmrc.apisubscriptionfields.model._
 
 class PushPullNotificationServiceConnectorSpec extends AsyncHmrcSpec with GuiceOneAppPerSuite with JsonFormatters with BeforeAndAfterAll with BeforeAndAfterEach {

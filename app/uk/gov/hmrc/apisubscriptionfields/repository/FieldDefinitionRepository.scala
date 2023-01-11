@@ -16,6 +16,9 @@
 
 package uk.gov.hmrc.apisubscriptionfields.repository
 
+import javax.inject.{Inject, Singleton}
+import scala.concurrent.{ExecutionContext, Future}
+
 import akka.stream.Materializer
 import com.google.inject.ImplementedBy
 import org.bson.codecs.configuration.CodecRegistries.{fromCodecs, fromRegistries}
@@ -23,16 +26,13 @@ import org.mongodb.scala.model.Filters.{and, equal}
 import org.mongodb.scala.model.Indexes.ascending
 import org.mongodb.scala.model.{Filters, IndexModel, IndexOptions}
 import org.mongodb.scala.{MongoClient, MongoCollection}
-import play.api.libs.json._
-import uk.gov.hmrc.apisubscriptionfields.model.JsonFormatters.ApiFieldDefinitionsJF
-import uk.gov.hmrc.apisubscriptionfields.model.Types._
-import uk.gov.hmrc.apisubscriptionfields.model._
-import uk.gov.hmrc.apisubscriptionfields.utils.ApplicationLogger
+
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.play.json.{Codecs, CollectionFactory, PlayMongoRepository}
 
-import javax.inject.{Inject, Singleton}
-import scala.concurrent.{ExecutionContext, Future}
+import uk.gov.hmrc.apisubscriptionfields.model.Types._
+import uk.gov.hmrc.apisubscriptionfields.model._
+import uk.gov.hmrc.apisubscriptionfields.utils.ApplicationLogger
 
 @ImplementedBy(classOf[ApiFieldDefinitionsMongoRepository])
 trait ApiFieldDefinitionsRepository {

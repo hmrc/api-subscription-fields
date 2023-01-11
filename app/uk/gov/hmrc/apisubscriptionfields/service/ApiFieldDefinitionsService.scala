@@ -17,11 +17,12 @@
 package uk.gov.hmrc.apisubscriptionfields.service
 
 import javax.inject.{Inject, Singleton}
-import uk.gov.hmrc.apisubscriptionfields.model._
-import Types._
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
+
 import cats.data.NonEmptyList
-import scala.concurrent.ExecutionContext
+
+import uk.gov.hmrc.apisubscriptionfields.model.Types._
+import uk.gov.hmrc.apisubscriptionfields.model._
 import uk.gov.hmrc.apisubscriptionfields.repository.ApiFieldDefinitionsRepository
 
 @Singleton

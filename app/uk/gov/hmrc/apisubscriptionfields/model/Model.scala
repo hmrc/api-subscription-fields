@@ -17,10 +17,10 @@
 package uk.gov.hmrc.apisubscriptionfields.model
 
 import cats.data.{NonEmptyList => NEL}
+import org.apache.commons.validator.routines.{DomainValidator, UrlValidator}
+
 import uk.gov.hmrc.apisubscriptionfields.model.FieldDefinitionType.FieldDefinitionType
-import org.apache.commons.validator.routines.UrlValidator
-import Types._
-import org.apache.commons.validator.routines.DomainValidator
+import uk.gov.hmrc.apisubscriptionfields.model.Types._
 
 sealed trait ValidationRule {
   def validate(value: FieldValue): Boolean = {

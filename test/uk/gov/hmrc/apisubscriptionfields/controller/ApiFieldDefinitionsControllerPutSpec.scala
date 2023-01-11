@@ -16,18 +16,18 @@
 
 package uk.gov.hmrc.apisubscriptionfields.controller
 
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
+import scala.concurrent.Future.successful
+
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc._
 import play.api.test.Helpers._
 import play.api.test._
-import uk.gov.hmrc.apisubscriptionfields.FieldDefinitionTestData
+
 import uk.gov.hmrc.apisubscriptionfields.model.JsonFormatters
 import uk.gov.hmrc.apisubscriptionfields.service.ApiFieldDefinitionsService
-import uk.gov.hmrc.apisubscriptionfields.AsyncHmrcSpec
-
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future.successful
-import scala.concurrent.Future
+import uk.gov.hmrc.apisubscriptionfields.{AsyncHmrcSpec, FieldDefinitionTestData}
 
 class ApiFieldDefinitionsControllerPutSpec extends AsyncHmrcSpec with FieldDefinitionTestData with JsonFormatters with StubControllerComponentsFactory {
 

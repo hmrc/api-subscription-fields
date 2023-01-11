@@ -17,6 +17,7 @@
 package uk.gov.hmrc.apisubscriptionfields.config
 
 import com.google.inject.{ImplementedBy, Inject, Singleton}
+
 import play.api.Configuration
 
 @ImplementedBy(classOf[ApplicationConfigImpl])

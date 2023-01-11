@@ -18,11 +18,12 @@ package uk.gov.hmrc.apisubscriptionfields
 
 import java.util.UUID
 
-import uk.gov.hmrc.apisubscriptionfields.model._
-import Types._
 import cats.data.NonEmptyList
 import eu.timepit.refined.api.Refined
+
 import uk.gov.hmrc.apisubscriptionfields.model.DevhubAccessRequirement._
+import uk.gov.hmrc.apisubscriptionfields.model.Types._
+import uk.gov.hmrc.apisubscriptionfields.model._
 
 trait FieldDefinitionTestData extends TestData {
   import eu.timepit.refined.auto._

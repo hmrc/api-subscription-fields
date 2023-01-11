@@ -18,13 +18,14 @@ package uk.gov.hmrc.apisubscriptionfields.model
 
 import cats.data.{NonEmptyList => NEL}
 import julienrf.json.derived
-import play.api.libs.json._
-import play.api.libs.functional.syntax._
 import julienrf.json.derived.TypeTagSetting.ShortClassName
-import Types._
-import uk.gov.hmrc.apisubscriptionfields.model.FieldDefinitionType.FieldDefinitionType
-import Types._
+
+import play.api.libs.functional.syntax._
 import play.api.libs.json.Json.JsValueWrapper
+import play.api.libs.json._
+
+import uk.gov.hmrc.apisubscriptionfields.model.FieldDefinitionType.FieldDefinitionType
+import uk.gov.hmrc.apisubscriptionfields.model.Types._
 
 trait NonEmptyListFormatters {
 

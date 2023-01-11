@@ -17,14 +17,14 @@
 package uk.gov.hmrc.apisubscriptionfields.controller
 
 import javax.inject.{Inject, Singleton}
+import scala.concurrent.{ExecutionContext, Future}
+
 import play.api.libs.json._
 import play.api.mvc._
+
 import uk.gov.hmrc.apisubscriptionfields.model.ErrorCode._
 import uk.gov.hmrc.apisubscriptionfields.model._
 import uk.gov.hmrc.apisubscriptionfields.service.SubscriptionFieldsService
-
-import scala.concurrent.Future
-import scala.concurrent.ExecutionContext
 
 @Singleton
 class SubscriptionFieldsController @Inject() (cc: ControllerComponents, service: SubscriptionFieldsService)(implicit ec: ExecutionContext) extends CommonController {

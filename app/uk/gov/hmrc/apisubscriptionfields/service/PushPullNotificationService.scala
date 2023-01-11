@@ -16,16 +16,14 @@
 
 package uk.gov.hmrc.apisubscriptionfields.service
 
-import uk.gov.hmrc.apisubscriptionfields.connector.PushPullNotificationServiceConnector
 import javax.inject.{Inject, Singleton}
-import uk.gov.hmrc.apisubscriptionfields.model.FieldDefinition
-import uk.gov.hmrc.apisubscriptionfields.model.Types.FieldValue
+import scala.concurrent.{ExecutionContext, Future}
 
-import scala.concurrent.Future
-import uk.gov.hmrc.apisubscriptionfields.model._
-
-import scala.concurrent.ExecutionContext
 import uk.gov.hmrc.http.HeaderCarrier
+
+import uk.gov.hmrc.apisubscriptionfields.connector.PushPullNotificationServiceConnector
+import uk.gov.hmrc.apisubscriptionfields.model.Types.FieldValue
+import uk.gov.hmrc.apisubscriptionfields.model.{FieldDefinition, _}
 
 @Singleton
 class PushPullNotificationService @Inject() (ppnsConnector: PushPullNotificationServiceConnector)(implicit ec: ExecutionContext) {

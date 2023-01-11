@@ -18,7 +18,8 @@ package uk.gov.hmrc.apisubscriptionfields.model
 
 import play.api.libs.json.Json.JsValueWrapper
 import play.api.libs.json.{JsObject, Json}
-import Types._
+
+import uk.gov.hmrc.apisubscriptionfields.model.Types._
 
 sealed trait SubsFieldsUpsertResponse
 case object NotFoundSubsFieldsUpsertResponse                                                  extends SubsFieldsUpsertResponse

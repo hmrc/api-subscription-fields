@@ -21,12 +21,12 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.{BeforeAndAfterEach, OptionValues}
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
+
 import play.api.test.{DefaultAwaitTimeout, FutureAwaits}
-import uk.gov.hmrc.apisubscriptionfields.model.{ApiContext, ApiFieldDefinitions}
-import uk.gov.hmrc.apisubscriptionfields.SubscriptionFieldsTestData.{FakeContext, FakeVersion, NelOfFieldDefinitions, uniqueApiContext}
 import uk.gov.hmrc.mongo.play.json.Codecs
 
-import scala.concurrent.ExecutionContext.Implicits.global
+import uk.gov.hmrc.apisubscriptionfields.SubscriptionFieldsTestData.{FakeContext, FakeVersion, NelOfFieldDefinitions, uniqueApiContext}
+import uk.gov.hmrc.apisubscriptionfields.model.{ApiContext, ApiFieldDefinitions}
 
 class ApiFieldDefinitionsRepositorySpec
     extends AnyWordSpec

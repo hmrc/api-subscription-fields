@@ -17,9 +17,11 @@
 package uk.gov.hmrc.apisubscriptionfields.repository
 
 import cats.data.NonEmptyList
+
 import play.api.libs.json.{JsSuccess, Json}
-import uk.gov.hmrc.apisubscriptionfields.model.{FieldDefinition, FieldDefinitionType, JsonFormatters, RegexValidationRule, ValidationGroup}
+
 import uk.gov.hmrc.apisubscriptionfields.AsyncHmrcSpec
+import uk.gov.hmrc.apisubscriptionfields.model.{FieldDefinition, FieldDefinitionType, JsonFormatters, RegexValidationRule, ValidationGroup}
 
 class MongoFormattersSpec extends AsyncHmrcSpec with JsonFormatters {
   import eu.timepit.refined.auto._

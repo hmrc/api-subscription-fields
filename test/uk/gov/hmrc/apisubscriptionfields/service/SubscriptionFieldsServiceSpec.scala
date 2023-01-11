@@ -16,17 +16,17 @@
 
 package uk.gov.hmrc.apisubscriptionfields.service
 
-import java.{util => ju}
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future.{failed, successful}
 
 import cats.data.NonEmptyList
+
+import uk.gov.hmrc.http.HeaderCarrier
+
 import uk.gov.hmrc.apisubscriptionfields.model.Types.FieldErrorMap
 import uk.gov.hmrc.apisubscriptionfields.model._
 import uk.gov.hmrc.apisubscriptionfields.repository._
 import uk.gov.hmrc.apisubscriptionfields.{AsyncHmrcSpec, FieldDefinitionTestData, SubscriptionFieldsTestData}
-import uk.gov.hmrc.http.HeaderCarrier
-import scala.concurrent.ExecutionContext.Implicits.global
-
-import scala.concurrent.Future.{failed, successful}
 
 class SubscriptionFieldsServiceSpec extends AsyncHmrcSpec with SubscriptionFieldsTestData with FieldDefinitionTestData {
 

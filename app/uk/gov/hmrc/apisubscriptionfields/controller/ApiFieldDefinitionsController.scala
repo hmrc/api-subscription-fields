@@ -16,17 +16,16 @@
 
 package uk.gov.hmrc.apisubscriptionfields.controller
 
-import javax.inject.{Inject, Singleton}
-
-import play.api.libs.json.{JsValue, Json, JsSuccess, JsError}
-import play.api.mvc._
-import uk.gov.hmrc.apisubscriptionfields.model._
-
-import uk.gov.hmrc.apisubscriptionfields.service.ApiFieldDefinitionsService
-import scala.concurrent.Future
-import scala.util.{Try, Success, Failure}
 import java.util.UUID
-import scala.concurrent.ExecutionContext
+import javax.inject.{Inject, Singleton}
+import scala.concurrent.{ExecutionContext, Future}
+import scala.util.{Failure, Success, Try}
+
+import play.api.libs.json.{JsError, JsSuccess, JsValue, Json}
+import play.api.mvc._
+
+import uk.gov.hmrc.apisubscriptionfields.model._
+import uk.gov.hmrc.apisubscriptionfields.service.ApiFieldDefinitionsService
 import uk.gov.hmrc.apisubscriptionfields.utils.ApplicationLogger
 
 @Singleton

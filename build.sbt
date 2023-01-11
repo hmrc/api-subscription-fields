@@ -45,6 +45,7 @@ lazy val microservice = Project(appName, file("."))
   .settings(publishingSettings: _*)
   .settings(defaultSettings(): _*)
   .settings(acceptanceTestSettings: _*)
+  .settings(headerSettings(AcceptanceTest) ++ automateHeaderSettings(AcceptanceTest))
   .settings(scalaVersion := "2.12.15")
   .settings(ScoverageSettings())
   .settings(

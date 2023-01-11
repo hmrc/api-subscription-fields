@@ -24,7 +24,7 @@ object Types {
   type RegexExpr = String Refined Regex
 
   type FieldNameRegex = MatchesRegex[W.`"^[a-zA-Z]+$"`.T]
-  type FieldName = Refined[String,FieldNameRegex]
+  type FieldName      = Refined[String, FieldNameRegex]
 
   type FieldValue = String
 

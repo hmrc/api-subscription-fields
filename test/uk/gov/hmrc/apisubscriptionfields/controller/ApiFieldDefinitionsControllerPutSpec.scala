@@ -29,13 +29,10 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future.successful
 import scala.concurrent.Future
 
-class ApiFieldDefinitionsControllerPutSpec extends AsyncHmrcSpec
-  with FieldDefinitionTestData
-  with JsonFormatters
-  with StubControllerComponentsFactory {
+class ApiFieldDefinitionsControllerPutSpec extends AsyncHmrcSpec with FieldDefinitionTestData with JsonFormatters with StubControllerComponentsFactory {
 
   private val mockApiFieldDefinitionsService = mock[ApiFieldDefinitionsService]
-  private val controller = new ApiFieldDefinitionsController(stubControllerComponents(), mockApiFieldDefinitionsService)
+  private val controller                     = new ApiFieldDefinitionsController(stubControllerComponents(), mockApiFieldDefinitionsService)
 
   "PUT /definition/context/:apiContext/version/:apiVersion" should {
     "return CREATED when created in the repo" in {
@@ -66,13 +63,14 @@ class ApiFieldDefinitionsControllerPutSpec extends AsyncHmrcSpec
 
   private def testSubmitResult(request: Request[JsValue])(test: Future[Result] => Unit) {
     val action: Action[JsValue] = controller.upsertFieldsDefinition(FakeContext, FakeVersion)
-    val result: Future[Result] = action.apply(request)
+    val result: Future[Result]  = action.apply(request)
     test(result)
   }
 
   private def mkRequest(jsonBody: JsValue): Request[JsValue] =
     FakeRequest()
-      .withJsonBody(jsonBody).map(r => r.json)
+      .withJsonBody(jsonBody)
+      .map(r => r.json)
 
   private def mkJson(model: FieldDefinitionsRequest) = Json.toJson(model)(Json.writes[FieldDefinitionsRequest])
 }

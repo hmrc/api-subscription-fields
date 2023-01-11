@@ -28,13 +28,10 @@ import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 import cats.data.NonEmptyList
 
-class ApiFieldDefinitionsControllerPostSpec extends AsyncHmrcSpec
-  with FieldDefinitionTestData
-  with JsonFormatters
-  with StubControllerComponentsFactory {
+class ApiFieldDefinitionsControllerPostSpec extends AsyncHmrcSpec with FieldDefinitionTestData with JsonFormatters with StubControllerComponentsFactory {
 
   private val mockFieldDefintionService = mock[ApiFieldDefinitionsService]
-  private val controller = new ApiFieldDefinitionsController(stubControllerComponents(), mockFieldDefintionService)
+  private val controller                = new ApiFieldDefinitionsController(stubControllerComponents(), mockFieldDefintionService)
 
   final val FakeValidRegexFieldsDefinitionRequest = FieldDefinitionsRequest(NonEmptyList.fromListUnsafe(List(FakeFieldDefinitionAlphnumericField, FakeFieldDefinitionPassword)))
 
@@ -58,13 +55,14 @@ class ApiFieldDefinitionsControllerPostSpec extends AsyncHmrcSpec
 
   private def testSubmitResult(request: Request[JsValue])(test: Future[Result] => Unit) {
     val action: Action[JsValue] = controller.validateFieldsDefinition()
-    val result: Future[Result] = action.apply(request)
+    val result: Future[Result]  = action.apply(request)
     test(result)
   }
 
   private def mkRequest(jsonBody: JsValue): Request[JsValue] =
     FakeRequest()
-      .withJsonBody(jsonBody).map(r => r.json)
+      .withJsonBody(jsonBody)
+      .map(r => r.json)
 
   private def mkJson(model: FieldDefinitionsRequest) = Json.toJson(model)(Json.writes[FieldDefinitionsRequest])
 

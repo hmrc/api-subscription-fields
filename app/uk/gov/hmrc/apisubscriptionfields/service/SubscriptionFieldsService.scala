@@ -29,51 +29,49 @@ import cats.data.{NonEmptyList => NEL}
 
 @Singleton
 class SubscriptionFieldsService @Inject() (
-                                          repository: SubscriptionFieldsRepository,
-                                          apiFieldDefinitionsService: ApiFieldDefinitionsService,
-                                          pushPullNotificationService: PushPullNotificationService)(implicit ec: ExecutionContext) {
-
+    repository: SubscriptionFieldsRepository,
+    apiFieldDefinitionsService: ApiFieldDefinitionsService,
+    pushPullNotificationService: PushPullNotificationService
+)(implicit ec: ExecutionContext) {
 
   private def validate(fields: Fields, fieldDefinitions: NonEmptyList[FieldDefinition]): SubsFieldValidationResponse = {
-    SubscriptionFieldsService.validateAgainstValidationRules(fieldDefinitions, fields) ++ SubscriptionFieldsService.validateFieldNamesAreDefined(fieldDefinitions,fields) match {
+    SubscriptionFieldsService.validateAgainstValidationRules(fieldDefinitions, fields) ++ SubscriptionFieldsService.validateFieldNamesAreDefined(fieldDefinitions, fields) match {
       case FieldErrorMap.empty => ValidSubsFieldValidationResponse
       case errs: FieldErrorMap => InvalidSubsFieldValidationResponse(errorResponses = errs)
     }
   }
 
   private def upsertSubscriptionFields(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion, fields: Fields): Future[SuccessfulSubsFieldsUpsertResponse] = {
-    repository.saveAtomic(clientId, apiContext, apiVersion, fields)
+    repository
+      .saveAtomic(clientId, apiContext, apiVersion, fields)
       .map(result => SuccessfulSubsFieldsUpsertResponse(result._1, result._2))
   }
 
-  def handlePPNS(clientId: ClientId,
-                 apiContext: ApiContext,
-                 apiVersion: ApiVersion,
-                 fieldDefinitions: NEL[FieldDefinition],
-                 fields: Fields)(implicit hc: HeaderCarrier): Future[SubsFieldsUpsertResponse] = {
+  def handlePPNS(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion, fieldDefinitions: NEL[FieldDefinition], fields: Fields)(implicit
+      hc: HeaderCarrier
+  ): Future[SubsFieldsUpsertResponse] = {
     val ppnsFieldDefinition: Option[FieldDefinition] = fieldDefinitions.find(_.`type` == FieldDefinitionType.PPNS_FIELD)
 
     ppnsFieldDefinition match {
       case Some(fieldDefinition) =>
         val oFieldValue: Option[FieldValue] = fields.get(fieldDefinition.name)
         pushPullNotificationService.subscribeToPPNS(clientId, apiContext, apiVersion, oFieldValue, fieldDefinition).flatMap {
-          case PPNSCallBackUrlSuccessResponse =>  upsertSubscriptionFields(clientId, apiContext, apiVersion, fields)
+          case PPNSCallBackUrlSuccessResponse       => upsertSubscriptionFields(clientId, apiContext, apiVersion, fields)
           case PPNSCallBackUrlFailedResponse(error) => Future.successful(FailedValidationSubsFieldsUpsertResponse(Map(fieldDefinition.name -> error)))
         }
-      case None =>  upsertSubscriptionFields(clientId, apiContext, apiVersion, fields)
+      case None                  => upsertSubscriptionFields(clientId, apiContext, apiVersion, fields)
     }
 
   }
 
-  def upsert(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion, fields: Fields)
-            (implicit hc: HeaderCarrier): Future[SubsFieldsUpsertResponse] = {
+  def upsert(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion, fields: Fields)(implicit hc: HeaderCarrier): Future[SubsFieldsUpsertResponse] = {
     val foFieldDefinitions: Future[Option[NonEmptyList[FieldDefinition]]] =
       apiFieldDefinitionsService.get(apiContext, apiVersion).map(_.map(_.fieldDefinitions))
 
     get(clientId, apiContext, apiVersion).flatMap(_ match {
       case Some(sfields) if (sfields.fields == fields) => Future.successful(SuccessfulSubsFieldsUpsertResponse(sfields, false))
-      case _ =>
-        foFieldDefinitions.flatMap( _ match {
+      case _                                           =>
+        foFieldDefinitions.flatMap(_ match {
           case None                   => successful(NotFoundSubsFieldsUpsertResponse)
           case Some(fieldDefinitions) =>
             validate(fields, fieldDefinitions) match {
@@ -108,17 +106,17 @@ class SubscriptionFieldsService @Inject() (
     (for {
       fields <- repository.fetchByClientId(clientId)
     } yield fields)
-    .map {
-      case Nil => None
-      case fs  => Some(BulkSubscriptionFieldsResponse(subscriptions = fs))
-    }
+      .map {
+        case Nil => None
+        case fs  => Some(BulkSubscriptionFieldsResponse(subscriptions = fs))
+      }
   }
 
   def getAll: Future[BulkSubscriptionFieldsResponse] = {
     (for {
       fields <- repository.fetchAll
     } yield fields)
-    .map (BulkSubscriptionFieldsResponse(_))
+      .map(BulkSubscriptionFieldsResponse(_))
   }
 
 }
@@ -133,19 +131,19 @@ object SubscriptionFieldsService {
 
   // Some is Some(error)
   def validateAgainstDefinition(fieldDefinition: FieldDefinition, value: FieldValue): Option[FieldError] = {
-    fieldDefinition.validation .flatMap(group => if (validateAgainstGroup(group, value)) None else Some((fieldDefinition.name, group.errorMessage)))
+    fieldDefinition.validation.flatMap(group => if (validateAgainstGroup(group, value)) None else Some((fieldDefinition.name, group.errorMessage)))
   }
 
   def validateAgainstValidationRules(fieldDefinitions: NonEmptyList[FieldDefinition], fields: Fields): FieldErrorMap =
     fieldDefinitions
-      .map(fd => validateAgainstDefinition(fd, fields.getOrElse(fd.name,"")))
+      .map(fd => validateAgainstDefinition(fd, fields.getOrElse(fd.name, "")))
       .foldLeft(FieldErrorMap.empty) {
-        case (acc, None)     => acc
-        case (acc, Some((name,msg))) => acc + (name -> msg)
+        case (acc, None)              => acc
+        case (acc, Some((name, msg))) => acc + (name -> msg)
       }
 
   def validateFieldNamesAreDefined(fieldDefinitions: NonEmptyList[FieldDefinition], fields: Fields): FieldErrorMap = {
     val illegalNames = fields.keySet -- (fieldDefinitions.map(_.name).toList)
-    illegalNames.foldLeft(FieldErrorMap.empty)( (acc, name) => acc + (name -> "No Field Definition found for this Field"))
+    illegalNames.foldLeft(FieldErrorMap.empty)((acc, name) => acc + (name -> "No Field Definition found for this Field"))
   }
 }

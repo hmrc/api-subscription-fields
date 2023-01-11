@@ -20,16 +20,16 @@ import play.api.libs.json._
 import uk.gov.hmrc.apisubscriptionfields.model.{ClientId, BoxId, SubscriptionFieldsId}
 
 trait JsonFormatters {
-  implicit val clientIdJF = Json.valueFormat[ClientId]
-  implicit val boxIdJF = Json.valueFormat[BoxId]
+  implicit val clientIdJF             = Json.valueFormat[ClientId]
+  implicit val boxIdJF                = Json.valueFormat[BoxId]
   implicit val subscriptionFieldsIdJF = Json.valueFormat[SubscriptionFieldsId]
 
-  implicit val createBoxRequestJF = Json.format[CreateBoxRequest]
-  implicit val createBoxResponseJF = Json.format[CreateBoxResponse]
-  implicit val subscriberRequestJF = Json.format[SubscriberRequest]
-  implicit val updateSubscriberRequestJF = Json.format[UpdateSubscriberRequest]
-  implicit val updateSubscriberResponseJF = Json.format[UpdateSubscriberResponse]
-  implicit val updateCallBackUrlRequestJF = Json.format[UpdateCallBackUrlRequest]
+  implicit val createBoxRequestJF          = Json.format[CreateBoxRequest]
+  implicit val createBoxResponseJF         = Json.format[CreateBoxResponse]
+  implicit val subscriberRequestJF         = Json.format[SubscriberRequest]
+  implicit val updateSubscriberRequestJF   = Json.format[UpdateSubscriberRequest]
+  implicit val updateSubscriberResponseJF  = Json.format[UpdateSubscriberResponse]
+  implicit val updateCallBackUrlRequestJF  = Json.format[UpdateCallBackUrlRequest]
   implicit val updateCallBackUrlResponseJF = Json.format[UpdateCallBackUrlResponse]
 }
 

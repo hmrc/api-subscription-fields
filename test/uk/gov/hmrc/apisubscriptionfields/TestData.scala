@@ -25,12 +25,12 @@ import uk.gov.hmrc.apisubscriptionfields.model._
 trait TestData {
 
   type EmulatedFailure = UnsupportedOperationException
-  final val emulatedFailure = new EmulatedFailure("Emulated failure.")
-  final val fakeRawClientId = UUID.randomUUID().toString
+  final val emulatedFailure  = new EmulatedFailure("Emulated failure.")
+  final val fakeRawClientId  = UUID.randomUUID().toString
   final val fakeRawClientId2 = UUID.randomUUID().toString
-  final val fakeRawContext = "acontext"
-  final val fakeRawContext2 = "acontext2"
-  final val fakeRawVersion = "1.0.2"
+  final val fakeRawContext   = "acontext"
+  final val fakeRawContext2  = "acontext2"
+  final val fakeRawVersion   = "1.0.2"
 
   final val FakeContext = ApiContext(fakeRawContext)
 
@@ -43,7 +43,6 @@ trait TestData {
   final val FakeClientId2 = ClientId(fakeRawClientId2)
 
 }
-
 
 object RequestHeaders {
 

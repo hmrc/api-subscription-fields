@@ -27,14 +27,10 @@ import scala.concurrent.Future.successful
 import play.api.libs.json._
 import play.api.test.Helpers._
 
-class ApiFieldDefinitionsControllerDeleteSpec
-    extends AsyncHmrcSpec
-    with FieldDefinitionTestData
-    with JsonFormatters
-    with StubControllerComponentsFactory {
+class ApiFieldDefinitionsControllerDeleteSpec extends AsyncHmrcSpec with FieldDefinitionTestData with JsonFormatters with StubControllerComponentsFactory {
 
   private val mockFieldsDefinitionService = mock[ApiFieldDefinitionsService]
-  private val controller = new ApiFieldDefinitionsController(stubControllerComponents(), mockFieldsDefinitionService)
+  private val controller                  = new ApiFieldDefinitionsController(stubControllerComponents(), mockFieldsDefinitionService)
 
   "DELETE /definition/context/:apiContext/version/:apiVersion" should {
     "return NO_CONTENT (204) when successfully deleted from repo" in {

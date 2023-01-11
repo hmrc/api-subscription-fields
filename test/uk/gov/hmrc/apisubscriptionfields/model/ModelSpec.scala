@@ -56,13 +56,13 @@ class UrlValidationRuleSpec extends HmrcSpec with ValidationRuleTestData with Ma
     }
 
     "invalid urls" in {
-      invalidUrls.map(invalidUrl =>  {
+      invalidUrls.map(invalidUrl => {
         UrlValidationRule.validate(invalidUrl) shouldBe false
       })
     }
 
     "handles internal mdtp domains in url" in {
-     UrlValidationRule.validate("https://who-cares.mdtp/pathy/mcpathface") shouldBe true
+      UrlValidationRule.validate("https://who-cares.mdtp/pathy/mcpathface") shouldBe true
     }
   }
 }

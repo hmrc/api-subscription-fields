@@ -55,30 +55,35 @@ class UUIDCreator {
 }
 
 @Singleton
-class SubscriptionFieldsMongoRepository @Inject()(mongo: MongoComponent, uuidCreator: UUIDCreator)
-                                                 (implicit ec: ExecutionContext, val mat: Materializer)
-  extends PlayMongoRepository[SubscriptionFields](
-    collectionName = "subscriptionFields",
-    mongoComponent = mongo,
-    domainFormat = JsonFormatters.SubscriptionFieldsJF,
-    indexes = Seq(
-      IndexModel(ascending(List("clientId", "apiContext", "apiVersion"): _*),
-        IndexOptions()
-          .name("clientId-apiContext-apiVersion_Index")
-          .unique(true)),
-      IndexModel(ascending("clientId"),
-        IndexOptions()
-          .name("clientIdIndex")
-          .unique(false)),
-      IndexModel(ascending("fieldsId"),
-        IndexOptions()
-          .name("fieldsIdIndex")
-          .unique(true))
-    ))
-
-  with SubscriptionFieldsRepository
-  with ApplicationLogger
-  with JsonFormatters {
+class SubscriptionFieldsMongoRepository @Inject() (mongo: MongoComponent, uuidCreator: UUIDCreator)(implicit ec: ExecutionContext, val mat: Materializer)
+    extends PlayMongoRepository[SubscriptionFields](
+      collectionName = "subscriptionFields",
+      mongoComponent = mongo,
+      domainFormat = JsonFormatters.SubscriptionFieldsJF,
+      indexes = Seq(
+        IndexModel(
+          ascending(List("clientId", "apiContext", "apiVersion"): _*),
+          IndexOptions()
+            .name("clientId-apiContext-apiVersion_Index")
+            .unique(true)
+        ),
+        IndexModel(
+          ascending("clientId"),
+          IndexOptions()
+            .name("clientIdIndex")
+            .unique(false)
+        ),
+        IndexModel(
+          ascending("fieldsId"),
+          IndexOptions()
+            .name("fieldsIdIndex")
+            .unique(true)
+        )
+      )
+    )
+    with SubscriptionFieldsRepository
+    with ApplicationLogger
+    with JsonFormatters {
 
   override lazy val collection: MongoCollection[SubscriptionFields] =
     CollectionFactory
@@ -96,25 +101,29 @@ class SubscriptionFieldsMongoRepository @Inject()(mongo: MongoComponent, uuidCre
         )
       )
 
-
   override def saveAtomic(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion, fields: Fields): Future[(SubscriptionFields, IsInsert)] = {
-    val query = and(equal("clientId", Codecs.toBson(clientId.value)),
+    val query = and(
+      equal("clientId", Codecs.toBson(clientId.value)),
       equal("apiContext", Codecs.toBson(apiContext.value)),
-      equal("apiVersion", Codecs.toBson(apiVersion.value)))
+      equal("apiVersion", Codecs.toBson(apiVersion.value))
+    )
 
     collection.find(query).headOption flatMap {
       case Some(subscription: SubscriptionFields) =>
         val updatedSubscription = subscription.copy(fields = fields)
         for {
-          updatedDefinitions <- collection.replaceOne(
-            filter = query,
-            replacement = updatedSubscription
-          ).toFuture().map(_ => updatedSubscription)
+          updatedDefinitions <- collection
+                                  .replaceOne(
+                                    filter = query,
+                                    replacement = updatedSubscription
+                                  )
+                                  .toFuture()
+                                  .map(_ => updatedSubscription)
         } yield (updatedDefinitions, false)
 
       case None =>
         val subscriptionFieldsId = SubscriptionFieldsId(uuidCreator.uuid())
-        val subscription = SubscriptionFields(clientId, apiContext, apiVersion, subscriptionFieldsId, fields)
+        val subscription         = SubscriptionFields(clientId, apiContext, apiVersion, subscriptionFieldsId, fields)
         for {
           newSubscriptionFields <- collection.insertOne(subscription).toFuture().map(_ => subscription)
         } yield (newSubscriptionFields, true)
@@ -122,9 +131,11 @@ class SubscriptionFieldsMongoRepository @Inject()(mongo: MongoComponent, uuidCre
   }
 
   override def fetch(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion): Future[Option[SubscriptionFields]] = {
-    val query = and(equal("clientId", Codecs.toBson(clientId.value)),
+    val query = and(
+      equal("clientId", Codecs.toBson(clientId.value)),
       equal("apiContext", Codecs.toBson(apiContext.value)),
-      equal("apiVersion", Codecs.toBson(apiVersion.value)))
+      equal("apiVersion", Codecs.toBson(apiVersion.value))
+    )
 
     collection.find(query).headOption()
   }
@@ -144,17 +155,21 @@ class SubscriptionFieldsMongoRepository @Inject()(mongo: MongoComponent, uuidCre
   }
 
   override def delete(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion): Future[Boolean] = {
-    val query = and(equal("clientId", Codecs.toBson(clientId.value)),
+    val query = and(
+      equal("clientId", Codecs.toBson(clientId.value)),
       equal("apiContext", Codecs.toBson(apiContext.value)),
-      equal("apiVersion", Codecs.toBson(apiVersion.value)))
-    collection.deleteOne(query)
+      equal("apiVersion", Codecs.toBson(apiVersion.value))
+    )
+    collection
+      .deleteOne(query)
       .toFuture()
       .map(_.getDeletedCount > 0)
   }
 
   override def delete(clientId: ClientId): Future[Boolean] = {
     val query = equal("clientId", Codecs.toBson(clientId.value))
-    collection.deleteMany(query)
+    collection
+      .deleteMany(query)
       .toFuture()
       .map(_.getDeletedCount > 0)
   }

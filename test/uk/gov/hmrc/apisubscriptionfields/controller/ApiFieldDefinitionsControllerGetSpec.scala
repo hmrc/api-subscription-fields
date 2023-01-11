@@ -24,17 +24,13 @@ import uk.gov.hmrc.apisubscriptionfields.model.{ApiFieldDefinitions, BulkApiFiel
 import uk.gov.hmrc.apisubscriptionfields.service.ApiFieldDefinitionsService
 import uk.gov.hmrc.apisubscriptionfields.AsyncHmrcSpec
 
-import scala.concurrent.Future.{successful,failed}
+import scala.concurrent.Future.{successful, failed}
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class ApiFieldDefinitionsControllerGetSpec
-  extends AsyncHmrcSpec
-  with FieldDefinitionTestData
-  with JsonFormatters
-  with StubControllerComponentsFactory {
+class ApiFieldDefinitionsControllerGetSpec extends AsyncHmrcSpec with FieldDefinitionTestData with JsonFormatters with StubControllerComponentsFactory {
 
   private val mockFieldsDefinitionService = mock[ApiFieldDefinitionsService]
-  private val controller = new ApiFieldDefinitionsController(stubControllerComponents(), mockFieldsDefinitionService)
+  private val controller                  = new ApiFieldDefinitionsController(stubControllerComponents(), mockFieldsDefinitionService)
 
   private val responseJsonString =
     """{
@@ -72,8 +68,8 @@ class ApiFieldDefinitionsControllerGetSpec
       |    }
       |  ]
       |}""".stripMargin
-  private val responseJson = Json.parse(responseJsonString)
-  private val responseModel = responseJson.as[ApiFieldDefinitions]
+  private val responseJson       = Json.parse(responseJsonString)
+  private val responseModel      = responseJson.as[ApiFieldDefinitions]
 
   private val allResponseJsonString =
     """{
@@ -150,9 +146,9 @@ class ApiFieldDefinitionsControllerGetSpec
       |    }
       |  ]
       |}""".stripMargin
-  private val allResponseJson = Json.parse(allResponseJsonString)
-  private val allResponseModel = allResponseJson.as[BulkApiFieldDefinitionsResponse]
-  private val emptyAllResponseJson = Json.toJson(BulkApiFieldDefinitionsResponse(Seq()))
+  private val allResponseJson       = Json.parse(allResponseJsonString)
+  private val allResponseModel      = allResponseJson.as[BulkApiFieldDefinitionsResponse]
+  private val emptyAllResponseJson  = Json.toJson(BulkApiFieldDefinitionsResponse(Seq()))
 
   "GET /definition/context/:apiContext/version/:apiVersion" should {
     "return OK when the expected record exists in the repo" in {

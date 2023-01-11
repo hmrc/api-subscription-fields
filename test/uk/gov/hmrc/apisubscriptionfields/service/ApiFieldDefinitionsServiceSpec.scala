@@ -21,14 +21,14 @@ import uk.gov.hmrc.apisubscriptionfields.model._
 import uk.gov.hmrc.apisubscriptionfields.repository.ApiFieldDefinitionsRepository
 import uk.gov.hmrc.apisubscriptionfields.AsyncHmrcSpec
 
-import scala.concurrent.Future.{successful,failed}
+import scala.concurrent.Future.{successful, failed}
 import cats.data.NonEmptyList
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class ApiFieldDefinitionsServiceSpec extends AsyncHmrcSpec with FieldDefinitionTestData {
 
   private val mockApiFieldDefinitionsRepository = mock[ApiFieldDefinitionsRepository]
-  private val service = new ApiFieldDefinitionsService(mockApiFieldDefinitionsRepository)
+  private val service                           = new ApiFieldDefinitionsService(mockApiFieldDefinitionsRepository)
 
   "getAll" should {
     "return an empty list when there are no records in the database collection" in {
@@ -47,9 +47,12 @@ class ApiFieldDefinitionsServiceSpec extends AsyncHmrcSpec with FieldDefinitionT
 
       val result = await(service.getAll)
 
-      val expectedResponse = BulkApiFieldDefinitionsResponse(apis = Seq(
-        ApiFieldDefinitions(FakeContext, FakeVersion, NonEmptyList.one(FakeFieldDefinitionUrl)),
-        ApiFieldDefinitions(FakeContext2, FakeVersion, NonEmptyList.one(FakeFieldDefinitionString))))
+      val expectedResponse = BulkApiFieldDefinitionsResponse(apis =
+        Seq(
+          ApiFieldDefinitions(FakeContext, FakeVersion, NonEmptyList.one(FakeFieldDefinitionUrl)),
+          ApiFieldDefinitions(FakeContext2, FakeVersion, NonEmptyList.one(FakeFieldDefinitionString))
+        )
+      )
       result shouldBe expectedResponse
     }
   }

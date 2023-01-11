@@ -28,8 +28,8 @@ import scala.util.control.NonFatal
 import uk.gov.hmrc.play.http.metrics.common._
 
 @Singleton
-class PushPullNotificationServiceConnector @Inject()(http: HttpClient, appConfig: ApplicationConfig, val apiMetrics: ApiMetrics)
-                                                    (implicit ec: ExecutionContext) extends RecordMetrics {
+class PushPullNotificationServiceConnector @Inject() (http: HttpClient, appConfig: ApplicationConfig, val apiMetrics: ApiMetrics)(implicit ec: ExecutionContext)
+    extends RecordMetrics {
   import uk.gov.hmrc.apisubscriptionfields.connector.JsonFormatters._
 
   val api: API = API("api-subscription-fields")
@@ -39,32 +39,35 @@ class PushPullNotificationServiceConnector @Inject()(http: HttpClient, appConfig
   def ensureBoxIsCreated(boxName: String, clientId: ClientId)(implicit hc: HeaderCarrier): Future[BoxId] = {
     val payload = CreateBoxRequest(boxName, clientId)
 
-    http.PUT[CreateBoxRequest, CreateBoxResponse](s"$externalServiceUri/box", payload)
-    .map(_.boxId)
-    .recover {
-      case NonFatal(e) => throw new RuntimeException(s"Unexpected response from $externalServiceUri: ${e.getMessage}")
-    }
+    http
+      .PUT[CreateBoxRequest, CreateBoxResponse](s"$externalServiceUri/box", payload)
+      .map(_.boxId)
+      .recover { case NonFatal(e) =>
+        throw new RuntimeException(s"Unexpected response from $externalServiceUri: ${e.getMessage}")
+      }
   }
 
   def subscribe(boxId: BoxId, callbackUrl: String)(implicit hc: HeaderCarrier): Future[Unit] = {
     val payload = UpdateSubscriberRequest(SubscriberRequest(callbackUrl, "API_PUSH_SUBSCRIBER"))
 
-    http.PUT[UpdateSubscriberRequest, UpdateSubscriberResponse](s"$externalServiceUri/box/${boxId.value.toString}/subscriber", payload)
-    .map(_ => ())
-    .recover {
-      case NonFatal(e) => throw new RuntimeException(s"Unexpected response from $externalServiceUri: ${e.getMessage}")
-    }
+    http
+      .PUT[UpdateSubscriberRequest, UpdateSubscriberResponse](s"$externalServiceUri/box/${boxId.value.toString}/subscriber", payload)
+      .map(_ => ())
+      .recover { case NonFatal(e) =>
+        throw new RuntimeException(s"Unexpected response from $externalServiceUri: ${e.getMessage}")
+      }
   }
 
-  def updateCallBackUrl(clientId: ClientId, boxId: BoxId, callbackUrl: FieldValue)
-                       (implicit hc: HeaderCarrier): Future[PPNSCallBackUrlValidationResponse] = {
+  def updateCallBackUrl(clientId: ClientId, boxId: BoxId, callbackUrl: FieldValue)(implicit hc: HeaderCarrier): Future[PPNSCallBackUrlValidationResponse] = {
     val payload = UpdateCallBackUrlRequest(clientId, callbackUrl)
-    http.PUT[UpdateCallBackUrlRequest, UpdateCallBackUrlResponse](s"$externalServiceUri/box/${boxId.value.toString}/callback", payload)
+    http
+      .PUT[UpdateCallBackUrlRequest, UpdateCallBackUrlResponse](s"$externalServiceUri/box/${boxId.value.toString}/callback", payload)
       .map(response =>
         if (response.successful) PPNSCallBackUrlSuccessResponse
         else response.errorMessage.fold(PPNSCallBackUrlFailedResponse("Unknown Error"))(PPNSCallBackUrlFailedResponse)
-      ).recover {
-      case NonFatal(e) => throw new RuntimeException(s"Unexpected response from $externalServiceUri: ${e.getMessage}")
-    }
+      )
+      .recover { case NonFatal(e) =>
+        throw new RuntimeException(s"Unexpected response from $externalServiceUri: ${e.getMessage}")
+      }
   }
 }

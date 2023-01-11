@@ -29,16 +29,12 @@ import scala.concurrent.Future
 import scala.concurrent.Future.successful
 import play.api.test.Helpers._
 
-class SubscriptionFieldsControllerPutSpec
-  extends AsyncHmrcSpec
-  with SubscriptionFieldsTestData
-  with JsonFormatters
-  with StubControllerComponentsFactory {
+class SubscriptionFieldsControllerPutSpec extends AsyncHmrcSpec with SubscriptionFieldsTestData with JsonFormatters with StubControllerComponentsFactory {
 
   private val mockSubscriptionFieldsService = mock[SubscriptionFieldsService]
-  private val controller = new SubscriptionFieldsController(stubControllerComponents(), mockSubscriptionFieldsService)
-  implicit private val actorSystem = ActorSystem("test")
-   
+  private val controller                    = new SubscriptionFieldsController(stubControllerComponents(), mockSubscriptionFieldsService)
+  implicit private val actorSystem          = ActorSystem("test")
+
   def subsFieldServiceUpsertReturns(response: SubsFieldsUpsertResponse) = {
     when(mockSubscriptionFieldsService.upsert(eqTo(FakeClientId), eqTo(FakeContext), eqTo(FakeVersion), eqTo(FakeSubscriptionFields))(*)).thenReturn(successful(response))
   }
@@ -94,13 +90,14 @@ class SubscriptionFieldsControllerPutSpec
 
   private def testSubmitResult(request: Request[JsValue])(test: Future[Result] => Unit) {
     val action: Action[JsValue] = controller.upsertSubscriptionFields(FakeClientId, FakeContext, FakeVersion)
-    val result: Future[Result] = action.apply(request)
+    val result: Future[Result]  = action.apply(request)
     test(result)
   }
 
   private def mkRequest(jsonBody: JsValue): Request[JsValue] =
     FakeRequest()
-      .withJsonBody(jsonBody).map(r => r.json)
+      .withJsonBody(jsonBody)
+      .map(r => r.json)
 
   private def mkJson(model: SubscriptionFieldsRequest) = Json.toJson(model)(Json.writes[SubscriptionFieldsRequest])
 }

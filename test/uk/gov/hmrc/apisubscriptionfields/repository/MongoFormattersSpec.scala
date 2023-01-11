@@ -24,7 +24,7 @@ import uk.gov.hmrc.apisubscriptionfields.AsyncHmrcSpec
 class MongoFormattersSpec extends AsyncHmrcSpec with JsonFormatters {
   import eu.timepit.refined.auto._
 
-  val validationRule = RegexValidationRule("test regex")
+  val validationRule   = RegexValidationRule("test regex")
   final val validation = ValidationGroup("error message", NonEmptyList.one(validationRule))
   "Field definition formatter" should {
     "Correctly unmarshall a JSON field definition with all the necessary fields" in {

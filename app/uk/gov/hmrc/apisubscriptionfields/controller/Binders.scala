@@ -17,35 +17,36 @@
 package uk.gov.hmrc.apisubscriptionfields.controller
 
 import play.api.mvc.PathBindable
-import uk.gov.hmrc.apisubscriptionfields.model.{ApiContext,ApiVersion, ClientId, SubscriptionFieldsId}
+import uk.gov.hmrc.apisubscriptionfields.model.{ApiContext, ApiVersion, ClientId, SubscriptionFieldsId}
 import java.{util => ju}
 
 object Binders {
 
-  implicit object apiContextPathBindable extends PathBindable.Parsing[ApiContext](
-    ApiContext.apply,
-    _.value,
-      (key: String, e: Exception) => "Cannot parse parameter %s as ApiContext: %s".format(key, e.getMessage)
-  )
+  implicit object apiContextPathBindable
+      extends PathBindable.Parsing[ApiContext](
+        ApiContext.apply,
+        _.value,
+        (key: String, e: Exception) => "Cannot parse parameter %s as ApiContext: %s".format(key, e.getMessage)
+      )
 
-  implicit object apiVersionPathBindable extends PathBindable.Parsing[ApiVersion](
-    ApiVersion.apply,
-    _.value,
-      (key: String, e: Exception) => "Cannot parse parameter %s as ApiVersion: %s".format(key, e.getMessage)
-  )
+  implicit object apiVersionPathBindable
+      extends PathBindable.Parsing[ApiVersion](
+        ApiVersion.apply,
+        _.value,
+        (key: String, e: Exception) => "Cannot parse parameter %s as ApiVersion: %s".format(key, e.getMessage)
+      )
 
-  implicit object clientIdPathBindable extends PathBindable.Parsing[ClientId](
-    ClientId.apply,
-    _.value,
-      (key: String, e: Exception) => "Cannot parse parameter %s as ClientId: %s".format(key, e.getMessage)
-  )
+  implicit object clientIdPathBindable
+      extends PathBindable.Parsing[ClientId](
+        ClientId.apply,
+        _.value,
+        (key: String, e: Exception) => "Cannot parse parameter %s as ClientId: %s".format(key, e.getMessage)
+      )
 
-  implicit object subscriptionFieldsIdPathBindable extends PathBindable.Parsing[SubscriptionFieldsId](
-    s => SubscriptionFieldsId(ju.UUID.fromString(s)),
-    _.value.toString,
-      (key: String, e: Exception) => "Cannot parse parameter %s as SubscriptionFieldsId: %s".format(key, e.getMessage)
-  )
+  implicit object subscriptionFieldsIdPathBindable
+      extends PathBindable.Parsing[SubscriptionFieldsId](
+        s => SubscriptionFieldsId(ju.UUID.fromString(s)),
+        _.value.toString,
+        (key: String, e: Exception) => "Cannot parse parameter %s as SubscriptionFieldsId: %s".format(key, e.getMessage)
+      )
 }
-
-
-

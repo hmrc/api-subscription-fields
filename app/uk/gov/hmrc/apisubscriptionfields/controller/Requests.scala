@@ -24,7 +24,6 @@ private[controller] case class SubscriptionFieldsRequest(fields: Fields)
 
 private[controller] case class FieldDefinitionsRequest(fieldDefinitions: NonEmptyList[FieldDefinition])
 
-
 object SubscriptionFieldsRequest {
   import play.api.libs.json._
   import be.venneborg.refined.play.RefinedJsonFormats._

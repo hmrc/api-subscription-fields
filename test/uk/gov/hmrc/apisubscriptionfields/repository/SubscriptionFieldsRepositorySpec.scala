@@ -26,19 +26,31 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.test.{DefaultAwaitTimeout, FutureAwaits}
 import uk.gov.hmrc.apisubscriptionfields.AsyncHmrcSpec
-import uk.gov.hmrc.apisubscriptionfields.SubscriptionFieldsTestData.{FakeClientId, FakeClientId2, FakeContext, FakeContext2, FakeRawFieldsId, FakeVersion, createSubscriptionFieldsWithApiContext, fakeRawContext2, fieldN, uniqueClientId}
+import uk.gov.hmrc.apisubscriptionfields.SubscriptionFieldsTestData.{
+  FakeClientId,
+  FakeClientId2,
+  FakeContext,
+  FakeContext2,
+  FakeRawFieldsId,
+  FakeVersion,
+  createSubscriptionFieldsWithApiContext,
+  fakeRawContext2,
+  fieldN,
+  uniqueClientId
+}
 import uk.gov.hmrc.mongo.play.json.Codecs
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class SubscriptionFieldsRepositorySpec extends AsyncHmrcSpec
-  with GuiceOneAppPerSuite
-  with Matchers
-  with OptionValues
-  with DefaultAwaitTimeout
-  with FutureAwaits
-  with BeforeAndAfterEach {
+class SubscriptionFieldsRepositorySpec
+    extends AsyncHmrcSpec
+    with GuiceOneAppPerSuite
+    with Matchers
+    with OptionValues
+    with DefaultAwaitTimeout
+    with FutureAwaits
+    with BeforeAndAfterEach {
 
   val mockUuidCreator: UUIDCreator = new UUIDCreator {
     override def uuid(): UUID = FakeRawFieldsId
@@ -61,17 +73,22 @@ class SubscriptionFieldsRepositorySpec extends AsyncHmrcSpec
   }
 
   private def selector(s: SubscriptionFields) = {
-    Filters.and(Filters.equal("apiContext", Codecs.toBson(s.apiContext.value)),
+    Filters.and(
+      Filters.equal("apiContext", Codecs.toBson(s.apiContext.value)),
       Filters.equal("apiVersion", Codecs.toBson(s.apiVersion.value)),
-      Filters.equal("clientId", Codecs.toBson(s.clientId.value)))
+      Filters.equal("clientId", Codecs.toBson(s.clientId.value))
+    )
   }
 
   def saveByFieldsId(subscription: SubscriptionFields): Future[SubscriptionFields] = {
     val query = Filters.equal("fieldsId", Codecs.toBson(subscription.fieldsId.value))
-    repository.collection.findOneAndUpdate(filter = query,
-      update = set("fieldsId", Codecs.toBson(subscription.fieldsId.value)),
-      options = FindOneAndUpdateOptions().upsert(false).returnDocument(ReturnDocument.AFTER)
-    ).toFuture()
+    repository.collection
+      .findOneAndUpdate(
+        filter = query,
+        update = set("fieldsId", Codecs.toBson(subscription.fieldsId.value)),
+        options = FindOneAndUpdateOptions().upsert(false).returnDocument(ReturnDocument.AFTER)
+      )
+      .toFuture()
   }
 
   def saveAtomic(subscriptionFields: SubscriptionFields) =
@@ -107,7 +124,7 @@ class SubscriptionFieldsRepositorySpec extends AsyncHmrcSpec
       collectionSize shouldBe 1
 
       val updatedSubscriptionFields = apiSubscriptionFields.copy(fields = Map(fieldN(4) -> "value_4"))
-      val resultAfterUpdate = await(saveAtomic(updatedSubscriptionFields))
+      val resultAfterUpdate         = await(saveAtomic(updatedSubscriptionFields))
       validateResult(resultAfterUpdate, updatedSubscriptionFields, false)
       resultAfterCreate._1.fieldsId shouldBe resultAfterUpdate._1.fieldsId
       collectionSize shouldBe 1
@@ -149,7 +166,7 @@ class SubscriptionFieldsRepositorySpec extends AsyncHmrcSpec
 
       val result = await(repository.fetch(FakeClientId, FakeContext, FakeVersion))
       result match {
-        case None => fail
+        case None                                         => fail
         case Some(subscriptionFields: SubscriptionFields) => validateSubscriptionFields(subscriptionFields, apiSubscription)
       }
     }
@@ -168,14 +185,14 @@ class SubscriptionFieldsRepositorySpec extends AsyncHmrcSpec
 
   "fetchByFieldsId" should {
     "retrieve the correct record from the `fieldsId` " in {
-      val apiSubscription = createApiSubscriptionFields()
+      val apiSubscription         = createApiSubscriptionFields()
       val savedSubscriptionFields = await(saveAtomic(apiSubscription))
       collectionSize shouldBe 1
 
       val result = await(repository.fetchByFieldsId(savedSubscriptionFields._1.fieldsId))
 
       result match {
-        case None => fail
+        case None                                         => fail
         case Some(subscriptionFields: SubscriptionFields) => validateSubscriptionFields(subscriptionFields, apiSubscription)
       }
     }

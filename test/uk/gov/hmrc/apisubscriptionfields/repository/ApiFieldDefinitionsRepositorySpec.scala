@@ -28,13 +28,14 @@ import uk.gov.hmrc.mongo.play.json.Codecs
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class ApiFieldDefinitionsRepositorySpec extends AnyWordSpec
-  with GuiceOneAppPerSuite
-  with Matchers
-  with OptionValues
-  with DefaultAwaitTimeout
-  with FutureAwaits
-  with BeforeAndAfterEach {
+class ApiFieldDefinitionsRepositorySpec
+    extends AnyWordSpec
+    with GuiceOneAppPerSuite
+    with Matchers
+    with OptionValues
+    with DefaultAwaitTimeout
+    with FutureAwaits
+    with BeforeAndAfterEach {
 
   private val repository = app.injector.instanceOf[ApiFieldDefinitionsMongoRepository]
 
@@ -148,7 +149,6 @@ class ApiFieldDefinitionsRepositorySpec extends AnyWordSpec
   }
 
   private def selector(fd: ApiFieldDefinitions) = {
-    Filters.and(Filters.equal("apiContext", Codecs.toBson(fd.apiContext.value)),
-      Filters.equal("apiVersion", Codecs.toBson(fd.apiVersion.value)))
+    Filters.and(Filters.equal("apiContext", Codecs.toBson(fd.apiContext.value)), Filters.equal("apiVersion", Codecs.toBson(fd.apiVersion.value)))
   }
 }

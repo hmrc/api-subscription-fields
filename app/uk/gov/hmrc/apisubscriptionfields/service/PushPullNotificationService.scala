@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.apisubscriptionfields.service
 
-
 import uk.gov.hmrc.apisubscriptionfields.connector.PushPullNotificationServiceConnector
 import javax.inject.{Inject, Singleton}
 import uk.gov.hmrc.apisubscriptionfields.model.FieldDefinition
@@ -29,24 +28,21 @@ import scala.concurrent.ExecutionContext
 import uk.gov.hmrc.http.HeaderCarrier
 
 @Singleton
-class PushPullNotificationService @Inject()(ppnsConnector: PushPullNotificationServiceConnector)(implicit ec: ExecutionContext) {
-  def makeBoxName(apiContext: ApiContext, apiVersion: ApiVersion, fieldDefinition: FieldDefinition) : String = {
+class PushPullNotificationService @Inject() (ppnsConnector: PushPullNotificationServiceConnector)(implicit ec: ExecutionContext) {
+  def makeBoxName(apiContext: ApiContext, apiVersion: ApiVersion, fieldDefinition: FieldDefinition): String = {
     val separator = "##"
     s"${apiContext.value}${separator}${apiVersion.value}${separator}${fieldDefinition.name.value}"
   }
 
-  def subscribeToPPNS(clientId: ClientId,
-                              apiContext: ApiContext,
-                              apiVersion: ApiVersion,
-                              oFieldValue: Option[FieldValue],
-                              fieldDefinition: FieldDefinition)
-                             (implicit hc: HeaderCarrier): Future[PPNSCallBackUrlValidationResponse] = {
+  def subscribeToPPNS(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion, oFieldValue: Option[FieldValue], fieldDefinition: FieldDefinition)(implicit
+      hc: HeaderCarrier
+  ): Future[PPNSCallBackUrlValidationResponse] = {
     for {
-      boxId <- ppnsConnector.ensureBoxIsCreated(makeBoxName(apiContext, apiVersion, fieldDefinition), clientId)
+      boxId  <- ppnsConnector.ensureBoxIsCreated(makeBoxName(apiContext, apiVersion, fieldDefinition), clientId)
       result <- oFieldValue match {
-        case Some(value) => ppnsConnector.updateCallBackUrl (clientId, boxId, value)
-        case None => Future.successful(PPNSCallBackUrlSuccessResponse)
-      }
+                  case Some(value) => ppnsConnector.updateCallBackUrl(clientId, boxId, value)
+                  case None        => Future.successful(PPNSCallBackUrlSuccessResponse)
+                }
     } yield result
   }
 

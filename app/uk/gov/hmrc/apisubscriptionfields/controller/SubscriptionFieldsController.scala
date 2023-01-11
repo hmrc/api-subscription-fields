@@ -27,7 +27,7 @@ import scala.concurrent.Future
 import scala.concurrent.ExecutionContext
 
 @Singleton
-class SubscriptionFieldsController @Inject()(cc: ControllerComponents, service: SubscriptionFieldsService)(implicit ec: ExecutionContext) extends CommonController {
+class SubscriptionFieldsController @Inject() (cc: ControllerComponents, service: SubscriptionFieldsService)(implicit ec: ExecutionContext) extends CommonController {
 
   import JsonFormatters._
 
@@ -69,14 +69,14 @@ class SubscriptionFieldsController @Inject()(cc: ControllerComponents, service: 
   private def asActionResult[T](eventualMaybeResponse: Future[Option[T]], notFoundMessage: String)(implicit writes: Writes[T]) = {
     eventualMaybeResponse map {
       case Some(payload) => Ok(Json.toJson(payload))
-      case None => notFoundResponse(notFoundMessage)
+      case None          => notFoundResponse(notFoundMessage)
     } recover recovery
   }
 
   private def asBulkActionResult(eventualMaybeResponse: Future[Option[BulkSubscriptionFieldsResponse]], notFoundMessage: String) = {
     eventualMaybeResponse map {
       case Some(subscriptionFields) => Ok(Json.toJson(subscriptionFields))
-      case None => notFoundResponse(notFoundMessage)
+      case None                     => notFoundResponse(notFoundMessage)
     } recover recovery
   }
 
@@ -84,33 +84,34 @@ class SubscriptionFieldsController @Inject()(cc: ControllerComponents, service: 
     import JsonFormatters._
 
     withJsonBody[SubscriptionFieldsRequest] { payload =>
-      if(payload.fields.isEmpty) {
+      if (payload.fields.isEmpty) {
         Future.successful(UnprocessableEntity(JsErrorResponse(INVALID_REQUEST_PAYLOAD, "At least one field must be specified")))
-      }
-      else {
-        service.upsert(clientId, apiContext, apiVersion, payload.fields).map( _ match {
-          case NotFoundSubsFieldsUpsertResponse                             => BadRequest(Json.toJson("reason" -> "field definitions not found")) // TODO
-          case FailedValidationSubsFieldsUpsertResponse(fieldErrorMessages) => 
-            BadRequest(Json.toJson(fieldErrorMessages))
-          case SuccessfulSubsFieldsUpsertResponse(response, true)           => Created(Json.toJson(response))
-          case SuccessfulSubsFieldsUpsertResponse(response, false)          => 
-            Ok(Json.toJson(response))
-        })
-        .recover(recovery)
+      } else {
+        service
+          .upsert(clientId, apiContext, apiVersion, payload.fields)
+          .map(_ match {
+            case NotFoundSubsFieldsUpsertResponse                             => BadRequest(Json.toJson("reason" -> "field definitions not found")) // TODO
+            case FailedValidationSubsFieldsUpsertResponse(fieldErrorMessages) =>
+              BadRequest(Json.toJson(fieldErrorMessages))
+            case SuccessfulSubsFieldsUpsertResponse(response, true)           => Created(Json.toJson(response))
+            case SuccessfulSubsFieldsUpsertResponse(response, false)          =>
+              Ok(Json.toJson(response))
+          })
+          .recover(recovery)
       }
     }
   }
 
   def deleteSubscriptionFields(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion): Action[AnyContent] = Action.async { _ =>
     service.delete(clientId, apiContext, apiVersion) map {
-      case true => NoContent
+      case true  => NoContent
       case false => notFoundResponse(notFoundMessage(clientId, apiContext, apiVersion))
     } recover recovery
   }
 
   def deleteAllSubscriptionFieldsForClient(clientId: ClientId): Action[AnyContent] = Action.async { _ =>
     service.delete(clientId) map {
-      case true => NoContent
+      case true  => NoContent
       case false => notFoundResponse(clientIdNotFoundMessage(clientId))
     } recover recovery
   }

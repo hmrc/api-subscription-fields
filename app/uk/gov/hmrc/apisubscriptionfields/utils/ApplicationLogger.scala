@@ -20,4 +20,4 @@ import play.api.Logger
 
 trait ApplicationLogger {
   protected val appLogger: Logger = Logger("application")
-} 
+}

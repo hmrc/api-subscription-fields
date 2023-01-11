@@ -47,19 +47,21 @@ trait ApiFieldDefinitionsRepository {
 }
 
 @Singleton
-class ApiFieldDefinitionsMongoRepository @Inject() (mongo: MongoComponent)
-                                                   (implicit ec: ExecutionContext, val mat: Materializer)
-  extends PlayMongoRepository[ApiFieldDefinitions](
-    collectionName = "fieldsDefinitions",
-    mongoComponent = mongo,
-    domainFormat = JsonFormatters.ApiFieldDefinitionsJF,
-    indexes = Seq(
-      IndexModel(ascending(List("apiContext", "apiVersion"): _*),
-        IndexOptions()
-          .name("apiContext-apiVersion_index")
-          .background(true)
-          .unique(true))
-    ))
+class ApiFieldDefinitionsMongoRepository @Inject() (mongo: MongoComponent)(implicit ec: ExecutionContext, val mat: Materializer)
+    extends PlayMongoRepository[ApiFieldDefinitions](
+      collectionName = "fieldsDefinitions",
+      mongoComponent = mongo,
+      domainFormat = JsonFormatters.ApiFieldDefinitionsJF,
+      indexes = Seq(
+        IndexModel(
+          ascending(List("apiContext", "apiVersion"): _*),
+          IndexOptions()
+            .name("apiContext-apiVersion_index")
+            .background(true)
+            .unique(true)
+        )
+      )
+    )
     with ApiFieldDefinitionsRepository
     with ApplicationLogger {
 
@@ -80,16 +82,18 @@ class ApiFieldDefinitionsMongoRepository @Inject() (mongo: MongoComponent)
       )
 
   def save(definitions: ApiFieldDefinitions): Future[(ApiFieldDefinitions, IsInsert)] = {
-    val query = and(equal("apiContext", Codecs.toBson(definitions.apiContext.value)),
-      equal("apiVersion", Codecs.toBson(definitions.apiVersion.value)))
+    val query = and(equal("apiContext", Codecs.toBson(definitions.apiContext.value)), equal("apiVersion", Codecs.toBson(definitions.apiVersion.value)))
 
     collection.find(query).headOption flatMap {
       case Some(_: ApiFieldDefinitions) =>
         for {
-          updatedDefinitions <- collection.replaceOne(
-            filter = query,
-            replacement = definitions
-          ).toFuture().map(_ => definitions)
+          updatedDefinitions <- collection
+                                  .replaceOne(
+                                    filter = query,
+                                    replacement = definitions
+                                  )
+                                  .toFuture()
+                                  .map(_ => definitions)
         } yield (updatedDefinitions, false)
 
       case None =>
@@ -100,8 +104,7 @@ class ApiFieldDefinitionsMongoRepository @Inject() (mongo: MongoComponent)
   }
 
   override def fetch(apiContext: ApiContext, apiVersion: ApiVersion): Future[Option[ApiFieldDefinitions]] = {
-    collection.find(Filters.and(equal("apiContext", Codecs.toBson(apiContext.value)),
-      equal("apiVersion", Codecs.toBson(apiVersion.value)))).headOption()
+    collection.find(Filters.and(equal("apiContext", Codecs.toBson(apiContext.value)), equal("apiVersion", Codecs.toBson(apiVersion.value)))).headOption()
   }
 
   override def fetchAll(): Future[List[ApiFieldDefinitions]] = {
@@ -109,8 +112,8 @@ class ApiFieldDefinitionsMongoRepository @Inject() (mongo: MongoComponent)
   }
 
   override def delete(apiContext: ApiContext, apiVersion: ApiVersion): Future[Boolean] = {
-    collection.deleteOne(Filters.and(equal("apiContext", Codecs.toBson(apiContext.value)),
-      equal("apiVersion", Codecs.toBson(apiVersion.value))))
+    collection
+      .deleteOne(Filters.and(equal("apiContext", Codecs.toBson(apiContext.value)), equal("apiVersion", Codecs.toBson(apiVersion.value))))
       .toFuture()
       .map(_.getDeletedCount > 0)
   }

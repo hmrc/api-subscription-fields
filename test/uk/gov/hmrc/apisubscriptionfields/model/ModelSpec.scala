@@ -16,10 +16,9 @@
 
 package uk.gov.hmrc.apisubscriptionfields.model
 
-import uk.gov.hmrc.apisubscriptionfields.SubscriptionFieldsTestData
-import uk.gov.hmrc.apisubscriptionfields.FieldDefinitionTestData
-import uk.gov.hmrc.apisubscriptionfields.HmrcSpec
 import org.scalatest.Matchers
+
+import uk.gov.hmrc.apisubscriptionfields.{FieldDefinitionTestData, HmrcSpec, SubscriptionFieldsTestData}
 
 class ModelSpec extends HmrcSpec with SubscriptionFieldsTestData with FieldDefinitionTestData with ValidationRuleTestData {
   "RegexValidationRule" should {
@@ -56,13 +55,13 @@ class UrlValidationRuleSpec extends HmrcSpec with ValidationRuleTestData with Ma
     }
 
     "invalid urls" in {
-      invalidUrls.map(invalidUrl =>  {
+      invalidUrls.map(invalidUrl => {
         UrlValidationRule.validate(invalidUrl) shouldBe false
       })
     }
 
     "handles internal mdtp domains in url" in {
-     UrlValidationRule.validate("https://who-cares.mdtp/pathy/mcpathface") shouldBe true
+      UrlValidationRule.validate("https://who-cares.mdtp/pathy/mcpathface") shouldBe true
     }
   }
 }

@@ -16,24 +16,24 @@
 
 package uk.gov.hmrc.apisubscriptionfields.controller
 
-import play.api.libs.json._
-import play.api.mvc.{Request, Result}
-import uk.gov.hmrc.apisubscriptionfields.model.ErrorCode._
-import uk.gov.hmrc.apisubscriptionfields.model.JsErrorResponse
-import uk.gov.hmrc.play.bootstrap.backend.controller.BackendBaseController
-import uk.gov.hmrc.apisubscriptionfields.utils.ApplicationLogger
-
 import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
 
+import play.api.libs.json._
+import play.api.mvc.{Request, Result}
+import uk.gov.hmrc.play.bootstrap.backend.controller.BackendBaseController
+
+import uk.gov.hmrc.apisubscriptionfields.model.ErrorCode._
+import uk.gov.hmrc.apisubscriptionfields.model.JsErrorResponse
+import uk.gov.hmrc.apisubscriptionfields.utils.ApplicationLogger
+
 trait CommonController extends BackendBaseController with ApplicationLogger {
 
-  override protected def withJsonBody[T]
-  (f: (T) => Future[Result])(implicit request: Request[JsValue], m: Manifest[T], reads: Reads[T]): Future[Result] = {
+  override protected def withJsonBody[T](f: (T) => Future[Result])(implicit request: Request[JsValue], m: Manifest[T], reads: Reads[T]): Future[Result] = {
     Try(request.body.validate[T]) match {
       case Success(JsSuccess(payload, _)) => f(payload)
-      case Success(JsError(errs)) => jsonError(JsError.toJson(errs).toString())
-      case Failure(e) => jsonError(e.getMessage)
+      case Success(JsError(errs))         => jsonError(JsError.toJson(errs).toString())
+      case Failure(e)                     => jsonError(e.getMessage)
     }
   }
 
@@ -42,8 +42,8 @@ trait CommonController extends BackendBaseController with ApplicationLogger {
     Future.successful(UnprocessableEntity(JsErrorResponse(INVALID_REQUEST_PAYLOAD, "A JSON error occurred")))
   }
 
-  def recovery: PartialFunction[Throwable, Result] = {
-    case e => handleException(e)
+  def recovery: PartialFunction[Throwable, Result] = { case e =>
+    handleException(e)
   }
 
   private[controller] def handleException(e: Throwable) = {

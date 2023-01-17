@@ -16,24 +16,23 @@
 
 package uk.gov.hmrc.apisubscriptionfields.controller
 
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
+import scala.concurrent.Future.{failed, successful}
+
 import play.api.libs.json.{JsDefined, JsString, Json}
 import play.api.mvc._
 import play.api.test.Helpers._
-import uk.gov.hmrc.apisubscriptionfields.SubscriptionFieldsTestData
+import play.api.test.{FakeRequest, StubControllerComponentsFactory}
+
 import uk.gov.hmrc.apisubscriptionfields.model._
 import uk.gov.hmrc.apisubscriptionfields.service.SubscriptionFieldsService
-import scala.concurrent.ExecutionContext.Implicits.global
-
-import scala.concurrent.Future
-import scala.concurrent.Future.{successful,failed}
-import play.api.test.StubControllerComponentsFactory
-import uk.gov.hmrc.apisubscriptionfields.AsyncHmrcSpec
-import play.api.test.FakeRequest
+import uk.gov.hmrc.apisubscriptionfields.{AsyncHmrcSpec, SubscriptionFieldsTestData}
 
 class SubscriptionFieldsControllerGetSpec extends AsyncHmrcSpec with SubscriptionFieldsTestData with JsonFormatters with StubControllerComponentsFactory {
 
   private val mockSubscriptionFieldsService = mock[SubscriptionFieldsService]
-  private val controller = new SubscriptionFieldsController(stubControllerComponents(), mockSubscriptionFieldsService)
+  private val controller                    = new SubscriptionFieldsController(stubControllerComponents(), mockSubscriptionFieldsService)
 
   private val responseJsonString =
     """{
@@ -46,8 +45,8 @@ class SubscriptionFieldsControllerGetSpec extends AsyncHmrcSpec with Subscriptio
       |    "token":"abc123"
       |  }
       |}""".stripMargin
-  private val responseJson = Json.parse(responseJsonString)
-  private val responseModel = responseJson.as[SubscriptionFields]
+  private val responseJson       = Json.parse(responseJsonString)
+  private val responseModel      = responseJson.as[SubscriptionFields]
 
   private val bulkResponseJsonString =
     """{
@@ -75,8 +74,8 @@ class SubscriptionFieldsControllerGetSpec extends AsyncHmrcSpec with Subscriptio
       |  ]
       |}
       |""".stripMargin
-  private val bulkResponseJson = Json.parse(bulkResponseJsonString)
-  private val bulkResponseModel = bulkResponseJson.as[BulkSubscriptionFieldsResponse]
+  private val bulkResponseJson       = Json.parse(bulkResponseJsonString)
+  private val bulkResponseModel      = bulkResponseJson.as[BulkSubscriptionFieldsResponse]
 
   "GET /field/application/{client-id}/context/{context}/version/{api-version}" should {
 

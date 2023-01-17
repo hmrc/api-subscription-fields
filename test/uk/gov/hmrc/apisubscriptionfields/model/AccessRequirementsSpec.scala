@@ -16,8 +16,8 @@
 
 package uk.gov.hmrc.apisubscriptionfields.model
 
-import org.scalatest.WordSpec
-import org.scalatest.Matchers
+import org.scalatest.{Matchers, WordSpec}
+
 import uk.gov.hmrc.apisubscriptionfields.model.DevhubAccessLevel._
 import uk.gov.hmrc.apisubscriptionfields.model.DevhubAccessRequirement._
 

@@ -16,14 +16,14 @@
 
 package uk.gov.hmrc.apisubscriptionfields.controller
 
-import uk.gov.hmrc.apisubscriptionfields.model.Types._
-import uk.gov.hmrc.apisubscriptionfields.model.FieldDefinition
 import cats.data.NonEmptyList
+
+import uk.gov.hmrc.apisubscriptionfields.model.FieldDefinition
+import uk.gov.hmrc.apisubscriptionfields.model.Types._
 
 private[controller] case class SubscriptionFieldsRequest(fields: Fields)
 
 private[controller] case class FieldDefinitionsRequest(fieldDefinitions: NonEmptyList[FieldDefinition])
-
 
 object SubscriptionFieldsRequest {
   import play.api.libs.json._

@@ -17,10 +17,10 @@
 package uk.gov.hmrc.apisubscriptionfields.model
 
 import cats.data.{NonEmptyList => NEL}
+import org.apache.commons.validator.routines.{DomainValidator, UrlValidator}
+
 import uk.gov.hmrc.apisubscriptionfields.model.FieldDefinitionType.FieldDefinitionType
-import org.apache.commons.validator.routines.UrlValidator
-import Types._
-import org.apache.commons.validator.routines.DomainValidator
+import uk.gov.hmrc.apisubscriptionfields.model.Types._
 
 sealed trait ValidationRule {
   def validate(value: FieldValue): Boolean = {
@@ -37,7 +37,7 @@ case class RegexValidationRule(regex: RegexExpr) extends ValidationRule {
 // Taken from: https://stackoverflow.com/a/5078838
 case object UrlValidationRule extends ValidationRule {
   DomainValidator.updateTLDOverride(DomainValidator.ArrayType.GENERIC_PLUS, Array("mdtp"));
-  private val schemes = Array("http","https")
+  private val schemes           = Array("http", "https")
   private lazy val urlValidator = new org.apache.commons.validator.routines.UrlValidator(schemes, UrlValidator.ALLOW_LOCAL_URLS)
 
   def validateAgainstRule(value: FieldValue): Boolean = {
@@ -51,20 +51,21 @@ object FieldDefinitionType extends Enumeration {
   type FieldDefinitionType = Value
 
   @deprecated("We don't use URL type for any validation", since = "0.5x")
-  val URL = Value("URL")
+  val URL          = Value("URL")
   val SECURE_TOKEN = Value("SecureToken")
-  val STRING = Value("STRING")
-  val PPNS_FIELD = Value("PPNSField")
+  val STRING       = Value("STRING")
+  val PPNS_FIELD   = Value("PPNSField")
 }
 
 case class FieldDefinition(
-  name: FieldName,
-  description: String,
-  hint: String = "",
-  `type`: FieldDefinitionType,
-  shortDescription: String,
-  validation: Option[ValidationGroup] = None,
-  access: AccessRequirements = AccessRequirements.Default)
+    name: FieldName,
+    description: String,
+    hint: String = "",
+    `type`: FieldDefinitionType,
+    shortDescription: String,
+    validation: Option[ValidationGroup] = None,
+    access: AccessRequirements = AccessRequirements.Default
+)
 
 case class ApiFieldDefinitions(apiContext: ApiContext, apiVersion: ApiVersion, fieldDefinitions: NEL[FieldDefinition])
 

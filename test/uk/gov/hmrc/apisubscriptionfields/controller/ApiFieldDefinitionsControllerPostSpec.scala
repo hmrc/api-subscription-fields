@@ -16,25 +16,24 @@
 
 package uk.gov.hmrc.apisubscriptionfields.controller
 
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
+
+import cats.data.NonEmptyList
+
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc._
 import play.api.test.Helpers._
 import play.api.test._
-import uk.gov.hmrc.apisubscriptionfields.FieldDefinitionTestData
+
 import uk.gov.hmrc.apisubscriptionfields.model.JsonFormatters
 import uk.gov.hmrc.apisubscriptionfields.service.ApiFieldDefinitionsService
-import uk.gov.hmrc.apisubscriptionfields.AsyncHmrcSpec
-import scala.concurrent.Future
-import scala.concurrent.ExecutionContext.Implicits.global
-import cats.data.NonEmptyList
+import uk.gov.hmrc.apisubscriptionfields.{AsyncHmrcSpec, FieldDefinitionTestData}
 
-class ApiFieldDefinitionsControllerPostSpec extends AsyncHmrcSpec
-  with FieldDefinitionTestData
-  with JsonFormatters
-  with StubControllerComponentsFactory {
+class ApiFieldDefinitionsControllerPostSpec extends AsyncHmrcSpec with FieldDefinitionTestData with JsonFormatters with StubControllerComponentsFactory {
 
   private val mockFieldDefintionService = mock[ApiFieldDefinitionsService]
-  private val controller = new ApiFieldDefinitionsController(stubControllerComponents(), mockFieldDefintionService)
+  private val controller                = new ApiFieldDefinitionsController(stubControllerComponents(), mockFieldDefintionService)
 
   final val FakeValidRegexFieldsDefinitionRequest = FieldDefinitionsRequest(NonEmptyList.fromListUnsafe(List(FakeFieldDefinitionAlphnumericField, FakeFieldDefinitionPassword)))
 
@@ -58,13 +57,14 @@ class ApiFieldDefinitionsControllerPostSpec extends AsyncHmrcSpec
 
   private def testSubmitResult(request: Request[JsValue])(test: Future[Result] => Unit) {
     val action: Action[JsValue] = controller.validateFieldsDefinition()
-    val result: Future[Result] = action.apply(request)
+    val result: Future[Result]  = action.apply(request)
     test(result)
   }
 
   private def mkRequest(jsonBody: JsValue): Request[JsValue] =
     FakeRequest()
-      .withJsonBody(jsonBody).map(r => r.json)
+      .withJsonBody(jsonBody)
+      .map(r => r.json)
 
   private def mkJson(model: FieldDefinitionsRequest) = Json.toJson(model)(Json.writes[FieldDefinitionsRequest])
 

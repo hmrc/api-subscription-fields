@@ -18,26 +18,27 @@ package uk.gov.hmrc.apisubscriptionfields.model
 
 import cats.data.NonEmptyList
 import org.scalatest.{Matchers, WordSpec}
-import uk.gov.hmrc.apisubscriptionfields.{FieldDefinitionTestData, SubscriptionFieldsTestData}
+
 import uk.gov.hmrc.apisubscriptionfields.model.FieldDefinitionType._
+import uk.gov.hmrc.apisubscriptionfields.{FieldDefinitionTestData, SubscriptionFieldsTestData}
 
 class JsonFormatterSpec extends WordSpec with Matchers with JsonFormatters with SubscriptionFieldsTestData with FieldDefinitionTestData {
 
   import play.api.libs.json._
 
-  private val fakeFields = Map(fieldN(1) -> "v1")
-  private val subscriptionFields = SubscriptionFields(FakeClientId, FakeContext, FakeVersion, FakeFieldsId, fakeFields)
+  private val fakeFields                     = Map(fieldN(1) -> "v1")
+  private val subscriptionFields             = SubscriptionFields(FakeClientId, FakeContext, FakeVersion, FakeFieldsId, fakeFields)
   private val bulkSubscriptionFieldsResponse = BulkSubscriptionFieldsResponse(Seq(subscriptionFields))
 
-  private val fakeApiFieldDefinitionsResponse = ApiFieldDefinitions(FakeContext, FakeVersion, NonEmptyList.one(FakeFieldDefinitionUrl))
+  private val fakeApiFieldDefinitionsResponse                = ApiFieldDefinitions(FakeContext, FakeVersion, NonEmptyList.one(FakeFieldDefinitionUrl))
   private val fakeApiFieldDefinitionsResponseEmptyValidation = ApiFieldDefinitions(FakeContext, FakeVersion, NonEmptyList.one(FakeFieldDefinitionUrlValidationEmpty))
-  private val bulkFieldsDefinitionResponse = BulkApiFieldDefinitionsResponse(Seq(fakeApiFieldDefinitionsResponse))
+  private val bulkFieldsDefinitionResponse                   = BulkApiFieldDefinitionsResponse(Seq(fakeApiFieldDefinitionsResponse))
 
   private def objectAsJsonString[A](a: A)(implicit t: Writes[A]) = Json.asciiStringify(Json.toJson(a))
 
-  private val subscriptionFieldJson =
+  private val subscriptionFieldJson              =
     s"""{"clientId":"$fakeRawClientId","apiContext":"$fakeRawContext","apiVersion":"$fakeRawVersion","fieldsId":"$FakeRawFieldsId","fields":{"fieldB":"v1"}}"""
-  private val fieldDefinitionJson =
+  private val fieldDefinitionJson                =
     s"""{"apiContext":"$fakeRawContext","apiVersion":"$fakeRawVersion","fieldDefinitions":[{"name":"fieldB","description":"desc1","hint":"hint1","type":"URL","shortDescription":"short description","validation":{"errorMessage":"error message","rules":[{"UrlValidationRule":{}}]}}]}"""
   private val fieldDefinitionEmptyValidationJson =
     s"""{"apiContext":"$fakeRawContext","apiVersion":"$fakeRawVersion","fieldDefinitions":[{"name":"fieldB","description":"desc1","hint":"hint1","type":"URL","shortDescription":"short description"}]}"""
@@ -174,7 +175,9 @@ class JsonFormatterSpec extends WordSpec with Matchers with JsonFormatters with 
     }
 
     "unmarshall with non default correctly" in {
-      Json.fromJson[AccessRequirements](Json.parse("""{"devhub":{"read":"adminOnly"}}""")) shouldBe JsSuccess(AccessRequirements(devhub = DevhubAccessRequirements(read = AdminOnly)))
+      Json.fromJson[AccessRequirements](Json.parse("""{"devhub":{"read":"adminOnly"}}""")) shouldBe JsSuccess(
+        AccessRequirements(devhub = DevhubAccessRequirements(read = AdminOnly))
+      )
     }
   }
 
@@ -184,8 +187,10 @@ class JsonFormatterSpec extends WordSpec with Matchers with JsonFormatters with 
     }
 
     "marshal json without mention of default access" in {
-      objectAsJsonString(FakeFieldDefinitionWithAccess.copy(access = AccessRequirements.Default)) should not include(""""access":{"devhub":{"read":"adminOnly", "write":"adminOnly"}}""")
-      objectAsJsonString(FakeFieldDefinitionWithAccess.copy(access = AccessRequirements.Default)) should not include(""""access"""")
+      objectAsJsonString(
+        FakeFieldDefinitionWithAccess.copy(access = AccessRequirements.Default)
+      ) should not include (""""access":{"devhub":{"read":"adminOnly", "write":"adminOnly"}}""")
+      objectAsJsonString(FakeFieldDefinitionWithAccess.copy(access = AccessRequirements.Default)) should not include (""""access"""")
     }
 
     "unmarshal json string into a FieldDefinition" in {

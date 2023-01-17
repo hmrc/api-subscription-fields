@@ -16,21 +16,22 @@
 
 package uk.gov.hmrc.apisubscriptionfields.controller
 
-import javax.inject.{Inject, Singleton}
-
-import play.api.libs.json.{JsValue, Json, JsSuccess, JsError}
-import play.api.mvc._
-import uk.gov.hmrc.apisubscriptionfields.model._
-
-import uk.gov.hmrc.apisubscriptionfields.service.ApiFieldDefinitionsService
-import scala.concurrent.Future
-import scala.util.{Try,Success,Failure}
 import java.util.UUID
-import scala.concurrent.ExecutionContext
+import javax.inject.{Inject, Singleton}
+import scala.concurrent.{ExecutionContext, Future}
+import scala.util.{Failure, Success, Try}
+
+import play.api.libs.json.{JsError, JsSuccess, JsValue, Json}
+import play.api.mvc._
+
+import uk.gov.hmrc.apisubscriptionfields.model._
+import uk.gov.hmrc.apisubscriptionfields.service.ApiFieldDefinitionsService
 import uk.gov.hmrc.apisubscriptionfields.utils.ApplicationLogger
 
 @Singleton
-class ApiFieldDefinitionsController @Inject() (cc: ControllerComponents, service: ApiFieldDefinitionsService)(implicit ec: ExecutionContext) extends CommonController with ApplicationLogger {
+class ApiFieldDefinitionsController @Inject() (cc: ControllerComponents, service: ApiFieldDefinitionsService)(implicit ec: ExecutionContext)
+    extends CommonController
+    with ApplicationLogger {
 
   import JsonFormatters._
 
@@ -46,11 +47,11 @@ class ApiFieldDefinitionsController @Inject() (cc: ControllerComponents, service
   def validateFieldsDefinition(): Action[JsValue] = Action(parse.json) { request =>
     Try(request.body.validate[FieldDefinitionsRequest]) match {
       case Success(JsSuccess(payload, _)) => Ok("")
-      case Success(JsError(errs)) => {
-        badRequestWithTag( (tag:UUID) => s"A JSON error occurred: [${tag.toString}] ${Json.prettyPrint(JsError.toJson(errs))}")
+      case Success(JsError(errs))         => {
+        badRequestWithTag((tag: UUID) => s"A JSON error occurred: [${tag.toString}] ${Json.prettyPrint(JsError.toJson(errs))}")
       }
-      case Failure(e) => {
-        badRequestWithTag{ (tag:UUID) => s"An error occurred during JSON validation: [${tag.toString}] ${e.getMessage}" }
+      case Failure(e)                     => {
+        badRequestWithTag { (tag: UUID) => s"An error occurred during JSON validation: [${tag.toString}] ${e.getMessage}" }
       }
     }
   }
@@ -58,13 +59,13 @@ class ApiFieldDefinitionsController @Inject() (cc: ControllerComponents, service
   def upsertFieldsDefinition(apiContext: ApiContext, apiVersion: ApiVersion): Action[JsValue] = Action.async(parse.json) { implicit request =>
     withJsonBody[FieldDefinitionsRequest] { payload =>
       service.upsert(apiContext, apiVersion, payload.fieldDefinitions) map {
-        case (response, true) => Created(Json.toJson(response))
+        case (response, true)  => Created(Json.toJson(response))
         case (response, false) => Ok(Json.toJson(response))
       }
     } recover recovery
   }
 
-  def getAllFieldsDefinitions: Action[AnyContent] = Action.async {  _ =>
+  def getAllFieldsDefinitions: Action[AnyContent] = Action.async { _ =>
     service.getAll map (defs => Ok(Json.toJson(defs))) recover recovery
   }
 
@@ -75,7 +76,7 @@ class ApiFieldDefinitionsController @Inject() (cc: ControllerComponents, service
 
   def deleteFieldsDefinition(apiContext: ApiContext, apiVersion: ApiVersion): Action[AnyContent] = Action.async { _ =>
     service.delete(apiContext, apiVersion) map {
-      case true => NoContent
+      case true  => NoContent
       case false => notFoundResponse(apiContext, apiVersion)
     } recover recovery
   }
@@ -83,7 +84,7 @@ class ApiFieldDefinitionsController @Inject() (cc: ControllerComponents, service
   private def asActionResult(eventualMaybeResponse: Future[Option[ApiFieldDefinitions]], apiContext: ApiContext, apiVersion: ApiVersion) = {
     eventualMaybeResponse map {
       case Some(subscriptionFields) => Ok(Json.toJson(subscriptionFields))
-      case None => notFoundResponse(apiContext, apiVersion)
+      case None                     => notFoundResponse(apiContext, apiVersion)
     } recover recovery
   }
 

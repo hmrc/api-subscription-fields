@@ -26,10 +26,10 @@ trait ValidationRuleTestData {
   val mixedCaseRule: ValidationRule = RegexValidationRule("""^[a-zA-Z]+$""")
 
   val atLeastThreeLongRule: ValidationRule = RegexValidationRule("""^.{3}.*$""")
-  val atLeastTenLongRule: ValidationRule = RegexValidationRule("""^.{10}.*$""")
+  val atLeastTenLongRule: ValidationRule   = RegexValidationRule("""^.{10}.*$""")
 
-  val validUrl = "https://www.example.com/here/and/there"
+  val validUrl      = "https://www.example.com/here/and/there"
   val localValidUrl = "https://localhost:9000/"
-  val invalidUrls = List("www.example.com", "ftp://example.com/abc", "https://www example.com", "https://www&example.com", "https://www,example.com")
+  val invalidUrls   = List("www.example.com", "ftp://example.com/abc", "https://www example.com", "https://www&example.com", "https://www,example.com")
 
 }

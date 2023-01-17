@@ -21,20 +21,21 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.{BeforeAndAfterEach, OptionValues}
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
+
 import play.api.test.{DefaultAwaitTimeout, FutureAwaits}
-import uk.gov.hmrc.apisubscriptionfields.model.{ApiContext, ApiFieldDefinitions}
-import uk.gov.hmrc.apisubscriptionfields.SubscriptionFieldsTestData.{FakeContext, FakeVersion, NelOfFieldDefinitions, uniqueApiContext}
 import uk.gov.hmrc.mongo.play.json.Codecs
 
-import scala.concurrent.ExecutionContext.Implicits.global
+import uk.gov.hmrc.apisubscriptionfields.SubscriptionFieldsTestData.{FakeContext, FakeVersion, NelOfFieldDefinitions, uniqueApiContext}
+import uk.gov.hmrc.apisubscriptionfields.model.{ApiContext, ApiFieldDefinitions}
 
-class ApiFieldDefinitionsRepositorySpec extends AnyWordSpec
-  with GuiceOneAppPerSuite
-  with Matchers
-  with OptionValues
-  with DefaultAwaitTimeout
-  with FutureAwaits
-  with BeforeAndAfterEach {
+class ApiFieldDefinitionsRepositorySpec
+    extends AnyWordSpec
+    with GuiceOneAppPerSuite
+    with Matchers
+    with OptionValues
+    with DefaultAwaitTimeout
+    with FutureAwaits
+    with BeforeAndAfterEach {
 
   private val repository = app.injector.instanceOf[ApiFieldDefinitionsMongoRepository]
 
@@ -148,7 +149,6 @@ class ApiFieldDefinitionsRepositorySpec extends AnyWordSpec
   }
 
   private def selector(fd: ApiFieldDefinitions) = {
-    Filters.and(Filters.equal("apiContext", Codecs.toBson(fd.apiContext.value)),
-      Filters.equal("apiVersion", Codecs.toBson(fd.apiVersion.value)))
+    Filters.and(Filters.equal("apiContext", Codecs.toBson(fd.apiContext.value)), Filters.equal("apiVersion", Codecs.toBson(fd.apiVersion.value)))
   }
 }

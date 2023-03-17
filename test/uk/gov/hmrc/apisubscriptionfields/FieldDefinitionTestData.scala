@@ -43,9 +43,10 @@ trait FieldDefinitionTestData extends TestData {
 
   final val FakeUrlValidation: ValidationGroup = ValidationGroup("error message", NonEmptyList.one(UrlValidationRule))
 
-  final val FakeFieldDefinitionUrl                         = FieldDefinition(fieldN(1), "desc1", "hint1", FieldDefinitionType.URL, "short description", Some(FakeUrlValidation))
-  final val FakeFieldDefinitionUrlValidationEmpty          = FieldDefinition(fieldN(1), "desc1", "hint1", FieldDefinitionType.URL, "short description", None)
-  final val FakeFieldDefinitionString                      = FieldDefinition(fieldN(2), "desc2", "hint2", FieldDefinitionType.STRING, "short description", Some(FakeValidation))
+  final val FakeFieldDefinitionUrl                = FieldDefinition(fieldN(1), "desc1", "hint1", FieldDefinitionType.URL, "short description", Some(FakeUrlValidation))
+  final val FakeFieldDefinitionUrlValidationEmpty = FieldDefinition(fieldN(1), "desc1", "hint1", FieldDefinitionType.URL, "short description", None)
+  final val FakeFieldDefinitionString             = FieldDefinition(fieldN(2), "desc2", "hint2", FieldDefinitionType.STRING, "short description", Some(FakeValidation))
+
   final val FakeFieldDefinitionWithAccess: FieldDefinition =
     FakeFieldDefinitionString.copy(validation = None, access = AccessRequirements(devhub = DevhubAccessRequirements(read = AdminOnly)))
   final val FakeFieldDefinitionSecureToken                 = FieldDefinition(fieldN(3), "desc3", "hint3", FieldDefinitionType.SECURE_TOKEN, "short description", Some(FakeValidation))
@@ -57,9 +58,11 @@ trait FieldDefinitionTestData extends TestData {
   final val PasswordRegexRule: RegexValidationRule         = RegexValidationRule("^(?=.{8,})(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=]).*$")
   final val CallBackUrlRegexRule: RegexValidationRule      = RegexValidationRule("^https.*")
   final val FakeValidationForAlphanumeric: ValidationGroup = ValidationGroup("Needs to be alpha numeric", NonEmptyList.one(AlphaNumericRegexRule))
-  final val FakeValidationForPassword: ValidationGroup     =
+
+  final val FakeValidationForPassword: ValidationGroup =
     ValidationGroup("Needs to be at least 8 chars with at least one lowercase, uppercase and special char", NonEmptyList.one(PasswordRegexRule))
-  final val FakeValidationForPPNS: ValidationGroup         =
+
+  final val FakeValidationForPPNS: ValidationGroup =
     ValidationGroup("CallBackUrl Validation", NonEmptyList.one(CallBackUrlRegexRule))
 
   final val FakeFieldDefinitionAlphnumericField = FieldDefinition(
@@ -70,12 +73,14 @@ trait FieldDefinitionTestData extends TestData {
     "an alphanumeric field",
     Some(FakeValidationForAlphanumeric)
   )
-  final val FakeFieldDefinitionPassword         =
+
+  final val FakeFieldDefinitionPassword =
     FieldDefinition("password", "password", "this is your password", FieldDefinitionType.SECURE_TOKEN, "password", Some(FakeValidationForPassword))
 
-  final val FakeFieldDefinitionPPNSFields        =
+  final val FakeFieldDefinitionPPNSFields     =
     FieldDefinition("callbackurl", "callbackurl", "please enter a callback url", FieldDefinitionType.PPNS_FIELD, "callbackurl", Some(FakeValidationForPPNS))
-  final val FakeApiFieldDefinitionssWithRegex    = NonEmptyList.fromListUnsafe(List(FakeFieldDefinitionAlphnumericField, FakeFieldDefinitionPassword))
+  final val FakeApiFieldDefinitionssWithRegex = NonEmptyList.fromListUnsafe(List(FakeFieldDefinitionAlphnumericField, FakeFieldDefinitionPassword))
+
   final val FakeApiFieldDefinitionsPPNSWithRegex =
     NonEmptyList.fromListUnsafe(List(FakeFieldDefinitionAlphnumericField, FakeFieldDefinitionPassword, FakeFieldDefinitionPPNSFields))
 
@@ -121,7 +126,7 @@ trait FieldDefinitionTestData extends TestData {
       apiContext: ApiContext = FakeContext,
       apiVersion: ApiVersion = FakeVersion,
       fieldDefinitions: NonEmptyList[FieldDefinition] = NelOfFieldDefinitions
-  ) =
+    ) =
     ApiFieldDefinitions(apiContext, apiVersion, fieldDefinitions)
 
   def uniqueApiContext = ApiContext(UUID.randomUUID().toString)

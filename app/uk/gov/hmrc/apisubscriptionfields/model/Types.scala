@@ -35,6 +35,7 @@ object Types {
   type FieldError = (FieldName, ErrorMessage)
 
   type FieldErrorMap = Map[FieldName, ErrorMessage]
+
   object FieldErrorMap {
     val empty = Map.empty[FieldName, ErrorMessage]
   }

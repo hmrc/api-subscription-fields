@@ -16,12 +16,13 @@
 
 package uk.gov.hmrc.apisubscriptionfields.model
 
-import org.scalatest.{Matchers, WordSpec}
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpec
 
 import uk.gov.hmrc.apisubscriptionfields.model.DevhubAccessLevel._
 import uk.gov.hmrc.apisubscriptionfields.model.DevhubAccessRequirement._
 
-class AccessRequirementsSpec extends WordSpec with Matchers {
+class AccessRequirementsSpec extends AnyWordSpec with Matchers {
 
   "DevhubRequirement" should {
 

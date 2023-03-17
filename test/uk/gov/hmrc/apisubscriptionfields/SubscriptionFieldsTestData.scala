@@ -28,10 +28,11 @@ trait SubscriptionFieldsTestData extends FieldDefinitionTestData with Validation
   final val FakeRawFieldsId = UUID.randomUUID()
   final val FakeFieldsId    = SubscriptionFieldsId(FakeRawFieldsId)
 
-  final val EmptyResponse: Future[Option[SubscriptionFields]]       = Future.successful(None)
-  final val FakeSubscriptionFields: Map[FieldName, String]          = Map(fieldN(1) -> "X", fieldN(2) -> "Y")
-  final val SubscriptionFieldsMatchRegexValidation: Fields          = Map(AlphanumericFieldName -> "ABC123ab", PasswordFieldName -> "Qw12@ert")
-  final val SubscriptionFieldsNonMatchRegexValidation: Fields       = Map(AlphanumericFieldName -> "ABC123a", PasswordFieldName -> "Qw12@er")
+  final val EmptyResponse: Future[Option[SubscriptionFields]] = Future.successful(None)
+  final val FakeSubscriptionFields: Map[FieldName, String]    = Map(fieldN(1) -> "X", fieldN(2) -> "Y")
+  final val SubscriptionFieldsMatchRegexValidation: Fields    = Map(AlphanumericFieldName -> "ABC123ab", PasswordFieldName -> "Qw12@ert")
+  final val SubscriptionFieldsNonMatchRegexValidation: Fields = Map(AlphanumericFieldName -> "ABC123a", PasswordFieldName -> "Qw12@er")
+
   final val SubscriptionFieldsMatchRegexValidationPPNS: Fields      =
     Map(AlphanumericFieldName -> "ABC123abc", PasswordFieldName -> "Qw12@erty", PPNSFieldFieldName -> "https://www.mycallbackurl.com")
   final val SubscriptionFieldsDoNotMatchRegexValidationPPNS: Fields = Map(AlphanumericFieldName -> "ABC123abc", PasswordFieldName -> "Qw12@erty", PPNSFieldFieldName -> "foo")
@@ -45,8 +46,9 @@ trait SubscriptionFieldsTestData extends FieldDefinitionTestData with Validation
   final val CallbackUrlFieldName: FieldName    = "callbackUrl"
   final val FakeFieldErrorMessage1: FieldError = ((CallbackUrlFieldName, "Invalid Callback URL"))
 
-  final val EoriFieldName: FieldName                                            = "EORI"
-  final val FakeFieldErrorMessage2                                              = ((EoriFieldName, "Invalid EORI"))
+  final val EoriFieldName: FieldName = "EORI"
+  final val FakeFieldErrorMessage2   = ((EoriFieldName, "Invalid EORI"))
+
   final val FakeFieldErrorMessages                                              = Map(
     (CallbackUrlFieldName -> FakeFieldErrorMessage1._2),
     (EoriFieldName        -> FakeFieldErrorMessage2._2)
@@ -55,7 +57,8 @@ trait SubscriptionFieldsTestData extends FieldDefinitionTestData with Validation
 
   final val FakeFieldErrorForAlphanumeric: FieldError = ((AlphanumericFieldName, "Needs to be alpha numeric"))
   final val FakeFieldErrorForPassword                 = ((PasswordFieldName, "Needs to be at least 8 chars with at least one lowercase, uppercase and special char"))
-  final val FakeInvalidSubsFieldValidationResponse2   = InvalidSubsFieldValidationResponse(errorResponses =
+
+  final val FakeInvalidSubsFieldValidationResponse2 = InvalidSubsFieldValidationResponse(errorResponses =
     Map(
       (AlphanumericFieldName -> FakeFieldErrorForAlphanumeric._2),
       (PasswordFieldName     -> FakeFieldErrorForPassword._2)

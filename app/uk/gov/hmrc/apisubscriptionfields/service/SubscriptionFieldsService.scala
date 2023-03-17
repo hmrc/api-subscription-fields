@@ -34,7 +34,8 @@ class SubscriptionFieldsService @Inject() (
     repository: SubscriptionFieldsRepository,
     apiFieldDefinitionsService: ApiFieldDefinitionsService,
     pushPullNotificationService: PushPullNotificationService
-)(implicit ec: ExecutionContext) {
+  )(implicit ec: ExecutionContext
+  ) {
 
   private def validate(fields: Fields, fieldDefinitions: NonEmptyList[FieldDefinition]): SubsFieldValidationResponse = {
     SubscriptionFieldsService.validateAgainstValidationRules(fieldDefinitions, fields) ++ SubscriptionFieldsService.validateFieldNamesAreDefined(fieldDefinitions, fields) match {
@@ -49,9 +50,15 @@ class SubscriptionFieldsService @Inject() (
       .map(result => SuccessfulSubsFieldsUpsertResponse(result._1, result._2))
   }
 
-  def handlePPNS(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion, fieldDefinitions: NEL[FieldDefinition], fields: Fields)(implicit
+  def handlePPNS(
+      clientId: ClientId,
+      apiContext: ApiContext,
+      apiVersion: ApiVersion,
+      fieldDefinitions: NEL[FieldDefinition],
+      fields: Fields
+    )(implicit
       hc: HeaderCarrier
-  ): Future[SubsFieldsUpsertResponse] = {
+    ): Future[SubsFieldsUpsertResponse] = {
     val ppnsFieldDefinition: Option[FieldDefinition] = fieldDefinitions.find(_.`type` == FieldDefinitionType.PPNS_FIELD)
 
     ppnsFieldDefinition match {

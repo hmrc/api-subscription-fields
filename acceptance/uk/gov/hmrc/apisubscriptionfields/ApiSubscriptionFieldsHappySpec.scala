@@ -53,11 +53,11 @@ class ApiSubscriptionFieldsHappySpec extends AcceptanceTestSpec
   }
 
 
-  feature("Subscription-Fields") {
+  Feature("Subscription-Fields") {
 
     appLogger.logger.info(s"App.mode = ${app.mode.toString}")
 
-    scenario("the API is called to store some values for a new subscription field") {
+    Scenario("the API is called to store some values for a new subscription field") {
       val request: Request[AnyContentAsJson] =  createSubscriptionFieldsRequest()
 
       When("a PUT request with data is sent to the API")
@@ -86,7 +86,7 @@ class ApiSubscriptionFieldsHappySpec extends AcceptanceTestSpec
       route(app, createSubscriptionFieldsRequest())
     }
 
-    scenario("the API is called to GET some existing subscription fields") {
+    Scenario("the API is called to GET some existing subscription fields") {
 
       Given("a request with a known subscription field")
       createSubscriptionFields()
@@ -110,7 +110,7 @@ class ApiSubscriptionFieldsHappySpec extends AcceptanceTestSpec
       sfr.get shouldBe SubscriptionFields(FakeClientId, ApiContext("acontext"), ApiVersion("1.0.2"), fieldsId, SampleFields1)
     }
 
-    scenario("the API is called to GET all existing subscription fields") {
+    Scenario("the API is called to GET all existing subscription fields") {
 
       Given("a request with a known subscription field")
       createSubscriptionFields()
@@ -134,7 +134,7 @@ class ApiSubscriptionFieldsHappySpec extends AcceptanceTestSpec
       sfr.get shouldBe BulkSubscriptionFieldsResponse(Seq(SubscriptionFields(FakeClientId, ApiContext("acontext"), ApiVersion("1.0.2"), fieldsId, SampleFields1)))
     }
 
-    scenario("the API is called to GET with a known fieldsId") {
+    Scenario("the API is called to GET with a known fieldsId") {
 
       Given("a request with a known fieldsId")
 
@@ -174,7 +174,7 @@ class ApiSubscriptionFieldsHappySpec extends AcceptanceTestSpec
       sfrFieldsId.get shouldBe SubscriptionFields(FakeClientId, ApiContext("acontext"), ApiVersion("1.0.2"), fieldsId, SampleFields1)
     }
 
-    scenario("the API is called to GET existing subscription fields by application clientId") {
+    Scenario("the API is called to GET existing subscription fields by application clientId") {
 
       Given("a request with a known client identifier")
       createSubscriptionFields()
@@ -199,7 +199,7 @@ class ApiSubscriptionFieldsHappySpec extends AcceptanceTestSpec
       sfr.get shouldBe BulkSubscriptionFieldsResponse(Seq(SubscriptionFields(FakeClientId, ApiContext("acontext"), ApiVersion("1.0.2"), fieldsId, SampleFields1)))
     }
 
-    scenario("the API is called to update existing subscription fields") {
+    Scenario("the API is called to update existing subscription fields") {
 
       Given("a request with valid payload")
       createSubscriptionFields()
@@ -223,7 +223,7 @@ class ApiSubscriptionFieldsHappySpec extends AcceptanceTestSpec
       sfr.get shouldBe SubscriptionFields(FakeClientId, ApiContext("acontext"), ApiVersion("1.0.2"), fieldsId, SampleFields2)
     }
 
-    scenario("the API is called to DELETE existing subscription fields") {
+    Scenario("the API is called to DELETE existing subscription fields") {
 
       Given("a request with existing subscription fields")
       createSubscriptionFields()

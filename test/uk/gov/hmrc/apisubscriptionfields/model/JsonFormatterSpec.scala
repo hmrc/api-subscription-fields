@@ -17,12 +17,13 @@
 package uk.gov.hmrc.apisubscriptionfields.model
 
 import cats.data.NonEmptyList
-import org.scalatest.{Matchers, WordSpec}
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpec
 
 import uk.gov.hmrc.apisubscriptionfields.model.FieldDefinitionType._
 import uk.gov.hmrc.apisubscriptionfields.{FieldDefinitionTestData, SubscriptionFieldsTestData}
 
-class JsonFormatterSpec extends WordSpec with Matchers with JsonFormatters with SubscriptionFieldsTestData with FieldDefinitionTestData {
+class JsonFormatterSpec extends AnyWordSpec with Matchers with JsonFormatters with SubscriptionFieldsTestData with FieldDefinitionTestData {
 
   import play.api.libs.json._
 
@@ -36,10 +37,12 @@ class JsonFormatterSpec extends WordSpec with Matchers with JsonFormatters with 
 
   private def objectAsJsonString[A](a: A)(implicit t: Writes[A]) = Json.asciiStringify(Json.toJson(a))
 
-  private val subscriptionFieldJson              =
+  private val subscriptionFieldJson =
     s"""{"clientId":"$fakeRawClientId","apiContext":"$fakeRawContext","apiVersion":"$fakeRawVersion","fieldsId":"$FakeRawFieldsId","fields":{"fieldB":"v1"}}"""
-  private val fieldDefinitionJson                =
+
+  private val fieldDefinitionJson =
     s"""{"apiContext":"$fakeRawContext","apiVersion":"$fakeRawVersion","fieldDefinitions":[{"name":"fieldB","description":"desc1","hint":"hint1","type":"URL","shortDescription":"short description","validation":{"errorMessage":"error message","rules":[{"UrlValidationRule":{}}]}}]}"""
+
   private val fieldDefinitionEmptyValidationJson =
     s"""{"apiContext":"$fakeRawContext","apiVersion":"$fakeRawVersion","fieldDefinitions":[{"name":"fieldB","description":"desc1","hint":"hint1","type":"URL","shortDescription":"short description"}]}"""
 

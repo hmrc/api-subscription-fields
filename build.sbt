@@ -75,6 +75,13 @@ lazy val microservice = Project(appName, file("."))
   )
   .settings(majorVersion := 0)
   .settings(scalacOptions ++= Seq("-Ypartial-unification"))
+  .settings(
+    scalacOptions ++= Seq(
+    "-Wconf:cat=unused&src=.*RoutesPrefix\\.scala:s",
+    "-Wconf:cat=unused&src=.*Routes\\.scala:s",
+    "-Wconf:cat=unused&src=.*ReverseRoutes\\.scala:s"
+    )
+  )
 
 lazy val acceptanceTestSettings =
   inConfig(AcceptanceTest)(Defaults.testSettings) ++

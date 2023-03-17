@@ -30,8 +30,8 @@ class SubscriptionFieldDefinitionsUnhappySpec extends AcceptanceTestSpec
   with OptionValues
   with SubscriptionFieldsTestData {
 
-  feature("Fields-Definition") {
-    scenario("the API is called to GET an unknown fields definition") {
+  Feature("Fields-Definition") {
+    Scenario("the API is called to GET an unknown fields definition") {
 
       Given("the API is called to GET an unknown fields definition")
       val request = ValidRequest.withTarget(RequestTarget(uriString = "", path = definitionEndpoint(fakeRawContext, "unknown"), queryString = Map.empty))
@@ -49,7 +49,7 @@ class SubscriptionFieldDefinitionsUnhappySpec extends AcceptanceTestSpec
       contentAsJson(resultFuture) shouldBe JsErrorResponse(NOT_FOUND_CODE, s"Fields definition not found for (${FakeContext.value}, unknown)")
     }
 
-    scenario("the API is called to PUT a fields definition with an invalid JSON payload") {
+    Scenario("the API is called to PUT a fields definition with an invalid JSON payload") {
 
       Given("the API is called to PUT a fields definition with an invalid JSON payload")
       val request = ValidRequest
@@ -70,7 +70,7 @@ class SubscriptionFieldDefinitionsUnhappySpec extends AcceptanceTestSpec
       contentAsJson(resultFuture) shouldBe JsErrorResponse(INVALID_REQUEST_PAYLOAD, _: Json.JsValueWrapper)
     }
 
-    scenario("the API is called to PUT a fields definition with an invalid field definition type") {
+    Scenario("the API is called to PUT a fields definition with an invalid field definition type") {
 
       val invalidFieldDefinition =
         """{
@@ -105,7 +105,7 @@ class SubscriptionFieldDefinitionsUnhappySpec extends AcceptanceTestSpec
       contentAsJson(resultFuture) shouldBe JsErrorResponse(INVALID_REQUEST_PAYLOAD, _: Json.JsValueWrapper)
     }
 
-    scenario("the API is called to PUT a fields definition with an invalid non JSON payload") {
+    Scenario("the API is called to PUT a fields definition with an invalid non JSON payload") {
 
       Given("the API is called to PUT a fields definition with an invalid non JSON payload")
 
@@ -127,7 +127,7 @@ class SubscriptionFieldDefinitionsUnhappySpec extends AcceptanceTestSpec
       contentAsJson(resultFuture) shouldBe JsErrorResponse(INVALID_REQUEST_PAYLOAD, _: Json.JsValueWrapper)
     }
 
-    scenario("the API is called to DELETE an unknown fields definition") {
+    Scenario("the API is called to DELETE an unknown fields definition") {
 
       Given("a request with an unknown fields definition")
 

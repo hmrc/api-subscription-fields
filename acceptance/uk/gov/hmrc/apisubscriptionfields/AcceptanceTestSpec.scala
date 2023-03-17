@@ -91,11 +91,11 @@ trait AcceptanceTestSpec extends AnyFeatureSpec
 
   protected def await[A](future: Future[A]): A = Await.result(future, 5.seconds)
 
-  override protected def beforeAll: Unit = {
+  override protected def beforeAll(): Unit = {
     dropDatabase()
   }
 
-  override protected def afterAll: Unit = {
+  override protected def afterAll(): Unit = {
     dropDatabase()
   }
 

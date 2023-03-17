@@ -40,7 +40,7 @@ class SubscriptionFieldDefinitionsUnhappySpec extends AcceptanceTestSpec
       val result: Option[Future[Result]] = route(app, request)
 
       Then(s"a response with a 404 status is received")
-      result shouldBe 'defined
+      result shouldBe Symbol("defined")
       val resultFuture = result.value
 
       status(resultFuture) shouldBe NOT_FOUND
@@ -61,7 +61,7 @@ class SubscriptionFieldDefinitionsUnhappySpec extends AcceptanceTestSpec
       val result: Option[Future[Result]] = route(app, request)
 
       Then(s"a response with a 422 status is received")
-      result shouldBe 'defined
+      result shouldBe Symbol("defined")
       val resultFuture = result.value
 
       status(resultFuture) shouldBe UNPROCESSABLE_ENTITY
@@ -96,7 +96,7 @@ class SubscriptionFieldDefinitionsUnhappySpec extends AcceptanceTestSpec
       val result: Option[Future[Result]] = route(app, request)
 
       Then(s"a response with a 422 status is received")
-      result shouldBe 'defined
+      result shouldBe Symbol("defined")
       val resultFuture = result.value
 
       status(resultFuture) shouldBe UNPROCESSABLE_ENTITY
@@ -118,7 +118,7 @@ class SubscriptionFieldDefinitionsUnhappySpec extends AcceptanceTestSpec
       val result: Option[Future[Result]] = route(app, request)
 
       Then(s"a response with a 415 status is received")
-      result shouldBe 'defined
+      result shouldBe Symbol("defined")
       val resultFuture = result.value
 
       status(resultFuture) shouldBe UNSUPPORTED_MEDIA_TYPE
@@ -140,7 +140,7 @@ class SubscriptionFieldDefinitionsUnhappySpec extends AcceptanceTestSpec
       val result: Option[Future[Result]] = route(app, request)
 
       Then(s"a response with a 404 status is received")
-      result shouldBe 'defined
+      result shouldBe Symbol("defined")
       val resultFuture = result.value
 
       status(resultFuture) shouldBe NOT_FOUND

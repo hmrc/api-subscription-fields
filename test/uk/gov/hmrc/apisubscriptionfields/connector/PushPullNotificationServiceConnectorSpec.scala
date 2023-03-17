@@ -36,6 +36,8 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.apisubscriptionfields.AsyncHmrcSpec
 import uk.gov.hmrc.apisubscriptionfields.model._
 
+import uk.gov.hmrc.apisubscriptionfields.connector.JsonFormatters
+
 class PushPullNotificationServiceConnectorSpec extends AsyncHmrcSpec with GuiceOneAppPerSuite with JsonFormatters with BeforeAndAfterAll with BeforeAndAfterEach {
 
   private val stubPort = 11111
@@ -52,16 +54,16 @@ class PushPullNotificationServiceConnectorSpec extends AsyncHmrcSpec with GuiceO
   // Run wiremock server on local machine with specified port.
   private val wireMockServer = new WireMockServer(wireMockConfig().port(stubPort))
 
-  override def beforeAll() {
+  override def beforeAll(): Unit = {
     wireMockServer.start()
     WireMock.configureFor(stubHost, stubPort)
   }
 
-  override def beforeEach {
+  override def beforeEach(): Unit = {
     wireMockServer.resetAll()
   }
 
-  override def afterAll() {
+  override def afterAll(): Unit = {
     wireMockServer.stop()
   }
 
@@ -74,7 +76,7 @@ class PushPullNotificationServiceConnectorSpec extends AsyncHmrcSpec with GuiceO
 
     val connector: PushPullNotificationServiceConnector = app.injector.instanceOf[PushPullNotificationServiceConnector]
 
-    def primeStub(path: String, requestBody: String, responseBody: String) {
+    def primeStub(path: String, requestBody: String, responseBody: String): Unit = {
       wireMockServer.stubFor(
         put(path)
           .withRequestBody(equalTo(requestBody))
@@ -87,7 +89,7 @@ class PushPullNotificationServiceConnectorSpec extends AsyncHmrcSpec with GuiceO
       )
     }
 
-    def verifyMock(path: String) {
+    def verifyMock(path: String): Unit = {
       wireMockServer.verify(
         putRequestedFor(urlPathEqualTo(path))
           .withHeader(CONTENT_TYPE, equalTo("application/json"))

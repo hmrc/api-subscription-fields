@@ -42,7 +42,7 @@ class SubscriptionFieldDefinitionsHappySpec extends AcceptanceTestSpec
       val putResult: Option[Future[Result]] = route(app, putRequest)
 
       Then(s"a response with a 201 status is received")
-      putResult shouldBe 'defined
+      putResult shouldBe Symbol("defined")
       val putResultFuture = putResult.value
 
       status(putResultFuture) shouldBe CREATED
@@ -68,7 +68,7 @@ class SubscriptionFieldDefinitionsHappySpec extends AcceptanceTestSpec
       val result: Option[Future[Result]] = route(app, request)
 
       Then(s"a response with a 200 status is received")
-      result shouldBe 'defined
+      result shouldBe Symbol("defined")
       val resultFuture = result.value
 
       status(resultFuture) shouldBe OK
@@ -91,7 +91,7 @@ class SubscriptionFieldDefinitionsHappySpec extends AcceptanceTestSpec
       val result: Option[Future[Result]] = route(app, request)
 
       Then(s"a response with a 200 status is received")
-      result shouldBe 'defined
+      result shouldBe Symbol("defined")
       val resultFuture = result.value
 
       status(resultFuture) shouldBe OK
@@ -113,7 +113,7 @@ class SubscriptionFieldDefinitionsHappySpec extends AcceptanceTestSpec
       val result: Option[Future[Result]] = route(app, request)
 
       Then(s"a response with a 200 status is received")
-      result shouldBe 'defined
+      result shouldBe Symbol("defined")
       val resultFuture = result.value
       status(resultFuture) shouldBe OK
 
@@ -135,13 +135,13 @@ class SubscriptionFieldDefinitionsHappySpec extends AcceptanceTestSpec
       val result: Option[Future[Result]] = route(app, request)
 
       Then(s"a response with a 204 status is received")
-      result shouldBe 'defined
+      result shouldBe Symbol("defined")
       val resultFuture = result.value
 
       status(resultFuture) shouldBe NO_CONTENT
 
       And("the response body is empty")
-      contentAsString(resultFuture) shouldBe 'empty
+      contentAsString(resultFuture) shouldBe Symbol("empty")
     }
 
   }

@@ -61,7 +61,7 @@ class ApiFieldDefinitionsControllerPutSpec extends AsyncHmrcSpec with FieldDefin
     }
   }
 
-  private def testSubmitResult(request: Request[JsValue])(test: Future[Result] => Unit) {
+  private def testSubmitResult(request: Request[JsValue])(test: Future[Result] => Unit): Unit = {
     val action: Action[JsValue] = controller.upsertFieldsDefinition(FakeContext, FakeVersion)
     val result: Future[Result]  = action.apply(request)
     test(result)

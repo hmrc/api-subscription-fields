@@ -48,9 +48,9 @@ class SubscriptionFieldsRepositorySpec
 
   private val repository = app.injector.instanceOf[SubscriptionFieldsMongoRepository]
 
-  override def beforeEach() {
+  override def beforeEach(): Unit = {
     super.beforeEach()
-    await(repository.collection.drop.toFuture())
+    await(repository.collection.drop().toFuture())
   }
 
   private def createApiSubscriptionFields(clientId: ClientId = FakeClientId): SubscriptionFields = {
@@ -156,7 +156,7 @@ class SubscriptionFieldsRepositorySpec
 
       val result = await(repository.fetch(FakeClientId, FakeContext, FakeVersion))
       result match {
-        case None                                         => fail
+        case None                                         => fail()
         case Some(subscriptionFields: SubscriptionFields) => validateSubscriptionFields(subscriptionFields, apiSubscription)
       }
     }
@@ -182,7 +182,7 @@ class SubscriptionFieldsRepositorySpec
       val result = await(repository.fetchByFieldsId(savedSubscriptionFields._1.fieldsId))
 
       result match {
-        case None                                         => fail
+        case None                                         => fail()
         case Some(subscriptionFields: SubscriptionFields) => validateSubscriptionFields(subscriptionFields, apiSubscription)
       }
     }

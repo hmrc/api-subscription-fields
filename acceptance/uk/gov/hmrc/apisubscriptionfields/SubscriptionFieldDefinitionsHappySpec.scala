@@ -30,10 +30,10 @@ class SubscriptionFieldDefinitionsHappySpec extends AcceptanceTestSpec
   with JsonFormatters {
 
 
-  feature("Fields-Definition") {
+  Feature("Fields-Definition") {
 
 
-    scenario("the API is called to store some new fields definitions") {
+    Scenario("the API is called to store some new fields definitions") {
       Given("Definitiions are created ")
       val putRequest = validDefinitionPutRequest(NelOfFieldDefinitions)
         .withTarget( RequestTarget(uriString="", path=definitionEndpoint(fakeRawContext, fakeRawVersion), queryString = Map.empty))
@@ -42,7 +42,7 @@ class SubscriptionFieldDefinitionsHappySpec extends AcceptanceTestSpec
       val putResult: Option[Future[Result]] = route(app, putRequest)
 
       Then(s"a response with a 201 status is received")
-      putResult shouldBe 'defined
+      putResult shouldBe defined
       val putResultFuture = putResult.value
 
       status(putResultFuture) shouldBe CREATED
@@ -57,7 +57,7 @@ class SubscriptionFieldDefinitionsHappySpec extends AcceptanceTestSpec
 
 
 
-    scenario("the API is called to GET a known fields definition") {
+    Scenario("the API is called to GET a known fields definition") {
 
       Then("a request with a known fields definition")
       val request = ValidRequest
@@ -68,7 +68,7 @@ class SubscriptionFieldDefinitionsHappySpec extends AcceptanceTestSpec
       val result: Option[Future[Result]] = route(app, request)
 
       Then(s"a response with a 200 status is received")
-      result shouldBe 'defined
+      result shouldBe defined
       val resultFuture = result.value
 
       status(resultFuture) shouldBe OK
@@ -80,7 +80,7 @@ class SubscriptionFieldDefinitionsHappySpec extends AcceptanceTestSpec
       fdr.get shouldBe FakeApiFieldDefinitionsResponse
     }
 
-    scenario("the API is called to GET all fields definitions") {
+    Scenario("the API is called to GET all fields definitions") {
 
       Given("a request for all fields definition")
       val request = ValidRequest
@@ -91,7 +91,7 @@ class SubscriptionFieldDefinitionsHappySpec extends AcceptanceTestSpec
       val result: Option[Future[Result]] = route(app, request)
 
       Then(s"a response with a 200 status is received")
-      result shouldBe 'defined
+      result shouldBe defined
       val resultFuture = result.value
 
       status(resultFuture) shouldBe OK
@@ -103,7 +103,7 @@ class SubscriptionFieldDefinitionsHappySpec extends AcceptanceTestSpec
       allFdr.get shouldBe BulkApiFieldDefinitionsResponse(List(FakeApiFieldDefinitionsResponse))
     }
 
-    scenario("the API is called to update some existing fields definitions") {
+    Scenario("the API is called to update some existing fields definitions") {
 
       Given("a request with valid payload")
       val request =  validDefinitionPutRequest(NelOfFieldDefinitions)
@@ -113,7 +113,7 @@ class SubscriptionFieldDefinitionsHappySpec extends AcceptanceTestSpec
       val result: Option[Future[Result]] = route(app, request)
 
       Then(s"a response with a 200 status is received")
-      result shouldBe 'defined
+      result shouldBe defined
       val resultFuture = result.value
       status(resultFuture) shouldBe OK
 
@@ -124,7 +124,7 @@ class SubscriptionFieldDefinitionsHappySpec extends AcceptanceTestSpec
       sfr.get shouldBe ApiFieldDefinitions(FakeContext, FakeVersion, NelOfFieldDefinitions)
     }
 
-    scenario("the API is called to delete some existing fields definitions") {
+    Scenario("the API is called to delete some existing fields definitions") {
 
       Given("a request with valid payload")
       val request = ValidRequest
@@ -135,13 +135,13 @@ class SubscriptionFieldDefinitionsHappySpec extends AcceptanceTestSpec
       val result: Option[Future[Result]] = route(app, request)
 
       Then(s"a response with a 204 status is received")
-      result shouldBe 'defined
+      result shouldBe defined
       val resultFuture = result.value
 
       status(resultFuture) shouldBe NO_CONTENT
 
       And("the response body is empty")
-      contentAsString(resultFuture) shouldBe 'empty
+      contentAsString(resultFuture) shouldBe Symbol("empty")
     }
 
   }

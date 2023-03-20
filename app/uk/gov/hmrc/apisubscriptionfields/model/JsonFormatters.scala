@@ -74,6 +74,7 @@ trait AccessRequirementsFormatters {
   )(DevhubAccessRequirements.apply _)
 
   implicit val DevhubAccessRequirementsWrites: OWrites[DevhubAccessRequirements] = new OWrites[DevhubAccessRequirements] {
+
     def writes(requirements: DevhubAccessRequirements) = {
       Json.obj(
         (

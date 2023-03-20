@@ -16,8 +16,6 @@
 
 package uk.gov.hmrc.apisubscriptionfields.model
 
-import org.scalatest.Matchers
-
 import uk.gov.hmrc.apisubscriptionfields.{FieldDefinitionTestData, HmrcSpec, SubscriptionFieldsTestData}
 
 class ModelSpec extends HmrcSpec with SubscriptionFieldsTestData with FieldDefinitionTestData with ValidationRuleTestData {
@@ -40,7 +38,7 @@ class ModelSpec extends HmrcSpec with SubscriptionFieldsTestData with FieldDefin
   }
 }
 
-class UrlValidationRuleSpec extends HmrcSpec with ValidationRuleTestData with Matchers {
+class UrlValidationRuleSpec extends HmrcSpec with ValidationRuleTestData {
   "url validation rule" should {
     "pass for a matching value" in {
       UrlValidationRule.validate(validUrl) shouldBe true

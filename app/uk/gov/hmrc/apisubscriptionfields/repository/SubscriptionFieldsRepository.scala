@@ -109,7 +109,7 @@ class SubscriptionFieldsMongoRepository @Inject() (mongo: MongoComponent, uuidCr
       equal("apiVersion", Codecs.toBson(apiVersion.value))
     )
 
-    collection.find(query).headOption flatMap {
+    collection.find(query).headOption().flatMap {
       case Some(subscription: SubscriptionFields) =>
         val updatedSubscription = subscription.copy(fields = fields)
         for {

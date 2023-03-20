@@ -23,6 +23,7 @@ import uk.gov.hmrc.apisubscriptionfields.model.FieldDefinitionType.FieldDefiniti
 import uk.gov.hmrc.apisubscriptionfields.model.Types._
 
 sealed trait ValidationRule {
+
   def validate(value: FieldValue): Boolean = {
     if (value == "") true
     else validateAgainstRule(value)
@@ -65,7 +66,7 @@ case class FieldDefinition(
     shortDescription: String,
     validation: Option[ValidationGroup] = None,
     access: AccessRequirements = AccessRequirements.Default
-)
+  )
 
 case class ApiFieldDefinitions(apiContext: ApiContext, apiVersion: ApiVersion, fieldDefinitions: NEL[FieldDefinition])
 

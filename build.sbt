@@ -28,24 +28,28 @@ import scala.language.postfixOps
 val appName = "api-subscription-fields"
 
 ThisBuild / scalafixDependencies += "com.github.liancheng" %% "organize-imports" % "0.6.0"
- 
-inThisBuild(
-  List(
-    scalaVersion := "2.12.15",
-    semanticdbEnabled := true,
-    semanticdbVersion := scalafixSemanticdb.revision
-  )
-)
+ThisBuild / semanticdbEnabled := true
+ThisBuild / semanticdbVersion := scalafixSemanticdb.revision
 
 resolvers ++= Seq(
   Resolver.sonatypeRepo("releases"),
   Resolver.sonatypeRepo("snapshots")
-  )
+)
 
 lazy val plugins: Seq[Plugins] = Seq(PlayScala, SbtAutoBuildPlugin, SbtDistributablesPlugin)
 lazy val playSettings: Seq[Setting[_]] = Seq.empty
 
 lazy val AcceptanceTest = config("acceptance") extend Test
+
+lazy val acceptanceTestSettings =
+  inConfig(AcceptanceTest)(Defaults.testSettings) ++
+  inConfig(AcceptanceTest)(BloopDefaults.configSettings) ++
+    Seq(
+      AcceptanceTest / unmanagedSourceDirectories := Seq(baseDirectory.value / "acceptance"),
+      AcceptanceTest / fork := false,
+      AcceptanceTest / parallelExecution := false,
+      addTestReportOption(AcceptanceTest, "acceptance-reports")
+    )
 
 lazy val microservice = Project(appName, file("."))
   .enablePlugins(plugins: _*)
@@ -56,7 +60,7 @@ lazy val microservice = Project(appName, file("."))
   .settings(defaultSettings(): _*)
   .settings(acceptanceTestSettings: _*)
   .settings(headerSettings(AcceptanceTest) ++ automateHeaderSettings(AcceptanceTest))
-  .settings(scalaVersion := "2.12.15")
+  .settings(scalaVersion := "2.13.8")
   .settings(ScoverageSettings())
   .settings(
     routesImport ++= Seq(
@@ -74,17 +78,16 @@ lazy val microservice = Project(appName, file("."))
     Test / parallelExecution := false
   )
   .settings(majorVersion := 0)
-  .settings(scalacOptions ++= Seq("-Ypartial-unification"))
-
-lazy val acceptanceTestSettings =
-  inConfig(AcceptanceTest)(Defaults.testSettings) ++
-  inConfig(AcceptanceTest)(BloopDefaults.configSettings) ++
-    Seq(
-      AcceptanceTest / unmanagedSourceDirectories := Seq(baseDirectory.value / "acceptance"),
-      AcceptanceTest / fork := false,
-      AcceptanceTest / parallelExecution := false,
-      addTestReportOption(AcceptanceTest, "acceptance-reports")
+  .settings(
+    scalacOptions ++= Seq(
+    "-Wconf:cat=unused&src=.*RoutesPrefix\\.scala:s",
+    "-Wconf:cat=unused&src=.*Routes\\.scala:s",
+    "-Wconf:cat=unused&src=.*ReverseRoutes\\.scala:s"
     )
+  )
+  .settings(
+    commands += Command.command("testAll") { state => "test" :: "acceptance:test" :: state }
+  )
 
 def onPackageName(rootPackage: String): String => Boolean = { testName => testName startsWith rootPackage }
 

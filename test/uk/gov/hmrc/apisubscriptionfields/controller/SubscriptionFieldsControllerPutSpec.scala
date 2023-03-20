@@ -90,7 +90,7 @@ class SubscriptionFieldsControllerPutSpec extends AsyncHmrcSpec with Subscriptio
     }
   }
 
-  private def testSubmitResult(request: Request[JsValue])(test: Future[Result] => Unit) {
+  private def testSubmitResult(request: Request[JsValue])(test: Future[Result] => Unit): Unit = {
     val action: Action[JsValue] = controller.upsertSubscriptionFields(FakeClientId, FakeContext, FakeVersion)
     val result: Future[Result]  = action.apply(request)
     test(result)

@@ -27,14 +27,21 @@ import uk.gov.hmrc.apisubscriptionfields.model.{FieldDefinition, _}
 
 @Singleton
 class PushPullNotificationService @Inject() (ppnsConnector: PushPullNotificationServiceConnector)(implicit ec: ExecutionContext) {
+
   def makeBoxName(apiContext: ApiContext, apiVersion: ApiVersion, fieldDefinition: FieldDefinition): String = {
     val separator = "##"
     s"${apiContext.value}${separator}${apiVersion.value}${separator}${fieldDefinition.name.value}"
   }
 
-  def subscribeToPPNS(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion, oFieldValue: Option[FieldValue], fieldDefinition: FieldDefinition)(implicit
+  def subscribeToPPNS(
+      clientId: ClientId,
+      apiContext: ApiContext,
+      apiVersion: ApiVersion,
+      oFieldValue: Option[FieldValue],
+      fieldDefinition: FieldDefinition
+    )(implicit
       hc: HeaderCarrier
-  ): Future[PPNSCallBackUrlValidationResponse] = {
+    ): Future[PPNSCallBackUrlValidationResponse] = {
     for {
       boxId  <- ppnsConnector.ensureBoxIsCreated(makeBoxName(apiContext, apiVersion, fieldDefinition), clientId)
       result <- oFieldValue match {

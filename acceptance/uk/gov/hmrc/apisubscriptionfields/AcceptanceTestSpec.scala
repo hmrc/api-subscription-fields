@@ -17,7 +17,6 @@
 package uk.gov.hmrc.apisubscriptionfields
 
 import java.util.UUID
-import org.scalatest._
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
@@ -35,7 +34,12 @@ import cats.data.NonEmptyList
 import uk.gov.hmrc.apisubscriptionfields.controller.Helper
 import uk.gov.hmrc.mongo.MongoComponent
 
-trait AcceptanceTestSpec extends FeatureSpec
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.GivenWhenThen
+import org.scalatest.BeforeAndAfterAll
+import org.scalatest.featurespec.AnyFeatureSpec
+
+trait AcceptanceTestSpec extends AnyFeatureSpec
   with GivenWhenThen
   with BeforeAndAfterAll
   with Matchers
@@ -87,12 +91,16 @@ trait AcceptanceTestSpec extends FeatureSpec
 
   protected def await[A](future: Future[A]): A = Await.result(future, 5.seconds)
 
-  override protected def beforeAll: Unit = {
+  override protected def beforeAll(): Unit = {
+    super.beforeAll()
+
     dropDatabase()
   }
 
-  override protected def afterAll: Unit = {
+  override protected def afterAll(): Unit = {
     dropDatabase()
+
+    super.afterAll()
   }
 
   private def dropDatabase(): Unit = {

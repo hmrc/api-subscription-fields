@@ -17,6 +17,7 @@
 package uk.gov.hmrc.apisubscriptionfields.model
 
 sealed trait DevhubAccessRequirement
+
 object DevhubAccessRequirement {
   final val Default: DevhubAccessRequirement = Anyone
 
@@ -46,6 +47,7 @@ object DevhubAccessRequirements {
 }
 
 case class AccessRequirements(devhub: DevhubAccessRequirements)
+
 object AccessRequirements {
   final val Default = AccessRequirements(devhub = DevhubAccessRequirements.Default)
 }
@@ -53,11 +55,13 @@ object AccessRequirements {
 sealed trait DevhubAccessLevel {
   def satisfiesRequirement(requirement: DevhubAccessRequirement): Boolean = DevhubAccessLevel.satisfies(requirement)(this)
 }
-object DevhubAccessLevel       {
+
+object DevhubAccessLevel {
   case object Developer     extends DevhubAccessLevel
   case object Admininstator extends DevhubAccessLevel
 
   import DevhubAccessRequirement._
+
   def satisfies(requirement: DevhubAccessRequirement)(actual: DevhubAccessLevel): Boolean = (requirement, actual) match {
     case (NoOne, _)             => false
     case (AdminOnly, Developer) => false

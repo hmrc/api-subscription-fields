@@ -39,14 +39,14 @@ class ApiFieldDefinitionsRepositorySpec
 
   private val repository = app.injector.instanceOf[ApiFieldDefinitionsMongoRepository]
 
-  override protected def beforeEach() {
+  override protected def beforeEach(): Unit = {
     super.beforeEach()
-    await(repository.collection.drop.toFuture())
+    await(repository.collection.drop().toFuture())
   }
 
-  override protected def afterEach() {
+  override protected def afterEach(): Unit = {
     super.afterEach()
-    await(repository.collection.drop.toFuture())
+    await(repository.collection.drop().toFuture())
   }
 
   def collectionSize: Long = {

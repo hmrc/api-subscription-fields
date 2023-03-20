@@ -31,10 +31,10 @@ class ApiSubscriptionFieldsUnhappySpec extends AcceptanceTestSpec
   with SubscriptionFieldsTestData
   with ApplicationLogger {
 
-  feature("Subscription-Fields") {
+  Feature("Subscription-Fields") {
     appLogger.logger.info(s"App.mode = ${app.mode.toString}")
 
-    scenario("the API is called to GET non-existing subscription fields") {
+    Scenario("the API is called to GET non-existing subscription fields") {
 
       Given("the API is called to GET non-existing subscription fields")
       val request =  createRequest(GET, subscriptionFieldsEndpoint(fakeRawClientId, fakeRawContext, fakeRawVersion))
@@ -42,7 +42,7 @@ class ApiSubscriptionFieldsUnhappySpec extends AcceptanceTestSpec
       val result: Option[Future[Result]] = route(app, request)
 
       Then(s"a response with a 404 status is received")
-      result shouldBe 'defined
+      result shouldBe defined
       val resultFuture = result.value
 
       status(resultFuture) shouldBe NOT_FOUND
@@ -51,7 +51,7 @@ class ApiSubscriptionFieldsUnhappySpec extends AcceptanceTestSpec
       contentAsJson(resultFuture) shouldBe JsErrorResponse(NOT_FOUND_CODE, s"Subscription fields not found for ($fakeRawClientId, $fakeRawContext, $fakeRawVersion)")
     }
 
-    scenario("the API is called to GET with an unknown fieldsId") {
+    Scenario("the API is called to GET with an unknown fieldsId") {
 
       Given("the API is called to GET with an unknown fieldsId")
       val request = createRequest(GET, fieldsIdEndpoint(FakeRawFieldsId))
@@ -60,7 +60,7 @@ class ApiSubscriptionFieldsUnhappySpec extends AcceptanceTestSpec
       val result: Option[Future[Result]] = route(app, request)
 
       Then(s"a response with a 404 status is received")
-      result shouldBe 'defined
+      result shouldBe defined
       val resultFuture = result.value
 
       status(resultFuture) shouldBe NOT_FOUND
@@ -69,7 +69,7 @@ class ApiSubscriptionFieldsUnhappySpec extends AcceptanceTestSpec
       contentAsJson(resultFuture) shouldBe JsErrorResponse(NOT_FOUND_CODE, s"FieldsId (${FakeRawFieldsId.toString}) was not found")
     }
 
-    scenario("the API is called to GET an unknown application clientId") {
+    Scenario("the API is called to GET an unknown application clientId") {
 
       Given("the API is called to GET an unknown application clientId")
       val request = createRequest(GET, byClientIdEndpoint(fakeRawClientId))
@@ -78,7 +78,7 @@ class ApiSubscriptionFieldsUnhappySpec extends AcceptanceTestSpec
       val result: Option[Future[Result]] = route(app, request)
 
       Then(s"a response with a 404 status is received")
-      result shouldBe 'defined
+      result shouldBe defined
       val resultFuture = result.value
 
       status(resultFuture) shouldBe NOT_FOUND
@@ -87,7 +87,7 @@ class ApiSubscriptionFieldsUnhappySpec extends AcceptanceTestSpec
       contentAsJson(resultFuture) shouldBe JsErrorResponse(NOT_FOUND_CODE, s"ClientId ($fakeRawClientId) was not found")
     }
 
-    scenario("the API is called to DELETE an unknown subscription field") {
+    Scenario("the API is called to DELETE an unknown subscription field") {
 
       Given("a request with an unknown subscription field")
       val request = createRequest(DELETE, subscriptionFieldsEndpoint(fakeRawClientId, fakeRawContext, fakeRawVersion))
@@ -96,7 +96,7 @@ class ApiSubscriptionFieldsUnhappySpec extends AcceptanceTestSpec
       val result: Option[Future[Result]] = route(app, request)
 
       Then(s"a response with a 404 status is received")
-      result shouldBe 'defined
+      result shouldBe defined
       val resultFuture = result.value
 
       status(resultFuture) shouldBe NOT_FOUND
@@ -105,7 +105,7 @@ class ApiSubscriptionFieldsUnhappySpec extends AcceptanceTestSpec
       contentAsJson(resultFuture) shouldBe JsErrorResponse(NOT_FOUND_CODE, s"Subscription fields not found for ($fakeRawClientId, $fakeRawContext, $fakeRawVersion)")
     }
 
-    scenario("the API is called to PUT subscription fields with an invalid JSON payload") {
+    Scenario("the API is called to PUT subscription fields with an invalid JSON payload") {
 
       Given("the API is called to PUT subscription fields with an invalid JSON payload")
       val request = createRequest(PUT, subscriptionFieldsEndpoint(fakeRawClientId, fakeRawContext, fakeRawVersion))
@@ -115,7 +115,7 @@ class ApiSubscriptionFieldsUnhappySpec extends AcceptanceTestSpec
       val result: Option[Future[Result]] = route(app, request)
 
       Then(s"a response with a 422 status is received")
-      result shouldBe 'defined
+      result shouldBe defined
       val resultFuture = result.value
 
       status(resultFuture) shouldBe UNPROCESSABLE_ENTITY
@@ -124,7 +124,7 @@ class ApiSubscriptionFieldsUnhappySpec extends AcceptanceTestSpec
       contentAsJson(resultFuture) shouldBe JsErrorResponse(INVALID_REQUEST_PAYLOAD, _: Json.JsValueWrapper)
     }
 
-    scenario("the API is called to PUT subscription fields with an invalid non JSON payload") {
+    Scenario("the API is called to PUT subscription fields with an invalid non JSON payload") {
 
       Given("the API is called to PUT subscription fields with an invalid non JSON payload")
       val request =  createRequest(PUT, subscriptionFieldsEndpoint(fakeRawClientId, fakeRawContext, fakeRawVersion))
@@ -134,7 +134,7 @@ class ApiSubscriptionFieldsUnhappySpec extends AcceptanceTestSpec
       val result: Option[Future[Result]] = route(app, request)
 
       Then(s"a response with a 415 status is received")
-      result shouldBe 'defined
+      result shouldBe defined
       val resultFuture = result.value
 
       status(resultFuture) shouldBe UNSUPPORTED_MEDIA_TYPE

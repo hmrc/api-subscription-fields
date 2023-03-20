@@ -84,7 +84,7 @@ class ApiFieldDefinitionsMongoRepository @Inject() (mongo: MongoComponent)(impli
   def save(definitions: ApiFieldDefinitions): Future[(ApiFieldDefinitions, IsInsert)] = {
     val query = and(equal("apiContext", Codecs.toBson(definitions.apiContext.value)), equal("apiVersion", Codecs.toBson(definitions.apiVersion.value)))
 
-    collection.find(query).headOption flatMap {
+    collection.find(query).headOption().flatMap {
       case Some(_: ApiFieldDefinitions) =>
         for {
           updatedDefinitions <- collection

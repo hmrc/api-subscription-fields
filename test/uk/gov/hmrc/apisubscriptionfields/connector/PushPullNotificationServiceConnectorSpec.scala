@@ -36,6 +36,8 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.apisubscriptionfields.AsyncHmrcSpec
 import uk.gov.hmrc.apisubscriptionfields.model._
 
+import uk.gov.hmrc.apisubscriptionfields.connector.JsonFormatters
+
 class PushPullNotificationServiceConnectorSpec extends AsyncHmrcSpec with GuiceOneAppPerSuite with JsonFormatters with BeforeAndAfterAll with BeforeAndAfterEach {
 
   private val stubPort = 11111
@@ -52,17 +54,21 @@ class PushPullNotificationServiceConnectorSpec extends AsyncHmrcSpec with GuiceO
   // Run wiremock server on local machine with specified port.
   private val wireMockServer = new WireMockServer(wireMockConfig().port(stubPort))
 
-  override def beforeAll() {
+  override def beforeAll(): Unit = {
+    super.beforeAll()
+
     wireMockServer.start()
     WireMock.configureFor(stubHost, stubPort)
   }
 
-  override def beforeEach {
+  override def beforeEach(): Unit = {
     wireMockServer.resetAll()
   }
 
-  override def afterAll() {
+  override def afterAll(): Unit = {
     wireMockServer.stop()
+
+    super.afterAll()
   }
 
   trait Setup {
@@ -74,7 +80,7 @@ class PushPullNotificationServiceConnectorSpec extends AsyncHmrcSpec with GuiceO
 
     val connector: PushPullNotificationServiceConnector = app.injector.instanceOf[PushPullNotificationServiceConnector]
 
-    def primeStub(path: String, requestBody: String, responseBody: String) {
+    def primeStub(path: String, requestBody: String, responseBody: String): Unit = {
       wireMockServer.stubFor(
         put(path)
           .withRequestBody(equalTo(requestBody))
@@ -87,7 +93,7 @@ class PushPullNotificationServiceConnectorSpec extends AsyncHmrcSpec with GuiceO
       )
     }
 
-    def verifyMock(path: String) {
+    def verifyPath(path: String): Unit = {
       wireMockServer.verify(
         putRequestedFor(urlPathEqualTo(path))
           .withHeader(CONTENT_TYPE, equalTo("application/json"))
@@ -108,7 +114,7 @@ class PushPullNotificationServiceConnectorSpec extends AsyncHmrcSpec with GuiceO
       val ret: BoxId = await(connector.ensureBoxIsCreated(boxName, clientId))
       ret shouldBe boxId
 
-      verifyMock(path)
+      verifyPath(path)
     }
 
     "send proper request to subscribe" in new Setup {
@@ -122,7 +128,7 @@ class PushPullNotificationServiceConnectorSpec extends AsyncHmrcSpec with GuiceO
       val ret: Unit = await(connector.subscribe(boxId, callbackUrl))
       ret shouldBe (())
 
-      verifyMock(path)
+      verifyPath(path)
     }
 
     "send proper request to update callback and map response on success" in new Setup {
@@ -136,7 +142,7 @@ class PushPullNotificationServiceConnectorSpec extends AsyncHmrcSpec with GuiceO
       val ret: PPNSCallBackUrlValidationResponse = await(connector.updateCallBackUrl(clientId, boxId, callbackUrl))
       ret shouldBe PPNSCallBackUrlSuccessResponse
 
-      verifyMock(path)
+      verifyPath(path)
     }
 
     "send proper request to update callback (when callback is empty) and map response on success" in new Setup {
@@ -150,7 +156,7 @@ class PushPullNotificationServiceConnectorSpec extends AsyncHmrcSpec with GuiceO
       val ret: PPNSCallBackUrlValidationResponse = await(connector.updateCallBackUrl(clientId, boxId, callbackUrl))
       ret shouldBe PPNSCallBackUrlSuccessResponse
 
-      verifyMock(path)
+      verifyPath(path)
     }
 
     "send proper request to update callback and map response on failure" in new Setup {
@@ -164,7 +170,7 @@ class PushPullNotificationServiceConnectorSpec extends AsyncHmrcSpec with GuiceO
       val ret: PPNSCallBackUrlValidationResponse = await(connector.updateCallBackUrl(clientId, boxId, callbackUrl))
       ret shouldBe PPNSCallBackUrlFailedResponse("some error")
 
-      verifyMock(path)
+      verifyPath(path)
     }
 
     "send proper request to update callback and map response on failure with Unknown Error" in new Setup {
@@ -178,7 +184,7 @@ class PushPullNotificationServiceConnectorSpec extends AsyncHmrcSpec with GuiceO
       val ret: PPNSCallBackUrlValidationResponse = await(connector.updateCallBackUrl(clientId, boxId, callbackUrl))
       ret shouldBe PPNSCallBackUrlFailedResponse("Unknown Error")
 
-      verifyMock(path)
+      verifyPath(path)
     }
   }
 }

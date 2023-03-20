@@ -37,34 +37,38 @@ class ApiSubscriptionFieldsHappySpec extends AcceptanceTestSpec
   with BeforeAndAfterAll 
   with ApplicationLogger {
 
-  override def beforeAll() {
+  override def beforeAll(): Unit = {
+    super.beforeAll()
+
     val putRequest = validDefinitionPutRequest(NelOfFieldDefinitions)
       .withTarget( RequestTarget(uriString="", path=definitionEndpoint(fakeRawContext, fakeRawVersion), queryString = Map.empty))
 
     Await.result(route(app, putRequest).get, 10.seconds)
   }
 
-  override def afterAll() {
+  override def afterAll(): Unit = {
     val request = ValidRequest
       .withMethod(DELETE)
       .withTarget( RequestTarget(uriString="", path=definitionEndpoint(fakeRawContext, fakeRawVersion), queryString = Map.empty))
 
     route(app, request)
+
+    super.afterAll()
   }
 
 
-  feature("Subscription-Fields") {
+  Feature("Subscription-Fields") {
 
     appLogger.logger.info(s"App.mode = ${app.mode.toString}")
 
-    scenario("the API is called to store some values for a new subscription field") {
+    Scenario("the API is called to store some values for a new subscription field") {
       val request: Request[AnyContentAsJson] =  createSubscriptionFieldsRequest()
 
       When("a PUT request with data is sent to the API")
       val result: Option[Future[Result]] = route(app, request)
 
       Then(s"a response with a 201 status is received")
-      result shouldBe 'defined
+      result shouldBe defined
       val resultFuture = result.value
 
       status(resultFuture) shouldBe CREATED
@@ -86,7 +90,7 @@ class ApiSubscriptionFieldsHappySpec extends AcceptanceTestSpec
       route(app, createSubscriptionFieldsRequest())
     }
 
-    scenario("the API is called to GET some existing subscription fields") {
+    Scenario("the API is called to GET some existing subscription fields") {
 
       Given("a request with a known subscription field")
       createSubscriptionFields()
@@ -97,7 +101,7 @@ class ApiSubscriptionFieldsHappySpec extends AcceptanceTestSpec
       val result: Option[Future[Result]] = route(app, request)
 
       Then(s"a response with a 200 status is received")
-      result shouldBe 'defined
+      result shouldBe defined
       val resultFuture = result.value
 
       status(resultFuture) shouldBe OK
@@ -110,7 +114,7 @@ class ApiSubscriptionFieldsHappySpec extends AcceptanceTestSpec
       sfr.get shouldBe SubscriptionFields(FakeClientId, ApiContext("acontext"), ApiVersion("1.0.2"), fieldsId, SampleFields1)
     }
 
-    scenario("the API is called to GET all existing subscription fields") {
+    Scenario("the API is called to GET all existing subscription fields") {
 
       Given("a request with a known subscription field")
       createSubscriptionFields()
@@ -121,7 +125,7 @@ class ApiSubscriptionFieldsHappySpec extends AcceptanceTestSpec
       val result: Option[Future[Result]] = route(app, request)
 
       Then(s"a response with a 200 status is received")
-      result shouldBe 'defined
+      result shouldBe defined
       val resultFuture = result.value
 
       status(resultFuture) shouldBe OK
@@ -134,7 +138,7 @@ class ApiSubscriptionFieldsHappySpec extends AcceptanceTestSpec
       sfr.get shouldBe BulkSubscriptionFieldsResponse(Seq(SubscriptionFields(FakeClientId, ApiContext("acontext"), ApiVersion("1.0.2"), fieldsId, SampleFields1)))
     }
 
-    scenario("the API is called to GET with a known fieldsId") {
+    Scenario("the API is called to GET with a known fieldsId") {
 
       Given("a request with a known fieldsId")
 
@@ -146,7 +150,7 @@ class ApiSubscriptionFieldsHappySpec extends AcceptanceTestSpec
       val result: Option[Future[Result]] = route(app, requestId)
 
       Then(s"a response with a 200 status is received")
-      result shouldBe 'defined
+      result shouldBe defined
       val resultFuture = result.value
 
       status(resultFuture) shouldBe OK
@@ -164,7 +168,7 @@ class ApiSubscriptionFieldsHappySpec extends AcceptanceTestSpec
       val resultFieldsId: Option[Future[Result]] = route(app, requestFieldsId)
 
       Then(s"a response with a 200 status is received")
-      resultFieldsId shouldBe 'defined
+      resultFieldsId shouldBe defined
       val resultFieldsIdFuture = result.value
 
       status(resultFieldsIdFuture) shouldBe OK
@@ -174,7 +178,7 @@ class ApiSubscriptionFieldsHappySpec extends AcceptanceTestSpec
       sfrFieldsId.get shouldBe SubscriptionFields(FakeClientId, ApiContext("acontext"), ApiVersion("1.0.2"), fieldsId, SampleFields1)
     }
 
-    scenario("the API is called to GET existing subscription fields by application clientId") {
+    Scenario("the API is called to GET existing subscription fields by application clientId") {
 
       Given("a request with a known client identifier")
       createSubscriptionFields()
@@ -185,7 +189,7 @@ class ApiSubscriptionFieldsHappySpec extends AcceptanceTestSpec
       val result: Option[Future[Result]] = route(app, request)
 
       Then(s"a response with a 200 status is received")
-      result shouldBe 'defined
+      result shouldBe defined
       val resultFuture = result.value
 
 
@@ -199,7 +203,7 @@ class ApiSubscriptionFieldsHappySpec extends AcceptanceTestSpec
       sfr.get shouldBe BulkSubscriptionFieldsResponse(Seq(SubscriptionFields(FakeClientId, ApiContext("acontext"), ApiVersion("1.0.2"), fieldsId, SampleFields1)))
     }
 
-    scenario("the API is called to update existing subscription fields") {
+    Scenario("the API is called to update existing subscription fields") {
 
       Given("a request with valid payload")
       createSubscriptionFields()
@@ -210,7 +214,7 @@ class ApiSubscriptionFieldsHappySpec extends AcceptanceTestSpec
       val result: Option[Future[Result]] = route(app, request)
 
       Then(s"a response with a 200 status is received")
-      result shouldBe 'defined
+      result shouldBe defined
       val resultFuture = result.value
 
       status(resultFuture) shouldBe OK
@@ -223,7 +227,7 @@ class ApiSubscriptionFieldsHappySpec extends AcceptanceTestSpec
       sfr.get shouldBe SubscriptionFields(FakeClientId, ApiContext("acontext"), ApiVersion("1.0.2"), fieldsId, SampleFields2)
     }
 
-    scenario("the API is called to DELETE existing subscription fields") {
+    Scenario("the API is called to DELETE existing subscription fields") {
 
       Given("a request with existing subscription fields")
       createSubscriptionFields()
@@ -234,13 +238,13 @@ class ApiSubscriptionFieldsHappySpec extends AcceptanceTestSpec
       val result: Option[Future[Result]] = route(app, request)
 
       Then(s"a response with a 204 status is received")
-      result shouldBe 'defined
+      result shouldBe defined
       val resultFuture = result.value
 
       status(resultFuture) shouldBe NO_CONTENT
 
       And("the response body is empty")
-      contentAsString(resultFuture) shouldBe 'empty
+      contentAsString(resultFuture) shouldBe empty
     }
 
   }

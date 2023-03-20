@@ -38,6 +38,8 @@ class ApiSubscriptionFieldsHappySpec extends AcceptanceTestSpec
   with ApplicationLogger {
 
   override def beforeAll(): Unit = {
+    super.beforeAll()
+
     val putRequest = validDefinitionPutRequest(NelOfFieldDefinitions)
       .withTarget( RequestTarget(uriString="", path=definitionEndpoint(fakeRawContext, fakeRawVersion), queryString = Map.empty))
 
@@ -50,6 +52,8 @@ class ApiSubscriptionFieldsHappySpec extends AcceptanceTestSpec
       .withTarget( RequestTarget(uriString="", path=definitionEndpoint(fakeRawContext, fakeRawVersion), queryString = Map.empty))
 
     route(app, request)
+
+    super.afterAll()
   }
 
 
@@ -64,7 +68,7 @@ class ApiSubscriptionFieldsHappySpec extends AcceptanceTestSpec
       val result: Option[Future[Result]] = route(app, request)
 
       Then(s"a response with a 201 status is received")
-      result shouldBe Symbol("defined")
+      result shouldBe defined
       val resultFuture = result.value
 
       status(resultFuture) shouldBe CREATED
@@ -97,7 +101,7 @@ class ApiSubscriptionFieldsHappySpec extends AcceptanceTestSpec
       val result: Option[Future[Result]] = route(app, request)
 
       Then(s"a response with a 200 status is received")
-      result shouldBe Symbol("defined")
+      result shouldBe defined
       val resultFuture = result.value
 
       status(resultFuture) shouldBe OK
@@ -121,7 +125,7 @@ class ApiSubscriptionFieldsHappySpec extends AcceptanceTestSpec
       val result: Option[Future[Result]] = route(app, request)
 
       Then(s"a response with a 200 status is received")
-      result shouldBe Symbol("defined")
+      result shouldBe defined
       val resultFuture = result.value
 
       status(resultFuture) shouldBe OK
@@ -146,7 +150,7 @@ class ApiSubscriptionFieldsHappySpec extends AcceptanceTestSpec
       val result: Option[Future[Result]] = route(app, requestId)
 
       Then(s"a response with a 200 status is received")
-      result shouldBe Symbol("defined")
+      result shouldBe defined
       val resultFuture = result.value
 
       status(resultFuture) shouldBe OK
@@ -164,7 +168,7 @@ class ApiSubscriptionFieldsHappySpec extends AcceptanceTestSpec
       val resultFieldsId: Option[Future[Result]] = route(app, requestFieldsId)
 
       Then(s"a response with a 200 status is received")
-      resultFieldsId shouldBe Symbol("defined")
+      resultFieldsId shouldBe defined
       val resultFieldsIdFuture = result.value
 
       status(resultFieldsIdFuture) shouldBe OK
@@ -185,7 +189,7 @@ class ApiSubscriptionFieldsHappySpec extends AcceptanceTestSpec
       val result: Option[Future[Result]] = route(app, request)
 
       Then(s"a response with a 200 status is received")
-      result shouldBe Symbol("defined")
+      result shouldBe defined
       val resultFuture = result.value
 
 
@@ -210,7 +214,7 @@ class ApiSubscriptionFieldsHappySpec extends AcceptanceTestSpec
       val result: Option[Future[Result]] = route(app, request)
 
       Then(s"a response with a 200 status is received")
-      result shouldBe Symbol("defined")
+      result shouldBe defined
       val resultFuture = result.value
 
       status(resultFuture) shouldBe OK
@@ -234,13 +238,13 @@ class ApiSubscriptionFieldsHappySpec extends AcceptanceTestSpec
       val result: Option[Future[Result]] = route(app, request)
 
       Then(s"a response with a 204 status is received")
-      result shouldBe Symbol("defined")
+      result shouldBe defined
       val resultFuture = result.value
 
       status(resultFuture) shouldBe NO_CONTENT
 
       And("the response body is empty")
-      contentAsString(resultFuture) shouldBe Symbol("empty")
+      contentAsString(resultFuture) shouldBe empty
     }
 
   }

@@ -41,6 +41,16 @@ lazy val playSettings: Seq[Setting[_]] = Seq.empty
 
 lazy val AcceptanceTest = config("acceptance") extend Test
 
+lazy val acceptanceTestSettings =
+  inConfig(AcceptanceTest)(Defaults.testSettings) ++
+  inConfig(AcceptanceTest)(BloopDefaults.configSettings) ++
+    Seq(
+      AcceptanceTest / unmanagedSourceDirectories := Seq(baseDirectory.value / "acceptance"),
+      AcceptanceTest / fork := false,
+      AcceptanceTest / parallelExecution := false,
+      addTestReportOption(AcceptanceTest, "acceptance-reports")
+    )
+
 lazy val microservice = Project(appName, file("."))
   .enablePlugins(plugins: _*)
   .configs(AcceptanceTest)
@@ -75,16 +85,9 @@ lazy val microservice = Project(appName, file("."))
     "-Wconf:cat=unused&src=.*ReverseRoutes\\.scala:s"
     )
   )
-
-lazy val acceptanceTestSettings =
-  inConfig(AcceptanceTest)(Defaults.testSettings) ++
-  inConfig(AcceptanceTest)(BloopDefaults.configSettings) ++
-    Seq(
-      AcceptanceTest / unmanagedSourceDirectories := Seq(baseDirectory.value / "acceptance"),
-      AcceptanceTest / fork := false,
-      AcceptanceTest / parallelExecution := false,
-      addTestReportOption(AcceptanceTest, "acceptance-reports")
-    )
+  .settings(
+    commands += Command.command("testAll") { state => "test" :: "acceptance:test" :: state }
+  )
 
 def onPackageName(rootPackage: String): String => Boolean = { testName => testName startsWith rootPackage }
 

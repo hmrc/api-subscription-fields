@@ -55,6 +55,8 @@ class PushPullNotificationServiceConnectorSpec extends AsyncHmrcSpec with GuiceO
   private val wireMockServer = new WireMockServer(wireMockConfig().port(stubPort))
 
   override def beforeAll(): Unit = {
+    super.beforeAll()
+
     wireMockServer.start()
     WireMock.configureFor(stubHost, stubPort)
   }
@@ -65,6 +67,8 @@ class PushPullNotificationServiceConnectorSpec extends AsyncHmrcSpec with GuiceO
 
   override def afterAll(): Unit = {
     wireMockServer.stop()
+
+    super.afterAll()
   }
 
   trait Setup {
@@ -89,7 +93,7 @@ class PushPullNotificationServiceConnectorSpec extends AsyncHmrcSpec with GuiceO
       )
     }
 
-    def verifyMock(path: String): Unit = {
+    def verifyPath(path: String): Unit = {
       wireMockServer.verify(
         putRequestedFor(urlPathEqualTo(path))
           .withHeader(CONTENT_TYPE, equalTo("application/json"))
@@ -110,7 +114,7 @@ class PushPullNotificationServiceConnectorSpec extends AsyncHmrcSpec with GuiceO
       val ret: BoxId = await(connector.ensureBoxIsCreated(boxName, clientId))
       ret shouldBe boxId
 
-      verifyMock(path)
+      verifyPath(path)
     }
 
     "send proper request to subscribe" in new Setup {
@@ -124,7 +128,7 @@ class PushPullNotificationServiceConnectorSpec extends AsyncHmrcSpec with GuiceO
       val ret: Unit = await(connector.subscribe(boxId, callbackUrl))
       ret shouldBe (())
 
-      verifyMock(path)
+      verifyPath(path)
     }
 
     "send proper request to update callback and map response on success" in new Setup {
@@ -138,7 +142,7 @@ class PushPullNotificationServiceConnectorSpec extends AsyncHmrcSpec with GuiceO
       val ret: PPNSCallBackUrlValidationResponse = await(connector.updateCallBackUrl(clientId, boxId, callbackUrl))
       ret shouldBe PPNSCallBackUrlSuccessResponse
 
-      verifyMock(path)
+      verifyPath(path)
     }
 
     "send proper request to update callback (when callback is empty) and map response on success" in new Setup {
@@ -152,7 +156,7 @@ class PushPullNotificationServiceConnectorSpec extends AsyncHmrcSpec with GuiceO
       val ret: PPNSCallBackUrlValidationResponse = await(connector.updateCallBackUrl(clientId, boxId, callbackUrl))
       ret shouldBe PPNSCallBackUrlSuccessResponse
 
-      verifyMock(path)
+      verifyPath(path)
     }
 
     "send proper request to update callback and map response on failure" in new Setup {
@@ -166,7 +170,7 @@ class PushPullNotificationServiceConnectorSpec extends AsyncHmrcSpec with GuiceO
       val ret: PPNSCallBackUrlValidationResponse = await(connector.updateCallBackUrl(clientId, boxId, callbackUrl))
       ret shouldBe PPNSCallBackUrlFailedResponse("some error")
 
-      verifyMock(path)
+      verifyPath(path)
     }
 
     "send proper request to update callback and map response on failure with Unknown Error" in new Setup {
@@ -180,7 +184,7 @@ class PushPullNotificationServiceConnectorSpec extends AsyncHmrcSpec with GuiceO
       val ret: PPNSCallBackUrlValidationResponse = await(connector.updateCallBackUrl(clientId, boxId, callbackUrl))
       ret shouldBe PPNSCallBackUrlFailedResponse("Unknown Error")
 
-      verifyMock(path)
+      verifyPath(path)
     }
   }
 }

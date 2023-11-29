@@ -92,6 +92,17 @@ class PushPullNotificationServiceConnectorSpec extends AsyncHmrcSpec with GuiceO
       )
     }
 
+    def primeError(path: String, requestBody: String): Unit = {
+      wireMockServer.stubFor(
+        put(path)
+          .withRequestBody(equalTo(requestBody))
+          .willReturn(
+            aResponse()
+              .withStatus(400)
+          )
+      )
+    }
+
     def verifyPath(path: String): Unit = {
       wireMockServer.verify(
         putRequestedFor(urlPathEqualTo(path))
@@ -116,6 +127,17 @@ class PushPullNotificationServiceConnectorSpec extends AsyncHmrcSpec with GuiceO
       verifyPath(path)
     }
 
+    "send to post box and map response on error" in new Setup {
+      val requestBody: String = Json.stringify(Json.toJson(CreateBoxRequest(boxName, clientId)))
+
+      val path = "/box"
+      primeError(path, requestBody)
+
+      intercept[RuntimeException] {
+        await(connector.ensureBoxIsCreated(boxName, clientId))
+      }
+    }
+
     "send proper request to subscribe" in new Setup {
       val callbackUrl          = "my-callback"
       val requestBody: String  = Json.stringify(Json.toJson(UpdateSubscriberRequest(SubscriberRequest(callbackUrl, "API_PUSH_SUBSCRIBER"))))
@@ -128,6 +150,18 @@ class PushPullNotificationServiceConnectorSpec extends AsyncHmrcSpec with GuiceO
       ret shouldBe (())
 
       verifyPath(path)
+    }
+
+    "send to subscribe and map response on error" in new Setup {
+      val callbackUrl         = "my-callback"
+      val requestBody: String = Json.stringify(Json.toJson(UpdateSubscriberRequest(SubscriberRequest(callbackUrl, "API_PUSH_SUBSCRIBER"))))
+
+      val path = s"/box/${boxId.value}/subscriber"
+      primeError() =)
+
+      intercept[RuntimeException] {
+        await(connector.subscribe(boxId, callbackUrl))
+      }
     }
 
     "send proper request to update callback and map response on success" in new Setup {
@@ -170,6 +204,18 @@ class PushPullNotificationServiceConnectorSpec extends AsyncHmrcSpec with GuiceO
       ret shouldBe PPNSCallBackUrlFailedResponse("some error")
 
       verifyPath(path)
+    }
+
+    "send to update callback and map response on error" in new Setup {
+      val callbackUrl         = "my-callback"
+      val requestBody: String = Json.stringify(Json.toJson(UpdateCallBackUrlRequest(clientId, callbackUrl)))
+
+      val path = s"/box/${boxId.value}/callback"
+      primeError(path, requestBody)
+
+      intercept[RuntimeException] {
+        await(connector.updateCallBackUrl(clientId, boxId, callbackUrl))
+      }
     }
 
     "send proper request to update callback and map response on failure with Unknown Error" in new Setup {

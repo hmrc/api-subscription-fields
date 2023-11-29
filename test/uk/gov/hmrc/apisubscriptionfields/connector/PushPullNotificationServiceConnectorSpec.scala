@@ -157,7 +157,7 @@ class PushPullNotificationServiceConnectorSpec extends AsyncHmrcSpec with GuiceO
       val requestBody: String = Json.stringify(Json.toJson(UpdateSubscriberRequest(SubscriberRequest(callbackUrl, "API_PUSH_SUBSCRIBER"))))
 
       val path = s"/box/${boxId.value}/subscriber"
-      primeError() =)
+      primeError(path, requestBody)
 
       intercept[RuntimeException] {
         await(connector.subscribe(boxId, callbackUrl))

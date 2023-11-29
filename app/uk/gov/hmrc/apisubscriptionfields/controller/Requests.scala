@@ -30,12 +30,12 @@ object SubscriptionFieldsRequest {
   import be.venneborg.refined.play.RefinedJsonFormats._
   import eu.timepit.refined.auto._
 
-  implicit val SubscriptionFieldsRequestJF = Json.format[SubscriptionFieldsRequest]
+  implicit val SubscriptionFieldsRequestJF: OFormat[SubscriptionFieldsRequest] = Json.format[SubscriptionFieldsRequest]
 }
 
 object FieldDefinitionsRequest {
   import play.api.libs.json._
   import uk.gov.hmrc.apisubscriptionfields.model.JsonFormatters._
 
-  implicit val FieldDefinitionsRequestJF = Json.format[FieldDefinitionsRequest]
+  implicit val FieldDefinitionsRequestJF: OFormat[FieldDefinitionsRequest] = Json.format[FieldDefinitionsRequest]
 }

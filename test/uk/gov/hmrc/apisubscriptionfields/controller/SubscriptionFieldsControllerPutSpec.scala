@@ -33,9 +33,9 @@ import uk.gov.hmrc.apisubscriptionfields.{AsyncHmrcSpec, SubscriptionFieldsTestD
 
 class SubscriptionFieldsControllerPutSpec extends AsyncHmrcSpec with SubscriptionFieldsTestData with JsonFormatters with StubControllerComponentsFactory {
 
-  private val mockSubscriptionFieldsService = mock[SubscriptionFieldsService]
-  private val controller                    = new SubscriptionFieldsController(stubControllerComponents(), mockSubscriptionFieldsService)
-  implicit private val actorSystem          = ActorSystem("test")
+  private val mockSubscriptionFieldsService     = mock[SubscriptionFieldsService]
+  private val controller                        = new SubscriptionFieldsController(stubControllerComponents(), mockSubscriptionFieldsService)
+  implicit private val actorSystem: ActorSystem = ActorSystem("test")
 
   def subsFieldServiceUpsertReturns(response: SubsFieldsUpsertResponse) = {
     when(mockSubscriptionFieldsService.upsert(eqTo(FakeClientId), eqTo(FakeContext), eqTo(FakeVersion), eqTo(FakeSubscriptionFields))(*)).thenReturn(successful(response))

@@ -21,17 +21,17 @@ import play.api.libs.json._
 import uk.gov.hmrc.apisubscriptionfields.model.{BoxId, ClientId, SubscriptionFieldsId}
 
 trait JsonFormatters {
-  implicit val clientIdJF             = Json.valueFormat[ClientId]
-  implicit val boxIdJF                = Json.valueFormat[BoxId]
-  implicit val subscriptionFieldsIdJF = Json.valueFormat[SubscriptionFieldsId]
+  implicit val clientIdJF: Format[ClientId]                         = Json.valueFormat[ClientId]
+  implicit val boxIdJF: Format[BoxId]                               = Json.valueFormat[BoxId]
+  implicit val subscriptionFieldsIdJF: Format[SubscriptionFieldsId] = Json.valueFormat[SubscriptionFieldsId]
 
-  implicit val createBoxRequestJF          = Json.format[CreateBoxRequest]
-  implicit val createBoxResponseJF         = Json.format[CreateBoxResponse]
-  implicit val subscriberRequestJF         = Json.format[SubscriberRequest]
-  implicit val updateSubscriberRequestJF   = Json.format[UpdateSubscriberRequest]
-  implicit val updateSubscriberResponseJF  = Json.format[UpdateSubscriberResponse]
-  implicit val updateCallBackUrlRequestJF  = Json.format[UpdateCallBackUrlRequest]
-  implicit val updateCallBackUrlResponseJF = Json.format[UpdateCallBackUrlResponse]
+  implicit val createBoxRequestJF: OFormat[CreateBoxRequest]                   = Json.format[CreateBoxRequest]
+  implicit val createBoxResponseJF: OFormat[CreateBoxResponse]                 = Json.format[CreateBoxResponse]
+  implicit val subscriberRequestJF: OFormat[SubscriberRequest]                 = Json.format[SubscriberRequest]
+  implicit val updateSubscriberRequestJF: OFormat[UpdateSubscriberRequest]     = Json.format[UpdateSubscriberRequest]
+  implicit val updateSubscriberResponseJF: OFormat[UpdateSubscriberResponse]   = Json.format[UpdateSubscriberResponse]
+  implicit val updateCallBackUrlRequestJF: OFormat[UpdateCallBackUrlRequest]   = Json.format[UpdateCallBackUrlRequest]
+  implicit val updateCallBackUrlResponseJF: OFormat[UpdateCallBackUrlResponse] = Json.format[UpdateCallBackUrlResponse]
 }
 
 object JsonFormatters extends JsonFormatters

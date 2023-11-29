@@ -34,9 +34,8 @@ import play.api.libs.json.Json
 import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apisubscriptionfields.AsyncHmrcSpec
-import uk.gov.hmrc.apisubscriptionfields.model._
-
 import uk.gov.hmrc.apisubscriptionfields.connector.JsonFormatters
+import uk.gov.hmrc.apisubscriptionfields.model._
 
 class PushPullNotificationServiceConnectorSpec extends AsyncHmrcSpec with GuiceOneAppPerSuite with JsonFormatters with BeforeAndAfterAll with BeforeAndAfterEach {
 
@@ -100,7 +99,7 @@ class PushPullNotificationServiceConnectorSpec extends AsyncHmrcSpec with GuiceO
           .withHeader(USER_AGENT, equalTo("api-subscription-fields"))
       )
     }
-    implicit val hc: HeaderCarrier = HeaderCarrier()
+    implicit val hc: HeaderCarrier     = HeaderCarrier()
   }
 
   "PPNS Connector" should {

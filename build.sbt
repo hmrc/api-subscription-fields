@@ -27,9 +27,12 @@ import scala.language.postfixOps
 
 val appName = "api-subscription-fields"
 
-ThisBuild / scalafixDependencies += "com.github.liancheng" %% "organize-imports" % "0.6.0"
+scalaVersion := "2.13.12"
+
 ThisBuild / semanticdbEnabled := true
 ThisBuild / semanticdbVersion := scalafixSemanticdb.revision
+
+ThisBuild / libraryDependencySchemes += "org.scala-lang.modules" %% "scala-xml" % VersionScheme.Always
 
 resolvers ++= Seq(
   Resolver.sonatypeRepo("releases"),
@@ -56,11 +59,9 @@ lazy val microservice = Project(appName, file("."))
   .configs(AcceptanceTest)
   .settings(playSettings: _*)
   .settings(scalaSettings: _*)
-  .settings(publishingSettings: _*)
   .settings(defaultSettings(): _*)
   .settings(acceptanceTestSettings: _*)
   .settings(headerSettings(AcceptanceTest) ++ automateHeaderSettings(AcceptanceTest))
-  .settings(scalaVersion := "2.13.8")
   .settings(ScoverageSettings())
   .settings(
     routesImport ++= Seq(
@@ -82,7 +83,8 @@ lazy val microservice = Project(appName, file("."))
     scalacOptions ++= Seq(
     "-Wconf:cat=unused&src=.*RoutesPrefix\\.scala:s",
     "-Wconf:cat=unused&src=.*Routes\\.scala:s",
-    "-Wconf:cat=unused&src=.*ReverseRoutes\\.scala:s"
+    "-Wconf:cat=unused&src=.*ReverseRoutes\\.scala:s",
+    "-Xlint:-byname-implicit"
     )
   )
   .settings(
@@ -93,3 +95,10 @@ def onPackageName(rootPackage: String): String => Boolean = { testName => testNa
 
 // Note that this task has to be scoped globally
 Global / bloopAggregateSourceDependencies := true
+
+commands ++= Seq(
+  Command.command("run-all-tests") { state => "test" :: "acceptance:test" :: state },
+  Command.command("clean-and-test") { state => "clean" :: "compile" :: "run-all-tests" :: state },
+  // Coverage does not need compile !
+  Command.command("pre-commit") { state => "clean" :: "scalafmtAll" :: "scalafixAll" :: "coverage" ::  "run-all-tests" :: "coverageOff" :: "coverageReport" :: state }
+)

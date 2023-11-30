@@ -100,21 +100,21 @@ trait JsonFormatters extends NonEmptyListFormatters with AccessRequirementsForma
   import eu.timepit.refined.auto._
   import play.api.libs.json._
 
-  implicit val ClientIdJF                     = Json.valueFormat[ClientId]
-  implicit val BoxIdJF                        = Json.valueFormat[BoxId]
-  implicit val SubscriptionFieldsIdjsonFormat = Json.valueFormat[SubscriptionFieldsId]
-  implicit val ApiContextJF                   = Json.valueFormat[ApiContext]
-  implicit val ApiVersionJF                   = Json.valueFormat[ApiVersion]
+  implicit val ClientIdJF: Format[ClientId]                                 = Json.valueFormat[ClientId]
+  implicit val BoxIdJF: Format[BoxId]                                       = Json.valueFormat[BoxId]
+  implicit val SubscriptionFieldsIdjsonFormat: Format[SubscriptionFieldsId] = Json.valueFormat[SubscriptionFieldsId]
+  implicit val ApiContextJF: Format[ApiContext]                             = Json.valueFormat[ApiContext]
+  implicit val ApiVersionJF: Format[ApiVersion]                             = Json.valueFormat[ApiVersion]
 
-  implicit val FieldNameFormat = formatRefined[String, FieldNameRegex, Refined]
+  implicit val FieldNameFormat: Format[Refined[String, FieldNameRegex]] = formatRefined[String, FieldNameRegex, Refined]
 
   implicit val FieldsFormat: Format[Fields] = refinedMapFormat[String, FieldNameRegex, Refined]
 
   implicit val ValidationRuleFormat: OFormat[ValidationRule] = derived.withTypeTag.oformat(ShortClassName)
 
-  implicit val ValidationJF = Json.format[ValidationGroup]
+  implicit val ValidationJF: OFormat[ValidationGroup] = Json.format[ValidationGroup]
 
-  implicit val FieldDefinitionTypeReads = Reads.enumNameReads(FieldDefinitionType)
+  implicit val FieldDefinitionTypeReads: Reads[FieldDefinitionType] = Reads.enumNameReads(FieldDefinitionType)
 
   implicit val FieldDefinitionReads: Reads[FieldDefinition] = (
     (JsPath \ "name").read[FieldName] and
@@ -149,13 +149,13 @@ trait JsonFormatters extends NonEmptyListFormatters with AccessRequirementsForma
     }
   }
 
-  implicit val ApiFieldDefinitionsJF: OFormat[ApiFieldDefinitions]                 = Json.format[ApiFieldDefinitions]
-  implicit val BulkApiFieldDefinitionsResponseJF                                   = Json.format[BulkApiFieldDefinitionsResponse]
-  implicit val SubsFieldValidationResponseJF: OFormat[SubsFieldValidationResponse] = derived.withTypeTag.oformat(ShortClassName)
-  implicit val InvalidSubsFieldValidationResponseJF                                = Json.format[InvalidSubsFieldValidationResponse]
+  implicit val ApiFieldDefinitionsJF: OFormat[ApiFieldDefinitions]                               = Json.format[ApiFieldDefinitions]
+  implicit val BulkApiFieldDefinitionsResponseJF: OFormat[BulkApiFieldDefinitionsResponse]       = Json.format[BulkApiFieldDefinitionsResponse]
+  implicit val SubsFieldValidationResponseJF: OFormat[SubsFieldValidationResponse]               = derived.withTypeTag.oformat(ShortClassName)
+  implicit val InvalidSubsFieldValidationResponseJF: OFormat[InvalidSubsFieldValidationResponse] = Json.format[InvalidSubsFieldValidationResponse]
 
-  implicit val SubscriptionFieldsJF             = Json.format[SubscriptionFields]
-  implicit val BulkSubscriptionFieldsResponseJF = Json.format[BulkSubscriptionFieldsResponse]
+  implicit val SubscriptionFieldsJF: OFormat[SubscriptionFields]                         = Json.format[SubscriptionFields]
+  implicit val BulkSubscriptionFieldsResponseJF: OFormat[BulkSubscriptionFieldsResponse] = Json.format[BulkSubscriptionFieldsResponse]
 }
 
 object JsonFormatters extends JsonFormatters

@@ -24,7 +24,6 @@ import play.api.libs.functional.syntax._
 import play.api.libs.json.Json.JsValueWrapper
 import play.api.libs.json._
 
-import uk.gov.hmrc.apisubscriptionfields.model.FieldDefinitionType.FieldDefinitionType
 import uk.gov.hmrc.apisubscriptionfields.model.Types._
 
 trait NonEmptyListFormatters {
@@ -113,8 +112,6 @@ trait JsonFormatters extends NonEmptyListFormatters with AccessRequirementsForma
   implicit val ValidationRuleFormat: OFormat[ValidationRule] = derived.withTypeTag.oformat(ShortClassName)
 
   implicit val ValidationJF: OFormat[ValidationGroup] = Json.format[ValidationGroup]
-
-  implicit val FieldDefinitionTypeReads: Reads[FieldDefinitionType] = Reads.enumNameReads(FieldDefinitionType)
 
   implicit val FieldDefinitionReads: Reads[FieldDefinition] = (
     (JsPath \ "name").read[FieldName] and

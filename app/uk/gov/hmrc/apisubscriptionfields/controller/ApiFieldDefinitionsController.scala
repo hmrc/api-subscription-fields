@@ -42,7 +42,7 @@ class ApiFieldDefinitionsController @Inject() (cc: ControllerComponents, service
   }
 
   private def notFoundResponse(apiContext: ApiContext, apiVersion: ApiVersion) =
-    NotFound(JsErrorResponse(ErrorCode.NOT_FOUND_CODE, s"Fields definition not found for (${apiContext.value}, ${apiVersion.value})"))
+    NotFound(JsErrorResponse(ErrorCode.NOT_FOUND, s"Fields definition not found for (${apiContext.value}, ${apiVersion.value})"))
 
   def validateFieldsDefinition(): Action[JsValue] = Action(parse.json) { request =>
     Try(request.body.validate[FieldDefinitionsRequest]) match {

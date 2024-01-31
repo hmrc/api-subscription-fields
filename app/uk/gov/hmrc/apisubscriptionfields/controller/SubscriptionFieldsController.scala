@@ -32,7 +32,7 @@ class SubscriptionFieldsController @Inject() (cc: ControllerComponents, service:
   import JsonFormatters._
 
   private def notFoundResponse(message: String) = {
-    NotFound(JsErrorResponse(NOT_FOUND_CODE, message))
+    NotFound(JsErrorResponse(ErrorCode.NOT_FOUND, message))
   }
 
   private def notFoundMessage(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion): String = {

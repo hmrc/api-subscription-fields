@@ -21,14 +21,12 @@ import scala.concurrent.{ExecutionContext, Future}
 
 import akka.stream.Materializer
 import com.google.inject.ImplementedBy
-import org.bson.codecs.configuration.CodecRegistries.{fromCodecs, fromRegistries}
 import org.mongodb.scala.model.Filters.{and, equal}
 import org.mongodb.scala.model.Indexes.ascending
 import org.mongodb.scala.model.{Filters, IndexModel, IndexOptions}
-import org.mongodb.scala.{MongoClient, MongoCollection}
 
 import uk.gov.hmrc.mongo.MongoComponent
-import uk.gov.hmrc.mongo.play.json.{Codecs, CollectionFactory, PlayMongoRepository}
+import uk.gov.hmrc.mongo.play.json.{Codecs, PlayMongoRepository}
 
 import uk.gov.hmrc.apisubscriptionfields.model.Types._
 import uk.gov.hmrc.apisubscriptionfields.model._
@@ -52,6 +50,12 @@ class ApiFieldDefinitionsMongoRepository @Inject() (mongo: MongoComponent)(impli
       collectionName = "fieldsDefinitions",
       mongoComponent = mongo,
       domainFormat = JsonFormatters.ApiFieldDefinitionsJF,
+      extraCodecs = Seq(
+        Codecs.playFormatCodec(JsonFormatters.ApiContextJF),
+        Codecs.playFormatCodec(JsonFormatters.ApiVersionJF),
+        Codecs.playFormatCodec(JsonFormatters.ApiFieldDefinitionsJF),
+        Codecs.playFormatCodec(JsonFormatters.ValidationJF)
+      ),
       indexes = Seq(
         IndexModel(
           ascending(List("apiContext", "apiVersion"): _*),
@@ -64,22 +68,6 @@ class ApiFieldDefinitionsMongoRepository @Inject() (mongo: MongoComponent)(impli
     )
     with ApiFieldDefinitionsRepository
     with ApplicationLogger {
-
-  override lazy val collection: MongoCollection[ApiFieldDefinitions] =
-    CollectionFactory
-      .collection(mongo.database, collectionName, domainFormat)
-      .withCodecRegistry(
-        fromRegistries(
-          fromCodecs(
-            Codecs.playFormatCodec(domainFormat),
-            Codecs.playFormatCodec(JsonFormatters.ApiContextJF),
-            Codecs.playFormatCodec(JsonFormatters.ApiVersionJF),
-            Codecs.playFormatCodec(JsonFormatters.ApiFieldDefinitionsJF),
-            Codecs.playFormatCodec(JsonFormatters.ValidationJF)
-          ),
-          MongoClient.DEFAULT_CODEC_REGISTRY
-        )
-      )
 
   def save(definitions: ApiFieldDefinitions): Future[(ApiFieldDefinitions, IsInsert)] = {
     val query = and(equal("apiContext", Codecs.toBson(definitions.apiContext.value)), equal("apiVersion", Codecs.toBson(definitions.apiVersion.value)))

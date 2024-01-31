@@ -20,16 +20,16 @@ import org.scalatest.OptionValues
 import play.api.libs.json.Json
 import play.api.mvc._
 import play.api.test.Helpers._
-import uk.gov.hmrc.apisubscriptionfields.model.ErrorCode.{INVALID_REQUEST_PAYLOAD, NOT_FOUND_CODE}
+import uk.gov.hmrc.apisubscriptionfields.model.ErrorCode
 import uk.gov.hmrc.apisubscriptionfields.model.JsErrorResponse
 import uk.gov.hmrc.apisubscriptionfields.utils.ApplicationLogger
 
 import scala.concurrent.Future
 
 class ApiSubscriptionFieldsUnhappySpec extends AcceptanceTestSpec
-  with OptionValues
-  with SubscriptionFieldsTestData
-  with ApplicationLogger {
+    with OptionValues
+    with SubscriptionFieldsTestData
+    with ApplicationLogger {
 
   Feature("Subscription-Fields") {
     appLogger.logger.info(s"App.mode = ${app.mode.toString}")
@@ -37,7 +37,7 @@ class ApiSubscriptionFieldsUnhappySpec extends AcceptanceTestSpec
     Scenario("the API is called to GET non-existing subscription fields") {
 
       Given("the API is called to GET non-existing subscription fields")
-      val request =  createRequest(GET, subscriptionFieldsEndpoint(fakeRawClientId, fakeRawContext, fakeRawVersion))
+      val request                        = createRequest(GET, subscriptionFieldsEndpoint(fakeRawClientId, fakeRawContext, fakeRawVersion))
       When("a GET request with data is sent to the API")
       val result: Option[Future[Result]] = route(app, request)
 
@@ -48,7 +48,7 @@ class ApiSubscriptionFieldsUnhappySpec extends AcceptanceTestSpec
       status(resultFuture) shouldBe NOT_FOUND
 
       And("the response body is empty")
-      contentAsJson(resultFuture) shouldBe JsErrorResponse(NOT_FOUND_CODE, s"Subscription fields not found for ($fakeRawClientId, $fakeRawContext, $fakeRawVersion)")
+      contentAsJson(resultFuture) shouldBe JsErrorResponse(ErrorCode.NOT_FOUND, s"Subscription fields not found for ($fakeRawClientId, $fakeRawContext, $fakeRawVersion)")
     }
 
     Scenario("the API is called to GET with an unknown fieldsId") {
@@ -66,7 +66,7 @@ class ApiSubscriptionFieldsUnhappySpec extends AcceptanceTestSpec
       status(resultFuture) shouldBe NOT_FOUND
 
       And("the response body is empty")
-      contentAsJson(resultFuture) shouldBe JsErrorResponse(NOT_FOUND_CODE, s"FieldsId (${FakeRawFieldsId.toString}) was not found")
+      contentAsJson(resultFuture) shouldBe JsErrorResponse(ErrorCode.NOT_FOUND, s"FieldsId (${FakeRawFieldsId.toString}) was not found")
     }
 
     Scenario("the API is called to GET an unknown application clientId") {
@@ -84,7 +84,7 @@ class ApiSubscriptionFieldsUnhappySpec extends AcceptanceTestSpec
       status(resultFuture) shouldBe NOT_FOUND
 
       And("the response body is empty")
-      contentAsJson(resultFuture) shouldBe JsErrorResponse(NOT_FOUND_CODE, s"ClientId ($fakeRawClientId) was not found")
+      contentAsJson(resultFuture) shouldBe JsErrorResponse(ErrorCode.NOT_FOUND, s"ClientId ($fakeRawClientId) was not found")
     }
 
     Scenario("the API is called to DELETE an unknown subscription field") {
@@ -102,7 +102,7 @@ class ApiSubscriptionFieldsUnhappySpec extends AcceptanceTestSpec
       status(resultFuture) shouldBe NOT_FOUND
 
       And("the response body is empty")
-      contentAsJson(resultFuture) shouldBe JsErrorResponse(NOT_FOUND_CODE, s"Subscription fields not found for ($fakeRawClientId, $fakeRawContext, $fakeRawVersion)")
+      contentAsJson(resultFuture) shouldBe JsErrorResponse(ErrorCode.NOT_FOUND, s"Subscription fields not found for ($fakeRawClientId, $fakeRawContext, $fakeRawVersion)")
     }
 
     Scenario("the API is called to PUT subscription fields with an invalid JSON payload") {
@@ -121,13 +121,13 @@ class ApiSubscriptionFieldsUnhappySpec extends AcceptanceTestSpec
       status(resultFuture) shouldBe UNPROCESSABLE_ENTITY
 
       And("the response body contains error message")
-      contentAsJson(resultFuture) shouldBe JsErrorResponse(INVALID_REQUEST_PAYLOAD, _: Json.JsValueWrapper)
+      contentAsJson(resultFuture) shouldBe JsErrorResponse(ErrorCode.INVALID_REQUEST_PAYLOAD, _: Json.JsValueWrapper)
     }
 
     Scenario("the API is called to PUT subscription fields with an invalid non JSON payload") {
 
       Given("the API is called to PUT subscription fields with an invalid non JSON payload")
-      val request =  createRequest(PUT, subscriptionFieldsEndpoint(fakeRawClientId, fakeRawContext, fakeRawVersion))
+      val request = createRequest(PUT, subscriptionFieldsEndpoint(fakeRawClientId, fakeRawContext, fakeRawVersion))
         .withBody(InvalidNonJsonPayload)
 
       When("a PUT request with data is sent to the API")
@@ -140,7 +140,7 @@ class ApiSubscriptionFieldsUnhappySpec extends AcceptanceTestSpec
       status(resultFuture) shouldBe UNSUPPORTED_MEDIA_TYPE
 
       And("the response body contains error message")
-      contentAsJson(resultFuture) shouldBe JsErrorResponse(INVALID_REQUEST_PAYLOAD, _: Json.JsValueWrapper)
+      contentAsJson(resultFuture) shouldBe JsErrorResponse(ErrorCode.INVALID_REQUEST_PAYLOAD, _: Json.JsValueWrapper)
     }
 
   }

@@ -17,7 +17,8 @@
 package uk.gov.hmrc.apisubscriptionfields.model
 
 import play.api.libs.json.Json.JsValueWrapper
-import play.api.libs.json.{JsObject, Json}
+import play.api.libs.json.{Format, JsObject, Json}
+import uk.gov.hmrc.apiplatform.modules.common.domain.services.SealedTraitJsonFormatting
 
 import uk.gov.hmrc.apisubscriptionfields.model.Types._
 
@@ -38,17 +39,26 @@ sealed trait PPNSCallBackUrlValidationResponse
 case object PPNSCallBackUrlSuccessResponse                 extends PPNSCallBackUrlValidationResponse
 case class PPNSCallBackUrlFailedResponse(errorMsg: String) extends PPNSCallBackUrlValidationResponse
 
-object ErrorCode extends Enumeration {
-  type ErrorCode = Value
+sealed trait ErrorCode
 
-  val INVALID_REQUEST_PAYLOAD = Value("INVALID_REQUEST_PAYLOAD")
-  val UNKNOWN_ERROR           = Value("UNKNOWN_ERROR")
-  val NOT_FOUND_CODE          = Value("NOT_FOUND")
+object ErrorCode {
+
+  case object INVALID_REQUEST_PAYLOAD extends ErrorCode
+  case object UNKNOWN_ERROR           extends ErrorCode
+  case object NOT_FOUND               extends ErrorCode
+
+  val values = Set(INVALID_REQUEST_PAYLOAD, UNKNOWN_ERROR, NOT_FOUND)
+
+  def apply(text: String): Option[ErrorCode] = ErrorCode.values.find(_.toString() == text.toUpperCase)
+
+  def unsafeApply(text: String): ErrorCode = apply(text).getOrElse(throw new RuntimeException(s"$text is not a valid Error Code"))
+
+  implicit val format: Format[ErrorCode] = SealedTraitJsonFormatting.createFormatFor[ErrorCode]("Error Code", apply)
 }
 
 object JsErrorResponse {
 
-  def apply(errorCode: ErrorCode.Value, message: JsValueWrapper): JsObject =
+  def apply(errorCode: ErrorCode, message: JsValueWrapper): JsObject =
     Json.obj(
       "code"    -> errorCode.toString,
       "message" -> message

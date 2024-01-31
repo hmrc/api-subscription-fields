@@ -21,14 +21,14 @@ import play.api.libs.json.Json
 import play.api.mvc._
 import play.api.mvc.request.RequestTarget
 import play.api.test.Helpers._
-import uk.gov.hmrc.apisubscriptionfields.model.ErrorCode.{INVALID_REQUEST_PAYLOAD, NOT_FOUND_CODE}
+import uk.gov.hmrc.apisubscriptionfields.model.ErrorCode
 import uk.gov.hmrc.apisubscriptionfields.model.JsErrorResponse
 
 import scala.concurrent.Future
 
 class SubscriptionFieldDefinitionsUnhappySpec extends AcceptanceTestSpec
-  with OptionValues
-  with SubscriptionFieldsTestData {
+    with OptionValues
+    with SubscriptionFieldsTestData {
 
   Feature("Fields-Definition") {
     Scenario("the API is called to GET an unknown fields definition") {
@@ -46,7 +46,7 @@ class SubscriptionFieldDefinitionsUnhappySpec extends AcceptanceTestSpec
       status(resultFuture) shouldBe NOT_FOUND
 
       And("the response body contains error message")
-      contentAsJson(resultFuture) shouldBe JsErrorResponse(NOT_FOUND_CODE, s"Fields definition not found for (${FakeContext.value}, unknown)")
+      contentAsJson(resultFuture) shouldBe JsErrorResponse(ErrorCode.NOT_FOUND, s"Fields definition not found for (${FakeContext.value}, unknown)")
     }
 
     Scenario("the API is called to PUT a fields definition with an invalid JSON payload") {
@@ -67,7 +67,7 @@ class SubscriptionFieldDefinitionsUnhappySpec extends AcceptanceTestSpec
       status(resultFuture) shouldBe UNPROCESSABLE_ENTITY
 
       And("the response body contains error message")
-      contentAsJson(resultFuture) shouldBe JsErrorResponse(INVALID_REQUEST_PAYLOAD, _: Json.JsValueWrapper)
+      contentAsJson(resultFuture) shouldBe JsErrorResponse(ErrorCode.INVALID_REQUEST_PAYLOAD, _: Json.JsValueWrapper)
     }
 
     Scenario("the API is called to PUT a fields definition with an invalid field definition type") {
@@ -91,7 +91,6 @@ class SubscriptionFieldDefinitionsUnhappySpec extends AcceptanceTestSpec
         .withTarget(RequestTarget(uriString = "", path = definitionEndpoint(fakeRawContext, fakeRawVersion), queryString = Map.empty))
         .withJsonBody(Json.parse(invalidFieldDefinition))
 
-
       When("a PUT request with data is sent to the API")
       val result: Option[Future[Result]] = route(app, request)
 
@@ -102,7 +101,7 @@ class SubscriptionFieldDefinitionsUnhappySpec extends AcceptanceTestSpec
       status(resultFuture) shouldBe UNPROCESSABLE_ENTITY
 
       And("the response body contains error message")
-      contentAsJson(resultFuture) shouldBe JsErrorResponse(INVALID_REQUEST_PAYLOAD, _: Json.JsValueWrapper)
+      contentAsJson(resultFuture) shouldBe JsErrorResponse(ErrorCode.INVALID_REQUEST_PAYLOAD, _: Json.JsValueWrapper)
     }
 
     Scenario("the API is called to PUT a fields definition with an invalid non JSON payload") {
@@ -124,7 +123,7 @@ class SubscriptionFieldDefinitionsUnhappySpec extends AcceptanceTestSpec
       status(resultFuture) shouldBe UNSUPPORTED_MEDIA_TYPE
 
       And("the response body contains error message")
-      contentAsJson(resultFuture) shouldBe JsErrorResponse(INVALID_REQUEST_PAYLOAD, _: Json.JsValueWrapper)
+      contentAsJson(resultFuture) shouldBe JsErrorResponse(ErrorCode.INVALID_REQUEST_PAYLOAD, _: Json.JsValueWrapper)
     }
 
     Scenario("the API is called to DELETE an unknown fields definition") {
@@ -134,7 +133,6 @@ class SubscriptionFieldDefinitionsUnhappySpec extends AcceptanceTestSpec
       val request = ValidRequest
         .withMethod(DELETE)
         .withTarget(RequestTarget(uriString = "", path = definitionEndpoint(fakeRawContext, "unknown"), queryString = Map.empty))
-
 
       When("a GET request with data is sent to the API")
       val result: Option[Future[Result]] = route(app, request)
@@ -146,7 +144,7 @@ class SubscriptionFieldDefinitionsUnhappySpec extends AcceptanceTestSpec
       status(resultFuture) shouldBe NOT_FOUND
 
       And("the response body is empty")
-      contentAsJson(resultFuture) shouldBe JsErrorResponse(NOT_FOUND_CODE, s"Fields definition not found for ($fakeRawContext, unknown)")
+      contentAsJson(resultFuture) shouldBe JsErrorResponse(ErrorCode.NOT_FOUND, s"Fields definition not found for ($fakeRawContext, unknown)")
     }
 
   }

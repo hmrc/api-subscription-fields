@@ -22,14 +22,12 @@ import scala.concurrent.{ExecutionContext, Future}
 
 import akka.stream.Materializer
 import com.google.inject.ImplementedBy
-import org.bson.codecs.configuration.CodecRegistries.{fromCodecs, fromRegistries}
 import org.mongodb.scala.model.Filters.{and, equal}
 import org.mongodb.scala.model.Indexes.ascending
 import org.mongodb.scala.model.{IndexModel, IndexOptions}
-import org.mongodb.scala.{MongoClient, MongoCollection}
 
 import uk.gov.hmrc.mongo.MongoComponent
-import uk.gov.hmrc.mongo.play.json.{Codecs, CollectionFactory, PlayMongoRepository}
+import uk.gov.hmrc.mongo.play.json.{Codecs, PlayMongoRepository}
 
 import uk.gov.hmrc.apisubscriptionfields.model.Types.{Fields, IsInsert}
 import uk.gov.hmrc.apisubscriptionfields.model._
@@ -61,6 +59,12 @@ class SubscriptionFieldsMongoRepository @Inject() (mongo: MongoComponent, uuidCr
       collectionName = "subscriptionFields",
       mongoComponent = mongo,
       domainFormat = JsonFormatters.SubscriptionFieldsJF,
+      extraCodecs = Seq(
+        Codecs.playFormatCodec(JsonFormatters.ApiContextJF),
+        Codecs.playFormatCodec(JsonFormatters.ApiVersionJF),
+        Codecs.playFormatCodec(JsonFormatters.SubscriptionFieldsIdjsonFormat),
+        Codecs.playFormatCodec(JsonFormatters.ValidationJF)
+      ),
       indexes = Seq(
         IndexModel(
           ascending(List("clientId", "apiContext", "apiVersion"): _*),
@@ -85,22 +89,6 @@ class SubscriptionFieldsMongoRepository @Inject() (mongo: MongoComponent, uuidCr
     with SubscriptionFieldsRepository
     with ApplicationLogger
     with JsonFormatters {
-
-  override lazy val collection: MongoCollection[SubscriptionFields] =
-    CollectionFactory
-      .collection(mongo.database, collectionName, domainFormat)
-      .withCodecRegistry(
-        fromRegistries(
-          fromCodecs(
-            Codecs.playFormatCodec(domainFormat),
-            Codecs.playFormatCodec(JsonFormatters.ApiContextJF),
-            Codecs.playFormatCodec(JsonFormatters.ApiVersionJF),
-            Codecs.playFormatCodec(JsonFormatters.SubscriptionFieldsIdjsonFormat),
-            Codecs.playFormatCodec(JsonFormatters.ValidationJF)
-          ),
-          MongoClient.DEFAULT_CODEC_REGISTRY
-        )
-      )
 
   override def saveAtomic(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion, fields: Fields): Future[(SubscriptionFields, IsInsert)] = {
     val query = and(

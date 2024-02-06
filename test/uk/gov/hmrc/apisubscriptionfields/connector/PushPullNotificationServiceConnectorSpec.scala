@@ -18,7 +18,7 @@ package uk.gov.hmrc.apisubscriptionfields.connector
 
 import java.{util => ju}
 
-import akka.stream.Materializer
+import org.apache.pekko.stream.Materializer
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.client.WireMock._

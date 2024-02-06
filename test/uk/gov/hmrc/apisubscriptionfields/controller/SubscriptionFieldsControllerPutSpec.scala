@@ -20,7 +20,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.Future.successful
 
-import akka.actor.ActorSystem
+import org.apache.pekko.actor.ActorSystem
 
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc._

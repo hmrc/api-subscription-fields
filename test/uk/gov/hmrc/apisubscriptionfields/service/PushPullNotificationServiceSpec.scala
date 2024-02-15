@@ -20,6 +20,7 @@ import java.{util => ju}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future.{failed, successful}
 
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApiContext, ApiVersionNbr, ClientId}
 import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apisubscriptionfields.connector.PushPullNotificationServiceConnector
@@ -29,10 +30,10 @@ import uk.gov.hmrc.apisubscriptionfields.{AsyncHmrcSpec, FieldDefinitionTestData
 
 class PushPullNotificationServiceSpec extends AsyncHmrcSpec with SubscriptionFieldsTestData with FieldDefinitionTestData {
 
-  val boxId: BoxId           = BoxId(ju.UUID.randomUUID())
-  val clientId: ClientId     = ClientId(ju.UUID.randomUUID().toString)
-  val apiContext: ApiContext = ApiContext("aContext")
-  val apiVersion: ApiVersion = ApiVersion("aVersion")
+  val boxId: BoxId              = BoxId(ju.UUID.randomUUID())
+  val clientId: ClientId        = ClientId(ju.UUID.randomUUID().toString)
+  val apiContext: ApiContext    = ApiContext("aContext")
+  val apiVersion: ApiVersionNbr = ApiVersionNbr("aVersion")
 
   trait Setup {
     val mockPPNSConnector: PushPullNotificationServiceConnector = mock[PushPullNotificationServiceConnector]

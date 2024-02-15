@@ -25,6 +25,7 @@ import org.mongodb.scala.model.Filters.{and, equal}
 import org.mongodb.scala.model.Indexes.ascending
 import org.mongodb.scala.model.{Filters, IndexModel, IndexOptions}
 
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApiContext, ApiVersionNbr}
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.play.json.{Codecs, PlayMongoRepository}
 
@@ -37,11 +38,11 @@ trait ApiFieldDefinitionsRepository {
 
   def save(definitions: ApiFieldDefinitions): Future[(ApiFieldDefinitions, IsInsert)]
 
-  def fetch(apiContext: ApiContext, apiVersion: ApiVersion): Future[Option[ApiFieldDefinitions]]
+  def fetch(apiContext: ApiContext, apiVersion: ApiVersionNbr): Future[Option[ApiFieldDefinitions]]
 
   def fetchAll(): Future[List[ApiFieldDefinitions]]
 
-  def delete(apiContext: ApiContext, apiVersion: ApiVersion): Future[Boolean]
+  def delete(apiContext: ApiContext, apiVersion: ApiVersionNbr): Future[Boolean]
 }
 
 @Singleton
@@ -91,7 +92,7 @@ class ApiFieldDefinitionsMongoRepository @Inject() (mongo: MongoComponent)(impli
     }
   }
 
-  override def fetch(apiContext: ApiContext, apiVersion: ApiVersion): Future[Option[ApiFieldDefinitions]] = {
+  override def fetch(apiContext: ApiContext, apiVersion: ApiVersionNbr): Future[Option[ApiFieldDefinitions]] = {
     collection.find(Filters.and(equal("apiContext", Codecs.toBson(apiContext.value)), equal("apiVersion", Codecs.toBson(apiVersion.value)))).headOption()
   }
 
@@ -99,7 +100,7 @@ class ApiFieldDefinitionsMongoRepository @Inject() (mongo: MongoComponent)(impli
     collection.find().toFuture().map(_.toList)
   }
 
-  override def delete(apiContext: ApiContext, apiVersion: ApiVersion): Future[Boolean] = {
+  override def delete(apiContext: ApiContext, apiVersion: ApiVersionNbr): Future[Boolean] = {
     collection
       .deleteOne(Filters.and(equal("apiContext", Codecs.toBson(apiContext.value)), equal("apiVersion", Codecs.toBson(apiVersion.value))))
       .toFuture()

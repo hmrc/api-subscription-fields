@@ -21,6 +21,8 @@ import scala.concurrent.{ExecutionContext, Future}
 
 import cats.data.NonEmptyList
 
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApiContext, ApiVersionNbr}
+
 import uk.gov.hmrc.apisubscriptionfields.model.Types._
 import uk.gov.hmrc.apisubscriptionfields.model._
 import uk.gov.hmrc.apisubscriptionfields.repository.ApiFieldDefinitionsRepository
@@ -28,16 +30,16 @@ import uk.gov.hmrc.apisubscriptionfields.repository.ApiFieldDefinitionsRepositor
 @Singleton
 class ApiFieldDefinitionsService @Inject() (repository: ApiFieldDefinitionsRepository)(implicit ec: ExecutionContext) {
 
-  def upsert(apiContext: ApiContext, apiVersion: ApiVersion, fieldDefinitions: NonEmptyList[FieldDefinition]): Future[(ApiFieldDefinitions, IsInsert)] = {
+  def upsert(apiContext: ApiContext, apiVersion: ApiVersionNbr, fieldDefinitions: NonEmptyList[FieldDefinition]): Future[(ApiFieldDefinitions, IsInsert)] = {
     val definitions = ApiFieldDefinitions(apiContext, apiVersion, fieldDefinitions)
     repository.save(definitions)
   }
 
-  def delete(apiContext: ApiContext, apiVersion: ApiVersion): Future[Boolean] = {
+  def delete(apiContext: ApiContext, apiVersion: ApiVersionNbr): Future[Boolean] = {
     repository.delete(apiContext, apiVersion)
   }
 
-  def get(apiContext: ApiContext, apiVersion: ApiVersion): Future[Option[ApiFieldDefinitions]] = {
+  def get(apiContext: ApiContext, apiVersion: ApiVersionNbr): Future[Option[ApiFieldDefinitions]] = {
     for {
       fetch <- repository.fetch(apiContext, apiVersion)
     } yield fetch

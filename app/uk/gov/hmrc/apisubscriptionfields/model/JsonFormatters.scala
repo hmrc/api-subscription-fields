@@ -23,6 +23,7 @@ import julienrf.json.derived.TypeTagSetting.ShortClassName
 import play.api.libs.functional.syntax._
 import play.api.libs.json.Json.JsValueWrapper
 import play.api.libs.json._
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApiContext, ApiVersionNbr, ClientId}
 
 import uk.gov.hmrc.apisubscriptionfields.model.Types._
 
@@ -103,7 +104,7 @@ trait JsonFormatters extends NonEmptyListFormatters with AccessRequirementsForma
   implicit val BoxIdJF: Format[BoxId]                                       = Json.valueFormat[BoxId]
   implicit val SubscriptionFieldsIdjsonFormat: Format[SubscriptionFieldsId] = Json.valueFormat[SubscriptionFieldsId]
   implicit val ApiContextJF: Format[ApiContext]                             = Json.valueFormat[ApiContext]
-  implicit val ApiVersionJF: Format[ApiVersion]                             = Json.valueFormat[ApiVersion]
+  implicit val ApiVersionJF: Format[ApiVersionNbr]                          = Json.valueFormat[ApiVersionNbr]
 
   implicit val FieldNameFormat: Format[Refined[String, FieldNameRegex]] = formatRefined[String, FieldNameRegex, Refined]
 

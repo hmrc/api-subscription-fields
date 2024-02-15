@@ -26,6 +26,7 @@ import org.scalatest.{BeforeAndAfterEach, OptionValues}
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 
 import play.api.test.{DefaultAwaitTimeout, FutureAwaits}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApiVersionNbr, ClientId}
 import uk.gov.hmrc.mongo.play.json.Codecs
 
 import uk.gov.hmrc.apisubscriptionfields.AsyncHmrcSpec
@@ -279,7 +280,7 @@ class SubscriptionFieldsRepositorySpec
       await(saveAtomic(apiSubscription))
       collectionSize shouldBe 1
 
-      await(saveByFieldsId(apiSubscription.copy(apiVersion = ApiVersion("2.2"))))
+      await(saveByFieldsId(apiSubscription.copy(apiVersion = ApiVersionNbr("2.2"))))
       collectionSize shouldBe 1
     }
 

@@ -23,10 +23,11 @@ import org.scalatest.{BeforeAndAfterEach, OptionValues}
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 
 import play.api.test.{DefaultAwaitTimeout, FutureAwaits}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApiContext
 import uk.gov.hmrc.mongo.play.json.Codecs
 
 import uk.gov.hmrc.apisubscriptionfields.SubscriptionFieldsTestData.{FakeContext, FakeVersion, NelOfFieldDefinitions, uniqueApiContext}
-import uk.gov.hmrc.apisubscriptionfields.model.{ApiContext, ApiFieldDefinitions}
+import uk.gov.hmrc.apisubscriptionfields.model.ApiFieldDefinitions
 
 class ApiFieldDefinitionsRepositorySpec
     extends AnyWordSpec

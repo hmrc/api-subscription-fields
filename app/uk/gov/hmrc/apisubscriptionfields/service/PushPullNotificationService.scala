@@ -19,6 +19,7 @@ package uk.gov.hmrc.apisubscriptionfields.service
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApiContext, ApiVersionNbr, ClientId}
 import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apisubscriptionfields.connector.PushPullNotificationServiceConnector
@@ -28,7 +29,7 @@ import uk.gov.hmrc.apisubscriptionfields.model.{FieldDefinition, _}
 @Singleton
 class PushPullNotificationService @Inject() (ppnsConnector: PushPullNotificationServiceConnector)(implicit ec: ExecutionContext) {
 
-  def makeBoxName(apiContext: ApiContext, apiVersion: ApiVersion, fieldDefinition: FieldDefinition): String = {
+  def makeBoxName(apiContext: ApiContext, apiVersion: ApiVersionNbr, fieldDefinition: FieldDefinition): String = {
     val separator = "##"
     s"${apiContext.value}${separator}${apiVersion.value}${separator}${fieldDefinition.name.value}"
   }
@@ -36,7 +37,7 @@ class PushPullNotificationService @Inject() (ppnsConnector: PushPullNotification
   def subscribeToPPNS(
       clientId: ClientId,
       apiContext: ApiContext,
-      apiVersion: ApiVersion,
+      apiVersion: ApiVersionNbr,
       oFieldValue: Option[FieldValue],
       fieldDefinition: FieldDefinition
     )(implicit

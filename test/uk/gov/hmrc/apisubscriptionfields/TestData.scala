@@ -20,8 +20,7 @@ import java.util.UUID
 
 import play.api.http.HeaderNames.{ACCEPT, CONTENT_TYPE}
 import play.api.http.MimeTypes
-
-import uk.gov.hmrc.apisubscriptionfields.model._
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApiContext, ApiVersionNbr, ClientId}
 
 trait TestData {
 
@@ -37,7 +36,7 @@ trait TestData {
 
   final val FakeContext2 = ApiContext(fakeRawContext2)
 
-  final val FakeVersion = ApiVersion(fakeRawVersion)
+  final val FakeVersion = ApiVersionNbr(fakeRawVersion)
 
   final val FakeClientId = ClientId(fakeRawClientId)
 

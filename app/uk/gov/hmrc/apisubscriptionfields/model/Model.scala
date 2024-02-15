@@ -20,6 +20,7 @@ import cats.data.{NonEmptyList => NEL}
 import org.apache.commons.validator.routines.{DomainValidator, UrlValidator}
 
 import play.api.libs.json.Format
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApiContext, ApiVersionNbr, ClientId}
 import uk.gov.hmrc.apiplatform.modules.common.domain.services.SealedTraitJsonFormatting
 
 import uk.gov.hmrc.apisubscriptionfields.model.Types._
@@ -88,6 +89,6 @@ case class FieldDefinition(
     access: AccessRequirements = AccessRequirements.Default
   )
 
-case class ApiFieldDefinitions(apiContext: ApiContext, apiVersion: ApiVersion, fieldDefinitions: NEL[FieldDefinition])
+case class ApiFieldDefinitions(apiContext: ApiContext, apiVersion: ApiVersionNbr, fieldDefinitions: NEL[FieldDefinition])
 
-case class SubscriptionFields(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion, fieldsId: SubscriptionFieldsId, fields: Fields)
+case class SubscriptionFields(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersionNbr, fieldsId: SubscriptionFieldsId, fields: Fields)

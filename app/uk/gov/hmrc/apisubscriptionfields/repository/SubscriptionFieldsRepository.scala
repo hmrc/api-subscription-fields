@@ -26,6 +26,7 @@ import org.mongodb.scala.model.Filters.{and, equal}
 import org.mongodb.scala.model.Indexes.ascending
 import org.mongodb.scala.model.{IndexModel, IndexOptions}
 
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApiContext, ApiVersionNbr, ClientId}
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.play.json.{Codecs, PlayMongoRepository}
 
@@ -36,14 +37,14 @@ import uk.gov.hmrc.apisubscriptionfields.utils.ApplicationLogger
 @ImplementedBy(classOf[SubscriptionFieldsMongoRepository])
 trait SubscriptionFieldsRepository {
 
-  def saveAtomic(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion, fields: Fields): Future[(SubscriptionFields, IsInsert)]
+  def saveAtomic(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersionNbr, fields: Fields): Future[(SubscriptionFields, IsInsert)]
 
-  def fetch(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion): Future[Option[SubscriptionFields]]
+  def fetch(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersionNbr): Future[Option[SubscriptionFields]]
   def fetchByFieldsId(fieldsId: SubscriptionFieldsId): Future[Option[SubscriptionFields]]
   def fetchByClientId(clientId: ClientId): Future[List[SubscriptionFields]]
   def fetchAll: Future[List[SubscriptionFields]]
 
-  def delete(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion): Future[Boolean]
+  def delete(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersionNbr): Future[Boolean]
 
   def delete(clientId: ClientId): Future[Boolean]
 }
@@ -90,7 +91,7 @@ class SubscriptionFieldsMongoRepository @Inject() (mongo: MongoComponent, uuidCr
     with ApplicationLogger
     with JsonFormatters {
 
-  override def saveAtomic(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion, fields: Fields): Future[(SubscriptionFields, IsInsert)] = {
+  override def saveAtomic(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersionNbr, fields: Fields): Future[(SubscriptionFields, IsInsert)] = {
     val query = and(
       equal("clientId", Codecs.toBson(clientId.value)),
       equal("apiContext", Codecs.toBson(apiContext.value)),
@@ -119,7 +120,7 @@ class SubscriptionFieldsMongoRepository @Inject() (mongo: MongoComponent, uuidCr
     }
   }
 
-  override def fetch(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion): Future[Option[SubscriptionFields]] = {
+  override def fetch(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersionNbr): Future[Option[SubscriptionFields]] = {
     val query = and(
       equal("clientId", Codecs.toBson(clientId.value)),
       equal("apiContext", Codecs.toBson(apiContext.value)),
@@ -143,7 +144,7 @@ class SubscriptionFieldsMongoRepository @Inject() (mongo: MongoComponent, uuidCr
     collection.find().toFuture().map(_.toList)
   }
 
-  override def delete(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion): Future[Boolean] = {
+  override def delete(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersionNbr): Future[Boolean] = {
     val query = and(
       equal("clientId", Codecs.toBson(clientId.value)),
       equal("apiContext", Codecs.toBson(apiContext.value)),

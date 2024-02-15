@@ -21,6 +21,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 import play.api.libs.json._
 import play.api.mvc._
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApiContext, ApiVersionNbr, ClientId}
 
 import uk.gov.hmrc.apisubscriptionfields.model.ErrorCode._
 import uk.gov.hmrc.apisubscriptionfields.model._
@@ -35,7 +36,7 @@ class SubscriptionFieldsController @Inject() (cc: ControllerComponents, service:
     NotFound(JsErrorResponse(ErrorCode.NOT_FOUND, message))
   }
 
-  private def notFoundMessage(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion): String = {
+  private def notFoundMessage(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersionNbr): String = {
     s"Subscription fields not found for (${clientId.value}, ${apiContext.value}, ${apiVersion.value})"
   }
 
@@ -47,7 +48,7 @@ class SubscriptionFieldsController @Inject() (cc: ControllerComponents, service:
     s"ClientId (${clientId.value.toString}) was not found"
   }
 
-  def getSubscriptionFields(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion): Action[AnyContent] = Action.async { _ =>
+  def getSubscriptionFields(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersionNbr): Action[AnyContent] = Action.async { _ =>
     val eventualMaybeResponse = service.get(clientId, apiContext, apiVersion)
     asActionResult(eventualMaybeResponse, notFoundMessage(clientId, apiContext, apiVersion))
   }
@@ -80,7 +81,7 @@ class SubscriptionFieldsController @Inject() (cc: ControllerComponents, service:
     } recover recovery
   }
 
-  def upsertSubscriptionFields(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion): Action[JsValue] = Action.async(parse.json) { implicit request =>
+  def upsertSubscriptionFields(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersionNbr): Action[JsValue] = Action.async(parse.json) { implicit request =>
     import JsonFormatters._
 
     withJsonBody[SubscriptionFieldsRequest] { payload =>
@@ -102,7 +103,7 @@ class SubscriptionFieldsController @Inject() (cc: ControllerComponents, service:
     }
   }
 
-  def deleteSubscriptionFields(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion): Action[AnyContent] = Action.async { _ =>
+  def deleteSubscriptionFields(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersionNbr): Action[AnyContent] = Action.async { _ =>
     service.delete(clientId, apiContext, apiVersion) map {
       case true  => NoContent
       case false => notFoundResponse(notFoundMessage(clientId, apiContext, apiVersion))

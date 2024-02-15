@@ -17,14 +17,15 @@
 package uk.gov.hmrc.apisubscriptionfields.service
 
 import javax.inject.{Inject, Singleton}
+import scala.concurrent.Future.successful
 import scala.concurrent.{ExecutionContext, Future}
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApiContext, ApiVersionNbr, ClientId}
 import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apisubscriptionfields.connector.PushPullNotificationServiceConnector
-import uk.gov.hmrc.apisubscriptionfields.model.Types.FieldValue
-import uk.gov.hmrc.apisubscriptionfields.model.{FieldDefinition, _}
+import uk.gov.hmrc.apisubscriptionfields.model.FieldDefinition
+import uk.gov.hmrc.apisubscriptionfields.model.Types.Fields
 
 @Singleton
 class PushPullNotificationService @Inject() (ppnsConnector: PushPullNotificationServiceConnector)(implicit ec: ExecutionContext) {
@@ -38,17 +39,19 @@ class PushPullNotificationService @Inject() (ppnsConnector: PushPullNotification
       clientId: ClientId,
       apiContext: ApiContext,
       apiVersion: ApiVersionNbr,
-      oFieldValue: Option[FieldValue],
-      fieldDefinition: FieldDefinition
+      fieldDefinition: FieldDefinition,
+      fields: Fields
     )(implicit
       hc: HeaderCarrier
-    ): Future[PPNSCallBackUrlValidationResponse] = {
+    ): Future[Either[String, Unit]] = {
+
     for {
-      boxId  <- ppnsConnector.ensureBoxIsCreated(makeBoxName(apiContext, apiVersion, fieldDefinition), clientId)
-      result <- oFieldValue match {
-                  case Some(value) => ppnsConnector.updateCallBackUrl(clientId, boxId, value)
-                  case None        => Future.successful(PPNSCallBackUrlSuccessResponse)
-                }
+      boxId     <- ppnsConnector.ensureBoxIsCreated(makeBoxName(apiContext, apiVersion, fieldDefinition), clientId)
+      fieldValue = fields.get(fieldDefinition.name)
+      result    <- fieldValue match {
+                     case Some(value) => ppnsConnector.updateCallBackUrl(clientId, boxId, value)
+                     case None        => successful(Right(()))
+                   }
     } yield result
   }
 

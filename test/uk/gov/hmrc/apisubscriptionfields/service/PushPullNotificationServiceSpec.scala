@@ -24,7 +24,6 @@ import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApiContext, ApiVers
 import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apisubscriptionfields.connector.PushPullNotificationServiceConnector
-import uk.gov.hmrc.apisubscriptionfields.model.FieldDefinitionType._
 import uk.gov.hmrc.apisubscriptionfields.model._
 import uk.gov.hmrc.apisubscriptionfields.{AsyncHmrcSpec, FieldDefinitionTestData, SubscriptionFieldsTestData}
 
@@ -44,59 +43,47 @@ class PushPullNotificationServiceSpec extends AsyncHmrcSpec with SubscriptionFie
   }
 
   "subscribing to PPNS" should {
-    val ppnsFieldName       = fieldN(1)
-    val callbackUrl         = "123"
-    val oCallbackUrl        = Some(callbackUrl)
-    val ppnsFieldDefinition = FieldDefinition(ppnsFieldName, "description-1", "hint-1", PPNS_FIELD, "short-description-1")
-    val expectedTopicName   = s"${apiContext.value}##${apiVersion.value}##$ppnsFieldName"
+    val ppnsFieldName     = fieldN(1)
+    val ppnsFieldValue    = "localhost:9001/pingme"
+    val expectedTopicName = s"${apiContext.value}##${apiVersion.value}##$ppnsFieldName"
 
-    "succeed and return PPNSCallBackUrlSuccessResponse when update of callback URL is successful" in new Setup {
+    "succeed when update of callback URL is successful" in new Setup {
       when(mockPPNSConnector.ensureBoxIsCreated(eqTo(expectedTopicName), eqTo(clientId))(*)).thenReturn(successful(boxId))
-      when(mockPPNSConnector.updateCallBackUrl(clientId, boxId, callbackUrl)(hc)).thenReturn(successful(PPNSCallBackUrlSuccessResponse))
+      when(mockPPNSConnector.updateCallBackUrl(clientId, boxId, ppnsFieldValue)(hc)).thenReturn(successful(Right(())))
 
-      val result: PPNSCallBackUrlValidationResponse = await(service.subscribeToPPNS(clientId, apiContext, apiVersion, oCallbackUrl, ppnsFieldDefinition))
+      val result = await(service.subscribeToPPNS(clientId, apiContext, apiVersion, ppnsFieldName, ppnsFieldValue))
 
-      result shouldBe PPNSCallBackUrlSuccessResponse
+      result shouldBe Right(())
       verify(mockPPNSConnector).ensureBoxIsCreated(eqTo(expectedTopicName), eqTo(clientId))(*)
-      verify(mockPPNSConnector).updateCallBackUrl(eqTo(clientId), eqTo(boxId), eqTo(callbackUrl))(*)
+      verify(mockPPNSConnector).updateCallBackUrl(eqTo(clientId), eqTo(boxId), eqTo(ppnsFieldValue))(*)
     }
 
-    "succeed and return PPNSCallBackUrlSuccessResponse but not call updatecallBackUrl when field is empty" in new Setup {
-      when(mockPPNSConnector.ensureBoxIsCreated(eqTo(expectedTopicName), eqTo(clientId))(*)).thenReturn(successful(boxId))
-
-      val result: PPNSCallBackUrlValidationResponse = await(service.subscribeToPPNS(clientId, apiContext, apiVersion, None, ppnsFieldDefinition))
-
-      result shouldBe PPNSCallBackUrlSuccessResponse
-      verify(mockPPNSConnector).ensureBoxIsCreated(eqTo(expectedTopicName), eqTo(clientId))(*)
-      verify(mockPPNSConnector, times(0)).updateCallBackUrl(eqTo(clientId), eqTo(boxId), eqTo(callbackUrl))(*)
-    }
-
-    "return PPNSCallBackUrlFailedResponse when update of callback URL fails" in new Setup {
+    "fail when update of callback URL fails" in new Setup {
       val errorMessage = "Error Message"
       when(mockPPNSConnector.ensureBoxIsCreated(eqTo(expectedTopicName), eqTo(clientId))(*)).thenReturn(successful(boxId))
-      when(mockPPNSConnector.updateCallBackUrl(clientId, boxId, callbackUrl)(hc)).thenReturn(successful(PPNSCallBackUrlFailedResponse(errorMessage)))
+      when(mockPPNSConnector.updateCallBackUrl(clientId, boxId, ppnsFieldValue)(hc)).thenReturn(successful(Left(errorMessage)))
 
-      val result: PPNSCallBackUrlValidationResponse = await(service.subscribeToPPNS(clientId, apiContext, apiVersion, oCallbackUrl, ppnsFieldDefinition))
+      val result = await(service.subscribeToPPNS(clientId, apiContext, apiVersion, ppnsFieldName, ppnsFieldValue))
 
-      result shouldBe PPNSCallBackUrlFailedResponse(errorMessage)
+      result shouldBe Left(errorMessage)
       verify(mockPPNSConnector).ensureBoxIsCreated(eqTo(expectedTopicName), eqTo(clientId))(*)
-      verify(mockPPNSConnector).updateCallBackUrl(eqTo(clientId), eqTo(boxId), eqTo(callbackUrl))(*)
+      verify(mockPPNSConnector).updateCallBackUrl(eqTo(clientId), eqTo(boxId), eqTo(ppnsFieldValue))(*)
     }
 
-    "fail when box creation fails" in new Setup {
+    "fail when box creation fails without updating callback url" in new Setup {
       when(mockPPNSConnector.ensureBoxIsCreated(eqTo(expectedTopicName), eqTo(clientId))(*)).thenReturn(failed(new RuntimeException))
 
       intercept[RuntimeException] {
-        await(service.subscribeToPPNS(clientId, apiContext, apiVersion, oCallbackUrl, ppnsFieldDefinition))
+        await(service.subscribeToPPNS(clientId, apiContext, apiVersion, ppnsFieldName, ppnsFieldValue))
       }
     }
 
     "fail when update callback url fails" in new Setup {
       when(mockPPNSConnector.ensureBoxIsCreated(eqTo(expectedTopicName), eqTo(clientId))(*)).thenReturn(successful(boxId))
-      when(mockPPNSConnector.updateCallBackUrl(clientId, boxId, callbackUrl)(hc)).thenReturn(failed(new RuntimeException))
+      when(mockPPNSConnector.updateCallBackUrl(clientId, boxId, ppnsFieldValue)(hc)).thenReturn(failed(new RuntimeException))
 
       intercept[RuntimeException] {
-        await(service.subscribeToPPNS(clientId, apiContext, apiVersion, oCallbackUrl, ppnsFieldDefinition))
+        await(service.subscribeToPPNS(clientId, apiContext, apiVersion, ppnsFieldName, ppnsFieldValue))
       }
     }
   }

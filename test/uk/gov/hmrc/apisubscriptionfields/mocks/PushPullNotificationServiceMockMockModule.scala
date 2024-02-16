@@ -18,12 +18,12 @@ package uk.gov.hmrc.apisubscriptionfields.mocks
 
 import scala.concurrent.Future.successful
 
-import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
+import org.mockito.{ArgumentMatchersSugar, MockitoSugar, Strictness}
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApiContext, ApiVersionNbr, ClientId}
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 
-import uk.gov.hmrc.apisubscriptionfields.model.{FieldDefinition, PPNSCallBackUrlValidationResponse, Types}
+import uk.gov.hmrc.apisubscriptionfields.model.Types._
 import uk.gov.hmrc.apisubscriptionfields.service.PushPullNotificationService
 
 trait PushPullNotificationServiceMockModule extends MockitoSugar with ArgumentMatchersSugar with FixedClock {
@@ -35,15 +35,23 @@ trait PushPullNotificationServiceMockModule extends MockitoSugar with ArgumentMa
 
     object SubscribeToPPNS {
 
-      def returns(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersionNbr, fieldValue: Option[Types.FieldValue], response: PPNSCallBackUrlValidationResponse) =
-        when(aMock.subscribeToPPNS(eqTo(clientId), eqTo(apiContext), eqTo(apiVersion), eqTo(fieldValue), *[FieldDefinition])(*)).thenReturn(successful(response))
+      def succeeds(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersionNbr, fieldName: FieldName, fieldValue: FieldValue) =
+        when(aMock.subscribeToPPNS(eqTo(clientId), eqTo(apiContext), eqTo(apiVersion), eqTo(fieldName), eqTo(fieldValue))(*)).thenReturn(successful(Right(())))
 
+      def fails(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersionNbr, fieldName: FieldName, fieldValue: FieldValue, error: String) =
+        when(aMock.subscribeToPPNS(eqTo(clientId), eqTo(apiContext), eqTo(apiVersion), eqTo(fieldName), eqTo(fieldValue))(*)).thenReturn(successful(Left(error)))
+
+      @deprecated("", "")
       def verifyCalled() =
-        verify(aMock, times(1)).subscribeToPPNS(*[ClientId], *[ApiContext], *[ApiVersionNbr], *, *)(*)
+        verify(aMock).subscribeToPPNS(*[ClientId], *[ApiContext], *[ApiVersionNbr], *, *)(*)
+
+      @deprecated("", "")
+      def verifyCalledWith(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersionNbr, fieldName: FieldName, fieldValue: FieldValue) =
+        verify(aMock).subscribeToPPNS(eqTo(clientId), eqTo(apiContext), eqTo(apiVersion), eqTo(fieldName), eqTo(fieldValue))(*)
     }
   }
 
   object PushPullNotificationServiceMock extends BasePushPullNotificationServiceMock {
-    val aMock = mock[PushPullNotificationService]
+    val aMock = mock[PushPullNotificationService](withSettings.strictness(Strictness.Warn))
   }
 }

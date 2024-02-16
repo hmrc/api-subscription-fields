@@ -17,41 +17,35 @@
 package uk.gov.hmrc.apisubscriptionfields.service
 
 import javax.inject.{Inject, Singleton}
-import scala.concurrent.Future.successful
 import scala.concurrent.{ExecutionContext, Future}
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApiContext, ApiVersionNbr, ClientId}
 import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apisubscriptionfields.connector.PushPullNotificationServiceConnector
-import uk.gov.hmrc.apisubscriptionfields.model.FieldDefinition
-import uk.gov.hmrc.apisubscriptionfields.model.Types.Fields
+import uk.gov.hmrc.apisubscriptionfields.model.Types.{FieldName, FieldValue}
 
 @Singleton
 class PushPullNotificationService @Inject() (ppnsConnector: PushPullNotificationServiceConnector)(implicit ec: ExecutionContext) {
 
-  def makeBoxName(apiContext: ApiContext, apiVersion: ApiVersionNbr, fieldDefinition: FieldDefinition): String = {
+  def makeBoxName(apiContext: ApiContext, apiVersion: ApiVersionNbr, fieldName: FieldName): String = {
     val separator = "##"
-    s"${apiContext.value}${separator}${apiVersion.value}${separator}${fieldDefinition.name.value}"
+    s"${apiContext.value}${separator}${apiVersion.value}${separator}${fieldName.value}"
   }
 
   def subscribeToPPNS(
       clientId: ClientId,
       apiContext: ApiContext,
       apiVersion: ApiVersionNbr,
-      fieldDefinition: FieldDefinition,
-      fields: Fields
+      fieldName: FieldName,
+      fieldValue: FieldValue
     )(implicit
       hc: HeaderCarrier
     ): Future[Either[String, Unit]] = {
 
     for {
-      boxId     <- ppnsConnector.ensureBoxIsCreated(makeBoxName(apiContext, apiVersion, fieldDefinition), clientId)
-      fieldValue = fields.get(fieldDefinition.name)
-      result    <- fieldValue match {
-                     case Some(value) => ppnsConnector.updateCallBackUrl(clientId, boxId, value)
-                     case None        => successful(Right(()))
-                   }
+      boxId  <- ppnsConnector.ensureBoxIsCreated(makeBoxName(apiContext, apiVersion, fieldName), clientId)
+      result <- ppnsConnector.updateCallBackUrl(clientId, boxId, fieldValue)
     } yield result
   }
 

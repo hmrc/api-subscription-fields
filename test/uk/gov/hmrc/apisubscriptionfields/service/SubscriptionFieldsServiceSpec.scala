@@ -19,15 +19,20 @@ package uk.gov.hmrc.apisubscriptionfields.service
 import scala.concurrent.ExecutionContext.Implicits.global
 
 import cats.data.NonEmptyList
+import org.mockito.scalatest.IdiomaticMockito
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpec
 
+import play.api.test.{DefaultAwaitTimeout, FutureAwaits}
 import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apisubscriptionfields.mocks.{SubscriptionFieldsRepositoryMockModule, _}
-import uk.gov.hmrc.apisubscriptionfields.model.Types.FieldErrorMap
+import uk.gov.hmrc.apisubscriptionfields.model.Types._
 import uk.gov.hmrc.apisubscriptionfields.model._
-import uk.gov.hmrc.apisubscriptionfields.{AsyncHmrcSpec, FieldDefinitionTestData, SubscriptionFieldsTestData}
+import uk.gov.hmrc.apisubscriptionfields.{FieldDefinitionTestData, SubscriptionFieldsTestData}
 
-class SubscriptionFieldsServiceSpec extends AsyncHmrcSpec with SubscriptionFieldsTestData with FieldDefinitionTestData {
+class SubscriptionFieldsServiceSpec extends AnyWordSpec with DefaultAwaitTimeout with FutureAwaits with Matchers with SubscriptionFieldsTestData with FieldDefinitionTestData
+    with IdiomaticMockito {
 
   trait Setup extends ApiFieldDefinitionsServiceMockModule with SubscriptionFieldsRepositoryMockModule with PushPullNotificationServiceMockModule {
     implicit val hc: HeaderCarrier = HeaderCarrier()
@@ -116,125 +121,123 @@ class SubscriptionFieldsServiceSpec extends AsyncHmrcSpec with SubscriptionField
   }
 
   "upsert" should {
-    val fieldsNonMatch: Types.Fields                   = SubscriptionFieldsNonMatchRegexValidation
-    val fields: Types.Fields                           = SubscriptionFieldsMatchRegexValidation
-    val subscriptionFieldsNonMatch: SubscriptionFields = subsFieldsFor(fieldsNonMatch)
-    val subscriptionFieldsMatching: SubscriptionFields = subsFieldsFor(fields)
+    val validSubsFields: SubscriptionFields = subsFieldsFor(SubscriptionFieldsMatchRegexValidation)
+    val otherValidSubsFields                = subsFieldsFor(SubscriptionFieldsMatchRegexValidation + (AlphanumericFieldName -> "CBA321"))
 
-    "return false when updating an existing api subscription fields (no PPNS)" in new Setup {
+    val validPpnsSubsFields: SubscriptionFields = subsFieldsFor(SubscriptionFieldsMatchRegexValidationPPNS)
+
+    val subsFieldsFailingValidation: SubscriptionFields = subsFieldsFor(Map(AlphanumericFieldName -> "ABC 123", PasswordFieldName -> "Qw12@er"))
+    val noSubsFields                                    = validSubsFields.copy(fields = Map.empty)
+
+    "succeeds creating a new api subscription fields" in new Setup {
       ApiFieldDefinitionsServiceMock.Get.thenReturns(FakeContext, FakeVersion, FakeApiFieldDefinitionsResponseWithRegex)
-      SubscriptionFieldsRepositoryMock.SaveAtomic.returns(FakeClientId, FakeContext, FakeVersion, subscriptionFieldsNonMatch, false)
-      SubscriptionFieldsRepositoryMock.Fetch.returns(FakeClientId, FakeContext, FakeVersion, subscriptionFieldsMatching)
+      SubscriptionFieldsRepositoryMock.Fetch.returns(FakeClientId, FakeContext, FakeVersion, noSubsFields)
+      SubscriptionFieldsRepositoryMock.SaveAtomic.returns(FakeClientId, FakeContext, FakeVersion, validSubsFields, true)
 
-      val result: SubsFieldsUpsertResponse = await(service.upsert(FakeClientId, FakeContext, FakeVersion, SubscriptionFieldsMatchRegexValidation))
+      val result: SubsFieldsUpsertResponse = await(service.upsert(FakeClientId, FakeContext, FakeVersion, validSubsFields.fields))
 
-      result shouldBe SuccessfulSubsFieldsUpsertResponse(SubscriptionFields(FakeClientId, FakeContext, FakeVersion, FakeFieldsId, fields), isInsert = false)
-      PushPullNotificationServiceMock.verifyZeroInteractions()
+      result shouldBe SuccessfulSubsFieldsUpsertResponse(SubscriptionFields(FakeClientId, FakeContext, FakeVersion, FakeFieldsId, validSubsFields.fields), isInsert = true)
     }
 
-    "return false when updating an existing api subscription fields where all fields match (no PPNS)" in new Setup {
+    "succeeds without updating because all fields match (no PPNSField definition)" in new Setup {
       ApiFieldDefinitionsServiceMock.Get.thenReturns(FakeContext, FakeVersion, FakeApiFieldDefinitionsResponseWithRegex)
-      SubscriptionFieldsRepositoryMock.SaveAtomic.returns(FakeClientId, FakeContext, FakeVersion, subscriptionFieldsMatching, false)
-      SubscriptionFieldsRepositoryMock.Fetch.returns(FakeClientId, FakeContext, FakeVersion, subscriptionFieldsMatching)
+      SubscriptionFieldsRepositoryMock.Fetch.returns(FakeClientId, FakeContext, FakeVersion, validSubsFields)
+      val result: SubsFieldsUpsertResponse = await(service.upsert(FakeClientId, FakeContext, FakeVersion, validSubsFields.fields))
 
-      val result: SubsFieldsUpsertResponse = await(service.upsert(FakeClientId, FakeContext, FakeVersion, SubscriptionFieldsMatchRegexValidation))
-
-      result shouldBe SuccessfulSubsFieldsUpsertResponse(SubscriptionFields(FakeClientId, FakeContext, FakeVersion, FakeFieldsId, fields), isInsert = false)
-      PushPullNotificationServiceMock.verifyZeroInteractions()
+      result shouldBe SuccessfulSubsFieldsUpsertResponse(SubscriptionFields(FakeClientId, FakeContext, FakeVersion, FakeFieldsId, validSubsFields.fields), isInsert = false)
     }
 
-    "return false when updating an existing api subscription fields (has PPNS)" in new Setup {
-      ApiFieldDefinitionsServiceMock.Get.thenReturns(FakeContext, FakeVersion, FakeApiFieldDefinitionsResponsePPNSWithRegex)
-      PushPullNotificationServiceMock.SubscribeToPPNS.returns(FakeClientId, FakeContext, FakeVersion, Some("https://www.mycallbackurl.com"), PPNSCallBackUrlSuccessResponse)
-      SubscriptionFieldsRepositoryMock.SaveAtomic.returns(FakeClientId, FakeContext, FakeVersion, subscriptionFieldsNonMatch, false)
-      SubscriptionFieldsRepositoryMock.Fetch.returns(FakeClientId, FakeContext, FakeVersion, subscriptionFieldsNonMatch)
+    "don't fail when identical subs fields presented but no definitions exist (anymore)" in new Setup {
+      ApiFieldDefinitionsServiceMock.Get.returnsNothing(FakeContext, FakeVersion)
+      SubscriptionFieldsRepositoryMock.Fetch.returns(FakeClientId, FakeContext, FakeVersion, validSubsFields)
 
-      val result: SubsFieldsUpsertResponse = await(service.upsert(FakeClientId, FakeContext, FakeVersion, SubscriptionFieldsMatchRegexValidationPPNS))
+      val result: SubsFieldsUpsertResponse = await(service.upsert(FakeClientId, FakeContext, FakeVersion, validSubsFields.fields))
 
-      result shouldBe SuccessfulSubsFieldsUpsertResponse(SubscriptionFields(FakeClientId, FakeContext, FakeVersion, FakeFieldsId, fieldsNonMatch), isInsert = false)
-
-      PushPullNotificationServiceMock.SubscribeToPPNS.verifyCalled()
-      SubscriptionFieldsRepositoryMock.SaveAtomic.verifyCalled()
+      result shouldBe SuccessfulSubsFieldsUpsertResponse(SubscriptionFields(FakeClientId, FakeContext, FakeVersion, FakeFieldsId, validSubsFields.fields), isInsert = false)
     }
 
-    "return false when updating an existing api subscription field with empty string callback URL for PPNS" in new Setup {
-      ApiFieldDefinitionsServiceMock.Get.thenReturns(FakeContext, FakeVersion, FakeApiFieldDefinitionsResponsePPNSWithRegex)
-      PushPullNotificationServiceMock.SubscribeToPPNS.returns(FakeClientId, FakeContext, FakeVersion, Some(""), PPNSCallBackUrlSuccessResponse)
-      SubscriptionFieldsRepositoryMock.SaveAtomic.returns(FakeClientId, FakeContext, FakeVersion, subscriptionFieldsNonMatch, false)
-      SubscriptionFieldsRepositoryMock.Fetch.returns(FakeClientId, FakeContext, FakeVersion, subscriptionFieldsNonMatch)
+    "don't fail when changed subs fields presented but no definitions exist (anymore)" in new Setup {
+      ApiFieldDefinitionsServiceMock.Get.returnsNothing(FakeContext, FakeVersion)
+      SubscriptionFieldsRepositoryMock.Fetch.returns(FakeClientId, FakeContext, FakeVersion, validSubsFields)
 
-      val result: SubsFieldsUpsertResponse = await(service.upsert(FakeClientId, FakeContext, FakeVersion, SubscriptionFieldsEmptyValueRegexValidationPPNS))
+      val result: SubsFieldsUpsertResponse = await(service.upsert(FakeClientId, FakeContext, FakeVersion, otherValidSubsFields.fields))
 
-      result shouldBe SuccessfulSubsFieldsUpsertResponse(SubscriptionFields(FakeClientId, FakeContext, FakeVersion, FakeFieldsId, fieldsNonMatch), isInsert = false)
-
-      PushPullNotificationServiceMock.SubscribeToPPNS.verifyCalled()
-      SubscriptionFieldsRepositoryMock.SaveAtomic.verifyCalled()
+      result shouldBe NotFoundSubsFieldsUpsertResponse
     }
 
-    "return PPNSCallBackUrlSuccessResponse when updating an existing api subscription field for PPNS is not included" in new Setup {
-      ApiFieldDefinitionsServiceMock.Get.thenReturns(FakeContext, FakeVersion, FakeApiFieldDefinitionsResponsePPNSWithRegex)
-      PushPullNotificationServiceMock.SubscribeToPPNS.returns(FakeClientId, FakeContext, FakeVersion, None, PPNSCallBackUrlSuccessResponse)
-      SubscriptionFieldsRepositoryMock.SaveAtomic.returns(FakeClientId, FakeContext, FakeVersion, subscriptionFieldsNonMatch, false)
-      SubscriptionFieldsRepositoryMock.Fetch.returns(FakeClientId, FakeContext, FakeVersion, subscriptionFieldsNonMatch)
-
-      val result: SubsFieldsUpsertResponse = await(service.upsert(FakeClientId, FakeContext, FakeVersion, SubscriptionFieldsMatchRegexValidation))
-
-      result shouldBe SuccessfulSubsFieldsUpsertResponse(SubscriptionFields(FakeClientId, FakeContext, FakeVersion, FakeFieldsId, fieldsNonMatch), isInsert = false)
-
-      PushPullNotificationServiceMock.SubscribeToPPNS.verifyCalled()
-      SubscriptionFieldsRepositoryMock.SaveAtomic.verifyCalled()
-
-    }
-
-    "return FailedValidationSubsFieldsUpsertResponse when updating an existing api subscription fields and PPNS service returns failure" in new Setup {
-      ApiFieldDefinitionsServiceMock.Get.thenReturns(FakeContext, FakeVersion, FakeApiFieldDefinitionsResponsePPNSWithRegex)
-      PushPullNotificationServiceMock.SubscribeToPPNS.returns(
-        FakeClientId,
-        FakeContext,
-        FakeVersion,
-        Some("https://www.mycallbackurl.com"),
-        PPNSCallBackUrlFailedResponse("An Error Occurred")
-      )
-
-      SubscriptionFieldsRepositoryMock.Fetch.returns(FakeClientId, FakeContext, FakeVersion, subscriptionFieldsNonMatch)
-
-      val result: SubsFieldsUpsertResponse = await(service.upsert(FakeClientId, FakeContext, FakeVersion, SubscriptionFieldsMatchRegexValidationPPNS))
-
-      result shouldBe FailedValidationSubsFieldsUpsertResponse(Map(PPNSFieldFieldName -> "An Error Occurred"))
-
-      PushPullNotificationServiceMock.SubscribeToPPNS.verifyCalled()
-    }
-
-    "return FailedValidationSubsFieldsUpsertResponse when updating an existing api subscription fields and PPNS field fails validation" in new Setup {
-      ApiFieldDefinitionsServiceMock.Get.thenReturns(FakeContext, FakeVersion, FakeApiFieldDefinitionsResponsePPNSWithRegex)
-      SubscriptionFieldsRepositoryMock.Fetch.returns(FakeClientId, FakeContext, FakeVersion, subscriptionFieldsNonMatch)
-
-      val result: SubsFieldsUpsertResponse = await(service.upsert(FakeClientId, FakeContext, FakeVersion, SubscriptionFieldsDoNotMatchRegexValidationPPNS))
-
-      result shouldBe FailedValidationSubsFieldsUpsertResponse(Map(PPNSFieldFieldName -> "CallBackUrl Validation"))
-
-      PushPullNotificationServiceMock.verifyZeroInteractions()
-    }
-
-    "return true when creating a new api subscription fields" in new Setup {
+    "succeeds updating an existing api subscription field because fields dont all match (no PPNSField definition)" in new Setup {
       ApiFieldDefinitionsServiceMock.Get.thenReturns(FakeContext, FakeVersion, FakeApiFieldDefinitionsResponseWithRegex)
+      SubscriptionFieldsRepositoryMock.Fetch.returns(FakeClientId, FakeContext, FakeVersion, validSubsFields)
+      SubscriptionFieldsRepositoryMock.SaveAtomic.returns(FakeClientId, FakeContext, FakeVersion, otherValidSubsFields, false)
 
-      SubscriptionFieldsRepositoryMock.SaveAtomic.returns(FakeClientId, FakeContext, FakeVersion, subscriptionFieldsNonMatch, true)
-      SubscriptionFieldsRepositoryMock.Fetch.returns(FakeClientId, FakeContext, FakeVersion, subscriptionFieldsNonMatch)
+      val result: SubsFieldsUpsertResponse = await(service.upsert(FakeClientId, FakeContext, FakeVersion, otherValidSubsFields.fields))
 
-      val result: SubsFieldsUpsertResponse = await(service.upsert(FakeClientId, FakeContext, FakeVersion, SubscriptionFieldsMatchRegexValidation))
+      result shouldBe SuccessfulSubsFieldsUpsertResponse(SubscriptionFields(FakeClientId, FakeContext, FakeVersion, FakeFieldsId, otherValidSubsFields.fields), isInsert = false)
+    }
 
-      result shouldBe SuccessfulSubsFieldsUpsertResponse(SubscriptionFields(FakeClientId, FakeContext, FakeVersion, FakeFieldsId, fieldsNonMatch), isInsert = true)
-      PushPullNotificationServiceMock.verifyZeroInteractions()
+    "fail validation when upserting with an invalid field value (no PPNSField definition)" in new Setup {
+      ApiFieldDefinitionsServiceMock.Get.thenReturns(FakeContext, FakeVersion, FakeApiFieldDefinitionsResponseWithRegex)
+      SubscriptionFieldsRepositoryMock.Fetch.returns(FakeClientId, FakeContext, FakeVersion, validSubsFields)
+
+      val result: SubsFieldsUpsertResponse = await(service.upsert(FakeClientId, FakeContext, FakeVersion, subsFieldsFailingValidation.fields))
+
+      result shouldBe FailedValidationSubsFieldsUpsertResponse(Map(
+        AlphanumericFieldName -> FakeFieldDefinitionAlphnumericField.validation.get.errorMessage,
+        PasswordFieldName     -> FakeFieldDefinitionPassword.validation.get.errorMessage
+      ))
+    }
+
+    "succeeds creating a new api subscription fields with PPNS field value" in new Setup {
+      ApiFieldDefinitionsServiceMock.Get.thenReturns(FakeContext, FakeVersion, FakeApiFieldDefinitionsResponsePPNSWithRegex)
+      SubscriptionFieldsRepositoryMock.Fetch.returns(FakeClientId, FakeContext, FakeVersion, noSubsFields)
+      PushPullNotificationServiceMock.SubscribeToPPNS.succeeds(FakeClientId, FakeContext, FakeVersion, PPNSFieldFieldName, PPNSFieldFieldValue)
+      SubscriptionFieldsRepositoryMock.SaveAtomic.returns(FakeClientId, FakeContext, FakeVersion, validPpnsSubsFields, true)
+
+      val result: SubsFieldsUpsertResponse = await(service.upsert(FakeClientId, FakeContext, FakeVersion, validPpnsSubsFields.fields))
+
+      result shouldBe SuccessfulSubsFieldsUpsertResponse(SubscriptionFields(FakeClientId, FakeContext, FakeVersion, FakeFieldsId, validPpnsSubsFields.fields), isInsert = true)
+    }
+
+    "succeeds without updating because all fields match but PPNS subscribe is required" in new Setup {
+      ApiFieldDefinitionsServiceMock.Get.thenReturns(FakeContext, FakeVersion, FakeApiFieldDefinitionsResponsePPNSWithRegex)
+      SubscriptionFieldsRepositoryMock.Fetch.returns(FakeClientId, FakeContext, FakeVersion, validPpnsSubsFields)
+      PushPullNotificationServiceMock.SubscribeToPPNS.succeeds(FakeClientId, FakeContext, FakeVersion, PPNSFieldFieldName, PPNSFieldFieldValue)
+
+      val result: SubsFieldsUpsertResponse = await(service.upsert(FakeClientId, FakeContext, FakeVersion, validPpnsSubsFields.fields))
+
+      result shouldBe SuccessfulSubsFieldsUpsertResponse(SubscriptionFields(FakeClientId, FakeContext, FakeVersion, FakeFieldsId, validPpnsSubsFields.fields), isInsert = false)
+    }
+
+    "succeeds updating an existing api subscription field because fields dont all match and PPNS subscribe is required" in new Setup {
+      ApiFieldDefinitionsServiceMock.Get.thenReturns(FakeContext, FakeVersion, FakeApiFieldDefinitionsResponsePPNSWithRegex)
+      SubscriptionFieldsRepositoryMock.Fetch.returns(FakeClientId, FakeContext, FakeVersion, validSubsFields)
+      PushPullNotificationServiceMock.SubscribeToPPNS.succeeds(FakeClientId, FakeContext, FakeVersion, PPNSFieldFieldName, PPNSFieldFieldValue)
+      SubscriptionFieldsRepositoryMock.SaveAtomic.returns(FakeClientId, FakeContext, FakeVersion, validPpnsSubsFields, false)
+
+      val result: SubsFieldsUpsertResponse = await(service.upsert(FakeClientId, FakeContext, FakeVersion, validPpnsSubsFields.fields))
+
+      result shouldBe SuccessfulSubsFieldsUpsertResponse(SubscriptionFields(FakeClientId, FakeContext, FakeVersion, FakeFieldsId, validPpnsSubsFields.fields), isInsert = false)
+    }
+
+    "fail validation when upserting with a bad PPNS field value and don't subscribe PPNS" in new Setup {
+      ApiFieldDefinitionsServiceMock.Get.thenReturns(FakeContext, FakeVersion, FakeApiFieldDefinitionsResponsePPNSWithRegex)
+      SubscriptionFieldsRepositoryMock.Fetch.returns(FakeClientId, FakeContext, FakeVersion, subsFieldsFailingValidation)
+
+      final val BadPpnsValue               = "xxx"
+      val baseFields                       = SubscriptionFieldsMatchRegexValidationPPNS
+      val fieldsWithInvalidPpnsValue       = baseFields + (PPNSFieldFieldName -> BadPpnsValue)
+      val result: SubsFieldsUpsertResponse = await(service.upsert(FakeClientId, FakeContext, FakeVersion, fieldsWithInvalidPpnsValue))
+
+      result shouldBe FailedValidationSubsFieldsUpsertResponse(Map(PPNSFieldFieldName -> FakeFieldDefinitionPPNSFields.validation.get.errorMessage))
     }
 
     "propagate the error" in new Setup {
       ApiFieldDefinitionsServiceMock.Get.thenReturns(FakeContext, FakeVersion, FakeApiFieldDefinitionsResponseWithRegex)
+      SubscriptionFieldsRepositoryMock.Fetch.returns(FakeClientId, FakeContext, FakeVersion, validSubsFields)
       SubscriptionFieldsRepositoryMock.SaveAtomic.fails(FakeClientId, FakeContext, FakeVersion, emulatedFailure)
-      SubscriptionFieldsRepositoryMock.Fetch.returns(FakeClientId, FakeContext, FakeVersion, subscriptionFieldsNonMatch)
 
       val caught: EmulatedFailure = intercept[EmulatedFailure] {
-        await(service.upsert(FakeClientId, FakeContext, FakeVersion, SubscriptionFieldsMatchRegexValidation))
+        await(service.upsert(FakeClientId, FakeContext, FakeVersion, otherValidSubsFields.fields))
       }
 
       caught shouldBe emulatedFailure

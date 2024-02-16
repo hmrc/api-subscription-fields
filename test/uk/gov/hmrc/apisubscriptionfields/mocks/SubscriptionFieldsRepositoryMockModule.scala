@@ -23,7 +23,7 @@ import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApiContext, ApiVersionNbr, ClientId}
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 
-import uk.gov.hmrc.apisubscriptionfields.model.Types.IsInsert
+import uk.gov.hmrc.apisubscriptionfields.model.Types._
 import uk.gov.hmrc.apisubscriptionfields.model.{SubscriptionFields, SubscriptionFieldsId}
 import uk.gov.hmrc.apisubscriptionfields.repository.SubscriptionFieldsRepository
 

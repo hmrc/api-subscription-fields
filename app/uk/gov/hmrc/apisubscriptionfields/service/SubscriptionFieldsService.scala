@@ -58,7 +58,7 @@ class SubscriptionFieldsService @Inject() (
           val fieldName = fieldDefinition.name
           fields.get(fieldName) match {
             case Some(fieldValue) =>
-              println(s"Calling subscribe '$fieldName' '$fieldValue'"); pushPullNotificationService.subscribeToPPNS(clientId, apiContext, apiVersion, fieldName, fieldValue)
+              pushPullNotificationService.subscribeToPPNS(clientId, apiContext, apiVersion, fieldName, fieldValue)
             case None             => successful(Right(()))
           }
         case None                  => successful(Right(()))
@@ -91,16 +91,13 @@ class SubscriptionFieldsService @Inject() (
         case Some(existingFields) if (existingFields.fields == newFields) =>
           successful(SuccessfulSubsFieldsUpsertResponse(existingFields, false))
         case _                                                            =>
-          println("Upsert fields")
           upsertSubscriptionFields(clientId, apiContext, apiVersion, newFields)
       }
     }
 
     (for {
       anyFieldDefinitions <- apiFieldDefinitionsService.get(apiContext, apiVersion).map(_.map(_.fieldDefinitions))
-      _                    = println(anyFieldDefinitions)
       anyExistingFields   <- subscriptionFieldsRepository.fetch(clientId, apiContext, apiVersion)
-      _                    = println(anyExistingFields)
     } yield (anyFieldDefinitions, anyExistingFields))
       .flatMap(_ match {
         case (None, Some(existingFields)) if (existingFields.fields == newFields) => successful(SuccessfulSubsFieldsUpsertResponse(existingFields, false))
@@ -110,10 +107,8 @@ class SubscriptionFieldsService @Inject() (
           (
             for {
               _        <- E.fromEither(validateFields(newFields, fieldDefinitions).leftMap(translateValidateError))
-              _         = println("validated")
               _        <- E.fromEitherF(handleAnyPpnsSubscriptionRequired(clientId, apiContext, apiVersion, fieldDefinitions, newFields)
                             .map(_.leftMap(translatePpnsError(fieldDefinitions))))
-              _         = println("handle")
               response <- E.liftF(upsertIfFieldsHaveChanged(anyExistingFields))
             } yield response
           )

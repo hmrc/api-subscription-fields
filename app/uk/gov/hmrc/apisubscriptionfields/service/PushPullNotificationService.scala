@@ -45,6 +45,7 @@ class PushPullNotificationService @Inject() (ppnsConnector: PushPullNotification
 
     for {
       boxId  <- ppnsConnector.ensureBoxIsCreated(makeBoxName(apiContext, apiVersion, fieldName), clientId)
+      // result <- if (fieldsHaveChanged) ppnsConnector.updateCallBackUrl(clientId, boxId, fieldValue) else success
       result <- ppnsConnector.updateCallBackUrl(clientId, boxId, fieldValue)
     } yield result
   }

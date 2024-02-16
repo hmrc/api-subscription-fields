@@ -40,10 +40,10 @@ class SubscriptionFieldsServiceSpec extends AnyWordSpec with DefaultAwaitTimeout
     val service =
       new SubscriptionFieldsService(SubscriptionFieldsRepositoryMock.aMock, ApiFieldDefinitionsServiceMock.aMock, PushPullNotificationServiceMock.aMock)
 
-    val validSubsFields: SubscriptionFields = subsFieldsFor(SubscriptionFieldsMatchRegexValidation)
-    val otherValidSubsFields                = subsFieldsFor(SubscriptionFieldsMatchRegexValidation + (AlphanumericFieldName -> "CBA321"))
-
-    val validPpnsSubsFields: SubscriptionFields = subsFieldsFor(SubscriptionFieldsMatchRegexValidationPPNS)
+    val validSubsFields: SubscriptionFields                  = subsFieldsFor(SubscriptionFieldsMatchRegexValidation)
+    val otherValidSubsFields                                 = subsFieldsFor(SubscriptionFieldsMatchRegexValidation + (AlphanumericFieldName -> "CBA321"))
+    def validSubsFieldsWithPpnsValue(fieldValue: FieldValue) = subsFieldsFor(SubscriptionFieldsMatchRegexValidation + (PPNSFieldFieldName -> fieldValue))
+    val validPpnsSubsFields: SubscriptionFields              = validSubsFieldsWithPpnsValue(PPNSFieldFieldValue)
 
     val subsFieldsFailingValidation: SubscriptionFields = subsFieldsFor(Map(AlphanumericFieldName -> "ABC 123", PasswordFieldName -> "Qw12@er"))
     val noSubsFields                                    = validSubsFields.copy(fields = Map.empty)
@@ -57,7 +57,8 @@ class SubscriptionFieldsServiceSpec extends AnyWordSpec with DefaultAwaitTimeout
     def thereAreExistingFieldsWithoutValues()                   = thereAreExistingFieldValues(noSubsFields)
     def thereAreExistingPpnsFieldValues()                       = thereAreExistingFieldValues(validPpnsSubsFields)
 
-    def ppnsFieldGetsSubscribedTo() = PushPullNotificationServiceMock.SubscribeToPPNS.succeeds(FakeClientId, FakeContext, FakeVersion, PPNSFieldFieldName, PPNSFieldFieldValue)
+    def ppnsFieldGetsSubscribedTo(fieldValue: FieldValue = PPNSFieldFieldValue) =
+      PushPullNotificationServiceMock.SubscribeToPPNS.succeeds(FakeClientId, FakeContext, FakeVersion, PPNSFieldFieldName, fieldValue)
 
     def ppnsFieldSubscriptionFails(error: String) =
       PushPullNotificationServiceMock.SubscribeToPPNS.fails(FakeClientId, FakeContext, FakeVersion, PPNSFieldFieldName, PPNSFieldFieldValue, error)
@@ -278,6 +279,18 @@ class SubscriptionFieldsServiceSpec extends AnyWordSpec with DefaultAwaitTimeout
       }
 
       caught shouldBe emulatedFailure
+    }
+
+    "APSR-1788" in new Setup {
+      val fieldsWithPpnsEmptyValue = validSubsFieldsWithPpnsValue("")
+      thereArePpnsFieldDefinitions()
+      thereAreExistingFieldValues(validSubsFields)
+      ppnsFieldGetsSubscribedTo("")
+      fieldsAreUpdatedInDB(fieldsWithPpnsEmptyValue)
+
+      val result: SubsFieldsUpsertResponse = await(service.upsert(FakeClientId, FakeContext, FakeVersion, fieldsWithPpnsEmptyValue.fields))
+
+      result shouldBe SuccessfulSubsFieldsUpsertResponse(SubscriptionFields(FakeClientId, FakeContext, FakeVersion, FakeFieldsId, fieldsWithPpnsEmptyValue.fields), isInsert = false)
     }
   }
 

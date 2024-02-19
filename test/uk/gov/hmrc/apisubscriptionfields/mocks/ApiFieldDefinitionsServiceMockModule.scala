@@ -35,7 +35,7 @@ trait ApiFieldDefinitionsServiceMockModule extends MockitoSugar with ArgumentMat
 
     object Get {
 
-      def thenReturns(context: ApiContext, version: ApiVersionNbr, response: ApiFieldDefinitions) =
+      def returns(context: ApiContext, version: ApiVersionNbr, response: ApiFieldDefinitions) =
         when(aMock.get(eqTo(context), eqTo(version))).thenReturn(successful(Some(response)))
 
       def returnsNothing(context: ApiContext, version: ApiVersionNbr) =

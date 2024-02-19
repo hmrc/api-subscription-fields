@@ -17,37 +17,28 @@
 package uk.gov.hmrc.apisubscriptionfields.service
 
 import javax.inject.{Inject, Singleton}
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApiContext, ApiVersionNbr, ClientId}
 import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apisubscriptionfields.connector.PushPullNotificationServiceConnector
+import uk.gov.hmrc.apisubscriptionfields.model.BoxId
 import uk.gov.hmrc.apisubscriptionfields.model.Types.{FieldName, FieldValue}
 
 @Singleton
-class PushPullNotificationService @Inject() (ppnsConnector: PushPullNotificationServiceConnector)(implicit ec: ExecutionContext) {
+class PushPullNotificationService @Inject() (ppnsConnector: PushPullNotificationServiceConnector) {
 
   def makeBoxName(apiContext: ApiContext, apiVersion: ApiVersionNbr, fieldName: FieldName): String = {
     val separator = "##"
     s"${apiContext.value}${separator}${apiVersion.value}${separator}${fieldName.value}"
   }
 
-  def subscribeToPPNS(
-      clientId: ClientId,
-      apiContext: ApiContext,
-      apiVersion: ApiVersionNbr,
-      fieldName: FieldName,
-      fieldValue: FieldValue
-    )(implicit
-      hc: HeaderCarrier
-    ): Future[Either[String, Unit]] = {
-
-    for {
-      boxId  <- ppnsConnector.ensureBoxIsCreated(makeBoxName(apiContext, apiVersion, fieldName), clientId)
-      // result <- if (fieldsHaveChanged) ppnsConnector.updateCallBackUrl(clientId, boxId, fieldValue) else success
-      result <- ppnsConnector.updateCallBackUrl(clientId, boxId, fieldValue)
-    } yield result
+  def ensureBoxIsCreated(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersionNbr, fieldName: FieldName)(implicit hc: HeaderCarrier): Future[BoxId] = {
+    ppnsConnector.ensureBoxIsCreated(makeBoxName(apiContext, apiVersion, fieldName), clientId)
   }
 
+  def updateCallbackUrl(clientId: ClientId, boxId: BoxId, fieldValue: FieldValue)(implicit hc: HeaderCarrier): Future[Either[String, Unit]] = {
+    ppnsConnector.updateCallBackUrl(clientId, boxId, fieldValue)
+  }
 }

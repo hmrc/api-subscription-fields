@@ -16,13 +16,13 @@
 
 package uk.gov.hmrc.apisubscriptionfields.mocks
 
-import scala.concurrent.Future.successful
+import scala.concurrent.Future.{failed, successful}
 
 import org.mockito.{ArgumentMatchersSugar, MockitoSugar, Strictness}
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApiContext, ApiVersionNbr, ClientId}
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
-
+import uk.gov.hmrc.apisubscriptionfields.model.BoxId
 import uk.gov.hmrc.apisubscriptionfields.model.Types._
 import uk.gov.hmrc.apisubscriptionfields.service.PushPullNotificationService
 
@@ -33,21 +33,23 @@ trait PushPullNotificationServiceMockModule extends MockitoSugar with ArgumentMa
 
     def verifyZeroInteractions(): Unit = MockitoSugar.verifyZeroInteractions(aMock)
 
-    object SubscribeToPPNS {
+    object EnsureBoxIsCreated {
 
-      def succeeds(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersionNbr, fieldName: FieldName, fieldValue: FieldValue) =
-        when(aMock.subscribeToPPNS(eqTo(clientId), eqTo(apiContext), eqTo(apiVersion), eqTo(fieldName), eqTo(fieldValue))(*)).thenReturn(successful(Right(())))
+      def succeeds(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersionNbr, fieldName: FieldName, boxId: BoxId) =
+        when(aMock.ensureBoxIsCreated(eqTo(clientId), eqTo(apiContext), eqTo(apiVersion), eqTo(fieldName))(*)).thenReturn(successful(boxId))
 
-      def fails(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersionNbr, fieldName: FieldName, fieldValue: FieldValue, error: String) =
-        when(aMock.subscribeToPPNS(eqTo(clientId), eqTo(apiContext), eqTo(apiVersion), eqTo(fieldName), eqTo(fieldValue))(*)).thenReturn(successful(Left(error)))
+      def fails(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersionNbr, fieldName: FieldName) =
+        when(aMock.ensureBoxIsCreated(eqTo(clientId), eqTo(apiContext), eqTo(apiVersion), eqTo(fieldName))(*)).thenReturn(failed(new Exception("bang!")))
+    }
 
-      @deprecated("", "")
-      def verifyCalled() =
-        verify(aMock).subscribeToPPNS(*[ClientId], *[ApiContext], *[ApiVersionNbr], *, *)(*)
+    object UpdateCallbackUrl {
 
-      @deprecated("", "")
-      def verifyCalledWith(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersionNbr, fieldName: FieldName, fieldValue: FieldValue) =
-        verify(aMock).subscribeToPPNS(eqTo(clientId), eqTo(apiContext), eqTo(apiVersion), eqTo(fieldName), eqTo(fieldValue))(*)
+      def succeeds(clientId: ClientId, boxId: BoxId, fieldValue: FieldValue) = {
+        when(aMock.updateCallbackUrl(eqTo(clientId), eqTo(boxId), eqTo(fieldValue))(*)).thenReturn(successful(Right(())))
+      }
+
+      def fails(clientId: ClientId, boxId: BoxId, fieldValue: FieldValue, error: String) =
+        when(aMock.updateCallbackUrl(eqTo(clientId), eqTo(boxId), eqTo(fieldValue))(*)).thenReturn(successful(Left(error)))
     }
   }
 

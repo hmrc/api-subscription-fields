@@ -48,7 +48,7 @@ class SubscriptionFieldsService @Inject() (
         apiContext: ApiContext,
         apiVersion: ApiVersionNbr,
         fieldDefinitions: NEL[FieldDefinition],
-        fields: Fields
+        existingFields: Option[SubscriptionFields]
       )(implicit
         hc: HeaderCarrier
       ): Future[Either[String, Unit]] = {
@@ -56,9 +56,13 @@ class SubscriptionFieldsService @Inject() (
       findPpnsField(fieldDefinitions) match {
         case Some(fieldDefinition) =>
           val fieldName = fieldDefinition.name
-          fields.get(fieldName) match {
+          newFields.get(fieldName) match {
             case Some(fieldValue) =>
-              pushPullNotificationService.subscribeToPPNS(clientId, apiContext, apiVersion, fieldName, fieldValue)
+              for {
+                boxId  <- pushPullNotificationService.ensureBoxIsCreated(clientId, apiContext, apiVersion, fieldName)
+                result <- if (existingFields.isDefined && existingFields.get.fields.contains(fieldName) && existingFields.get.fields.get(fieldName).contains(fieldValue)) successful(Right(()))
+                          else pushPullNotificationService.updateCallbackUrl(clientId, boxId, fieldValue)
+              } yield result
             case None             => successful(Right(()))
           }
         case None                  => successful(Right(()))
@@ -107,7 +111,7 @@ class SubscriptionFieldsService @Inject() (
           (
             for {
               _        <- E.fromEither(validateFields(newFields, fieldDefinitions).leftMap(translateValidateError))
-              _        <- E.fromEitherF(handleAnyPpnsSubscriptionRequired(clientId, apiContext, apiVersion, fieldDefinitions, newFields)
+              _        <- E.fromEitherF(handleAnyPpnsSubscriptionRequired(clientId, apiContext, apiVersion, fieldDefinitions, anyExistingFields)
                             .map(_.leftMap(translatePpnsError(fieldDefinitions))))
               response <- E.liftF(upsertIfFieldsHaveChanged(anyExistingFields))
             } yield response

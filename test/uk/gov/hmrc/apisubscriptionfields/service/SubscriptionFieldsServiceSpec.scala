@@ -22,7 +22,6 @@ import cats.data.NonEmptyList
 import org.mockito.scalatest.IdiomaticMockito
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
-
 import play.api.test.{DefaultAwaitTimeout, FutureAwaits}
 import uk.gov.hmrc.http.HeaderCarrier
 
@@ -49,19 +48,22 @@ class SubscriptionFieldsServiceSpec extends AnyWordSpec with DefaultAwaitTimeout
     val noSubsFields                                    = validSubsFields.copy(fields = Map.empty)
 
     def thereAreNoFieldDefinitions()   = ApiFieldDefinitionsServiceMock.Get.returnsNothing(FakeContext, FakeVersion)
-    def thereAreFieldDefinitions()     = ApiFieldDefinitionsServiceMock.Get.thenReturns(FakeContext, FakeVersion, FakeApiFieldDefinitionsResponseWithRegex)
-    def thereArePpnsFieldDefinitions() = ApiFieldDefinitionsServiceMock.Get.thenReturns(FakeContext, FakeVersion, FakeApiFieldDefinitionsResponsePPNSWithRegex)
+    def thereAreFieldDefinitions()     = ApiFieldDefinitionsServiceMock.Get.returns(FakeContext, FakeVersion, FakeApiFieldDefinitionsResponseWithRegex)
+    def thereArePpnsFieldDefinitions() = ApiFieldDefinitionsServiceMock.Get.returns(FakeContext, FakeVersion, FakeApiFieldDefinitionsResponsePPNSWithRegex)
 
     def thereAreNoExistingFieldValues()                         = SubscriptionFieldsRepositoryMock.Fetch.returnsNone(FakeClientId, FakeContext, FakeVersion)
     def thereAreExistingFieldValues(fields: SubscriptionFields) = SubscriptionFieldsRepositoryMock.Fetch.returns(FakeClientId, FakeContext, FakeVersion, fields)
     def thereAreExistingFieldsWithoutValues()                   = thereAreExistingFieldValues(noSubsFields)
     def thereAreExistingPpnsFieldValues()                       = thereAreExistingFieldValues(validPpnsSubsFields)
 
-    def ppnsFieldGetsSubscribedTo(fieldValue: FieldValue = PPNSFieldFieldValue) =
-      PushPullNotificationServiceMock.SubscribeToPPNS.succeeds(FakeClientId, FakeContext, FakeVersion, PPNSFieldFieldName, fieldValue)
 
-    def ppnsFieldSubscriptionFails(error: String) =
-      PushPullNotificationServiceMock.SubscribeToPPNS.fails(FakeClientId, FakeContext, FakeVersion, PPNSFieldFieldName, PPNSFieldFieldValue, error)
+    def boxIsCreatedIfNeeded() = PushPullNotificationServiceMock.EnsureBoxIsCreated.succeeds(FakeClientId, FakeContext, FakeVersion, PPNSFieldFieldName, FakeBoxId)
+    def boxCreationFails()     = PushPullNotificationServiceMock.EnsureBoxIsCreated.fails(FakeClientId, FakeContext, FakeVersion, PPNSFieldFieldName)
+
+    def ppnsFieldGetsUpdated(fieldValue: FieldValue = PPNSFieldFieldValue) =
+      PushPullNotificationServiceMock.UpdateCallbackUrl.succeeds(FakeClientId, FakeBoxId, fieldValue)
+    def ppnsFieldUpdateFails(error: String) =
+      PushPullNotificationServiceMock.UpdateCallbackUrl.fails(FakeClientId, FakeBoxId, PPNSFieldFieldValue, error)
 
     def fieldsAreCreatedInDB(whichFields: SubscriptionFields) = SubscriptionFieldsRepositoryMock.SaveAtomic.returns(FakeClientId, FakeContext, FakeVersion, whichFields, true)
     def fieldsAreUpdatedInDB(whichFields: SubscriptionFields) = SubscriptionFieldsRepositoryMock.SaveAtomic.returns(FakeClientId, FakeContext, FakeVersion, whichFields, false)
@@ -146,7 +148,7 @@ class SubscriptionFieldsServiceSpec extends AnyWordSpec with DefaultAwaitTimeout
   }
 
   "upsert" should {
-    "succeeds creating a new api subscription fields" in new Setup {
+    "succeed in creating a new api subscription fields" in new Setup {
       thereAreFieldDefinitions()
       thereAreExistingFieldsWithoutValues()
       fieldsAreCreatedInDB(validSubsFields)
@@ -156,7 +158,7 @@ class SubscriptionFieldsServiceSpec extends AnyWordSpec with DefaultAwaitTimeout
       result shouldBe SuccessfulSubsFieldsUpsertResponse(SubscriptionFields(FakeClientId, FakeContext, FakeVersion, FakeFieldsId, validSubsFields.fields), isInsert = true)
     }
 
-    "succeeds without updating because all fields match (no PPNSField definition)" in new Setup {
+    "succeed without updating because all fields match (no PPNSField definition)" in new Setup {
       thereAreFieldDefinitions()
       thereAreExistingFieldValues(validSubsFields)
 
@@ -165,7 +167,7 @@ class SubscriptionFieldsServiceSpec extends AnyWordSpec with DefaultAwaitTimeout
       result shouldBe SuccessfulSubsFieldsUpsertResponse(SubscriptionFields(FakeClientId, FakeContext, FakeVersion, FakeFieldsId, validSubsFields.fields), isInsert = false)
     }
 
-    "don't fail when identical subs fields presented but no definitions exist (anymore)" in new Setup {
+    "not fail when identical subs fields presented but no definitions exist (anymore)" in new Setup {
       thereAreNoFieldDefinitions()
       thereAreExistingFieldValues(validSubsFields)
 
@@ -174,7 +176,7 @@ class SubscriptionFieldsServiceSpec extends AnyWordSpec with DefaultAwaitTimeout
       result shouldBe SuccessfulSubsFieldsUpsertResponse(SubscriptionFields(FakeClientId, FakeContext, FakeVersion, FakeFieldsId, validSubsFields.fields), isInsert = false)
     }
 
-    "don't fail when changed subs fields presented but no definitions exist (anymore)" in new Setup {
+    "not fail when changed subs fields presented but no definitions exist (anymore)" in new Setup {
       thereAreNoFieldDefinitions()
       thereAreExistingFieldValues(validSubsFields)
 
@@ -183,7 +185,7 @@ class SubscriptionFieldsServiceSpec extends AnyWordSpec with DefaultAwaitTimeout
       result shouldBe NotFoundSubsFieldsUpsertResponse
     }
 
-    "succeeds updating an existing api subscription field because fields dont all match (no PPNSField definition)" in new Setup {
+    "succeed updating an existing api subscription field because fields don't all match (no PPNSField definition)" in new Setup {
       thereAreFieldDefinitions()
       thereAreExistingFieldValues(validSubsFields)
       fieldsAreUpdatedInDB(otherValidSubsFields)
@@ -205,10 +207,11 @@ class SubscriptionFieldsServiceSpec extends AnyWordSpec with DefaultAwaitTimeout
       ))
     }
 
-    "succeeds creating a new api subscription fields with PPNS field value" in new Setup {
+    "succeed creating a new api subscription fields with PPNS field value" in new Setup {
       thereArePpnsFieldDefinitions()
       thereAreExistingFieldsWithoutValues()
-      ppnsFieldGetsSubscribedTo()
+      boxIsCreatedIfNeeded()
+      ppnsFieldGetsUpdated()
       fieldsAreCreatedInDB(validPpnsSubsFields)
 
       val result: SubsFieldsUpsertResponse = await(service.upsert(FakeClientId, FakeContext, FakeVersion, validPpnsSubsFields.fields))
@@ -216,17 +219,17 @@ class SubscriptionFieldsServiceSpec extends AnyWordSpec with DefaultAwaitTimeout
       result shouldBe SuccessfulSubsFieldsUpsertResponse(SubscriptionFields(FakeClientId, FakeContext, FakeVersion, FakeFieldsId, validPpnsSubsFields.fields), isInsert = true)
     }
 
-    "succeeds without updating because all fields match but PPNS subscribe is required" in new Setup {
+    "succeed without updating because all fields match but PPNS box creation is required" in new Setup {  // APSR-1788
       thereArePpnsFieldDefinitions()
       thereAreExistingPpnsFieldValues()
-      ppnsFieldGetsSubscribedTo()
+      boxIsCreatedIfNeeded()
 
       val result: SubsFieldsUpsertResponse = await(service.upsert(FakeClientId, FakeContext, FakeVersion, validPpnsSubsFields.fields))
 
       result shouldBe SuccessfulSubsFieldsUpsertResponse(SubscriptionFields(FakeClientId, FakeContext, FakeVersion, FakeFieldsId, validPpnsSubsFields.fields), isInsert = false)
     }
 
-    "handles having no ppns field value in the new fields but saves other fields due to changed values" in new Setup {
+    "handle having no PPNS field value in the new fields but saves other fields due to changed values" in new Setup {
       thereArePpnsFieldDefinitions()
       thereAreExistingFieldValues(validSubsFields)
       fieldsAreUpdatedInDB(otherValidSubsFields)
@@ -236,20 +239,22 @@ class SubscriptionFieldsServiceSpec extends AnyWordSpec with DefaultAwaitTimeout
       result shouldBe SuccessfulSubsFieldsUpsertResponse(SubscriptionFields(FakeClientId, FakeContext, FakeVersion, FakeFieldsId, otherValidSubsFields.fields), isInsert = false)
     }
 
-    "handles ppns subscription returning validation errors" in new Setup {
+    "handle PPNS subscription returning validation errors" in new Setup {
       thereArePpnsFieldDefinitions()
-      thereAreExistingPpnsFieldValues()
-      ppnsFieldSubscriptionFails("Bobbins")
+      thereAreNoExistingFieldValues()
+      boxIsCreatedIfNeeded()
+      ppnsFieldUpdateFails("Bobbins")
 
       val result: SubsFieldsUpsertResponse = await(service.upsert(FakeClientId, FakeContext, FakeVersion, validPpnsSubsFields.fields))
 
       result shouldBe FailedValidationSubsFieldsUpsertResponse(Map(PPNSFieldFieldName -> "Bobbins"))
     }
 
-    "succeeds updating an existing api subscription field because fields dont all match and PPNS subscribe is required" in new Setup {
+    "succeed updating an existing api subscription field because fields dont all match and PPNS subscribe is required" in new Setup {
       thereArePpnsFieldDefinitions()
       thereAreExistingFieldValues(validSubsFields)
-      ppnsFieldGetsSubscribedTo()
+      boxIsCreatedIfNeeded()
+      ppnsFieldGetsUpdated()
       fieldsAreUpdatedInDB(validPpnsSubsFields)
 
       val result: SubsFieldsUpsertResponse = await(service.upsert(FakeClientId, FakeContext, FakeVersion, validPpnsSubsFields.fields))
@@ -285,7 +290,8 @@ class SubscriptionFieldsServiceSpec extends AnyWordSpec with DefaultAwaitTimeout
       val fieldsWithPpnsEmptyValue = validSubsFieldsWithPpnsValue("")
       thereArePpnsFieldDefinitions()
       thereAreExistingFieldValues(validSubsFields)
-      ppnsFieldGetsSubscribedTo("")
+      boxIsCreatedIfNeeded()
+      ppnsFieldGetsUpdated("")
       fieldsAreUpdatedInDB(fieldsWithPpnsEmptyValue)
 
       val result: SubsFieldsUpsertResponse = await(service.upsert(FakeClientId, FakeContext, FakeVersion, fieldsWithPpnsEmptyValue.fields))
@@ -336,7 +342,7 @@ class SubscriptionFieldsServiceSpec extends AnyWordSpec with DefaultAwaitTimeout
     }
   }
 
-  "validate value against field defintion" should {
+  "validate value against field definition" should {
     val fieldDefintionWithoutValidation = FieldDefinition(fieldN(1), "desc1", "hint1", FieldDefinitionType.URL, "short description", None)
     val fieldDefinitionWithValidation   = fieldDefintionWithoutValidation.copy(validation = Some(validationGroup1))
 

@@ -20,8 +20,8 @@ import java.util.UUID
 
 import play.api.http.HeaderNames.{ACCEPT, CONTENT_TYPE}
 import play.api.http.MimeTypes
-
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApiContext, ApiVersionNbr, ClientId}
+
 import uk.gov.hmrc.apisubscriptionfields.model.BoxId
 
 trait TestData {

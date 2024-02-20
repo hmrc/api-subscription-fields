@@ -63,7 +63,7 @@ class PushPullNotificationServiceSpec extends AsyncHmrcSpec with SubscriptionFie
   }
 
   "updating PPNS callback URL" should {
-    val ppnsFieldValue    = "localhost:9001/pingme"
+    val ppnsFieldValue = "localhost:9001/pingme"
 
     "succeed when update of callback URL is successful" in new Setup {
       when(mockPPNSConnector.updateCallBackUrl(clientId, boxId, ppnsFieldValue)(hc)).thenReturn(successful(Right(())))

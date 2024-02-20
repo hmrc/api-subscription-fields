@@ -57,13 +57,14 @@ class SubscriptionFieldsService @Inject() (
         case Some(fieldDefinition) =>
           val fieldName = fieldDefinition.name
           newFields.get(fieldName) match {
-            case Some(fieldValue) =>
+            case Some(newFieldValue) =>
               for {
-                boxId  <- pushPullNotificationService.ensureBoxIsCreated(clientId, apiContext, apiVersion, fieldName)
-                result <- if (existingFields.isDefined && existingFields.get.fields.contains(fieldName) && existingFields.get.fields.get(fieldName).contains(fieldValue)) successful(Right(()))
-                          else pushPullNotificationService.updateCallbackUrl(clientId, boxId, fieldValue)
+                boxId                  <- pushPullNotificationService.ensureBoxIsCreated(clientId, apiContext, apiVersion, fieldName)
+                fieldValueHasNotChanged = existingFields.map(_.fields.get(fieldName).contains(newFieldValue)).getOrElse(false)
+                result                 <- if (fieldValueHasNotChanged) successful(Right(()))
+                                          else pushPullNotificationService.updateCallbackUrl(clientId, boxId, newFieldValue)
               } yield result
-            case None             => successful(Right(()))
+            case None                => successful(Right(()))
           }
         case None                  => successful(Right(()))
       }

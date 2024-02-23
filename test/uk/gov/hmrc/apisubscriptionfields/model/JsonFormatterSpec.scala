@@ -64,8 +64,8 @@ class JsonFormatterSpec extends AnyWordSpec with Matchers with JsonFormatters wi
     val singleValidation     = FakeValidation
     val singleValidationText = """{"errorMessage":"error message","rules":[{"RegexValidationRule":{"regex":".*"}}]}"""
 
-    val dualValidation     = ValidationGroup("error message", NonEmptyList.of(FakeValidationRule, RegexValidationRule("[a-z0-9]+")))
-    val dualValidationText = """{"errorMessage":"error message","rules":[{"RegexValidationRule":{"regex":".*"}},{"RegexValidationRule":{"regex":"[a-z0-9]+"}}]}"""
+    val dualValidation     = ValidationGroup("error message", NonEmptyList.of(RegexValidationRule("^.{12,50}+$"), UrlValidationRule))
+    val dualValidationText = """{"errorMessage":"error message","rules":[{"RegexValidationRule":{"regex":"^.{12,50}+$"}},{"UrlValidationRule":{}}]}"""
 
     "marshal json" in {
       objectAsJsonString(singleValidation) shouldBe singleValidationText

@@ -38,13 +38,13 @@ class JsonFormatterSpec extends AnyWordSpec with Matchers with JsonFormatters wi
   private def objectAsJsonString[A](a: A)(implicit t: Writes[A]) = Json.asciiStringify(Json.toJson(a))
 
   private val subscriptionFieldJson =
-    s"""{"clientId":"$fakeRawClientId","apiContext":"$fakeRawContext","apiVersionNbr":"$fakeRawVersion","fieldsId":"$FakeRawFieldsId","fields":{"fieldB":"v1"}}"""
+    s"""{"clientId":"$fakeRawClientId","apiContext":"$fakeRawContext","apiVersion":"$fakeRawVersion","fieldsId":"$FakeRawFieldsId","fields":{"fieldB":"v1"}}"""
 
   private val fieldDefinitionJson =
-    s"""{"apiContext":"$fakeRawContext","apiVersionNbr":"$fakeRawVersion","fieldDefinitions":[{"name":"fieldB","description":"desc1","hint":"hint1","type":"URL","shortDescription":"short description","validation":{"errorMessage":"error message","rules":[{"UrlValidationRule":{}}]}}]}"""
+    s"""{"apiContext":"$fakeRawContext","apiVersion":"$fakeRawVersion","fieldDefinitions":[{"name":"fieldB","description":"desc1","hint":"hint1","type":"URL","shortDescription":"short description","validation":{"errorMessage":"error message","rules":[{"UrlValidationRule":{}}]}}]}"""
 
   private val fieldDefinitionEmptyValidationJson =
-    s"""{"apiContext":"$fakeRawContext","apiVersionNbr":"$fakeRawVersion","fieldDefinitions":[{"name":"fieldB","description":"desc1","hint":"hint1","type":"URL","shortDescription":"short description"}]}"""
+    s"""{"apiContext":"$fakeRawContext","apiVersion":"$fakeRawVersion","fieldDefinitions":[{"name":"fieldB","description":"desc1","hint":"hint1","type":"URL","shortDescription":"short description"}]}"""
 
   "SubscriptionFields" should {
     "marshal json" in {
@@ -59,6 +59,29 @@ class JsonFormatterSpec extends AnyWordSpec with Matchers with JsonFormatters wi
     }
   }
 
+  "ValidationGroup" should {
+    import eu.timepit.refined.auto._
+    val singleValidation     = FakeValidation
+    val singleValidationText = """{"errorMessage":"error message","rules":[{"RegexValidationRule":{"regex":".*"}}]}"""
+
+    val dualValidation     = ValidationGroup("error message", NonEmptyList.of(FakeValidationRule, RegexValidationRule("[a-z0-9]+")))
+    val dualValidationText = """{"errorMessage":"error message","rules":[{"RegexValidationRule":{"regex":".*"}},{"RegexValidationRule":{"regex":"[a-z0-9]+"}}]}"""
+
+    "marshal json" in {
+      objectAsJsonString(singleValidation) shouldBe singleValidationText
+      objectAsJsonString(dualValidation) shouldBe dualValidationText
+    }
+    "unmarshal text" in {
+      Json.parse(singleValidationText).validate[ValidationGroup] match {
+        case JsSuccess(r, _) => r shouldBe singleValidation
+        case JsError(e)      => fail(s"Should have parsed json text but got $e")
+      }
+      Json.parse(dualValidationText).validate[ValidationGroup] match {
+        case JsSuccess(r, _) => r shouldBe dualValidation
+        case JsError(e)      => fail(s"Should have parsed json text but got $e")
+      }
+    }
+  }
   "ApiFieldDefinitions" should {
     "marshal json" in {
       objectAsJsonString(fakeApiFieldDefinitionsResponse) shouldBe fieldDefinitionJson

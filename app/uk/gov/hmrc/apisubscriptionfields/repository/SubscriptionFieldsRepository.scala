@@ -61,12 +61,14 @@ class SubscriptionFieldsMongoRepository @Inject() (mongo: MongoComponent, uuidCr
       mongoComponent = mongo,
       domainFormat = JsonFormatters.SubscriptionFieldsJF,
       extraCodecs = Seq(
+        Codecs.playFormatCodec(ApiContext.format),
+        Codecs.playFormatCodec(ApiVersionNbr.format),
         Codecs.playFormatCodec(JsonFormatters.SubscriptionFieldsIdjsonFormat),
         Codecs.playFormatCodec(JsonFormatters.ValidationJF)
       ),
       indexes = Seq(
         IndexModel(
-          ascending(List("clientId", "apiContext", "apiVersionNbr"): _*),
+          ascending(List("clientId", "apiContext", "apiVersion"): _*),
           IndexOptions()
             .name("clientId-apiContext-apiVersion_Index")
             .unique(true)
@@ -93,7 +95,7 @@ class SubscriptionFieldsMongoRepository @Inject() (mongo: MongoComponent, uuidCr
     val query = and(
       equal("clientId", Codecs.toBson(clientId.value)),
       equal("apiContext", Codecs.toBson(apiContext.value)),
-      equal("apiVersionNbr", Codecs.toBson(apiVersionNbr.value))
+      equal("apiVersion", Codecs.toBson(apiVersionNbr.value))
     )
 
     collection.find(query).headOption().flatMap {
@@ -122,7 +124,7 @@ class SubscriptionFieldsMongoRepository @Inject() (mongo: MongoComponent, uuidCr
     val query = and(
       equal("clientId", Codecs.toBson(clientId.value)),
       equal("apiContext", Codecs.toBson(apiContext.value)),
-      equal("apiVersionNbr", Codecs.toBson(apiVersionNbr.value))
+      equal("apiVersion", Codecs.toBson(apiVersionNbr.value))
     )
 
     collection.find(query).headOption()
@@ -146,7 +148,7 @@ class SubscriptionFieldsMongoRepository @Inject() (mongo: MongoComponent, uuidCr
     val query = and(
       equal("clientId", Codecs.toBson(clientId.value)),
       equal("apiContext", Codecs.toBson(apiContext.value)),
-      equal("apiVersionNbr", Codecs.toBson(apiVersionNbr.value))
+      equal("apiVersion", Codecs.toBson(apiVersionNbr.value))
     )
     collection
       .deleteOne(query)

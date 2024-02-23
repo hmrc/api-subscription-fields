@@ -74,8 +74,30 @@ trait JsonFormatters extends NonEmptyListFormatters with AccessRequirementsForma
   implicit val BoxIdJF: Format[BoxId]                                       = Json.valueFormat[BoxId]
   implicit val SubscriptionFieldsIdjsonFormat: Format[SubscriptionFieldsId] = Json.valueFormat[SubscriptionFieldsId]
 
-  implicit val ValidationRuleFormat: OFormat[ValidationRule] = ??? // derived.withTypeTag.oformat(ShortClassName)
-  implicit val ValidationJF: OFormat[ValidationGroup]        = Json.format[ValidationGroup]
+  implicit val RegexValidationRuleFormat: OFormat[RegexValidationRule] = Json.format[RegexValidationRule]
+
+  implicit val ValidationRuleReads: Reads[ValidationRule] = new Reads[ValidationRule] {
+
+    def reads(json: JsValue): JsResult[ValidationRule] = json match {
+      case JsObject(fields) if (fields.keys.size == 1) =>
+        fields.toList.head match {
+          case ("RegexValidationRule", v) => Json.fromJson[RegexValidationRule](v)
+          case ("UrlValidationRule", _)   => JsSuccess(UrlValidationRule)
+          case (k, v)                     => JsError(s"$k is not a valid validation rule")
+        }
+      case _                                           => JsError("Cannot read validation rule")
+    }
+  }
+
+  implicit val ValidationRuleWrites: Writes[ValidationRule] = new Writes[ValidationRule] {
+
+    def writes(o: ValidationRule): JsValue = o match {
+      case r: RegexValidationRule => Json.obj("RegexValidationRule" -> Json.toJson(r))
+      case u @ UrlValidationRule  => Json.obj("UrlValidationRule" -> Json.obj())
+    }
+  }
+
+  implicit val ValidationJF: OFormat[ValidationGroup] = Json.format[ValidationGroup]
 
   implicit val FieldNameFormat: Format[FieldName] = formatRefined[String, FieldNameRegex]
 
@@ -112,10 +134,8 @@ trait JsonFormatters extends NonEmptyListFormatters with AccessRequirementsForma
     }
   }
 
-  implicit val ApiFieldDefinitionsJF: OFormat[ApiFieldDefinitions]                               = Json.format[ApiFieldDefinitions]
-  implicit val BulkApiFieldDefinitionsResponseJF: OFormat[BulkApiFieldDefinitionsResponse]       = Json.format[BulkApiFieldDefinitionsResponse]
-  implicit val SubsFieldValidationResponseJF: OFormat[SubsFieldValidationResponse]               = ??? // derived.withTypeTag.oformat(ShortClassName)
-  implicit val InvalidSubsFieldValidationResponseJF: OFormat[InvalidSubsFieldValidationResponse] = Json.format[InvalidSubsFieldValidationResponse]
+  implicit val ApiFieldDefinitionsJF: OFormat[ApiFieldDefinitions]                         = Json.format[ApiFieldDefinitions]
+  implicit val BulkApiFieldDefinitionsResponseJF: OFormat[BulkApiFieldDefinitionsResponse] = Json.format[BulkApiFieldDefinitionsResponse]
 
   implicit val SubscriptionFieldsJF: OFormat[SubscriptionFields]                         = Json.format[SubscriptionFields]
   implicit val BulkSubscriptionFieldsResponseJF: OFormat[BulkSubscriptionFieldsResponse] = Json.format[BulkSubscriptionFieldsResponse]

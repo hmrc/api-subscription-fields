@@ -23,7 +23,7 @@ import com.google.inject.ImplementedBy
 import org.apache.pekko.stream.Materializer
 import org.mongodb.scala.model.Filters.{and, equal}
 import org.mongodb.scala.model.Indexes.ascending
-import org.mongodb.scala.model.{Filters, IndexModel, IndexOptions}
+import org.mongodb.scala.model.{IndexModel, IndexOptions}
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.mongo.MongoComponent
@@ -52,12 +52,14 @@ class ApiFieldDefinitionsMongoRepository @Inject() (mongo: MongoComponent)(impli
       mongoComponent = mongo,
       domainFormat = JsonFormatters.ApiFieldDefinitionsJF,
       extraCodecs = Seq(
+        Codecs.playFormatCodec(ApiContext.format),
+        Codecs.playFormatCodec(ApiVersionNbr.format),
         Codecs.playFormatCodec(JsonFormatters.ApiFieldDefinitionsJF),
         Codecs.playFormatCodec(JsonFormatters.ValidationJF)
       ),
       indexes = Seq(
         IndexModel(
-          ascending(List("apiContext", "apiVersionNbr"): _*),
+          ascending(List("apiContext", "apiVersion"): _*),
           IndexOptions()
             .name("apiContext-apiVersion_index")
             .background(true)
@@ -68,8 +70,11 @@ class ApiFieldDefinitionsMongoRepository @Inject() (mongo: MongoComponent)(impli
     with ApiFieldDefinitionsRepository
     with ApplicationLogger {
 
+  private def apiContextAndVersionFilter(apiContext: ApiContext, apiVersionNbr: ApiVersionNbr) =
+    and(equal("apiContext", Codecs.toBson(apiContext.value)), equal("apiVersion", Codecs.toBson(apiVersionNbr.value)))
+
   def save(definitions: ApiFieldDefinitions): Future[(ApiFieldDefinitions, IsInsert)] = {
-    val query = and(equal("apiContext", Codecs.toBson(definitions.apiContext.value)), equal("apiVersionNbr", Codecs.toBson(definitions.apiVersionNbr.value)))
+    val query = apiContextAndVersionFilter(definitions.apiContext, definitions.apiVersion)
 
     collection.find(query).headOption().flatMap {
       case Some(_: ApiFieldDefinitions) =>
@@ -91,7 +96,7 @@ class ApiFieldDefinitionsMongoRepository @Inject() (mongo: MongoComponent)(impli
   }
 
   override def fetch(apiContext: ApiContext, apiVersionNbr: ApiVersionNbr): Future[Option[ApiFieldDefinitions]] = {
-    collection.find(Filters.and(equal("apiContext", Codecs.toBson(apiContext.value)), equal("apiVersionNbr", Codecs.toBson(apiVersionNbr.value)))).headOption()
+    collection.find(apiContextAndVersionFilter(apiContext, apiVersionNbr)).headOption()
   }
 
   override def fetchAll(): Future[List[ApiFieldDefinitions]] = {
@@ -100,7 +105,7 @@ class ApiFieldDefinitionsMongoRepository @Inject() (mongo: MongoComponent)(impli
 
   override def delete(apiContext: ApiContext, apiVersionNbr: ApiVersionNbr): Future[Boolean] = {
     collection
-      .deleteOne(Filters.and(equal("apiContext", Codecs.toBson(apiContext.value)), equal("apiVersionNbr", Codecs.toBson(apiVersionNbr.value))))
+      .deleteOne(apiContextAndVersionFilter(apiContext, apiVersionNbr))
       .toFuture()
       .map(_.getDeletedCount > 0)
   }

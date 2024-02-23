@@ -66,7 +66,7 @@ class SubscriptionFieldsRepositorySpec
   private def selector(s: SubscriptionFields) = {
     Filters.and(
       Filters.equal("apiContext", Codecs.toBson(s.apiContext.value)),
-      Filters.equal("apiVersionNbr", Codecs.toBson(s.apiVersionNbr.value)),
+      Filters.equal("apiVersion", Codecs.toBson(s.apiVersion.value)),
       Filters.equal("clientId", Codecs.toBson(s.clientId.value))
     )
   }
@@ -83,7 +83,7 @@ class SubscriptionFieldsRepositorySpec
   }
 
   def saveAtomic(subscriptionFields: SubscriptionFields) =
-    repository.saveAtomic(subscriptionFields.clientId, subscriptionFields.apiContext, subscriptionFields.apiVersionNbr, subscriptionFields.fields)
+    repository.saveAtomic(subscriptionFields.clientId, subscriptionFields.apiContext, subscriptionFields.apiVersion, subscriptionFields.fields)
 
   def validateResult(result: (SubscriptionFields, IsInsert), expectedSubscriptionFields: SubscriptionFields, expectedIsInsert: Boolean) = {
     result._2 shouldBe expectedIsInsert
@@ -227,7 +227,7 @@ class SubscriptionFieldsRepositorySpec
       await(saveAtomic(apiSubscription))
       collectionSize shouldBe 1
 
-      await(repository.delete(apiSubscription.clientId, apiSubscription.apiContext, apiSubscription.apiVersionNbr)) shouldBe true
+      await(repository.delete(apiSubscription.clientId, apiSubscription.apiContext, apiSubscription.apiVersion)) shouldBe true
       collectionSize shouldBe 0
     }
 
@@ -280,7 +280,7 @@ class SubscriptionFieldsRepositorySpec
       await(saveAtomic(apiSubscription))
       collectionSize shouldBe 1
 
-      await(saveByFieldsId(apiSubscription.copy(apiVersionNbr = ApiVersionNbr("2.2"))))
+      await(saveByFieldsId(apiSubscription.copy(apiVersion = ApiVersionNbr("2.2"))))
       collectionSize shouldBe 1
     }
 

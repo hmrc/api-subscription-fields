@@ -58,8 +58,8 @@ class SubscriptionFieldsServiceSpec extends AsyncHmrcSpec with SubscriptionField
 
       val expectedResponse: BulkSubscriptionFieldsResponse = BulkSubscriptionFieldsResponse(subscriptions =
         List(
-          SubscriptionFields(sf1.clientId, sf1.apiContext, sf1.apiVersionNbr, sf1.fieldsId, sf1.fields),
-          SubscriptionFields(sf2.clientId, sf2.apiContext, sf2.apiVersionNbr, sf2.fieldsId, sf2.fields)
+          SubscriptionFields(sf1.clientId, sf1.apiContext, sf1.apiVersion, sf1.fieldsId, sf1.fields),
+          SubscriptionFields(sf2.clientId, sf2.apiContext, sf2.apiVersion, sf2.fieldsId, sf2.fields)
         )
       )
 
@@ -84,8 +84,8 @@ class SubscriptionFieldsServiceSpec extends AsyncHmrcSpec with SubscriptionField
       result shouldBe Some(
         BulkSubscriptionFieldsResponse(subscriptions =
           Seq(
-            SubscriptionFields(sf1.clientId, sf1.apiContext, sf1.apiVersionNbr, sf1.fieldsId, sf1.fields),
-            SubscriptionFields(sf2.clientId, sf2.apiContext, sf2.apiVersionNbr, sf2.fieldsId, sf2.fields)
+            SubscriptionFields(sf1.clientId, sf1.apiContext, sf1.apiVersion, sf1.fieldsId, sf1.fields),
+            SubscriptionFields(sf2.clientId, sf2.apiContext, sf2.apiVersion, sf2.fieldsId, sf2.fields)
           )
         )
       )

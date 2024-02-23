@@ -125,7 +125,7 @@ class ApiFieldDefinitionsRepositorySpec
       await(repository.save(definitions))
       collectionSize shouldBe 1
 
-      await(repository.delete(definitions.apiContext, definitions.apiVersionNbr)) shouldBe true
+      await(repository.delete(definitions.apiContext, definitions.apiVersion)) shouldBe true
       collectionSize shouldBe 0
     }
 
@@ -139,7 +139,7 @@ class ApiFieldDefinitionsRepositorySpec
   }
 
   "collection" should {
-    "have a unique compound index based on `apiContext` and `apiVersionNbr`" in new Setup {
+    "have a unique compound index based on `apiContext` and `apiVersion`" in new Setup {
 
       await(repository.save(definitions))
       collectionSize shouldBe 1
@@ -150,6 +150,6 @@ class ApiFieldDefinitionsRepositorySpec
   }
 
   private def selector(fd: ApiFieldDefinitions) = {
-    Filters.and(Filters.equal("apiContext", Codecs.toBson(fd.apiContext.value)), Filters.equal("apiVersionNbr", Codecs.toBson(fd.apiVersionNbr.value)))
+    Filters.and(Filters.equal("apiContext", Codecs.toBson(fd.apiContext.value)), Filters.equal("apiVersion", Codecs.toBson(fd.apiVersion.value)))
   }
 }

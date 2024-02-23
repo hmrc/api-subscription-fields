@@ -35,7 +35,7 @@ class ApiFieldDefinitionsControllerGetSpec extends AsyncHmrcSpec with FieldDefin
   private val responseJsonString =
     """{
       |  "apiContext": "hello",
-      |  "apiVersionNbr": "1.0",
+      |  "apiVersion": "1.0",
       |  "fieldDefinitions": [
       |    {
       |      "name": "callbackUrl",
@@ -76,7 +76,7 @@ class ApiFieldDefinitionsControllerGetSpec extends AsyncHmrcSpec with FieldDefin
       |  "apis": [
       |    {
       |      "apiContext": "hello",
-      |      "apiVersionNbr": "1.0",
+      |      "apiVersion": "1.0",
       |      "fieldDefinitions": [
       |        {
       |          "name": "callbackUrl",
@@ -116,7 +116,7 @@ class ApiFieldDefinitionsControllerGetSpec extends AsyncHmrcSpec with FieldDefin
       |    },
       |    {
       |      "apiContext": "ciao",
-      |      "apiVersionNbr": "2.0",
+      |      "apiVersion": "2.0",
       |      "fieldDefinitions": [
       |        {
       |          "name": "address",

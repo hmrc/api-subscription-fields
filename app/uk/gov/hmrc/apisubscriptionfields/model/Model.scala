@@ -89,6 +89,6 @@ case class FieldDefinition(
     access: AccessRequirements = AccessRequirements.Default
   )
 
-case class ApiFieldDefinitions(apiContext: ApiContext, apiVersionNbr: ApiVersionNbr, fieldDefinitions: NEL[FieldDefinition])
+case class ApiFieldDefinitions(apiContext: ApiContext, apiVersion: ApiVersionNbr, fieldDefinitions: NEL[FieldDefinition])
 
-case class SubscriptionFields(clientId: ClientId, apiContext: ApiContext, apiVersionNbr: ApiVersionNbr, fieldsId: SubscriptionFieldsId, fields: Fields)
+case class SubscriptionFields(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersionNbr, fieldsId: SubscriptionFieldsId, fields: Fields)

@@ -19,6 +19,8 @@ package uk.gov.hmrc.apisubscriptionfields
 import java.util.UUID
 import scala.concurrent.Future
 
+import uk.gov.hmrc.apiplatform.modules.common.domain.models._
+
 import uk.gov.hmrc.apisubscriptionfields.model.Types._
 import uk.gov.hmrc.apisubscriptionfields.model._
 
@@ -70,7 +72,7 @@ trait SubscriptionFieldsTestData extends FieldDefinitionTestData with Validation
   // TODO sort this
   def createSubscriptionFieldsWithApiContext(clientId: ClientId = FakeClientId, rawContext: String = fakeRawContext) = {
     val subscriptionFields: Fields = Map(fieldN(1) -> "value_1", fieldN(2) -> "value_2", fieldN(3) -> "value_3")
-    SubscriptionFields(clientId, ApiContext(rawContext), ApiVersion(fakeRawVersion), FakeFieldsId, subscriptionFields)
+    SubscriptionFields(clientId, ApiContext(rawContext), ApiVersionNbr(fakeRawVersion), FakeFieldsId, subscriptionFields)
   }
 
   def uniqueClientId = ClientId(UUID.randomUUID().toString)

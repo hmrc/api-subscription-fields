@@ -38,7 +38,7 @@ class SubscriptionFieldsControllerGetSpec extends AsyncHmrcSpec with Subscriptio
     """{
       |  "clientId": "b624ef7f-8fb5-4ae1-add5-168ebc9fdfcc",
       |  "apiContext": "ciao-api",
-      |  "apiVersion": "1.0",
+      |  "apiVersionNbr": "1.0",
       |  "fieldsId":"327d9145-4965-4d28-a2c5-39dedee50334",
       |  "fields":{
       |    "callbackId":"http://localhost",
@@ -54,7 +54,7 @@ class SubscriptionFieldsControllerGetSpec extends AsyncHmrcSpec with Subscriptio
       |    {
       |      "clientId": "b624ef7f-8fb5-4ae1-add5-168ebc9fdfcc",
       |      "apiContext": "ciao-api",
-      |      "apiVersion": "1.0",
+      |      "apiVersionNbr": "1.0",
       |      "fieldsId": "327d9145-4965-4d28-a2c5-39dedee50334",
       |      "fields": {
       |        "callbackId": "http://localhost",
@@ -64,7 +64,7 @@ class SubscriptionFieldsControllerGetSpec extends AsyncHmrcSpec with Subscriptio
       |    {
       |      "clientId": "b624ef7f-8fb5-4ae1-add5-168ebc9fdfcc",
       |      "apiContext": "ciao-api",
-      |      "apiVersion": "2.0",
+      |      "apiVersionNbr": "2.0",
       |      "fieldsId": "327d9145-4965-4d28-a2c5-39dedee50335",
       |      "fields": {
       |        "callbackId": "https://application.sage.com/return-route",

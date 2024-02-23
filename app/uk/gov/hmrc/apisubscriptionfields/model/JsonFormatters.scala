@@ -71,14 +71,11 @@ trait AccessRequirementsFormatters {
 object AccessRequirementsFormatters extends AccessRequirementsFormatters
 
 trait JsonFormatters extends NonEmptyListFormatters with AccessRequirementsFormatters with DefaultReads with DefaultWrites with RefinedJson {
-  implicit val ClientIdJF: Format[ClientId]                                 = Json.valueFormat[ClientId]
   implicit val BoxIdJF: Format[BoxId]                                       = Json.valueFormat[BoxId]
   implicit val SubscriptionFieldsIdjsonFormat: Format[SubscriptionFieldsId] = Json.valueFormat[SubscriptionFieldsId]
-  implicit val ApiContextJF: Format[ApiContext]                             = Json.valueFormat[ApiContext]
-  implicit val ApiVersionJF: Format[ApiVersion]                             = Json.valueFormat[ApiVersion]
 
   implicit val ValidationRuleFormat: OFormat[ValidationRule] = ??? // derived.withTypeTag.oformat(ShortClassName)
-  implicit val ValidationJF: OFormat[ValidationGroup] = Json.format[ValidationGroup]
+  implicit val ValidationJF: OFormat[ValidationGroup]        = Json.format[ValidationGroup]
 
   implicit val FieldNameFormat: Format[FieldName] = formatRefined[String, FieldNameRegex]
 

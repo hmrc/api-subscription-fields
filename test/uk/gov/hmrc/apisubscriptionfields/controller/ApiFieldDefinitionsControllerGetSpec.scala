@@ -35,7 +35,7 @@ class ApiFieldDefinitionsControllerGetSpec extends AsyncHmrcSpec with FieldDefin
   private val responseJsonString =
     """{
       |  "apiContext": "hello",
-      |  "apiVersion": "1.0",
+      |  "apiVersionNbr": "1.0",
       |  "fieldDefinitions": [
       |    {
       |      "name": "callbackUrl",
@@ -76,7 +76,7 @@ class ApiFieldDefinitionsControllerGetSpec extends AsyncHmrcSpec with FieldDefin
       |  "apis": [
       |    {
       |      "apiContext": "hello",
-      |      "apiVersion": "1.0",
+      |      "apiVersionNbr": "1.0",
       |      "fieldDefinitions": [
       |        {
       |          "name": "callbackUrl",
@@ -116,7 +116,7 @@ class ApiFieldDefinitionsControllerGetSpec extends AsyncHmrcSpec with FieldDefin
       |    },
       |    {
       |      "apiContext": "ciao",
-      |      "apiVersion": "2.0",
+      |      "apiVersionNbr": "2.0",
       |      "fieldDefinitions": [
       |        {
       |          "name": "address",
@@ -150,7 +150,7 @@ class ApiFieldDefinitionsControllerGetSpec extends AsyncHmrcSpec with FieldDefin
   private val allResponseModel      = allResponseJson.as[BulkApiFieldDefinitionsResponse]
   private val emptyAllResponseJson  = Json.toJson(BulkApiFieldDefinitionsResponse(Seq()))
 
-  "GET /definition/context/:apiContext/version/:apiVersion" should {
+  "GET /definition/context/:apiContext/version/:apiVersionNbr" should {
     "return OK when the expected record exists in the repo" in {
       when(mockFieldsDefinitionService.get(FakeContext, FakeVersion)).thenReturn(successful(Some(responseModel)))
 

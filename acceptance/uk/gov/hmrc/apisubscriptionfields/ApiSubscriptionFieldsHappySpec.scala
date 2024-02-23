@@ -28,6 +28,7 @@ import scala.concurrent.Future
 import scala.concurrent.Await
 import scala.concurrent.duration._
 import uk.gov.hmrc.apisubscriptionfields.utils.ApplicationLogger
+import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 
 class ApiSubscriptionFieldsHappySpec extends AcceptanceTestSpec
   with OptionValues
@@ -78,7 +79,7 @@ class ApiSubscriptionFieldsHappySpec extends AcceptanceTestSpec
       val fieldsId = sfr.get.fieldsId
 
       sfr.isSuccess shouldBe true
-      sfr.get shouldBe SubscriptionFields(FakeClientId, ApiContext("acontext"), ApiVersion("1.0.2"), fieldsId, SampleFields1)
+      sfr.get shouldBe SubscriptionFields(FakeClientId, ApiContext("acontext"), ApiVersionNbr("1.0.2"), fieldsId, SampleFields1)
     }
 
     def createSubscriptionFieldsRequest(): FakeRequest[AnyContentAsJson] = {
@@ -111,7 +112,7 @@ class ApiSubscriptionFieldsHappySpec extends AcceptanceTestSpec
       val fieldsId = sfr.get.fieldsId
 
       sfr.isSuccess shouldBe true
-      sfr.get shouldBe SubscriptionFields(FakeClientId, ApiContext("acontext"), ApiVersion("1.0.2"), fieldsId, SampleFields1)
+      sfr.get shouldBe SubscriptionFields(FakeClientId, ApiContext("acontext"), ApiVersionNbr("1.0.2"), fieldsId, SampleFields1)
     }
 
     Scenario("the API is called to GET all existing subscription fields") {
@@ -135,7 +136,7 @@ class ApiSubscriptionFieldsHappySpec extends AcceptanceTestSpec
       val fieldsId = sfr.get.subscriptions.head.fieldsId
 
       sfr.isSuccess shouldBe true
-      sfr.get shouldBe BulkSubscriptionFieldsResponse(Seq(SubscriptionFields(FakeClientId, ApiContext("acontext"), ApiVersion("1.0.2"), fieldsId, SampleFields1)))
+      sfr.get shouldBe BulkSubscriptionFieldsResponse(Seq(SubscriptionFields(FakeClientId, ApiContext("acontext"), ApiVersionNbr("1.0.2"), fieldsId, SampleFields1)))
     }
 
     Scenario("the API is called to GET with a known fieldsId") {
@@ -175,7 +176,7 @@ class ApiSubscriptionFieldsHappySpec extends AcceptanceTestSpec
       val sfrFieldsId = contentAsJson(resultFuture).validate[SubscriptionFields]
 
       sfrFieldsId.isSuccess shouldBe true
-      sfrFieldsId.get shouldBe SubscriptionFields(FakeClientId, ApiContext("acontext"), ApiVersion("1.0.2"), fieldsId, SampleFields1)
+      sfrFieldsId.get shouldBe SubscriptionFields(FakeClientId, ApiContext("acontext"), ApiVersionNbr("1.0.2"), fieldsId, SampleFields1)
     }
 
     Scenario("the API is called to GET existing subscription fields by application clientId") {
@@ -200,7 +201,7 @@ class ApiSubscriptionFieldsHappySpec extends AcceptanceTestSpec
       val fieldsId = sfr.get.subscriptions.head.fieldsId
 
       sfr.isSuccess shouldBe true
-      sfr.get shouldBe BulkSubscriptionFieldsResponse(Seq(SubscriptionFields(FakeClientId, ApiContext("acontext"), ApiVersion("1.0.2"), fieldsId, SampleFields1)))
+      sfr.get shouldBe BulkSubscriptionFieldsResponse(Seq(SubscriptionFields(FakeClientId, ApiContext("acontext"), ApiVersionNbr("1.0.2"), fieldsId, SampleFields1)))
     }
 
     Scenario("the API is called to update existing subscription fields") {
@@ -224,7 +225,7 @@ class ApiSubscriptionFieldsHappySpec extends AcceptanceTestSpec
       val fieldsId = sfr.get.fieldsId
 
       sfr.isSuccess shouldBe true
-      sfr.get shouldBe SubscriptionFields(FakeClientId, ApiContext("acontext"), ApiVersion("1.0.2"), fieldsId, SampleFields2)
+      sfr.get shouldBe SubscriptionFields(FakeClientId, ApiContext("acontext"), ApiVersionNbr("1.0.2"), fieldsId, SampleFields2)
     }
 
     Scenario("the API is called to DELETE existing subscription fields") {

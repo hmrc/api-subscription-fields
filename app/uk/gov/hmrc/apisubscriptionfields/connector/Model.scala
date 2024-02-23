@@ -16,7 +16,9 @@
 
 package uk.gov.hmrc.apisubscriptionfields.connector
 
-import uk.gov.hmrc.apisubscriptionfields.model.{BoxId, ClientId}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.ClientId
+
+import uk.gov.hmrc.apisubscriptionfields.model.BoxId
 
 private[connector] case class CreateBoxRequest(boxName: String, clientId: ClientId)
 

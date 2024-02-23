@@ -19,12 +19,13 @@ package uk.gov.hmrc.apisubscriptionfields.repository
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
-import org.apache.pekko.stream.Materializer
 import com.google.inject.ImplementedBy
+import org.apache.pekko.stream.Materializer
 import org.mongodb.scala.model.Filters.{and, equal}
 import org.mongodb.scala.model.Indexes.ascending
 import org.mongodb.scala.model.{Filters, IndexModel, IndexOptions}
 
+import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.play.json.{Codecs, PlayMongoRepository}
 
@@ -37,11 +38,11 @@ trait ApiFieldDefinitionsRepository {
 
   def save(definitions: ApiFieldDefinitions): Future[(ApiFieldDefinitions, IsInsert)]
 
-  def fetch(apiContext: ApiContext, apiVersion: ApiVersion): Future[Option[ApiFieldDefinitions]]
+  def fetch(apiContext: ApiContext, apiVersionNbr: ApiVersionNbr): Future[Option[ApiFieldDefinitions]]
 
   def fetchAll(): Future[List[ApiFieldDefinitions]]
 
-  def delete(apiContext: ApiContext, apiVersion: ApiVersion): Future[Boolean]
+  def delete(apiContext: ApiContext, apiVersionNbr: ApiVersionNbr): Future[Boolean]
 }
 
 @Singleton
@@ -51,14 +52,12 @@ class ApiFieldDefinitionsMongoRepository @Inject() (mongo: MongoComponent)(impli
       mongoComponent = mongo,
       domainFormat = JsonFormatters.ApiFieldDefinitionsJF,
       extraCodecs = Seq(
-        Codecs.playFormatCodec(JsonFormatters.ApiContextJF),
-        Codecs.playFormatCodec(JsonFormatters.ApiVersionJF),
         Codecs.playFormatCodec(JsonFormatters.ApiFieldDefinitionsJF),
         Codecs.playFormatCodec(JsonFormatters.ValidationJF)
       ),
       indexes = Seq(
         IndexModel(
-          ascending(List("apiContext", "apiVersion"): _*),
+          ascending(List("apiContext", "apiVersionNbr"): _*),
           IndexOptions()
             .name("apiContext-apiVersion_index")
             .background(true)
@@ -70,7 +69,7 @@ class ApiFieldDefinitionsMongoRepository @Inject() (mongo: MongoComponent)(impli
     with ApplicationLogger {
 
   def save(definitions: ApiFieldDefinitions): Future[(ApiFieldDefinitions, IsInsert)] = {
-    val query = and(equal("apiContext", Codecs.toBson(definitions.apiContext.value)), equal("apiVersion", Codecs.toBson(definitions.apiVersion.value)))
+    val query = and(equal("apiContext", Codecs.toBson(definitions.apiContext.value)), equal("apiVersionNbr", Codecs.toBson(definitions.apiVersionNbr.value)))
 
     collection.find(query).headOption().flatMap {
       case Some(_: ApiFieldDefinitions) =>
@@ -91,17 +90,17 @@ class ApiFieldDefinitionsMongoRepository @Inject() (mongo: MongoComponent)(impli
     }
   }
 
-  override def fetch(apiContext: ApiContext, apiVersion: ApiVersion): Future[Option[ApiFieldDefinitions]] = {
-    collection.find(Filters.and(equal("apiContext", Codecs.toBson(apiContext.value)), equal("apiVersion", Codecs.toBson(apiVersion.value)))).headOption()
+  override def fetch(apiContext: ApiContext, apiVersionNbr: ApiVersionNbr): Future[Option[ApiFieldDefinitions]] = {
+    collection.find(Filters.and(equal("apiContext", Codecs.toBson(apiContext.value)), equal("apiVersionNbr", Codecs.toBson(apiVersionNbr.value)))).headOption()
   }
 
   override def fetchAll(): Future[List[ApiFieldDefinitions]] = {
     collection.find().toFuture().map(_.toList)
   }
 
-  override def delete(apiContext: ApiContext, apiVersion: ApiVersion): Future[Boolean] = {
+  override def delete(apiContext: ApiContext, apiVersionNbr: ApiVersionNbr): Future[Boolean] = {
     collection
-      .deleteOne(Filters.and(equal("apiContext", Codecs.toBson(apiContext.value)), equal("apiVersion", Codecs.toBson(apiVersion.value))))
+      .deleteOne(Filters.and(equal("apiContext", Codecs.toBson(apiContext.value)), equal("apiVersionNbr", Codecs.toBson(apiVersionNbr.value))))
       .toFuture()
       .map(_.getDeletedCount > 0)
   }

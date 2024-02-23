@@ -41,7 +41,7 @@ class SubscriptionFieldsControllerPutSpec extends AsyncHmrcSpec with Subscriptio
     when(mockSubscriptionFieldsService.upsert(eqTo(FakeClientId), eqTo(FakeContext), eqTo(FakeVersion), eqTo(FakeSubscriptionFields))(*)).thenReturn(successful(response))
   }
 
-  "PUT /field/application/:clientId/context/:apiContext/version/:apiVersion" should {
+  "PUT /field/application/:clientId/context/:apiContext/version/:apiVersionNbr" should {
     "return CREATED when Field values are Valid and created in the repo" in {
       subsFieldServiceUpsertReturns(SuccessfulSubsFieldsUpsertResponse(FakeSubscriptionFieldsResponse, true))
 

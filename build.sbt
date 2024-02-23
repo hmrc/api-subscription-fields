@@ -61,8 +61,10 @@ lazy val microservice = Project(appName, file("."))
   .settings(
     routesImport ++= Seq(
       "uk.gov.hmrc.apisubscriptionfields.model._",
+      "uk.gov.hmrc.apiplatform.modules.common.domain.models._",
       "uk.gov.hmrc.apisubscriptionfields.controller.Binders._"
     )
+
   )
   .settings(
     libraryDependencies ++= AppDependencies(),

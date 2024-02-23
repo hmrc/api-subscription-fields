@@ -19,6 +19,7 @@ package uk.gov.hmrc.apisubscriptionfields.model
 import eu.timepit.refined._
 import eu.timepit.refined.api.Refined
 import eu.timepit.refined.string._
+import scala.collection.immutable.Map
 
 object Types {
   type RegexExpr = String Refined Regex

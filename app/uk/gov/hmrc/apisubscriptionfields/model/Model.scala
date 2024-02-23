@@ -74,7 +74,7 @@ object FieldDefinitionType {
     case STRING       => "STRING"
     case PPNS_FIELD   => "PPNSField"
   }
-  Format
+  
   implicit val format: Format[FieldDefinitionType] = SealedTraitJsonFormatting.createFormatFor[FieldDefinitionType]("Field Definition Type", apply, label)
 }
 

@@ -6,17 +6,16 @@ object AppDependencies {
 
   private lazy val mongoVersion     = "1.7.0"
   private lazy val bootstrapVersion = "8.4.0"
-  val commonDomainVersion           = "0.10.0"
+  val commonDomainVersion           = "0.12.0-SNAPSHOT"
 
   private lazy val dependencies = Seq(
     "uk.gov.hmrc"       %% "bootstrap-backend-play-30"  % bootstrapVersion,
     "uk.gov.hmrc.mongo" %% "hmrc-mongo-play-30"         % mongoVersion,
-    "org.julienrf"      %% "play-json-derived-codecs"   % "10.1.0",
-    "com.typesafe.play" %% "play-json"                  % "2.9.2",
+    // "org.julienrf"      %% "play-json-derived-codecs"   % "10.1.0",
+    // "com.typesafe.play" %% "play-json"                  % "2.9.2",
     "uk.gov.hmrc"       %% "http-metrics"               % "2.8.0",
     "org.typelevel"     %% "cats-core"                  % "2.9.0",
     "eu.timepit"        %% "refined"                    % "0.10.2",
-    "be.venneborg"      %% "play28-refined"             % "0.6.0",
     "commons-validator"  % "commons-validator"          % "1.6",
     "uk.gov.hmrc"       %% "api-platform-common-domain" % commonDomainVersion
   )

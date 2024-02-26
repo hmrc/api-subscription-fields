@@ -55,12 +55,12 @@ trait AcceptanceTestSpec extends AnyFeatureSpec
 
   protected val InvalidNonJsonPayload = "##INVALID_JSON_PAYLOAD##"
 
-  protected def subscriptionFieldsEndpoint(clientId: String, apiContext: String, apiVersion: String) =
-    s"/field/application/$clientId/context/$apiContext/version/$apiVersion"
+  protected def subscriptionFieldsEndpoint(clientId: String, apiContext: String, apiVersionNbr: String) =
+    s"/field/application/$clientId/context/$apiContext/version/$apiVersionNbr"
 
   protected def byClientIdEndpoint(clientId: String) = s"/field/application/$clientId"
 
-  protected def definitionEndpoint(apiContext: String, apiVersion: String) = s"/definition/context/$apiContext/version/$apiVersion"
+  protected def definitionEndpoint(apiContext: String, apiVersionNbr: String) = s"/definition/context/$apiContext/version/$apiVersionNbr"
 
   protected def fieldsIdEndpoint(fieldsId: UUID) = s"/field/$fieldsId"
 
@@ -77,8 +77,8 @@ trait AcceptanceTestSpec extends AnyFeatureSpec
     FakeRequest().withHeaders(RequestHeaders.ACCEPT_HMRC_JSON_HEADER, RequestHeaders.CONTENT_TYPE_HEADER)
   }
 
-  protected def fieldsEndpoint(clientId: String, apiContext: String, apiVersion: String) =
-    s"/field/application/$clientId/context/$apiContext/version/$apiVersion"
+  protected def fieldsEndpoint(clientId: String, apiContext: String, apiVersionNbr: String) =
+    s"/field/application/$clientId/context/$apiContext/version/$apiVersionNbr"
 
   override def fakeApplication(): Application = new GuiceApplicationBuilder().configure(Map(
     "metrics.jvm" -> false,

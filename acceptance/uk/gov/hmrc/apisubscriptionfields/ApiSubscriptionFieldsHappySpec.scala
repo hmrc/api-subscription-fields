@@ -28,8 +28,7 @@ import scala.concurrent.Future
 import scala.concurrent.Await
 import scala.concurrent.duration._
 import uk.gov.hmrc.apisubscriptionfields.utils.ApplicationLogger
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApiContext
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApiVersionNbr
+import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 
 class ApiSubscriptionFieldsHappySpec extends AcceptanceTestSpec
   with OptionValues

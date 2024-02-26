@@ -19,7 +19,7 @@ package uk.gov.hmrc.apisubscriptionfields.service
 import java.{util => ju}
 import scala.concurrent.Future.{failed, successful}
 
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApiContext, ApiVersionNbr, ClientId}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apisubscriptionfields.connector.PushPullNotificationServiceConnector
@@ -28,10 +28,10 @@ import uk.gov.hmrc.apisubscriptionfields.{AsyncHmrcSpec, FieldDefinitionTestData
 
 class PushPullNotificationServiceSpec extends AsyncHmrcSpec with SubscriptionFieldsTestData with FieldDefinitionTestData {
 
-  val boxId: BoxId              = BoxId(ju.UUID.randomUUID())
-  val clientId: ClientId        = ClientId(ju.UUID.randomUUID().toString)
-  val apiContext: ApiContext    = ApiContext("aContext")
-  val apiVersion: ApiVersionNbr = ApiVersionNbr("aVersion")
+  val boxId: BoxId                 = BoxId(ju.UUID.randomUUID())
+  val clientId: ClientId           = ClientId(ju.UUID.randomUUID().toString)
+  val apiContext: ApiContext       = ApiContext("aContext")
+  val apiVersionNbr: ApiVersionNbr = ApiVersionNbr("aVersion")
 
   trait Setup {
     val mockPPNSConnector: PushPullNotificationServiceConnector = mock[PushPullNotificationServiceConnector]
@@ -43,12 +43,12 @@ class PushPullNotificationServiceSpec extends AsyncHmrcSpec with SubscriptionFie
 
   "creating PPNS box when needed" should {
     val ppnsFieldName     = fieldN(1)
-    val expectedTopicName = s"${apiContext.value}##${apiVersion.value}##$ppnsFieldName"
+    val expectedTopicName = s"${apiContext.value}##${apiVersionNbr.value}##$ppnsFieldName"
 
     "succeed when box is created" in new Setup {
       when(mockPPNSConnector.ensureBoxIsCreated(eqTo(expectedTopicName), eqTo(clientId))(*)).thenReturn(successful(boxId))
 
-      val result = await(service.ensureBoxIsCreated(clientId, apiContext, apiVersion, ppnsFieldName))
+      val result = await(service.ensureBoxIsCreated(clientId, apiContext, apiVersionNbr, ppnsFieldName))
 
       result shouldBe boxId
     }
@@ -57,7 +57,7 @@ class PushPullNotificationServiceSpec extends AsyncHmrcSpec with SubscriptionFie
       when(mockPPNSConnector.ensureBoxIsCreated(eqTo(expectedTopicName), eqTo(clientId))(*)).thenReturn(failed(new RuntimeException))
 
       intercept[RuntimeException] {
-        await(service.ensureBoxIsCreated(clientId, apiContext, apiVersion, ppnsFieldName))
+        await(service.ensureBoxIsCreated(clientId, apiContext, apiVersionNbr, ppnsFieldName))
       }
     }
   }

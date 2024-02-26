@@ -24,8 +24,7 @@ import cats.data.NonEmptyList
 import cats.data.{NonEmptyList => NEL}
 import cats.implicits._
 
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApiContext, ApiVersionNbr, ClientId}
-import uk.gov.hmrc.apiplatform.modules.common.services.EitherTHelper
+import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apisubscriptionfields.model.Types._
@@ -40,13 +39,13 @@ class SubscriptionFieldsService @Inject() (
   )(implicit ec: ExecutionContext
   ) {
 
-  def upsert(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersionNbr, newFields: Fields)(implicit hc: HeaderCarrier): Future[SubsFieldsUpsertResponse] = {
+  def upsert(clientId: ClientId, apiContext: ApiContext, apiVersionNbr: ApiVersionNbr, newFields: Fields)(implicit hc: HeaderCarrier): Future[SubsFieldsUpsertResponse] = {
     def findPpnsField(fieldDefinitions: NEL[FieldDefinition]): Option[FieldDefinition] = fieldDefinitions.find(_.`type` == FieldDefinitionType.PPNS_FIELD)
 
     def handleAnyPpnsSubscriptionRequired(
         clientId: ClientId,
         apiContext: ApiContext,
-        apiVersion: ApiVersionNbr,
+        apiVersionNbr: ApiVersionNbr,
         fieldDefinitions: NEL[FieldDefinition],
         existingFields: Option[SubscriptionFields]
       )(implicit
@@ -59,7 +58,7 @@ class SubscriptionFieldsService @Inject() (
           newFields.get(fieldName) match {
             case Some(newFieldValue) =>
               for {
-                boxId                  <- pushPullNotificationService.ensureBoxIsCreated(clientId, apiContext, apiVersion, fieldName)
+                boxId                  <- pushPullNotificationService.ensureBoxIsCreated(clientId, apiContext, apiVersionNbr, fieldName)
                 fieldValueHasNotChanged = existingFields.map(_.fields.get(fieldName).contains(newFieldValue)).getOrElse(false)
                 result                 <- if (fieldValueHasNotChanged) successful(Right(()))
                                           else pushPullNotificationService.updateCallbackUrl(clientId, boxId, newFieldValue)
@@ -86,9 +85,9 @@ class SubscriptionFieldsService @Inject() (
     }
 
     def upsertIfFieldsHaveChanged(anyExistingFields: Option[SubscriptionFields]) = {
-      def upsertSubscriptionFields(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersionNbr, fields: Fields): Future[SuccessfulSubsFieldsUpsertResponse] = {
+      def upsertSubscriptionFields(clientId: ClientId, apiContext: ApiContext, apiVersionNbr: ApiVersionNbr, fields: Fields): Future[SuccessfulSubsFieldsUpsertResponse] = {
         subscriptionFieldsRepository
-          .saveAtomic(clientId, apiContext, apiVersion, fields)
+          .saveAtomic(clientId, apiContext, apiVersionNbr, fields)
           .map(result => SuccessfulSubsFieldsUpsertResponse(result._1, result._2))
       }
 
@@ -96,13 +95,13 @@ class SubscriptionFieldsService @Inject() (
         case Some(existingFields) if (existingFields.fields == newFields) =>
           successful(SuccessfulSubsFieldsUpsertResponse(existingFields, false))
         case _                                                            =>
-          upsertSubscriptionFields(clientId, apiContext, apiVersion, newFields)
+          upsertSubscriptionFields(clientId, apiContext, apiVersionNbr, newFields)
       }
     }
 
     (for {
-      anyFieldDefinitions <- apiFieldDefinitionsService.get(apiContext, apiVersion).map(_.map(_.fieldDefinitions))
-      anyExistingFields   <- subscriptionFieldsRepository.fetch(clientId, apiContext, apiVersion)
+      anyFieldDefinitions <- apiFieldDefinitionsService.get(apiContext, apiVersionNbr).map(_.map(_.fieldDefinitions))
+      anyExistingFields   <- subscriptionFieldsRepository.fetch(clientId, apiContext, apiVersionNbr)
     } yield (anyFieldDefinitions, anyExistingFields))
       .flatMap(_ match {
         case (None, Some(existingFields)) if (existingFields.fields == newFields) => successful(SuccessfulSubsFieldsUpsertResponse(existingFields, false))
@@ -112,7 +111,7 @@ class SubscriptionFieldsService @Inject() (
           (
             for {
               _        <- E.fromEither(validateFields(newFields, fieldDefinitions).leftMap(translateValidateError))
-              _        <- E.fromEitherF(handleAnyPpnsSubscriptionRequired(clientId, apiContext, apiVersion, fieldDefinitions, anyExistingFields)
+              _        <- E.fromEitherF(handleAnyPpnsSubscriptionRequired(clientId, apiContext, apiVersionNbr, fieldDefinitions, anyExistingFields)
                             .map(_.leftMap(translatePpnsError(fieldDefinitions))))
               response <- E.liftF(upsertIfFieldsHaveChanged(anyExistingFields))
             } yield response
@@ -121,17 +120,17 @@ class SubscriptionFieldsService @Inject() (
       })
   }
 
-  def delete(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersionNbr): Future[Boolean] = {
-    subscriptionFieldsRepository.delete(clientId, apiContext, apiVersion)
+  def delete(clientId: ClientId, apiContext: ApiContext, apiVersionNbr: ApiVersionNbr): Future[Boolean] = {
+    subscriptionFieldsRepository.delete(clientId, apiContext, apiVersionNbr)
   }
 
   def delete(clientId: ClientId): Future[Boolean] = {
     subscriptionFieldsRepository.delete(clientId)
   }
 
-  def get(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersionNbr): Future[Option[SubscriptionFields]] = {
+  def get(clientId: ClientId, apiContext: ApiContext, apiVersionNbr: ApiVersionNbr): Future[Option[SubscriptionFields]] = {
     for {
-      fetch <- subscriptionFieldsRepository.fetch(clientId, apiContext, apiVersion)
+      fetch <- subscriptionFieldsRepository.fetch(clientId, apiContext, apiVersionNbr)
     } yield fetch
   }
 

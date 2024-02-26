@@ -19,7 +19,7 @@ package uk.gov.hmrc.apisubscriptionfields.controller
 import java.{util => ju}
 
 import play.api.mvc.PathBindable
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApiContext, ApiVersionNbr, ClientId}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 
 import uk.gov.hmrc.apisubscriptionfields.model.SubscriptionFieldsId
 

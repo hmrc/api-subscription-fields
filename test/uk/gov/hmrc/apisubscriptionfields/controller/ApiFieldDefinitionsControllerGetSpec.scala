@@ -150,7 +150,7 @@ class ApiFieldDefinitionsControllerGetSpec extends AsyncHmrcSpec with FieldDefin
   private val allResponseModel      = allResponseJson.as[BulkApiFieldDefinitionsResponse]
   private val emptyAllResponseJson  = Json.toJson(BulkApiFieldDefinitionsResponse(Seq()))
 
-  "GET /definition/context/:apiContext/version/:apiVersion" should {
+  "GET /definition/context/:apiContext/version/:apiVersionNbr" should {
     "return OK when the expected record exists in the repo" in {
       when(mockFieldsDefinitionService.get(FakeContext, FakeVersion)).thenReturn(successful(Some(responseModel)))
 

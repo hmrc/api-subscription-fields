@@ -21,7 +21,7 @@ import java.util.UUID
 import cats.data.NonEmptyList
 import eu.timepit.refined.api.Refined
 
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApiContext, ApiVersionNbr}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 
 import uk.gov.hmrc.apisubscriptionfields.model.DevhubAccessRequirement._
 import uk.gov.hmrc.apisubscriptionfields.model.Types._
@@ -126,10 +126,10 @@ trait FieldDefinitionTestData extends TestData {
 
   def createApiFieldDefinitions(
       apiContext: ApiContext = FakeContext,
-      apiVersion: ApiVersionNbr = FakeVersion,
+      apiVersionNbr: ApiVersionNbr = FakeVersion,
       fieldDefinitions: NonEmptyList[FieldDefinition] = NelOfFieldDefinitions
     ) =
-    ApiFieldDefinitions(apiContext, apiVersion, fieldDefinitions)
+    ApiFieldDefinitions(apiContext, apiVersionNbr, fieldDefinitions)
 
   def uniqueApiContext = ApiContext(UUID.randomUUID().toString)
 }

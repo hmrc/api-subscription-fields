@@ -34,11 +34,6 @@ ThisBuild / semanticdbVersion := scalafixSemanticdb.revision
 
 ThisBuild / libraryDependencySchemes += "org.scala-lang.modules" %% "scala-xml" % VersionScheme.Always
 
-resolvers ++= Seq(
-  Resolver.sonatypeRepo("releases"),
-  Resolver.sonatypeRepo("snapshots")
-)
-
 lazy val plugins: Seq[Plugins] = Seq(PlayScala, SbtAutoBuildPlugin, SbtDistributablesPlugin)
 lazy val playSettings: Seq[Setting[_]] = Seq.empty
 
@@ -69,10 +64,10 @@ lazy val microservice = Project(appName, file("."))
       "uk.gov.hmrc.apiplatform.modules.common.domain.models._",
       "uk.gov.hmrc.apisubscriptionfields.controller.Binders._"
     )
+
   )
   .settings(
     libraryDependencies ++= AppDependencies(),
-    update / evictionWarningOptions := EvictionWarningOptions.default.withWarnScalaVersionEviction(false)
   )
   .settings(
     Test / fork := false,

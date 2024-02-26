@@ -19,7 +19,7 @@ package uk.gov.hmrc.apisubscriptionfields.service
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.Future
 
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApiContext, ApiVersionNbr, ClientId}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apisubscriptionfields.connector.PushPullNotificationServiceConnector
@@ -29,13 +29,13 @@ import uk.gov.hmrc.apisubscriptionfields.model.Types.{FieldName, FieldValue}
 @Singleton
 class PushPullNotificationService @Inject() (ppnsConnector: PushPullNotificationServiceConnector) {
 
-  def makeBoxName(apiContext: ApiContext, apiVersion: ApiVersionNbr, fieldName: FieldName): String = {
+  def makeBoxName(apiContext: ApiContext, apiVersionNbr: ApiVersionNbr, fieldDefinition: FieldDefinition): String = {
     val separator = "##"
-    s"${apiContext.value}${separator}${apiVersion.value}${separator}${fieldName.value}"
+    s"${apiContext.value}${separator}${apiVersionNbr.value}${separator}${fieldName.value}"
   }
 
-  def ensureBoxIsCreated(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersionNbr, fieldName: FieldName)(implicit hc: HeaderCarrier): Future[BoxId] = {
-    ppnsConnector.ensureBoxIsCreated(makeBoxName(apiContext, apiVersion, fieldName), clientId)
+  def ensureBoxIsCreated(clientId: ClientId, apiContext: ApiContext, apiVersionNbr: ApiVersionNbr, fieldName: FieldName)(implicit hc: HeaderCarrier): Future[BoxId] = {
+    ppnsConnector.ensureBoxIsCreated(makeBoxName(apiContext, apiVersionNbr, fieldName), clientId)
   }
 
   def updateCallbackUrl(clientId: ClientId, boxId: BoxId, fieldValue: FieldValue)(implicit hc: HeaderCarrier): Future[Either[String, Unit]] = {

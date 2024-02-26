@@ -17,7 +17,6 @@
 package uk.gov.hmrc.apisubscriptionfields.connector
 
 import play.api.libs.json._
-import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 
 import uk.gov.hmrc.apisubscriptionfields.model.{BoxId, SubscriptionFieldsId}
 

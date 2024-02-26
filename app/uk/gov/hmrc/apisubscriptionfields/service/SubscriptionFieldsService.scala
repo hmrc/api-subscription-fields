@@ -25,6 +25,7 @@ import cats.data.{NonEmptyList => NEL}
 import cats.implicits._
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
+import uk.gov.hmrc.apiplatform.modules.common.services.EitherTHelper
 import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apisubscriptionfields.model.Types._

@@ -29,7 +29,7 @@ import uk.gov.hmrc.apisubscriptionfields.model.Types.{FieldName, FieldValue}
 @Singleton
 class PushPullNotificationService @Inject() (ppnsConnector: PushPullNotificationServiceConnector) {
 
-  def makeBoxName(apiContext: ApiContext, apiVersionNbr: ApiVersionNbr, fieldDefinition: FieldDefinition): String = {
+  def makeBoxName(apiContext: ApiContext, apiVersionNbr: ApiVersionNbr, fieldName: FieldName): String = {
     val separator = "##"
     s"${apiContext.value}${separator}${apiVersionNbr.value}${separator}${fieldName.value}"
   }

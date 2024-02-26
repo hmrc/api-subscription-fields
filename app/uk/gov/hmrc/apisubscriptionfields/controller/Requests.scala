@@ -18,17 +18,16 @@ package uk.gov.hmrc.apisubscriptionfields.controller
 
 import cats.data.NonEmptyList
 
-import uk.gov.hmrc.apisubscriptionfields.model.FieldDefinition
 import uk.gov.hmrc.apisubscriptionfields.model.Types._
+import uk.gov.hmrc.apisubscriptionfields.model.{FieldDefinition, RefinedJson}
 
 private[controller] case class SubscriptionFieldsRequest(fields: Fields)
 
 private[controller] case class FieldDefinitionsRequest(fieldDefinitions: NonEmptyList[FieldDefinition])
 
 object SubscriptionFieldsRequest {
+  import RefinedJson.formatRefined
   import play.api.libs.json._
-  import be.venneborg.refined.play.RefinedJsonFormats._
-  import eu.timepit.refined.auto._
 
   implicit val SubscriptionFieldsRequestJF: OFormat[SubscriptionFieldsRequest] = Json.format[SubscriptionFieldsRequest]
 }

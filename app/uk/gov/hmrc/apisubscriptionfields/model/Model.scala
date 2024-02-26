@@ -20,6 +20,7 @@ import cats.data.{NonEmptyList => NEL}
 import org.apache.commons.validator.routines.{DomainValidator, UrlValidator}
 
 import play.api.libs.json.Format
+import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.domain.services.SealedTraitJsonFormatting
 
 import uk.gov.hmrc.apisubscriptionfields.model.Types._
@@ -68,13 +69,13 @@ object FieldDefinitionType {
 
   def unsafeApply(text: String): FieldDefinitionType = apply(text).getOrElse(throw new RuntimeException(s"$text is not a valid Field Definition Type"))
 
-  def label(fdt: FieldDefinitionType): String      = fdt match {
+  def label(fdt: FieldDefinitionType): String = fdt match {
     case URL          => "URL"
     case SECURE_TOKEN => "SecureToken"
     case STRING       => "STRING"
     case PPNS_FIELD   => "PPNSField"
   }
-  Format
+
   implicit val format: Format[FieldDefinitionType] = SealedTraitJsonFormatting.createFormatFor[FieldDefinitionType]("Field Definition Type", apply, label)
 }
 
@@ -88,6 +89,6 @@ case class FieldDefinition(
     access: AccessRequirements = AccessRequirements.Default
   )
 
-case class ApiFieldDefinitions(apiContext: ApiContext, apiVersion: ApiVersion, fieldDefinitions: NEL[FieldDefinition])
+case class ApiFieldDefinitions(apiContext: ApiContext, apiVersion: ApiVersionNbr, fieldDefinitions: NEL[FieldDefinition])
 
-case class SubscriptionFields(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion, fieldsId: SubscriptionFieldsId, fields: Fields)
+case class SubscriptionFields(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersionNbr, fieldsId: SubscriptionFieldsId, fields: Fields)

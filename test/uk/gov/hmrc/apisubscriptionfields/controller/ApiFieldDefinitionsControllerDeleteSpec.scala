@@ -32,7 +32,7 @@ class ApiFieldDefinitionsControllerDeleteSpec extends AsyncHmrcSpec with FieldDe
   private val mockFieldsDefinitionService = mock[ApiFieldDefinitionsService]
   private val controller                  = new ApiFieldDefinitionsController(stubControllerComponents(), mockFieldsDefinitionService)
 
-  "DELETE /definition/context/:apiContext/version/:apiVersion" should {
+  "DELETE /definition/context/:apiContext/version/:apiVersionNbr" should {
     "return NO_CONTENT (204) when successfully deleted from repo" in {
       when(mockFieldsDefinitionService.delete(FakeContext, FakeVersion)).thenReturn(successful(true))
 

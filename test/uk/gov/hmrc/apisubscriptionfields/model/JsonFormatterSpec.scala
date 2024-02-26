@@ -59,6 +59,29 @@ class JsonFormatterSpec extends AnyWordSpec with Matchers with JsonFormatters wi
     }
   }
 
+  "ValidationGroup" should {
+    import eu.timepit.refined.auto._
+    val singleValidation     = FakeValidation
+    val singleValidationText = """{"errorMessage":"error message","rules":[{"RegexValidationRule":{"regex":".*"}}]}"""
+
+    val dualValidation     = ValidationGroup("error message", NonEmptyList.of(RegexValidationRule("^.{12,50}+$"), UrlValidationRule))
+    val dualValidationText = """{"errorMessage":"error message","rules":[{"RegexValidationRule":{"regex":"^.{12,50}+$"}},{"UrlValidationRule":{}}]}"""
+
+    "marshal json" in {
+      objectAsJsonString(singleValidation) shouldBe singleValidationText
+      objectAsJsonString(dualValidation) shouldBe dualValidationText
+    }
+    "unmarshal text" in {
+      Json.parse(singleValidationText).validate[ValidationGroup] match {
+        case JsSuccess(r, _) => r shouldBe singleValidation
+        case JsError(e)      => fail(s"Should have parsed json text but got $e")
+      }
+      Json.parse(dualValidationText).validate[ValidationGroup] match {
+        case JsSuccess(r, _) => r shouldBe dualValidation
+        case JsError(e)      => fail(s"Should have parsed json text but got $e")
+      }
+    }
+  }
   "ApiFieldDefinitions" should {
     "marshal json" in {
       objectAsJsonString(fakeApiFieldDefinitionsResponse) shouldBe fieldDefinitionJson

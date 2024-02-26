@@ -23,6 +23,7 @@ import scala.concurrent.{ExecutionContext, Future}
 import cats.data.NonEmptyList
 import cats.data.{NonEmptyList => NEL}
 
+import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apisubscriptionfields.model.Types._
@@ -44,16 +45,16 @@ class SubscriptionFieldsService @Inject() (
     }
   }
 
-  private def upsertSubscriptionFields(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion, fields: Fields): Future[SuccessfulSubsFieldsUpsertResponse] = {
+  private def upsertSubscriptionFields(clientId: ClientId, apiContext: ApiContext, apiVersionNbr: ApiVersionNbr, fields: Fields): Future[SuccessfulSubsFieldsUpsertResponse] = {
     repository
-      .saveAtomic(clientId, apiContext, apiVersion, fields)
+      .saveAtomic(clientId, apiContext, apiVersionNbr, fields)
       .map(result => SuccessfulSubsFieldsUpsertResponse(result._1, result._2))
   }
 
   def handlePPNS(
       clientId: ClientId,
       apiContext: ApiContext,
-      apiVersion: ApiVersion,
+      apiVersionNbr: ApiVersionNbr,
       fieldDefinitions: NEL[FieldDefinition],
       fields: Fields
     )(implicit
@@ -64,44 +65,44 @@ class SubscriptionFieldsService @Inject() (
     ppnsFieldDefinition match {
       case Some(fieldDefinition) =>
         val oFieldValue: Option[FieldValue] = fields.get(fieldDefinition.name)
-        pushPullNotificationService.subscribeToPPNS(clientId, apiContext, apiVersion, oFieldValue, fieldDefinition).flatMap {
-          case PPNSCallBackUrlSuccessResponse       => upsertSubscriptionFields(clientId, apiContext, apiVersion, fields)
+        pushPullNotificationService.subscribeToPPNS(clientId, apiContext, apiVersionNbr, oFieldValue, fieldDefinition).flatMap {
+          case PPNSCallBackUrlSuccessResponse       => upsertSubscriptionFields(clientId, apiContext, apiVersionNbr, fields)
           case PPNSCallBackUrlFailedResponse(error) => Future.successful(FailedValidationSubsFieldsUpsertResponse(Map(fieldDefinition.name -> error)))
         }
-      case None                  => upsertSubscriptionFields(clientId, apiContext, apiVersion, fields)
+      case None                  => upsertSubscriptionFields(clientId, apiContext, apiVersionNbr, fields)
     }
 
   }
 
-  def upsert(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion, fields: Fields)(implicit hc: HeaderCarrier): Future[SubsFieldsUpsertResponse] = {
+  def upsert(clientId: ClientId, apiContext: ApiContext, apiVersionNbr: ApiVersionNbr, fields: Fields)(implicit hc: HeaderCarrier): Future[SubsFieldsUpsertResponse] = {
     val foFieldDefinitions: Future[Option[NonEmptyList[FieldDefinition]]] =
-      apiFieldDefinitionsService.get(apiContext, apiVersion).map(_.map(_.fieldDefinitions))
+      apiFieldDefinitionsService.get(apiContext, apiVersionNbr).map(_.map(_.fieldDefinitions))
 
-    get(clientId, apiContext, apiVersion).flatMap(_ match {
+    get(clientId, apiContext, apiVersionNbr).flatMap(_ match {
       case Some(sfields) if (sfields.fields == fields) => Future.successful(SuccessfulSubsFieldsUpsertResponse(sfields, false))
       case _                                           =>
         foFieldDefinitions.flatMap(_ match {
           case None                   => successful(NotFoundSubsFieldsUpsertResponse)
           case Some(fieldDefinitions) =>
             validate(fields, fieldDefinitions) match {
-              case ValidSubsFieldValidationResponse                       => handlePPNS(clientId, apiContext, apiVersion, fieldDefinitions, fields)
+              case ValidSubsFieldValidationResponse                       => handlePPNS(clientId, apiContext, apiVersionNbr, fieldDefinitions, fields)
               case InvalidSubsFieldValidationResponse(fieldErrorMessages) => successful(FailedValidationSubsFieldsUpsertResponse(fieldErrorMessages))
             }
         })
     })
   }
 
-  def delete(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion): Future[Boolean] = {
-    repository.delete(clientId, apiContext, apiVersion)
+  def delete(clientId: ClientId, apiContext: ApiContext, apiVersionNbr: ApiVersionNbr): Future[Boolean] = {
+    repository.delete(clientId, apiContext, apiVersionNbr)
   }
 
   def delete(clientId: ClientId): Future[Boolean] = {
     repository.delete(clientId)
   }
 
-  def get(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion): Future[Option[SubscriptionFields]] = {
+  def get(clientId: ClientId, apiContext: ApiContext, apiVersionNbr: ApiVersionNbr): Future[Option[SubscriptionFields]] = {
     for {
-      fetch <- repository.fetch(clientId, apiContext, apiVersion)
+      fetch <- repository.fetch(clientId, apiContext, apiVersionNbr)
     } yield fetch
   }
 

@@ -20,6 +20,7 @@ import java.{util => ju}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future.{failed, successful}
 
+import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apisubscriptionfields.connector.PushPullNotificationServiceConnector
@@ -29,10 +30,10 @@ import uk.gov.hmrc.apisubscriptionfields.{AsyncHmrcSpec, FieldDefinitionTestData
 
 class PushPullNotificationServiceSpec extends AsyncHmrcSpec with SubscriptionFieldsTestData with FieldDefinitionTestData {
 
-  val boxId: BoxId           = BoxId(ju.UUID.randomUUID())
-  val clientId: ClientId     = ClientId(ju.UUID.randomUUID().toString)
-  val apiContext: ApiContext = ApiContext("aContext")
-  val apiVersion: ApiVersion = ApiVersion("aVersion")
+  val boxId: BoxId                 = BoxId(ju.UUID.randomUUID())
+  val clientId: ClientId           = ClientId(ju.UUID.randomUUID().toString)
+  val apiContext: ApiContext       = ApiContext("aContext")
+  val apiVersionNbr: ApiVersionNbr = ApiVersionNbr("aVersion")
 
   trait Setup {
     val mockPPNSConnector: PushPullNotificationServiceConnector = mock[PushPullNotificationServiceConnector]
@@ -47,13 +48,13 @@ class PushPullNotificationServiceSpec extends AsyncHmrcSpec with SubscriptionFie
     val callbackUrl         = "123"
     val oCallbackUrl        = Some(callbackUrl)
     val ppnsFieldDefinition = FieldDefinition(ppnsFieldName, "description-1", "hint-1", PPNS_FIELD, "short-description-1")
-    val expectedTopicName   = s"${apiContext.value}##${apiVersion.value}##$ppnsFieldName"
+    val expectedTopicName   = s"${apiContext.value}##${apiVersionNbr.value}##$ppnsFieldName"
 
     "succeed and return PPNSCallBackUrlSuccessResponse when update of callback URL is successful" in new Setup {
       when(mockPPNSConnector.ensureBoxIsCreated(eqTo(expectedTopicName), eqTo(clientId))(*)).thenReturn(successful(boxId))
       when(mockPPNSConnector.updateCallBackUrl(clientId, boxId, callbackUrl)(hc)).thenReturn(successful(PPNSCallBackUrlSuccessResponse))
 
-      val result: PPNSCallBackUrlValidationResponse = await(service.subscribeToPPNS(clientId, apiContext, apiVersion, oCallbackUrl, ppnsFieldDefinition))
+      val result: PPNSCallBackUrlValidationResponse = await(service.subscribeToPPNS(clientId, apiContext, apiVersionNbr, oCallbackUrl, ppnsFieldDefinition))
 
       result shouldBe PPNSCallBackUrlSuccessResponse
       verify(mockPPNSConnector).ensureBoxIsCreated(eqTo(expectedTopicName), eqTo(clientId))(*)
@@ -63,7 +64,7 @@ class PushPullNotificationServiceSpec extends AsyncHmrcSpec with SubscriptionFie
     "succeed and return PPNSCallBackUrlSuccessResponse but not call updatecallBackUrl when field is empty" in new Setup {
       when(mockPPNSConnector.ensureBoxIsCreated(eqTo(expectedTopicName), eqTo(clientId))(*)).thenReturn(successful(boxId))
 
-      val result: PPNSCallBackUrlValidationResponse = await(service.subscribeToPPNS(clientId, apiContext, apiVersion, None, ppnsFieldDefinition))
+      val result: PPNSCallBackUrlValidationResponse = await(service.subscribeToPPNS(clientId, apiContext, apiVersionNbr, None, ppnsFieldDefinition))
 
       result shouldBe PPNSCallBackUrlSuccessResponse
       verify(mockPPNSConnector).ensureBoxIsCreated(eqTo(expectedTopicName), eqTo(clientId))(*)
@@ -75,7 +76,7 @@ class PushPullNotificationServiceSpec extends AsyncHmrcSpec with SubscriptionFie
       when(mockPPNSConnector.ensureBoxIsCreated(eqTo(expectedTopicName), eqTo(clientId))(*)).thenReturn(successful(boxId))
       when(mockPPNSConnector.updateCallBackUrl(clientId, boxId, callbackUrl)(hc)).thenReturn(successful(PPNSCallBackUrlFailedResponse(errorMessage)))
 
-      val result: PPNSCallBackUrlValidationResponse = await(service.subscribeToPPNS(clientId, apiContext, apiVersion, oCallbackUrl, ppnsFieldDefinition))
+      val result: PPNSCallBackUrlValidationResponse = await(service.subscribeToPPNS(clientId, apiContext, apiVersionNbr, oCallbackUrl, ppnsFieldDefinition))
 
       result shouldBe PPNSCallBackUrlFailedResponse(errorMessage)
       verify(mockPPNSConnector).ensureBoxIsCreated(eqTo(expectedTopicName), eqTo(clientId))(*)
@@ -86,7 +87,7 @@ class PushPullNotificationServiceSpec extends AsyncHmrcSpec with SubscriptionFie
       when(mockPPNSConnector.ensureBoxIsCreated(eqTo(expectedTopicName), eqTo(clientId))(*)).thenReturn(failed(new RuntimeException))
 
       intercept[RuntimeException] {
-        await(service.subscribeToPPNS(clientId, apiContext, apiVersion, oCallbackUrl, ppnsFieldDefinition))
+        await(service.subscribeToPPNS(clientId, apiContext, apiVersionNbr, oCallbackUrl, ppnsFieldDefinition))
       }
     }
 
@@ -95,7 +96,7 @@ class PushPullNotificationServiceSpec extends AsyncHmrcSpec with SubscriptionFie
       when(mockPPNSConnector.updateCallBackUrl(clientId, boxId, callbackUrl)(hc)).thenReturn(failed(new RuntimeException))
 
       intercept[RuntimeException] {
-        await(service.subscribeToPPNS(clientId, apiContext, apiVersion, oCallbackUrl, ppnsFieldDefinition))
+        await(service.subscribeToPPNS(clientId, apiContext, apiVersionNbr, oCallbackUrl, ppnsFieldDefinition))
       }
     }
   }

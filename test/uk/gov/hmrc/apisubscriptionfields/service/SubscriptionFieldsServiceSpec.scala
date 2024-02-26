@@ -21,6 +21,7 @@ import scala.concurrent.Future.{failed, successful}
 
 import cats.data.NonEmptyList
 
+import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apisubscriptionfields.model.Types.FieldErrorMap
@@ -131,7 +132,7 @@ class SubscriptionFieldsServiceSpec extends AsyncHmrcSpec with SubscriptionField
 
     "return false when updating an existing api subscription fields (no PPNS)" in new Setup {
       when(mockApiFieldDefinitionsService.get(FakeContext, FakeVersion)).thenReturn(successful(Some(FakeApiFieldDefinitionsResponseWithRegex)))
-      when(mockSubscriptionFieldsRepository.saveAtomic(*[ClientId], *[ApiContext], *[ApiVersion], *)).thenReturn(successful((subscriptionFieldsNonMatch, false)))
+      when(mockSubscriptionFieldsRepository.saveAtomic(*[ClientId], *[ApiContext], *[ApiVersionNbr], *)).thenReturn(successful((subscriptionFieldsNonMatch, false)))
       when(mockSubscriptionFieldsRepository.fetch(FakeClientId, FakeContext, FakeVersion)).thenReturn(successful(Some((subscriptionFieldsMatching))))
 
       val result: SubsFieldsUpsertResponse = await(service.upsert(FakeClientId, FakeContext, FakeVersion, SubscriptionFieldsMatchRegexValidation))
@@ -142,7 +143,7 @@ class SubscriptionFieldsServiceSpec extends AsyncHmrcSpec with SubscriptionField
 
     "return false when updating an existing api subscription fields where all fields match (no PPNS)" in new Setup {
       when(mockApiFieldDefinitionsService.get(FakeContext, FakeVersion)).thenReturn(successful(Some(FakeApiFieldDefinitionsResponseWithRegex)))
-      when(mockSubscriptionFieldsRepository.saveAtomic(*[ClientId], *[ApiContext], *[ApiVersion], *)).thenReturn(successful((subscriptionFieldsMatching, false)))
+      when(mockSubscriptionFieldsRepository.saveAtomic(*[ClientId], *[ApiContext], *[ApiVersionNbr], *)).thenReturn(successful((subscriptionFieldsMatching, false)))
       when(mockSubscriptionFieldsRepository.fetch(FakeClientId, FakeContext, FakeVersion)).thenReturn(successful(Some((subscriptionFieldsMatching))))
 
       val result: SubsFieldsUpsertResponse = await(service.upsert(FakeClientId, FakeContext, FakeVersion, SubscriptionFieldsMatchRegexValidation))
@@ -155,7 +156,7 @@ class SubscriptionFieldsServiceSpec extends AsyncHmrcSpec with SubscriptionField
       when(mockApiFieldDefinitionsService.get(FakeContext, FakeVersion)).thenReturn(successful(Some(FakeApiFieldDefinitionsResponsePPNSWithRegex)))
       when(mockPushPullNotificationService.subscribeToPPNS(eqTo(FakeClientId), eqTo(FakeContext), eqTo(FakeVersion), any, any[FieldDefinition])(any))
         .thenReturn(ppnsSuccessResponse)
-      when(mockSubscriptionFieldsRepository.saveAtomic(*[ClientId], *[ApiContext], *[ApiVersion], *)).thenReturn(successful((subscriptionFieldsNonMatch, false)))
+      when(mockSubscriptionFieldsRepository.saveAtomic(*[ClientId], *[ApiContext], *[ApiVersionNbr], *)).thenReturn(successful((subscriptionFieldsNonMatch, false)))
       when(mockSubscriptionFieldsRepository.fetch(FakeClientId, FakeContext, FakeVersion)).thenReturn(successful(Some((subscriptionFieldsNonMatch))))
 
       val result: SubsFieldsUpsertResponse = await(service.upsert(FakeClientId, FakeContext, FakeVersion, SubscriptionFieldsMatchRegexValidationPPNS))
@@ -169,14 +170,14 @@ class SubscriptionFieldsServiceSpec extends AsyncHmrcSpec with SubscriptionField
         eqTo(Some("https://www.mycallbackurl.com")),
         any[FieldDefinition]
       )(any)
-      verify(mockSubscriptionFieldsRepository).saveAtomic(*[ClientId], *[ApiContext], *[ApiVersion], *)
+      verify(mockSubscriptionFieldsRepository).saveAtomic(*[ClientId], *[ApiContext], *[ApiVersionNbr], *)
     }
 
     "return false when updating an existing api subscription field with empty string callback URL for PPNS" in new Setup {
       when(mockApiFieldDefinitionsService.get(FakeContext, FakeVersion)).thenReturn(successful(Some(FakeApiFieldDefinitionsResponsePPNSWithRegex)))
       when(mockPushPullNotificationService.subscribeToPPNS(eqTo(FakeClientId), eqTo(FakeContext), eqTo(FakeVersion), any, any[FieldDefinition])(any))
         .thenReturn(ppnsSuccessResponse)
-      when(mockSubscriptionFieldsRepository.saveAtomic(*[ClientId], *[ApiContext], *[ApiVersion], *)).thenReturn(successful((subscriptionFieldsNonMatch, false)))
+      when(mockSubscriptionFieldsRepository.saveAtomic(*[ClientId], *[ApiContext], *[ApiVersionNbr], *)).thenReturn(successful((subscriptionFieldsNonMatch, false)))
       when(mockSubscriptionFieldsRepository.fetch(FakeClientId, FakeContext, FakeVersion)).thenReturn(successful(Some((subscriptionFieldsNonMatch))))
 
       val result: SubsFieldsUpsertResponse = await(service.upsert(FakeClientId, FakeContext, FakeVersion, SubscriptionFieldsEmptyValueRegexValidationPPNS))
@@ -184,14 +185,14 @@ class SubscriptionFieldsServiceSpec extends AsyncHmrcSpec with SubscriptionField
       result shouldBe SuccessfulSubsFieldsUpsertResponse(SubscriptionFields(FakeClientId, FakeContext, FakeVersion, FakeFieldsId, fieldsNonMatch), isInsert = false)
 
       verify(mockPushPullNotificationService).subscribeToPPNS(eqTo(FakeClientId), eqTo(FakeContext), eqTo(FakeVersion), eqTo(Some("")), any[FieldDefinition])(any)
-      verify(mockSubscriptionFieldsRepository).saveAtomic(*[ClientId], *[ApiContext], *[ApiVersion], *)
+      verify(mockSubscriptionFieldsRepository).saveAtomic(*[ClientId], *[ApiContext], *[ApiVersionNbr], *)
     }
 
     "return PPNSCallBackUrlSuccessResponse when updating an existing api subscription field for PPNS is not included" in new Setup {
       when(mockApiFieldDefinitionsService.get(FakeContext, FakeVersion)).thenReturn(successful(Some(FakeApiFieldDefinitionsResponsePPNSWithRegex)))
       when(mockPushPullNotificationService.subscribeToPPNS(eqTo(FakeClientId), eqTo(FakeContext), eqTo(FakeVersion), any, any[FieldDefinition])(any))
         .thenReturn(ppnsSuccessResponse)
-      when(mockSubscriptionFieldsRepository.saveAtomic(*[ClientId], *[ApiContext], *[ApiVersion], *)).thenReturn(successful((subscriptionFieldsNonMatch, false)))
+      when(mockSubscriptionFieldsRepository.saveAtomic(*[ClientId], *[ApiContext], *[ApiVersionNbr], *)).thenReturn(successful((subscriptionFieldsNonMatch, false)))
       when(mockSubscriptionFieldsRepository.fetch(FakeClientId, FakeContext, FakeVersion)).thenReturn(successful(Some((subscriptionFieldsNonMatch))))
 
       val result: SubsFieldsUpsertResponse = await(service.upsert(FakeClientId, FakeContext, FakeVersion, SubscriptionFieldsMatchRegexValidation))
@@ -199,7 +200,7 @@ class SubscriptionFieldsServiceSpec extends AsyncHmrcSpec with SubscriptionField
       result shouldBe SuccessfulSubsFieldsUpsertResponse(SubscriptionFields(FakeClientId, FakeContext, FakeVersion, FakeFieldsId, fieldsNonMatch), isInsert = false)
 
       verify(mockPushPullNotificationService).subscribeToPPNS(eqTo(FakeClientId), eqTo(FakeContext), eqTo(FakeVersion), any, any[FieldDefinition])(any)
-      verify(mockSubscriptionFieldsRepository).saveAtomic(*[ClientId], *[ApiContext], *[ApiVersion], *)
+      verify(mockSubscriptionFieldsRepository).saveAtomic(*[ClientId], *[ApiContext], *[ApiVersionNbr], *)
 
     }
 
@@ -230,7 +231,7 @@ class SubscriptionFieldsServiceSpec extends AsyncHmrcSpec with SubscriptionField
     "return true when creating a new api subscription fields" in new Setup {
       when(mockApiFieldDefinitionsService.get(FakeContext, FakeVersion)).thenReturn(successful(Some(FakeApiFieldDefinitionsResponseWithRegex)))
 
-      when(mockSubscriptionFieldsRepository.saveAtomic(*[ClientId], *[ApiContext], *[ApiVersion], *)).thenReturn(successful((subscriptionFieldsNonMatch, true)))
+      when(mockSubscriptionFieldsRepository.saveAtomic(*[ClientId], *[ApiContext], *[ApiVersionNbr], *)).thenReturn(successful((subscriptionFieldsNonMatch, true)))
       when(mockSubscriptionFieldsRepository.fetch(FakeClientId, FakeContext, FakeVersion)).thenReturn(successful(Some((subscriptionFieldsNonMatch))))
 
       val result: SubsFieldsUpsertResponse = await(service.upsert(FakeClientId, FakeContext, FakeVersion, SubscriptionFieldsMatchRegexValidation))
@@ -241,7 +242,7 @@ class SubscriptionFieldsServiceSpec extends AsyncHmrcSpec with SubscriptionField
 
     "propagate the error" in new Setup {
       when(mockApiFieldDefinitionsService.get(FakeContext, FakeVersion)).thenReturn(successful(Some(FakeApiFieldDefinitionsResponseWithRegex)))
-      when(mockSubscriptionFieldsRepository.saveAtomic(*[ClientId], *[ApiContext], *[ApiVersion], *)).thenReturn(failed(emulatedFailure))
+      when(mockSubscriptionFieldsRepository.saveAtomic(*[ClientId], *[ApiContext], *[ApiVersionNbr], *)).thenReturn(failed(emulatedFailure))
       when(mockSubscriptionFieldsRepository.fetch(FakeClientId, FakeContext, FakeVersion)).thenReturn(successful(Some((subscriptionFieldsNonMatch))))
 
       val caught: EmulatedFailure = intercept[EmulatedFailure] {

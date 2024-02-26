@@ -19,8 +19,9 @@ package uk.gov.hmrc.apisubscriptionfields.controller
 import java.{util => ju}
 
 import play.api.mvc.PathBindable
+import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 
-import uk.gov.hmrc.apisubscriptionfields.model.{ApiContext, ApiVersion, ClientId, SubscriptionFieldsId}
+import uk.gov.hmrc.apisubscriptionfields.model.SubscriptionFieldsId
 
 object Binders {
 
@@ -32,10 +33,10 @@ object Binders {
       )
 
   implicit object apiVersionPathBindable
-      extends PathBindable.Parsing[ApiVersion](
-        ApiVersion.apply,
+      extends PathBindable.Parsing[ApiVersionNbr](
+        ApiVersionNbr.apply,
         _.value,
-        (key: String, e: Exception) => "Cannot parse parameter %s as ApiVersion: %s".format(key, e.getMessage)
+        (key: String, e: Exception) => "Cannot parse parameter %s as ApiVersionNbr: %s".format(key, e.getMessage)
       )
 
   implicit object clientIdPathBindable

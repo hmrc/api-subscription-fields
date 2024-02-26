@@ -34,7 +34,7 @@ class ApiFieldDefinitionsControllerPutSpec extends AsyncHmrcSpec with FieldDefin
   private val mockApiFieldDefinitionsService = mock[ApiFieldDefinitionsService]
   private val controller                     = new ApiFieldDefinitionsController(stubControllerComponents(), mockApiFieldDefinitionsService)
 
-  "PUT /definition/context/:apiContext/version/:apiVersion" should {
+  "PUT /definition/context/:apiContext/version/:apiVersionNbr" should {
     "return CREATED when created in the repo" in {
       when(mockApiFieldDefinitionsService.upsert(FakeContext, FakeVersion, NelOfFieldDefinitions)).thenReturn(successful((FakeApiFieldDefinitionsResponse, true)))
 

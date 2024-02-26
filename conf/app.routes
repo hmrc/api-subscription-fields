@@ -1,16 +1,16 @@
 # microservice-specific routes
 
-PUT           /definition/context/:apiContext/version/:apiVersion                      uk.gov.hmrc.apisubscriptionfields.controller.ApiFieldDefinitionsController.upsertFieldsDefinition(apiContext: ApiContext, apiVersion: ApiVersion)
-GET           /definition/context/:apiContext/version/:apiVersion                      uk.gov.hmrc.apisubscriptionfields.controller.ApiFieldDefinitionsController.getFieldsDefinition(apiContext: ApiContext, apiVersion: ApiVersion)
+PUT           /definition/context/:apiContext/version/:apiVersionNbr                   uk.gov.hmrc.apisubscriptionfields.controller.ApiFieldDefinitionsController.upsertFieldsDefinition(apiContext: ApiContext, apiVersionNbr: ApiVersionNbr)
+GET           /definition/context/:apiContext/version/:apiVersionNbr                   uk.gov.hmrc.apisubscriptionfields.controller.ApiFieldDefinitionsController.getFieldsDefinition(apiContext: ApiContext, apiVersionNbr: ApiVersionNbr)
 GET           /definition                                                              uk.gov.hmrc.apisubscriptionfields.controller.ApiFieldDefinitionsController.getAllFieldsDefinitions
-DELETE        /definition/context/:apiContext/version/:apiVersion                      uk.gov.hmrc.apisubscriptionfields.controller.ApiFieldDefinitionsController.deleteFieldsDefinition(apiContext: ApiContext, apiVersion: ApiVersion)
+DELETE        /definition/context/:apiContext/version/:apiVersionNbr                   uk.gov.hmrc.apisubscriptionfields.controller.ApiFieldDefinitionsController.deleteFieldsDefinition(apiContext: ApiContext, apiVersionNbr: ApiVersionNbr)
 
 POST          /validate                                                                uk.gov.hmrc.apisubscriptionfields.controller.ApiFieldDefinitionsController.validateFieldsDefinition()
 
-PUT           /field/application/:clientId/context/:apiContext/version/:apiVersion     uk.gov.hmrc.apisubscriptionfields.controller.SubscriptionFieldsController.upsertSubscriptionFields(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion)
-GET           /field/application/:clientId/context/:apiContext/version/:apiVersion     uk.gov.hmrc.apisubscriptionfields.controller.SubscriptionFieldsController.getSubscriptionFields(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion)
+PUT           /field/application/:clientId/context/:apiContext/version/:apiVersionNbr  uk.gov.hmrc.apisubscriptionfields.controller.SubscriptionFieldsController.upsertSubscriptionFields(clientId: ClientId, apiContext: ApiContext, apiVersionNbr: ApiVersionNbr)
+GET           /field/application/:clientId/context/:apiContext/version/:apiVersionNbr  uk.gov.hmrc.apisubscriptionfields.controller.SubscriptionFieldsController.getSubscriptionFields(clientId: ClientId, apiContext: ApiContext, apiVersionNbr: ApiVersionNbr)
 GET           /field/:fieldsId                                                         uk.gov.hmrc.apisubscriptionfields.controller.SubscriptionFieldsController.getSubscriptionFieldsByFieldsId(fieldsId: SubscriptionFieldsId)
 GET           /field/application/:clientId                                             uk.gov.hmrc.apisubscriptionfields.controller.SubscriptionFieldsController.getBulkSubscriptionFieldsByClientId(clientId: ClientId)
 GET           /field                                                                   uk.gov.hmrc.apisubscriptionfields.controller.SubscriptionFieldsController.getAllSubscriptionFields
 DELETE        /field/application/:clientId                                             uk.gov.hmrc.apisubscriptionfields.controller.SubscriptionFieldsController.deleteAllSubscriptionFieldsForClient(clientId: ClientId)
-DELETE        /field/application/:clientId/context/:apiContext/version/:apiVersion     uk.gov.hmrc.apisubscriptionfields.controller.SubscriptionFieldsController.deleteSubscriptionFields(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersion)
+DELETE        /field/application/:clientId/context/:apiContext/version/:apiVersionNbr  uk.gov.hmrc.apisubscriptionfields.controller.SubscriptionFieldsController.deleteSubscriptionFields(clientId: ClientId, apiContext: ApiContext, apiVersionNbr: ApiVersionNbr)

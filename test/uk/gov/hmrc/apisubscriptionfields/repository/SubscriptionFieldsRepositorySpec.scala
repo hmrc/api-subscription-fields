@@ -26,6 +26,7 @@ import org.scalatest.{BeforeAndAfterEach, OptionValues}
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 
 import play.api.test.{DefaultAwaitTimeout, FutureAwaits}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.mongo.play.json.Codecs
 
 import uk.gov.hmrc.apisubscriptionfields.AsyncHmrcSpec
@@ -148,7 +149,7 @@ class SubscriptionFieldsRepositorySpec
 
   }
 
-  "fetch using clientId, apiContext, apiVersion" should {
+  "fetch using clientId, apiContext, apiVersionNbr" should {
     "retrieve the correct record" in {
       val apiSubscription = createApiSubscriptionFields()
       await(saveAtomic(apiSubscription))
@@ -267,7 +268,7 @@ class SubscriptionFieldsRepositorySpec
   "collection" should {
     val apiSubscription = createApiSubscriptionFields(FakeClientId)
 
-    "have a unique compound index based on `clientId`, `apiContext` and `apiVersion`" in {
+    "have a unique compound index based on `clientId`, `apiContext` and `apiVersionNbr`" in {
       await(saveAtomic(apiSubscription))
       collectionSize shouldBe 1
 
@@ -279,7 +280,7 @@ class SubscriptionFieldsRepositorySpec
       await(saveAtomic(apiSubscription))
       collectionSize shouldBe 1
 
-      await(saveByFieldsId(apiSubscription.copy(apiVersion = ApiVersion("2.2"))))
+      await(saveByFieldsId(apiSubscription.copy(apiVersion = ApiVersionNbr("2.2"))))
       collectionSize shouldBe 1
     }
 

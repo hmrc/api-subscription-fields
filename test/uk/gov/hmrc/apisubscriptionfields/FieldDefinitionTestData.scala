@@ -80,7 +80,7 @@ trait FieldDefinitionTestData extends TestData {
     FieldDefinition("password", "password", "this is your password", FieldDefinitionType.SECURE_TOKEN, "password", Some(FakeValidationForPassword))
 
   final val FakeFieldDefinitionPPNSFields     =
-    FieldDefinition("callbackurl", "callbackurl", "please enter a callback url", FieldDefinitionType.PPNS_FIELD, "callbackurl", Some(FakeValidationForPPNS))
+    FieldDefinition(PPNSFieldFieldName, "Callback URL", "please enter a callback url", FieldDefinitionType.PPNS_FIELD, "callback", Some(FakeValidationForPPNS))
   final val FakeApiFieldDefinitionssWithRegex = NonEmptyList.fromListUnsafe(List(FakeFieldDefinitionAlphnumericField, FakeFieldDefinitionPassword))
 
   final val FakeApiFieldDefinitionsPPNSWithRegex =

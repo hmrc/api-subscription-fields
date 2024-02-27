@@ -173,8 +173,8 @@ class PushPullNotificationServiceConnectorSpec extends AsyncHmrcSpec with GuiceO
       val path = s"/box/${boxId.value}/callback"
       primeStub(path, requestBody, responseBody)
 
-      val ret: PPNSCallBackUrlValidationResponse = await(connector.updateCallBackUrl(clientId, boxId, callbackUrl))
-      ret shouldBe PPNSCallBackUrlSuccessResponse
+      val ret = await(connector.updateCallBackUrl(clientId, boxId, callbackUrl))
+      ret shouldBe Right(())
 
       verifyPath(path)
     }
@@ -187,8 +187,8 @@ class PushPullNotificationServiceConnectorSpec extends AsyncHmrcSpec with GuiceO
       val path = s"/box/${boxId.value}/callback"
       primeStub(path, requestBody, responseBody)
 
-      val ret: PPNSCallBackUrlValidationResponse = await(connector.updateCallBackUrl(clientId, boxId, callbackUrl))
-      ret shouldBe PPNSCallBackUrlSuccessResponse
+      val ret = await(connector.updateCallBackUrl(clientId, boxId, callbackUrl))
+      ret shouldBe Right(())
 
       verifyPath(path)
     }
@@ -201,8 +201,8 @@ class PushPullNotificationServiceConnectorSpec extends AsyncHmrcSpec with GuiceO
       val path = s"/box/${boxId.value}/callback"
       primeStub(path, requestBody, responseBody)
 
-      val ret: PPNSCallBackUrlValidationResponse = await(connector.updateCallBackUrl(clientId, boxId, callbackUrl))
-      ret shouldBe PPNSCallBackUrlFailedResponse("some error")
+      val ret = await(connector.updateCallBackUrl(clientId, boxId, callbackUrl))
+      ret shouldBe Left("some error")
 
       verifyPath(path)
     }
@@ -227,8 +227,8 @@ class PushPullNotificationServiceConnectorSpec extends AsyncHmrcSpec with GuiceO
       val path = s"/box/${boxId.value}/callback"
       primeStub(path, requestBody, responseBody)
 
-      val ret: PPNSCallBackUrlValidationResponse = await(connector.updateCallBackUrl(clientId, boxId, callbackUrl))
-      ret shouldBe PPNSCallBackUrlFailedResponse("Unknown Error")
+      val ret = await(connector.updateCallBackUrl(clientId, boxId, callbackUrl))
+      ret shouldBe Left("Unknown Error")
 
       verifyPath(path)
     }

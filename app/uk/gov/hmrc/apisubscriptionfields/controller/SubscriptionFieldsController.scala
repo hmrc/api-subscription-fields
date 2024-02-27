@@ -92,11 +92,9 @@ class SubscriptionFieldsController @Inject() (cc: ControllerComponents, service:
           .upsert(clientId, apiContext, apiVersionNbr, payload.fields)
           .map(_ match {
             case NotFoundSubsFieldsUpsertResponse                             => BadRequest(Json.toJson("reason" -> "field definitions not found")) // TODO
-            case FailedValidationSubsFieldsUpsertResponse(fieldErrorMessages) =>
-              BadRequest(Json.toJson(fieldErrorMessages))
+            case FailedValidationSubsFieldsUpsertResponse(fieldErrorMessages) => BadRequest(Json.toJson(fieldErrorMessages))
             case SuccessfulSubsFieldsUpsertResponse(response, true)           => Created(Json.toJson(response))
-            case SuccessfulSubsFieldsUpsertResponse(response, false)          =>
-              Ok(Json.toJson(response))
+            case SuccessfulSubsFieldsUpsertResponse(response, false)          => Ok(Json.toJson(response))
           })
           .recover(recovery)
       }

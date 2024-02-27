@@ -22,6 +22,8 @@ import play.api.http.HeaderNames.{ACCEPT, CONTENT_TYPE}
 import play.api.http.MimeTypes
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 
+import uk.gov.hmrc.apisubscriptionfields.model.BoxId
+
 trait TestData {
 
   type EmulatedFailure = UnsupportedOperationException
@@ -42,6 +44,7 @@ trait TestData {
 
   final val FakeClientId2 = ClientId(fakeRawClientId2)
 
+  final val FakeBoxId = BoxId(UUID.randomUUID())
 }
 
 object RequestHeaders {

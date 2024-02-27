@@ -22,8 +22,10 @@ import scala.concurrent.{ExecutionContext, Future}
 
 import cats.data.NonEmptyList
 import cats.data.{NonEmptyList => NEL}
+import cats.implicits._
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
+import uk.gov.hmrc.apiplatform.modules.common.services.EitherTHelper
 import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apisubscriptionfields.model.Types._
@@ -32,89 +34,116 @@ import uk.gov.hmrc.apisubscriptionfields.repository.SubscriptionFieldsRepository
 
 @Singleton
 class SubscriptionFieldsService @Inject() (
-    repository: SubscriptionFieldsRepository,
+    subscriptionFieldsRepository: SubscriptionFieldsRepository,
     apiFieldDefinitionsService: ApiFieldDefinitionsService,
     pushPullNotificationService: PushPullNotificationService
   )(implicit ec: ExecutionContext
   ) {
 
-  private def validate(fields: Fields, fieldDefinitions: NonEmptyList[FieldDefinition]): SubsFieldValidationResponse = {
-    SubscriptionFieldsService.validateAgainstValidationRules(fieldDefinitions, fields) ++ SubscriptionFieldsService.validateFieldNamesAreDefined(fieldDefinitions, fields) match {
-      case FieldErrorMap.empty => ValidSubsFieldValidationResponse
-      case errs: FieldErrorMap => InvalidSubsFieldValidationResponse(errorResponses = errs)
-    }
-  }
+  def upsert(clientId: ClientId, apiContext: ApiContext, apiVersionNbr: ApiVersionNbr, newFields: Fields)(implicit hc: HeaderCarrier): Future[SubsFieldsUpsertResponse] = {
+    def findPpnsField(fieldDefinitions: NEL[FieldDefinition]): Option[FieldDefinition] = fieldDefinitions.find(_.`type` == FieldDefinitionType.PPNS_FIELD)
 
-  private def upsertSubscriptionFields(clientId: ClientId, apiContext: ApiContext, apiVersionNbr: ApiVersionNbr, fields: Fields): Future[SuccessfulSubsFieldsUpsertResponse] = {
-    repository
-      .saveAtomic(clientId, apiContext, apiVersionNbr, fields)
-      .map(result => SuccessfulSubsFieldsUpsertResponse(result._1, result._2))
-  }
+    def handleAnyPpnsSubscriptionRequired(
+        clientId: ClientId,
+        apiContext: ApiContext,
+        apiVersionNbr: ApiVersionNbr,
+        fieldDefinitions: NEL[FieldDefinition],
+        existingFields: Option[SubscriptionFields]
+      )(implicit
+        hc: HeaderCarrier
+      ): Future[Either[String, Unit]] = {
 
-  def handlePPNS(
-      clientId: ClientId,
-      apiContext: ApiContext,
-      apiVersionNbr: ApiVersionNbr,
-      fieldDefinitions: NEL[FieldDefinition],
-      fields: Fields
-    )(implicit
-      hc: HeaderCarrier
-    ): Future[SubsFieldsUpsertResponse] = {
-    val ppnsFieldDefinition: Option[FieldDefinition] = fieldDefinitions.find(_.`type` == FieldDefinitionType.PPNS_FIELD)
-
-    ppnsFieldDefinition match {
-      case Some(fieldDefinition) =>
-        val oFieldValue: Option[FieldValue] = fields.get(fieldDefinition.name)
-        pushPullNotificationService.subscribeToPPNS(clientId, apiContext, apiVersionNbr, oFieldValue, fieldDefinition).flatMap {
-          case PPNSCallBackUrlSuccessResponse       => upsertSubscriptionFields(clientId, apiContext, apiVersionNbr, fields)
-          case PPNSCallBackUrlFailedResponse(error) => Future.successful(FailedValidationSubsFieldsUpsertResponse(Map(fieldDefinition.name -> error)))
-        }
-      case None                  => upsertSubscriptionFields(clientId, apiContext, apiVersionNbr, fields)
+      findPpnsField(fieldDefinitions) match {
+        case Some(fieldDefinition) =>
+          val fieldName = fieldDefinition.name
+          newFields.get(fieldName) match {
+            case Some(newFieldValue) =>
+              for {
+                boxId                  <- pushPullNotificationService.ensureBoxIsCreated(clientId, apiContext, apiVersionNbr, fieldName)
+                fieldValueHasNotChanged = existingFields.map(_.fields.get(fieldName).contains(newFieldValue)).getOrElse(false)
+                result                 <- if (fieldValueHasNotChanged) successful(Right(()))
+                                          else pushPullNotificationService.updateCallbackUrl(clientId, boxId, newFieldValue)
+              } yield result
+            case None                => successful(Right(()))
+          }
+        case None                  => successful(Right(()))
+      }
     }
 
-  }
+    def validateFields(fields: Fields, fieldDefinitions: NonEmptyList[FieldDefinition]): Either[FieldErrorMap, Unit] = {
+      SubscriptionFieldsService.validateAgainstValidationRules(fieldDefinitions, fields) ++ SubscriptionFieldsService.validateFieldNamesAreDefined(fieldDefinitions, fields) match {
+        case FieldErrorMap.empty => Right(())
+        case errs: FieldErrorMap => Left(errs)
+      }
+    }
 
-  def upsert(clientId: ClientId, apiContext: ApiContext, apiVersionNbr: ApiVersionNbr, fields: Fields)(implicit hc: HeaderCarrier): Future[SubsFieldsUpsertResponse] = {
-    val foFieldDefinitions: Future[Option[NonEmptyList[FieldDefinition]]] =
-      apiFieldDefinitionsService.get(apiContext, apiVersionNbr).map(_.map(_.fieldDefinitions))
+    def translateValidateError(fieldErrorMessages: FieldErrorMap) = FailedValidationSubsFieldsUpsertResponse(fieldErrorMessages)
 
-    get(clientId, apiContext, apiVersionNbr).flatMap(_ match {
-      case Some(sfields) if (sfields.fields == fields) => Future.successful(SuccessfulSubsFieldsUpsertResponse(sfields, false))
-      case _                                           =>
-        foFieldDefinitions.flatMap(_ match {
-          case None                   => successful(NotFoundSubsFieldsUpsertResponse)
-          case Some(fieldDefinitions) =>
-            validate(fields, fieldDefinitions) match {
-              case ValidSubsFieldValidationResponse                       => handlePPNS(clientId, apiContext, apiVersionNbr, fieldDefinitions, fields)
-              case InvalidSubsFieldValidationResponse(fieldErrorMessages) => successful(FailedValidationSubsFieldsUpsertResponse(fieldErrorMessages))
-            }
-        })
-    })
+    def translatePpnsError(fieldDefinitions: NEL[FieldDefinition])(error: String) = {
+      val fieldName          = findPpnsField(fieldDefinitions).get.name
+      val fieldErrorMessages = Map(fieldName -> error)
+      FailedValidationSubsFieldsUpsertResponse(fieldErrorMessages)
+    }
+
+    def upsertIfFieldsHaveChanged(anyExistingFields: Option[SubscriptionFields]) = {
+      def upsertSubscriptionFields(clientId: ClientId, apiContext: ApiContext, apiVersionNbr: ApiVersionNbr, fields: Fields): Future[SuccessfulSubsFieldsUpsertResponse] = {
+        subscriptionFieldsRepository
+          .saveAtomic(clientId, apiContext, apiVersionNbr, fields)
+          .map(result => SuccessfulSubsFieldsUpsertResponse(result._1, result._2))
+      }
+
+      anyExistingFields match {
+        case Some(existingFields) if (existingFields.fields == newFields) =>
+          successful(SuccessfulSubsFieldsUpsertResponse(existingFields, false))
+        case _                                                            =>
+          upsertSubscriptionFields(clientId, apiContext, apiVersionNbr, newFields)
+      }
+    }
+
+    (for {
+      anyFieldDefinitions <- apiFieldDefinitionsService.get(apiContext, apiVersionNbr).map(_.map(_.fieldDefinitions))
+      anyExistingFields   <- subscriptionFieldsRepository.fetch(clientId, apiContext, apiVersionNbr)
+    } yield (anyFieldDefinitions, anyExistingFields))
+      .flatMap(_ match {
+        case (None, Some(existingFields)) if (existingFields.fields == newFields) => successful(SuccessfulSubsFieldsUpsertResponse(existingFields, false))
+        case (None, _)                                                            => successful(NotFoundSubsFieldsUpsertResponse)
+        case (Some(fieldDefinitions), anyExistingFields)                          =>
+          val E = EitherTHelper.make[FailedValidationSubsFieldsUpsertResponse]
+          (
+            for {
+              _        <- E.fromEither(validateFields(newFields, fieldDefinitions).leftMap(translateValidateError))
+              _        <- E.fromEitherF(handleAnyPpnsSubscriptionRequired(clientId, apiContext, apiVersionNbr, fieldDefinitions, anyExistingFields)
+                            .map(_.leftMap(translatePpnsError(fieldDefinitions))))
+              response <- E.liftF(upsertIfFieldsHaveChanged(anyExistingFields))
+            } yield response
+          )
+            .merge
+      })
   }
 
   def delete(clientId: ClientId, apiContext: ApiContext, apiVersionNbr: ApiVersionNbr): Future[Boolean] = {
-    repository.delete(clientId, apiContext, apiVersionNbr)
+    subscriptionFieldsRepository.delete(clientId, apiContext, apiVersionNbr)
   }
 
   def delete(clientId: ClientId): Future[Boolean] = {
-    repository.delete(clientId)
+    subscriptionFieldsRepository.delete(clientId)
   }
 
   def get(clientId: ClientId, apiContext: ApiContext, apiVersionNbr: ApiVersionNbr): Future[Option[SubscriptionFields]] = {
     for {
-      fetch <- repository.fetch(clientId, apiContext, apiVersionNbr)
+      fetch <- subscriptionFieldsRepository.fetch(clientId, apiContext, apiVersionNbr)
     } yield fetch
   }
 
   def getBySubscriptionFieldId(subscriptionFieldsId: SubscriptionFieldsId): Future[Option[SubscriptionFields]] = {
     for {
-      fetch <- repository.fetchByFieldsId(subscriptionFieldsId)
+      fetch <- subscriptionFieldsRepository.fetchByFieldsId(subscriptionFieldsId)
     } yield fetch
   }
 
   def getByClientId(clientId: ClientId): Future[Option[BulkSubscriptionFieldsResponse]] = {
     (for {
-      fields <- repository.fetchByClientId(clientId)
+      fields <- subscriptionFieldsRepository.fetchByClientId(clientId)
     } yield fields)
       .map {
         case Nil => None
@@ -124,7 +153,7 @@ class SubscriptionFieldsService @Inject() (
 
   def getAll: Future[BulkSubscriptionFieldsResponse] = {
     (for {
-      fields <- repository.fetchAll
+      fields <- subscriptionFieldsRepository.fetchAll
     } yield fields)
       .map(BulkSubscriptionFieldsResponse(_))
   }

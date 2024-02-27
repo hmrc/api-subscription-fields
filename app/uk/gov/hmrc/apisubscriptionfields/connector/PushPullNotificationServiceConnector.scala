@@ -60,13 +60,15 @@ class PushPullNotificationServiceConnector @Inject() (http: HttpClient, appConfi
       }
   }
 
-  def updateCallBackUrl(clientId: ClientId, boxId: BoxId, callbackUrl: FieldValue)(implicit hc: HeaderCarrier): Future[PPNSCallBackUrlValidationResponse] = {
+  def updateCallBackUrl(clientId: ClientId, boxId: BoxId, callbackUrl: FieldValue)(implicit hc: HeaderCarrier): Future[Either[String, Unit]] = {
     val payload = UpdateCallBackUrlRequest(clientId, callbackUrl)
     http
       .PUT[UpdateCallBackUrlRequest, UpdateCallBackUrlResponse](s"$externalServiceUri/box/${boxId.value.toString}/callback", payload)
       .map(response =>
-        if (response.successful) PPNSCallBackUrlSuccessResponse
-        else response.errorMessage.fold(PPNSCallBackUrlFailedResponse("Unknown Error"))(PPNSCallBackUrlFailedResponse)
+        if (response.successful)
+          Right(())
+        else
+          Left(response.errorMessage.getOrElse("Unknown Error"))
       )
       .recover { case NonFatal(e) =>
         throw new RuntimeException(s"Unexpected response from $externalServiceUri: ${e.getMessage}")

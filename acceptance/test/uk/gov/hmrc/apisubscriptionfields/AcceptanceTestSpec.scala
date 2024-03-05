@@ -17,7 +17,15 @@
 package uk.gov.hmrc.apisubscriptionfields
 
 import java.util.UUID
+import scala.concurrent.duration._
+import scala.concurrent.{Await, Future}
+
+import cats.data.NonEmptyList
+import org.scalatest.featurespec.AnyFeatureSpec
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.{BeforeAndAfterAll, GivenWhenThen}
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
+
 import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
@@ -25,26 +33,18 @@ import play.api.mvc._
 import play.api.mvc.request.RequestTarget
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import uk.gov.hmrc.apisubscriptionfields.model._
-
-import scala.concurrent.duration._
-import scala.concurrent.{Await, Future}
-import cats.data.NonEmptyList
-import uk.gov.hmrc.apisubscriptionfields.controller.Helper
 import uk.gov.hmrc.mongo.MongoComponent
 
-import org.scalatest.matchers.should.Matchers
-import org.scalatest.GivenWhenThen
-import org.scalatest.BeforeAndAfterAll
-import org.scalatest.featurespec.AnyFeatureSpec
+import uk.gov.hmrc.apisubscriptionfields.controller.Helper
+import uk.gov.hmrc.apisubscriptionfields.model._
 
 trait AcceptanceTestSpec extends AnyFeatureSpec
-  with GivenWhenThen
-  with BeforeAndAfterAll
-  with Matchers
-  with GuiceOneServerPerSuite
-  with FieldDefinitionTestData
-  with Helper {
+    with GivenWhenThen
+    with BeforeAndAfterAll
+    with Matchers
+    with GuiceOneServerPerSuite
+    with FieldDefinitionTestData
+    with Helper {
 
   protected val ValidRequest = FakeRequest()
     .withHeaders(RequestHeaders.ACCEPT_HMRC_JSON_HEADER)
@@ -81,8 +81,8 @@ trait AcceptanceTestSpec extends AnyFeatureSpec
     s"/field/application/$clientId/context/$apiContext/version/$apiVersionNbr"
 
   override def fakeApplication(): Application = new GuiceApplicationBuilder().configure(Map(
-    "metrics.jvm" -> false,
-    "run.mode" -> "Stub",
+    "metrics.jvm"                                             -> false,
+    "run.mode"                                                -> "Stub",
     "Test.microservice.services.api-subscription-fields.host" -> ExternalServicesConfig.Host,
     "Test.microservice.services.api-subscription-fields.port" -> ExternalServicesConfig.Port
   ))
@@ -103,11 +103,11 @@ trait AcceptanceTestSpec extends AnyFeatureSpec
   }
 
   private def dropDatabase(): Unit = {
-   await( app.injector.instanceOf[MongoComponent].database.drop().toFuture())
+    await(app.injector.instanceOf[MongoComponent].database.drop().toFuture())
   }
 
   def createRequest(method: String, path: String) =
     ValidRequest
       .withMethod(method)
-      .withTarget( RequestTarget(uriString ="", path= path, queryString = Map.empty))
+      .withTarget(RequestTarget(uriString = "", path = path, queryString = Map.empty))
 }

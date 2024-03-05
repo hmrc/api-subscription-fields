@@ -1,62 +1,28 @@
-/*
- * Copyright 2017 HM Revenue & Customs
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import sbt.Keys.{parallelExecution, _}
-import sbt._
-import uk.gov.hmrc.DefaultBuildSettings.{addTestReportOption, defaultSettings, scalaSettings}
-import uk.gov.hmrc.SbtAutoBuildPlugin
-import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin
-import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin._
-import uk.gov.hmrc.versioning.SbtGitVersioning
-import bloop.integrations.sbt.BloopDefaults
-
+import uk.gov.hmrc.DefaultBuildSettings
+import uk.gov.hmrc.DefaultBuildSettings._
 import scala.language.postfixOps
 
 val appName = "api-subscription-fields"
 
-scalaVersion := "2.13.12"
+Global / bloopAggregateSourceDependencies := true
+Global / bloopExportJarClassifiers := Some(Set("sources"))
 
+ThisBuild / scalaVersion := "2.13.12"
+ThisBuild / majorVersion := 0
+ThisBuild / libraryDependencySchemes += "org.scala-lang.modules" %% "scala-xml" % VersionScheme.Always
 ThisBuild / semanticdbEnabled := true
 ThisBuild / semanticdbVersion := scalafixSemanticdb.revision
 
-ThisBuild / libraryDependencySchemes += "org.scala-lang.modules" %% "scala-xml" % VersionScheme.Always
-
-lazy val plugins: Seq[Plugins] = Seq(PlayScala, SbtAutoBuildPlugin, SbtDistributablesPlugin)
-lazy val playSettings: Seq[Setting[_]] = Seq.empty
-
-lazy val AcceptanceTest = config("acceptance") extend Test
-
-lazy val acceptanceTestSettings =
-  inConfig(AcceptanceTest)(Defaults.testSettings) ++
-  inConfig(AcceptanceTest)(BloopDefaults.configSettings) ++
-    Seq(
-      AcceptanceTest / unmanagedSourceDirectories := Seq(baseDirectory.value / "acceptance"),
-      AcceptanceTest / fork := false,
-      AcceptanceTest / parallelExecution := false,
-      addTestReportOption(AcceptanceTest, "acceptance-reports")
-    )
-
 lazy val microservice = Project(appName, file("."))
-  .enablePlugins(plugins: _*)
-  .configs(AcceptanceTest)
-  .settings(playSettings: _*)
-  .settings(scalaSettings: _*)
-  .settings(defaultSettings(): _*)
-  .settings(acceptanceTestSettings: _*)
-  .settings(headerSettings(AcceptanceTest) ++ automateHeaderSettings(AcceptanceTest))
+  .enablePlugins(PlayScala, SbtDistributablesPlugin)
+  .disablePlugins(JUnitXmlReportPlugin)
+  .settings(
+    libraryDependencies ++= AppDependencies(),
+    retrieveManaged := true,
+    // https://www.scala-lang.org/2021/01/12/configuring-and-suppressing-warnings.html
+    // suppress warnings in generated routes files
+    scalacOptions += "-Wconf:src=routes/.*:s"
+  )
   .settings(ScoverageSettings())
   .settings(
     routesImport ++= Seq(
@@ -64,37 +30,31 @@ lazy val microservice = Project(appName, file("."))
       "uk.gov.hmrc.apiplatform.modules.common.domain.models._",
       "uk.gov.hmrc.apisubscriptionfields.controller.Binders._"
     )
-
   )
-  .settings(
-    libraryDependencies ++= AppDependencies(),
-  )
-  .settings(
-    Test / fork := false,
-    addTestReportOption(Test, "test-reports"),
-    Test / parallelExecution := false
-  )
-  .settings(majorVersion := 0)
   .settings(
     scalacOptions ++= Seq(
-    "-Wconf:cat=unused&src=.*RoutesPrefix\\.scala:s",
-    "-Wconf:cat=unused&src=.*Routes\\.scala:s",
-    "-Wconf:cat=unused&src=.*ReverseRoutes\\.scala:s",
-    "-Xlint:-byname-implicit"
+      "-Wconf:cat=unused&src=views/.*\\.scala:s",
+      "-Xlint:-byname-implicit"
     )
   )
+
+lazy val acceptance = (project in file("acceptance"))
+  .enablePlugins(PlayScala)
+  .dependsOn(microservice % "test->test")
   .settings(
-    commands += Command.command("testAll") { state => "test" :: "acceptance:test" :: state }
+    name := "acceptance-tests",
+    Test / testOptions += Tests.Argument(TestFrameworks.ScalaTest, "-eT"),
+    DefaultBuildSettings.itSettings(),
+    addTestReportOption(Test, "acceptance-reports")
   )
 
-def onPackageName(rootPackage: String): String => Boolean = { testName => testName startsWith rootPackage }
-
-// Note that this task has to be scoped globally
-Global / bloopAggregateSourceDependencies := true
-
 commands ++= Seq(
-  Command.command("run-all-tests") { state => "test" :: "acceptance:test" :: state },
-  Command.command("clean-and-test") { state => "clean" :: "compile" :: "run-all-tests" :: state },
-  // Coverage does not need compile !
-  Command.command("pre-commit") { state => "clean" :: "scalafmtAll" :: "scalafixAll" :: "coverage" ::  "run-all-tests" :: "coverageOff" :: "coverageReport" :: state }
+  Command.command("cleanAll") { state => "clean" :: "acceptance/clean" :: state },
+  Command.command("fmtAll") { state => "scalafmtAll" :: "acceptance/scalafmtAll" :: state },
+  Command.command("fixAll") { state => "scalafixAll" :: "acceptance/scalafixAll" :: state },
+  Command.command("testAll") { state => "test" :: "acceptance/test" :: state },
+
+  Command.command("run-all-tests") { state => "testAll" :: state },
+  Command.command("clean-and-test") { state => "cleanAll" :: "compile" :: "run-all-tests" :: state },
+  Command.command("pre-commit") { state => "cleanAll" :: "fmtAll" :: "fixAll" :: "coverage" :: "testAll" :: "coverageOff" :: "coverageAggregate" :: state }
 )

@@ -16,33 +16,34 @@
 
 package uk.gov.hmrc.apisubscriptionfields
 
-import org.scalatest.OptionValues
-import org.scalatest.BeforeAndAfterAll
+import scala.concurrent.duration._
+import scala.concurrent.{Await, Future}
+
+import org.scalatest.{BeforeAndAfterAll, OptionValues}
+
 import play.api.libs.json.Json
 import play.api.mvc._
 import play.api.mvc.request.RequestTarget
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import uk.gov.hmrc.apisubscriptionfields.model._
-import scala.concurrent.Future
-import scala.concurrent.Await
-import scala.concurrent.duration._
-import uk.gov.hmrc.apisubscriptionfields.utils.ApplicationLogger
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 
+import uk.gov.hmrc.apisubscriptionfields.model._
+import uk.gov.hmrc.apisubscriptionfields.utils.ApplicationLogger
+
 class ApiSubscriptionFieldsHappySpec extends AcceptanceTestSpec
-  with OptionValues
-  with JsonFormatters
-  with SubscriptionFieldsTestData
-  with FieldDefinitionTestData
-  with BeforeAndAfterAll 
-  with ApplicationLogger {
+    with OptionValues
+    with JsonFormatters
+    with SubscriptionFieldsTestData
+    with FieldDefinitionTestData
+    with BeforeAndAfterAll
+    with ApplicationLogger {
 
   override def beforeAll(): Unit = {
     super.beforeAll()
 
     val putRequest = validDefinitionPutRequest(NelOfFieldDefinitions)
-      .withTarget( RequestTarget(uriString="", path=definitionEndpoint(fakeRawContext, fakeRawVersion), queryString = Map.empty))
+      .withTarget(RequestTarget(uriString = "", path = definitionEndpoint(fakeRawContext, fakeRawVersion), queryString = Map.empty))
 
     Await.result(route(app, putRequest).get, 10.seconds)
   }
@@ -50,20 +51,19 @@ class ApiSubscriptionFieldsHappySpec extends AcceptanceTestSpec
   override def afterAll(): Unit = {
     val request = ValidRequest
       .withMethod(DELETE)
-      .withTarget( RequestTarget(uriString="", path=definitionEndpoint(fakeRawContext, fakeRawVersion), queryString = Map.empty))
+      .withTarget(RequestTarget(uriString = "", path = definitionEndpoint(fakeRawContext, fakeRawVersion), queryString = Map.empty))
 
     route(app, request)
 
     super.afterAll()
   }
 
-
   Feature("Subscription-Fields") {
 
     appLogger.logger.info(s"App.mode = ${app.mode.toString}")
 
     Scenario("the API is called to store some values for a new subscription field") {
-      val request: Request[AnyContentAsJson] =  createSubscriptionFieldsRequest()
+      val request: Request[AnyContentAsJson] = createSubscriptionFieldsRequest()
 
       When("a PUT request with data is sent to the API")
       val result: Option[Future[Result]] = route(app, request)
@@ -75,7 +75,7 @@ class ApiSubscriptionFieldsHappySpec extends AcceptanceTestSpec
       status(resultFuture) shouldBe CREATED
 
       And("the response body should be a valid response")
-      val sfr = contentAsJson(resultFuture).validate[SubscriptionFields]
+      val sfr      = contentAsJson(resultFuture).validate[SubscriptionFields]
       val fieldsId = sfr.get.fieldsId
 
       sfr.isSuccess shouldBe true
@@ -87,7 +87,7 @@ class ApiSubscriptionFieldsHappySpec extends AcceptanceTestSpec
         .withJsonBody(Json.toJson(makeSubscriptionFieldsRequest(SampleFields1)))
     }
 
-    def createSubscriptionFields()= {
+    def createSubscriptionFields() = {
       route(app, createSubscriptionFieldsRequest())
     }
 
@@ -108,7 +108,7 @@ class ApiSubscriptionFieldsHappySpec extends AcceptanceTestSpec
       status(resultFuture) shouldBe OK
 
       And("the response body should be a valid response")
-      val sfr = contentAsJson(resultFuture).validate[SubscriptionFields]
+      val sfr      = contentAsJson(resultFuture).validate[SubscriptionFields]
       val fieldsId = sfr.get.fieldsId
 
       sfr.isSuccess shouldBe true
@@ -132,7 +132,7 @@ class ApiSubscriptionFieldsHappySpec extends AcceptanceTestSpec
       status(resultFuture) shouldBe OK
 
       And("the response body should be a valid response")
-      val sfr = contentAsJson(resultFuture).validate[BulkSubscriptionFieldsResponse]
+      val sfr      = contentAsJson(resultFuture).validate[BulkSubscriptionFieldsResponse]
       val fieldsId = sfr.get.subscriptions.head.fieldsId
 
       sfr.isSuccess shouldBe true
@@ -145,7 +145,7 @@ class ApiSubscriptionFieldsHappySpec extends AcceptanceTestSpec
 
       createSubscriptionFields()
 
-      val requestId =  createRequest(GET, subscriptionFieldsEndpoint(fakeRawClientId, fakeRawContext, fakeRawVersion))
+      val requestId = createRequest(GET, subscriptionFieldsEndpoint(fakeRawClientId, fakeRawContext, fakeRawVersion))
 
       When("an id GET request with data is sent to the API")
       val result: Option[Future[Result]] = route(app, requestId)
@@ -163,7 +163,6 @@ class ApiSubscriptionFieldsHappySpec extends AcceptanceTestSpec
       val fieldsId = sfr.get.fieldsId
 
       val requestFieldsId = createRequest(GET, fieldsIdEndpoint(fieldsId.value))
-
 
       When("a fieldsId GET request with data is sent to the API")
       val resultFieldsId: Option[Future[Result]] = route(app, requestFieldsId)
@@ -193,11 +192,10 @@ class ApiSubscriptionFieldsHappySpec extends AcceptanceTestSpec
       result shouldBe defined
       val resultFuture = result.value
 
-
       status(resultFuture) shouldBe OK
 
       And("the response body should be a valid response")
-      val sfr = contentAsJson(resultFuture).validate[BulkSubscriptionFieldsResponse]
+      val sfr      = contentAsJson(resultFuture).validate[BulkSubscriptionFieldsResponse]
       val fieldsId = sfr.get.subscriptions.head.fieldsId
 
       sfr.isSuccess shouldBe true
@@ -221,7 +219,7 @@ class ApiSubscriptionFieldsHappySpec extends AcceptanceTestSpec
       status(resultFuture) shouldBe OK
 
       And("the response body should be a valid response")
-      val sfr = contentAsJson(resultFuture).validate[SubscriptionFields]
+      val sfr      = contentAsJson(resultFuture).validate[SubscriptionFields]
       val fieldsId = sfr.get.fieldsId
 
       sfr.isSuccess shouldBe true

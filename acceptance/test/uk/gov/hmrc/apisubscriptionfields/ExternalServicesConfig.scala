@@ -14,14 +14,9 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.apisubscriptionfields.controller
+package uk.gov.hmrc.apisubscriptionfields
 
-import uk.gov.hmrc.apisubscriptionfields.model.{Types, FieldDefinition}
-import cats.data.{NonEmptyList => NEL}
-
-trait Helper {
-  def makeSubscriptionFieldsRequest(fields: Types.Fields): SubscriptionFieldsRequest = SubscriptionFieldsRequest(fields)
-  def makeFieldDefinitionsRequest(definitions: NEL[FieldDefinition]): FieldDefinitionsRequest = FieldDefinitionsRequest(definitions)
+object ExternalServicesConfig {
+  val Port: Int = 11111
+  val Host      = "localhost"
 }
-
-object Helper extends Helper

@@ -9,7 +9,6 @@ object ScoverageSettings {
     // Semicolon-separated list of regexs matching classes to exclude
     coverageExcludedPackages := Seq(
       "<empty>",
-      "com.kenshoo.play.metrics.*",
       "prod.*",
       "testOnlyDoNotUseInAppConf.*",
       "app.*",

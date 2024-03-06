@@ -16,15 +16,16 @@
 
 package uk.gov.hmrc.apisubscriptionfields
 
+import scala.concurrent.Future
+
 import org.scalatest.OptionValues
+
 import play.api.libs.json.Json
 import play.api.mvc._
 import play.api.test.Helpers._
-import uk.gov.hmrc.apisubscriptionfields.model.ErrorCode
-import uk.gov.hmrc.apisubscriptionfields.model.JsErrorResponse
-import uk.gov.hmrc.apisubscriptionfields.utils.ApplicationLogger
 
-import scala.concurrent.Future
+import uk.gov.hmrc.apisubscriptionfields.model.{ErrorCode, JsErrorResponse}
+import uk.gov.hmrc.apisubscriptionfields.utils.ApplicationLogger
 
 class ApiSubscriptionFieldsUnhappySpec extends AcceptanceTestSpec
     with OptionValues

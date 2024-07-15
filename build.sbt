@@ -43,8 +43,7 @@ lazy val acceptance = (project in file("acceptance"))
   .settings(
     name := "acceptance-tests",
     Test / testOptions += Tests.Argument(TestFrameworks.ScalaTest, "-eT"),
-    DefaultBuildSettings.itSettings(),
-    addTestReportOption(Test, "acceptance-reports")
+    DefaultBuildSettings.itSettings()
   )
 
 commands ++= Seq(

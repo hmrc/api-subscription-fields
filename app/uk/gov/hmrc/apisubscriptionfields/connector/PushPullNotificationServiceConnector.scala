@@ -20,9 +20,11 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.control.NonFatal
 
+import play.api.libs.json.Json
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.ClientId
 import uk.gov.hmrc.http.HttpReads.Implicits._
-import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
+import uk.gov.hmrc.http.client.HttpClientV2
+import uk.gov.hmrc.http.{HeaderCarrier, StringContextOps}
 import uk.gov.hmrc.play.http.metrics.common._
 
 import uk.gov.hmrc.apisubscriptionfields.config.ApplicationConfig
@@ -30,7 +32,7 @@ import uk.gov.hmrc.apisubscriptionfields.model.Types.FieldValue
 import uk.gov.hmrc.apisubscriptionfields.model._
 
 @Singleton
-class PushPullNotificationServiceConnector @Inject() (http: HttpClient, appConfig: ApplicationConfig, val apiMetrics: ApiMetrics)(implicit ec: ExecutionContext)
+class PushPullNotificationServiceConnector @Inject() (http: HttpClientV2, appConfig: ApplicationConfig, val apiMetrics: ApiMetrics)(implicit ec: ExecutionContext)
     extends RecordMetrics {
   import uk.gov.hmrc.apisubscriptionfields.connector.JsonFormatters._
 
@@ -42,7 +44,9 @@ class PushPullNotificationServiceConnector @Inject() (http: HttpClient, appConfi
     val payload = CreateBoxRequest(boxName, clientId)
 
     http
-      .PUT[CreateBoxRequest, CreateBoxResponse](s"$externalServiceUri/box", payload)
+      .put(url"$externalServiceUri/box")
+      .withBody(Json.toJson(payload))
+      .execute[CreateBoxResponse]
       .map(_.boxId)
       .recover { case NonFatal(e) =>
         throw new RuntimeException(s"Unexpected response from $externalServiceUri: ${e.getMessage}")
@@ -53,7 +57,9 @@ class PushPullNotificationServiceConnector @Inject() (http: HttpClient, appConfi
     val payload = UpdateSubscriberRequest(SubscriberRequest(callbackUrl, "API_PUSH_SUBSCRIBER"))
 
     http
-      .PUT[UpdateSubscriberRequest, UpdateSubscriberResponse](s"$externalServiceUri/box/${boxId.value.toString}/subscriber", payload)
+      .put(url"$externalServiceUri/box/${boxId.value.toString}/subscriber")
+      .withBody(Json.toJson(payload))
+      .execute[UpdateSubscriberResponse]
       .map(_ => ())
       .recover { case NonFatal(e) =>
         throw new RuntimeException(s"Unexpected response from $externalServiceUri: ${e.getMessage}")
@@ -63,7 +69,9 @@ class PushPullNotificationServiceConnector @Inject() (http: HttpClient, appConfi
   def updateCallBackUrl(clientId: ClientId, boxId: BoxId, callbackUrl: FieldValue)(implicit hc: HeaderCarrier): Future[Either[String, Unit]] = {
     val payload = UpdateCallBackUrlRequest(clientId, callbackUrl)
     http
-      .PUT[UpdateCallBackUrlRequest, UpdateCallBackUrlResponse](s"$externalServiceUri/box/${boxId.value.toString}/callback", payload)
+      .put(url"$externalServiceUri/box/${boxId.value.toString}/callback")
+      .withBody(Json.toJson(payload))
+      .execute[UpdateCallBackUrlResponse]
       .map(response =>
         if (response.successful)
           Right(())

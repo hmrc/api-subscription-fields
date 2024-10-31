@@ -17,6 +17,7 @@
 package uk.gov.hmrc.apisubscriptionfields.controller
 
 import scala.concurrent.Future
+import scala.reflect.ClassTag
 import scala.util.{Failure, Success, Try}
 
 import play.api.libs.json._
@@ -29,7 +30,7 @@ import uk.gov.hmrc.apisubscriptionfields.utils.ApplicationLogger
 
 trait CommonController extends BackendBaseController with ApplicationLogger {
 
-  override protected def withJsonBody[T](f: (T) => Future[Result])(implicit request: Request[JsValue], m: Manifest[T], reads: Reads[T]): Future[Result] = {
+  override protected def withJsonBody[T](f: T => Future[Result])(implicit request: Request[JsValue], ct: ClassTag[T], reads: Reads[T]): Future[Result] = {
     Try(request.body.validate[T]) match {
       case Success(JsSuccess(payload, _)) => f(payload)
       case Success(JsError(errs))         => jsonError(JsError.toJson(errs).toString())

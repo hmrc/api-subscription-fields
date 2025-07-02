@@ -7,7 +7,8 @@ object AppDependencies {
   private lazy val bootstrapVersion = "9.13.0"
   val commonDomainVersion           = "0.18.0"
   val applicationDomainVersion      = "0.79.0"
-  
+  val mockitoVersion = "5.18.0"
+
   private lazy val dependencies = Seq(
     "uk.gov.hmrc"       %% "bootstrap-backend-play-30"  % bootstrapVersion,
     "uk.gov.hmrc.mongo" %% "hmrc-mongo-play-30"         % mongoVersion,
@@ -25,7 +26,8 @@ object AppDependencies {
     "uk.gov.hmrc"           %% "api-platform-common-domain-fixtures"      % commonDomainVersion,
     "uk.gov.hmrc"           %% "api-platform-application-domain-fixtures" % applicationDomainVersion,
     "org.pegdown"            % "pegdown"                                  % "1.6.0",
-    "org.mockito"           %% "mockito-scala-scalatest"                  % "2.0.0"
+    "org.mockito"           %% "mockito-scala-scalatest"                  % "2.0.0",
+    "org.mockito"            % "mockito-core"                             % mockitoVersion    // This is here for Jenkins build for JavaAgent
   ).map(d => d % "test")
 }
 

@@ -14,3 +14,5 @@ GET           /field/application/:clientId                                      
 GET           /field                                                                   uk.gov.hmrc.apisubscriptionfields.controller.SubscriptionFieldsController.getAllSubscriptionFields
 DELETE        /field/application/:clientId                                             uk.gov.hmrc.apisubscriptionfields.controller.SubscriptionFieldsController.deleteAllSubscriptionFieldsForClient(clientId: ClientId)
 DELETE        /field/application/:clientId/context/:apiContext/version/:apiVersionNbr  uk.gov.hmrc.apisubscriptionfields.controller.SubscriptionFieldsController.deleteSubscriptionFields(clientId: ClientId, apiContext: ApiContext, apiVersionNbr: ApiVersionNbr)
+
+GET           /csv                                                                     uk.gov.hmrc.apisubscriptionfields.controller.CsvController.csv()

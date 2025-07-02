@@ -19,3 +19,7 @@ package uk.gov.hmrc.apisubscriptionfields.model
 import java.{util => ju}
 
 case class SubscriptionFieldsId(value: ju.UUID) extends AnyVal
+
+object SubscriptionFieldsId {
+  def random(): SubscriptionFieldsId = SubscriptionFieldsId(ju.UUID.randomUUID)
+}

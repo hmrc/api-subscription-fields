@@ -151,7 +151,7 @@ class SubscriptionFieldsService @Inject() (
       }
   }
 
-  def getAll: Future[BulkSubscriptionFieldsResponse] = {
+  def getAll(): Future[BulkSubscriptionFieldsResponse] = {
     (for {
       fields <- subscriptionFieldsRepository.fetchAll
     } yield fields)

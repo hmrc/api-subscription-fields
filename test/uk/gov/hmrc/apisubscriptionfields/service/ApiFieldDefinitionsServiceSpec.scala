@@ -34,7 +34,7 @@ class ApiFieldDefinitionsServiceSpec extends AsyncHmrcSpec with FieldDefinitionT
     "return an empty list when there are no records in the database collection" in {
       when(mockApiFieldDefinitionsRepository.fetchAll()).thenReturn(successful(List()))
 
-      val result = await(service.getAll)
+      val result = await(service.getAll())
 
       result shouldBe BulkApiFieldDefinitionsResponse(List())
     }
@@ -45,7 +45,7 @@ class ApiFieldDefinitionsServiceSpec extends AsyncHmrcSpec with FieldDefinitionT
 
       when(mockApiFieldDefinitionsRepository.fetchAll()).thenReturn(successful(List(fd1, fd2)))
 
-      val result = await(service.getAll)
+      val result = await(service.getAll())
 
       val expectedResponse = BulkApiFieldDefinitionsResponse(apis =
         Seq(

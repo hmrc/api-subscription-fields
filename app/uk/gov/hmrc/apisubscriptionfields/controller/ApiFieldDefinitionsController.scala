@@ -67,7 +67,7 @@ class ApiFieldDefinitionsController @Inject() (cc: ControllerComponents, service
   }
 
   def getAllFieldsDefinitions: Action[AnyContent] = Action.async { _ =>
-    service.getAll map (defs => Ok(Json.toJson(defs))) recover recovery
+    service.getAll() map (defs => Ok(Json.toJson(defs))) recover recovery
   }
 
   def getFieldsDefinition(apiContext: ApiContext, apiVersionNbr: ApiVersionNbr): Action[AnyContent] = Action.async { _ =>

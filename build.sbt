@@ -4,6 +4,8 @@ import scala.language.postfixOps
 
 val appName = "api-subscription-fields"
 
+val mockitoVersion = "5.18.0"
+
 Global / bloopAggregateSourceDependencies := true
 Global / bloopExportJarClassifiers := Some(Set("sources"))
 
@@ -34,6 +36,12 @@ lazy val microservice = Project(appName, file("."))
       // suppress warnings in generated routes files
       "-Wconf:src=routes/.*:s",
       "-Xlint:-byname-implicit"
+    )
+  )
+  .settings(
+    Test / fork := true,
+    Test / javaOptions := Seq(
+      s"-javaagent:${csrCacheDirectory.value.getAbsolutePath}/https/repo1.maven.org/maven2/org/mockito/mockito-core/$mockitoVersion/mockito-core-$mockitoVersion.jar"
     )
   )
 

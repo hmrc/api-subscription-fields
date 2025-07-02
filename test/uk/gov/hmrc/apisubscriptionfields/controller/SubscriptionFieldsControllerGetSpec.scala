@@ -177,7 +177,7 @@ class SubscriptionFieldsControllerGetSpec extends AsyncHmrcSpec with Subscriptio
 
   "GET /field" should {
     "return OK with all field subscriptions" in {
-      when(mockSubscriptionFieldsService.getAll).thenReturn(successful(bulkResponseModel))
+      when(mockSubscriptionFieldsService.getAll()).thenReturn(successful(bulkResponseModel))
 
       val result = controller.getAllSubscriptionFields(FakeRequest())
 
@@ -186,7 +186,7 @@ class SubscriptionFieldsControllerGetSpec extends AsyncHmrcSpec with Subscriptio
     }
 
     "return OK with an empty list when no field subscriptions exist in the repo" in {
-      when(mockSubscriptionFieldsService.getAll).thenReturn(successful(BulkSubscriptionFieldsResponse(subscriptions = Seq())))
+      when(mockSubscriptionFieldsService.getAll()).thenReturn(successful(BulkSubscriptionFieldsResponse(subscriptions = Seq())))
 
       val result = controller.getAllSubscriptionFields(FakeRequest())
 
@@ -195,7 +195,7 @@ class SubscriptionFieldsControllerGetSpec extends AsyncHmrcSpec with Subscriptio
     }
 
     "return INTERNAL_SERVER_ERROR when service throws exception" in {
-      when(mockSubscriptionFieldsService.getAll).thenReturn(failed(emulatedFailure))
+      when(mockSubscriptionFieldsService.getAll()).thenReturn(failed(emulatedFailure))
 
       val result = controller.getAllSubscriptionFields(FakeRequest())
 

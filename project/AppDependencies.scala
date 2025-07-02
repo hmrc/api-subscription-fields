@@ -25,8 +25,7 @@ object AppDependencies {
     "uk.gov.hmrc.mongo"     %% "hmrc-mongo-test-play-30"                  % mongoVersion,
     "uk.gov.hmrc"           %% "api-platform-common-domain-fixtures"      % commonDomainVersion,
     "uk.gov.hmrc"           %% "api-platform-application-domain-fixtures" % applicationDomainVersion,
-    "org.mockito"           %% "mockito-scala-scalatest"                  % "2.0.0",
-    "org.mockito"            % "mockito-core"                             % mockitoVersion    // This is here for Jenkins build for JavaAgent
+    "org.mockito"           %% "mockito-scala-scalatest"                  % "2.0.0"
   ).map(d => d % "test")
 }
 

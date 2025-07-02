@@ -36,12 +36,6 @@ lazy val microservice = Project(appName, file("."))
       "-Xlint:-byname-implicit"
     )
   )
-  .settings(
-    Test / fork := true,
-    Test / javaOptions := Seq(
-      s"-javaagent:${csrCacheDirectory.value.getAbsolutePath}/https/repo1.maven.org/maven2/org/mockito/mockito-core/${AppDependencies.mockitoVersion}/mockito-core-${AppDependencies.mockitoVersion}.jar"
-    )
-  )
 
 lazy val acceptance = (project in file("acceptance"))
   .enablePlugins(PlayScala)

@@ -19,7 +19,6 @@ package uk.gov.hmrc.apisubscriptionfields.controller
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
 
-import play.api.http.HeaderNames
 import play.api.mvc.ControllerComponents
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 
@@ -61,7 +60,8 @@ class CsvController @Inject() (val controllerComponents: ControllerComponents, s
       val sortedAndFlattenedFields = flattendFieldValues(allFieldsValues.subscriptions)
         .sortBy(x => (x.clientId.value, x.context, x.versionNbr, x.name.value))
 
-      Ok(CsvHelper.toCsvString(columnDefinitions, sortedAndFlattenedFields)).withHeaders(HeaderNames.CONTENT_TYPE -> "text/csv")
+      val bodyText = CsvHelper.toCsvString(columnDefinitions, sortedAndFlattenedFields)
+      Ok(bodyText).as("text/csv")
     })
   }
 }

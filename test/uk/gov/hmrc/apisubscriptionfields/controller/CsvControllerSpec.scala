@@ -63,6 +63,7 @@ class CsvControllerSpec extends AsyncHmrcSpec with StubControllerComponentsFacto
                             |""".stripMargin
 
       contentAsString(result) shouldBe expectedCsv
+      contentType(result).value shouldBe "text/csv"
     }
   }
 }

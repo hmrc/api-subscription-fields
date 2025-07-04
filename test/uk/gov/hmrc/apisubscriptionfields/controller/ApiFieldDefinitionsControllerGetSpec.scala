@@ -183,7 +183,7 @@ class ApiFieldDefinitionsControllerGetSpec extends AsyncHmrcSpec with FieldDefin
 
   "GET /definition" should {
     "return OK with all field definitions" in {
-      when(mockFieldsDefinitionService.getAll).thenReturn(successful(allResponseModel))
+      when(mockFieldsDefinitionService.getAll()).thenReturn(successful(allResponseModel))
 
       val result = controller.getAllFieldsDefinitions(FakeRequest())
 
@@ -192,7 +192,7 @@ class ApiFieldDefinitionsControllerGetSpec extends AsyncHmrcSpec with FieldDefin
     }
 
     "return OK with an empty list when no field definitions exist in the repo" in {
-      when(mockFieldsDefinitionService.getAll).thenReturn(successful(BulkApiFieldDefinitionsResponse(Seq())))
+      when(mockFieldsDefinitionService.getAll()).thenReturn(successful(BulkApiFieldDefinitionsResponse(Seq())))
 
       val result = controller.getAllFieldsDefinitions(FakeRequest())
 
@@ -201,7 +201,7 @@ class ApiFieldDefinitionsControllerGetSpec extends AsyncHmrcSpec with FieldDefin
     }
 
     "return INTERNAL_SERVER_ERROR when service throws exception" in {
-      when(mockFieldsDefinitionService.getAll).thenReturn(failed(emulatedFailure))
+      when(mockFieldsDefinitionService.getAll()).thenReturn(failed(emulatedFailure))
 
       val result = controller.getAllFieldsDefinitions(FakeRequest())
 

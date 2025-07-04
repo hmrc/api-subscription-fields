@@ -40,7 +40,7 @@ case class RegexValidationRule(regex: RegexExpr) extends ValidationRule {
 
 // Taken from: https://stackoverflow.com/a/5078838
 case object UrlValidationRule extends ValidationRule {
-  DomainValidator.updateTLDOverride(DomainValidator.ArrayType.GENERIC_PLUS, Array("mdtp"));
+  DomainValidator.updateTLDOverride(DomainValidator.ArrayType.GENERIC_PLUS, Seq("mdtp"): _*)
   private val schemes           = Array("http", "https")
   private lazy val urlValidator = new org.apache.commons.validator.routines.UrlValidator(schemes, UrlValidator.ALLOW_LOCAL_URLS)
 

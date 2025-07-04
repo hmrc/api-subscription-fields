@@ -74,7 +74,7 @@ class SubscriptionFieldsServiceSpec extends AnyWordSpec with DefaultAwaitTimeout
     "return an empty list when no entry exists in the database collection" in new Setup {
       SubscriptionFieldsRepositoryMock.FetchAll.returns(List.empty)
 
-      await(service.getAll) shouldBe BulkSubscriptionFieldsResponse(subscriptions = List())
+      await(service.getAll()) shouldBe BulkSubscriptionFieldsResponse(subscriptions = List())
     }
 
     "return a list containing all subscription fields" in new Setup {
@@ -90,7 +90,7 @@ class SubscriptionFieldsServiceSpec extends AnyWordSpec with DefaultAwaitTimeout
         )
       )
 
-      await(service.getAll) shouldBe expectedResponse
+      await(service.getAll()) shouldBe expectedResponse
     }
   }
 

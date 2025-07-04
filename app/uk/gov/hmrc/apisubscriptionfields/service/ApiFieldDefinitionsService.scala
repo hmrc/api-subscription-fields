@@ -45,7 +45,7 @@ class ApiFieldDefinitionsService @Inject() (repository: ApiFieldDefinitionsRepos
     } yield fetch
   }
 
-  def getAll: Future[BulkApiFieldDefinitionsResponse] = {
+  def getAll(): Future[BulkApiFieldDefinitionsResponse] = {
     (for {
       defs <- repository.fetchAll()
     } yield defs) map (BulkApiFieldDefinitionsResponse(_))

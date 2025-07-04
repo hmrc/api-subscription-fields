@@ -64,7 +64,7 @@ class SubscriptionFieldsController @Inject() (cc: ControllerComponents, service:
   }
 
   def getAllSubscriptionFields: Action[AnyContent] = Action.async { _ =>
-    service.getAll map (fields => Ok(Json.toJson(fields))) recover recovery
+    service.getAll().map(fields => Ok(Json.toJson(fields))) recover recovery
   }
 
   private def asActionResult[T](eventualMaybeResponse: Future[Option[T]], notFoundMessage: String)(implicit writes: Writes[T]) = {

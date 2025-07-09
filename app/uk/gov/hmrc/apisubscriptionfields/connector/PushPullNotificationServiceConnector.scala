@@ -22,13 +22,13 @@ import scala.util.control.NonFatal
 
 import play.api.libs.json.Json
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.ClientId
+import uk.gov.hmrc.apiplatform.modules.subscriptionfields.domain.models.FieldValue
 import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.http.{HeaderCarrier, StringContextOps}
 import uk.gov.hmrc.play.http.metrics.common._
 
 import uk.gov.hmrc.apisubscriptionfields.config.ApplicationConfig
-import uk.gov.hmrc.apisubscriptionfields.model.Types.FieldValue
 import uk.gov.hmrc.apisubscriptionfields.model._
 
 @Singleton
@@ -67,7 +67,7 @@ class PushPullNotificationServiceConnector @Inject() (http: HttpClientV2, appCon
   }
 
   def updateCallBackUrl(clientId: ClientId, boxId: BoxId, callbackUrl: FieldValue)(implicit hc: HeaderCarrier): Future[Either[String, Unit]] = {
-    val payload = UpdateCallBackUrlRequest(clientId, callbackUrl)
+    val payload = UpdateCallBackUrlRequest(clientId, callbackUrl.value)
     http
       .put(url"$externalServiceUri/box/${boxId.value.toString}/callback")
       .withBody(Json.toJson(payload))

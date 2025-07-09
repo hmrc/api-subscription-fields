@@ -20,11 +20,11 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.Future
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
+import uk.gov.hmrc.apiplatform.modules.subscriptionfields.domain.models.{FieldName, FieldValue}
 import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apisubscriptionfields.connector.PushPullNotificationServiceConnector
 import uk.gov.hmrc.apisubscriptionfields.model.BoxId
-import uk.gov.hmrc.apisubscriptionfields.model.Types.{FieldName, FieldValue}
 
 @Singleton
 class PushPullNotificationService @Inject() (ppnsConnector: PushPullNotificationServiceConnector) {

@@ -22,6 +22,7 @@ import scala.concurrent.{ExecutionContext, Future}
 import play.api.libs.json._
 import play.api.mvc._
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
+import uk.gov.hmrc.apiplatform.modules.subscriptionfields.interface.models.UpsertFieldValuesRequest
 
 import uk.gov.hmrc.apisubscriptionfields.model.ErrorCode._
 import uk.gov.hmrc.apisubscriptionfields.model._
@@ -84,7 +85,7 @@ class SubscriptionFieldsController @Inject() (cc: ControllerComponents, service:
   def upsertSubscriptionFields(clientId: ClientId, apiContext: ApiContext, apiVersionNbr: ApiVersionNbr): Action[JsValue] = Action.async(parse.json) { implicit request =>
     import JsonFormatters._
 
-    withJsonBody[SubscriptionFieldsRequest] { payload =>
+    withJsonBody[UpsertFieldValuesRequest] { payload =>
       if (payload.fields.isEmpty) {
         Future.successful(UnprocessableEntity(JsErrorResponse(INVALID_REQUEST_PAYLOAD, "At least one field must be specified")))
       } else {

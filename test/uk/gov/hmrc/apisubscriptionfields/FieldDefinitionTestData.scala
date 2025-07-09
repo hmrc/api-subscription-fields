@@ -19,25 +19,39 @@ package uk.gov.hmrc.apisubscriptionfields
 import java.util.UUID
 
 import cats.data.NonEmptyList
-import eu.timepit.refined.api.Refined
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
+import uk.gov.hmrc.apiplatform.modules.subscriptionfields.domain.models.DevhubAccessRequirement.AdminOnly
+import uk.gov.hmrc.apiplatform.modules.subscriptionfields.domain.models._
 
-import uk.gov.hmrc.apisubscriptionfields.model.DevhubAccessRequirement._
-import uk.gov.hmrc.apisubscriptionfields.model.Types._
 import uk.gov.hmrc.apisubscriptionfields.model._
 
 trait FieldDefinitionTestData extends TestData {
-  import eu.timepit.refined.auto._
+
+  implicit class IntStringFields(in: Map[Int, String]) {
+
+    def asFields: Fields =
+      in.map {
+        case (i, s) => fieldN(i) -> FieldValue(s)
+      }
+  }
+
+  implicit class NameStringFields(in: Map[FieldName, String]) {
+
+    def asFields: Fields =
+      in.map {
+        case (n, s) => n -> FieldValue(s)
+      }
+  }
 
   def fieldN(id: Int): FieldName = {
     val char = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".charAt(id)
-    Refined.unsafeApply(s"field$char")
+    FieldName.safeApply(s"field$char").get
   }
 
-  final val AlphanumericFieldName: FieldName = "alphanumericField"
-  final val PasswordFieldName: FieldName     = "password"
-  final val PPNSFieldFieldName: FieldName    = "callbackurl"
+  final val AlphanumericFieldName: FieldName = FieldName("alphanumericField")
+  final val PasswordFieldName: FieldName     = FieldName("password")
+  final val PPNSFieldFieldName: FieldName    = FieldName("callbackurl")
 
   final val FakeValidationRule: RegexValidationRule = RegexValidationRule(".*")
 
@@ -68,7 +82,7 @@ trait FieldDefinitionTestData extends TestData {
     ValidationGroup("CallBackUrl Validation", NonEmptyList.one(CallBackUrlRegexRule))
 
   final val FakeFieldDefinitionAlphnumericField = FieldDefinition(
-    "alphanumericField",
+    FieldName("alphanumericField"),
     "an alphanumeric filed",
     "this is an alphanumeric value",
     FieldDefinitionType.STRING,
@@ -77,7 +91,7 @@ trait FieldDefinitionTestData extends TestData {
   )
 
   final val FakeFieldDefinitionPassword =
-    FieldDefinition("password", "password", "this is your password", FieldDefinitionType.SECURE_TOKEN, "password", Some(FakeValidationForPassword))
+    FieldDefinition(FieldName("password"), "password", "this is your password", FieldDefinitionType.SECURE_TOKEN, "password", Some(FakeValidationForPassword))
 
   final val FakeFieldDefinitionPPNSFields     =
     FieldDefinition(PPNSFieldFieldName, "Callback URL", "please enter a callback url", FieldDefinitionType.PPNS_FIELD, "callback", Some(FakeValidationForPPNS))

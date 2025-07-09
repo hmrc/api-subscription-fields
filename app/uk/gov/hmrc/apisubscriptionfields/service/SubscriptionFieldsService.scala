@@ -26,9 +26,9 @@ import cats.implicits._
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.services.EitherTHelper
+import uk.gov.hmrc.apiplatform.modules.subscriptionfields.domain.models._
 import uk.gov.hmrc.http.HeaderCarrier
 
-import uk.gov.hmrc.apisubscriptionfields.model.Types._
 import uk.gov.hmrc.apisubscriptionfields.model._
 import uk.gov.hmrc.apisubscriptionfields.repository.SubscriptionFieldsRepository
 
@@ -161,7 +161,6 @@ class SubscriptionFieldsService @Inject() (
 }
 
 object SubscriptionFieldsService {
-  import Types._
 
   // True - passed
   def validateAgainstGroup(group: ValidationGroup, value: FieldValue): Boolean = {
@@ -169,13 +168,13 @@ object SubscriptionFieldsService {
   }
 
   // Some is Some(error)
-  def validateAgainstDefinition(fieldDefinition: FieldDefinition, value: FieldValue): Option[FieldError] = {
+  def validateAgainstDefinition(fieldDefinition: FieldDefinition, value: FieldValue): Option[(FieldName, FieldErrorMessage)] = {
     fieldDefinition.validation.flatMap(group => if (validateAgainstGroup(group, value)) None else Some((fieldDefinition.name, group.errorMessage)))
   }
 
   def validateAgainstValidationRules(fieldDefinitions: NonEmptyList[FieldDefinition], fields: Fields): FieldErrorMap =
     fieldDefinitions
-      .map(fd => validateAgainstDefinition(fd, fields.getOrElse(fd.name, "")))
+      .map(fd => validateAgainstDefinition(fd, fields.getOrElse(fd.name, FieldValue.empty)))
       .foldLeft(FieldErrorMap.empty) {
         case (acc, None)              => acc
         case (acc, Some((name, msg))) => acc + (name -> msg)

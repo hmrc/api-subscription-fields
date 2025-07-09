@@ -26,6 +26,7 @@ import org.mongodb.scala.model.Indexes.ascending
 import org.mongodb.scala.model.{IndexModel, IndexOptions}
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
+import uk.gov.hmrc.apiplatform.modules.subscriptionfields.domain.models.ValidationGroup
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.play.json.{Codecs, PlayMongoRepository}
 
@@ -55,7 +56,7 @@ class ApiFieldDefinitionsMongoRepository @Inject() (mongo: MongoComponent)(impli
         Codecs.playFormatCodec(ApiContext.format),
         Codecs.playFormatCodec(ApiVersionNbr.format),
         Codecs.playFormatCodec(JsonFormatters.ApiFieldDefinitionsJF),
-        Codecs.playFormatCodec(JsonFormatters.ValidationJF)
+        Codecs.playFormatCodec(ValidationGroup.formatValidationGroup)
       ),
       indexes = Seq(
         IndexModel(

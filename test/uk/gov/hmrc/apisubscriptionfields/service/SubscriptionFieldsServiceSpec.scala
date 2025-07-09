@@ -24,10 +24,10 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 
 import play.api.test.{DefaultAwaitTimeout, FutureAwaits}
+import uk.gov.hmrc.apiplatform.modules.subscriptionfields.domain.models._
 import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apisubscriptionfields.mocks.{SubscriptionFieldsRepositoryMockModule, _}
-import uk.gov.hmrc.apisubscriptionfields.model.Types._
 import uk.gov.hmrc.apisubscriptionfields.model._
 import uk.gov.hmrc.apisubscriptionfields.{FieldDefinitionTestData, SubscriptionFieldsTestData}
 
@@ -40,13 +40,12 @@ class SubscriptionFieldsServiceSpec extends AnyWordSpec with DefaultAwaitTimeout
     val service =
       new SubscriptionFieldsService(SubscriptionFieldsRepositoryMock.aMock, ApiFieldDefinitionsServiceMock.aMock, PushPullNotificationServiceMock.aMock)
 
-    val validSubsFields: SubscriptionFields                  = subsFieldsFor(SubscriptionFieldsMatchRegexValidation)
-    val otherValidSubsFields                                 = subsFieldsFor(SubscriptionFieldsMatchRegexValidation + (AlphanumericFieldName -> "CBA321"))
-    def validSubsFieldsWithPpnsValue(fieldValue: FieldValue) = subsFieldsFor(SubscriptionFieldsMatchRegexValidation + (PPNSFieldFieldName -> fieldValue))
-    val validPpnsSubsFields: SubscriptionFields              = validSubsFieldsWithPpnsValue(PPNSFieldFieldValue)
-
-    val subsFieldsFailingValidation: SubscriptionFields = subsFieldsFor(Map(AlphanumericFieldName -> "ABC 123", PasswordFieldName -> "Qw12@er"))
-    val noSubsFields                                    = validSubsFields.copy(fields = Map.empty)
+    val validSubsFields: SubscriptionFields                                      = subsFieldsFor(SubscriptionFieldsMatchRegexValidation)
+    val otherValidSubsFields                                                     = subsFieldsFor(SubscriptionFieldsMatchRegexValidation ++ Map(AlphanumericFieldName -> "CBA321").asFields)
+    val validPpnsSubsFields: SubscriptionFields                                  = validSubsFieldsWithPpnsValue(PPNSFieldFieldValue)
+    def validSubsFieldsWithPpnsValue(fieldValue: FieldValue): SubscriptionFields = subsFieldsFor(SubscriptionFieldsMatchRegexValidation + (PPNSFieldFieldName -> fieldValue))
+    val subsFieldsFailingValidation: SubscriptionFields                          = subsFieldsFor(Map(AlphanumericFieldName -> "ABC 123", PasswordFieldName -> "Qw12@er").asFields)
+    val noSubsFields                                                             = validSubsFields.copy(fields = Map.empty)
 
     def thereAreNoFieldDefinitions()   = ApiFieldDefinitionsServiceMock.Get.returnsNothing(FakeContext, FakeVersion)
     def thereAreFieldDefinitions()     = ApiFieldDefinitionsServiceMock.Get.returns(FakeContext, FakeVersion, FakeApiFieldDefinitionsResponseWithRegex)
@@ -234,8 +233,8 @@ class SubscriptionFieldsServiceSpec extends AnyWordSpec with DefaultAwaitTimeout
       thereArePpnsFieldDefinitions()
       thereAreExistingFieldValues(validSubsFields)
       callToEnsurePpnsBoxIsPresent()
-      ppnsFieldGetsUpdated("")
-      val fieldsWithPpnsEmptyValue = validSubsFieldsWithPpnsValue("")
+      ppnsFieldGetsUpdated(FieldValue.empty)
+      val fieldsWithPpnsEmptyValue = validSubsFieldsWithPpnsValue(FieldValue.empty)
       fieldsAreUpdatedInDB(fieldsWithPpnsEmptyValue)
 
       val result: SubsFieldsUpsertResponse = await(service.upsert(FakeClientId, FakeContext, FakeVersion, fieldsWithPpnsEmptyValue.fields))
@@ -280,7 +279,7 @@ class SubscriptionFieldsServiceSpec extends AnyWordSpec with DefaultAwaitTimeout
       thereArePpnsFieldDefinitions()
       SubscriptionFieldsRepositoryMock.Fetch.returns(FakeClientId, FakeContext, FakeVersion, subsFieldsFailingValidation)
 
-      final val BadPpnsValue               = "xxx"
+      final val BadPpnsValue               = FieldValue("xxx")
       val baseFields                       = SubscriptionFieldsMatchRegexValidationPPNS
       val fieldsWithInvalidPpnsValue       = baseFields + (PPNSFieldFieldName -> BadPpnsValue)
       val result: SubsFieldsUpsertResponse = await(service.upsert(FakeClientId, FakeContext, FakeVersion, fieldsWithInvalidPpnsValue))
@@ -327,8 +326,21 @@ class SubscriptionFieldsServiceSpec extends AnyWordSpec with DefaultAwaitTimeout
     }
   }
 
-  def theErrorMessage(i: Int)           = s"error message $i"
-  val validationGroup1: ValidationGroup = ValidationGroup(theErrorMessage(1), NonEmptyList(mixedCaseRule, List(atLeastThreeLongRule)))
+  def theErrorMessage(i: Int) = s"error message $i"
+
+  val lowerCaseValue = FieldValue("bob")
+  val mixedCaseValue = FieldValue("Bob")
+
+  val lowerCaseRule: ValidationRule = RegexValidationRule("""^[a-z]+$""")
+  val mixedCaseRule: ValidationRule = RegexValidationRule("""^[a-zA-Z]+$""")
+
+  val atLeastThreeLongRule: ValidationRule = RegexValidationRule("""^.{3}.*$""")
+  val atLeastTenLongRule: ValidationRule   = RegexValidationRule("""^.{10}.*$""")
+  val validationGroup1: ValidationGroup    = ValidationGroup(theErrorMessage(1), NonEmptyList(mixedCaseRule, List(atLeastThreeLongRule)))
+
+  val validUrl      = "https://www.example.com/here/and/there"
+  val localValidUrl = "https://localhost:9000/"
+  val invalidUrls   = List("www.example.com", "ftp://example.com/abc", "https://www example.com", "https://www&example.com", "https://www,example.com")
 
   "validate value against group" should {
     "return true when the value is both mixed case and at least 3 long" in new Setup {
@@ -336,8 +348,8 @@ class SubscriptionFieldsServiceSpec extends AnyWordSpec with DefaultAwaitTimeout
     }
 
     "return false when the value is not mixed case or not at least 3 long" in new Setup {
-      val hasNumeralsValue   = "A345"
-      val veryShortMixedCase = "Ab"
+      val hasNumeralsValue   = FieldValue("A345")
+      val veryShortMixedCase = FieldValue("Ab")
       SubscriptionFieldsService.validateAgainstGroup(validationGroup1, hasNumeralsValue) shouldBe false
       SubscriptionFieldsService.validateAgainstGroup(validationGroup1, veryShortMixedCase) shouldBe false
     }
@@ -352,7 +364,7 @@ class SubscriptionFieldsServiceSpec extends AnyWordSpec with DefaultAwaitTimeout
     }
 
     "return FieldError when validation on the field defintion does not match the value" in new Setup {
-      val hasNumeralsValue = "A345"
+      val hasNumeralsValue = FieldValue("A345")
       SubscriptionFieldsService.validateAgainstDefinition(fieldDefinitionWithValidation, hasNumeralsValue) shouldBe
         Some((fieldDefinitionWithValidation.name, validationGroup1.errorMessage))
     }
@@ -360,7 +372,7 @@ class SubscriptionFieldsServiceSpec extends AnyWordSpec with DefaultAwaitTimeout
 
   "validate Field Names Are Defined" should {
     val fieldDefinitionWithoutValidation = FieldDefinition(fieldN(1), "desc1", "hint1", FieldDefinitionType.URL, "short description", None)
-    val fields                           = Map(fieldN(1) -> "Emily")
+    val fields                           = Map(fieldN(1) -> "Emily").asFields
 
     "succeed when Fields match Field Definitions" in new Setup {
       SubscriptionFieldsService.validateFieldNamesAreDefined(NonEmptyList.one(fieldDefinitionWithoutValidation), fields) shouldBe empty
@@ -368,7 +380,7 @@ class SubscriptionFieldsServiceSpec extends AnyWordSpec with DefaultAwaitTimeout
 
     "fail when when Fields are not present in the Field Definitions" in new Setup {
       val errs: FieldErrorMap =
-        SubscriptionFieldsService.validateFieldNamesAreDefined(NonEmptyList.one(fieldDefinitionWithoutValidation), Map(fieldN(5) -> "Bob", fieldN(1) -> "Fred"))
+        SubscriptionFieldsService.validateFieldNamesAreDefined(NonEmptyList.one(fieldDefinitionWithoutValidation), Map(5 -> "Bob", 1 -> "Fred").asFields)
       errs should not be empty
       errs.head match {
         case (name, _) if name == fieldN(5) => succeed

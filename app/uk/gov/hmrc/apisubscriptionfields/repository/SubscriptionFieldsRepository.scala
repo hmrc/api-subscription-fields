@@ -27,10 +27,11 @@ import org.mongodb.scala.model.Indexes.ascending
 import org.mongodb.scala.model.{IndexModel, IndexOptions}
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
+import uk.gov.hmrc.apiplatform.modules.subscriptionfields.domain.models.{Fields, ValidationGroup}
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.play.json.{Codecs, PlayMongoRepository}
 
-import uk.gov.hmrc.apisubscriptionfields.model.Types.{Fields, IsInsert}
+import uk.gov.hmrc.apisubscriptionfields.model.Types.IsInsert
 import uk.gov.hmrc.apisubscriptionfields.model._
 import uk.gov.hmrc.apisubscriptionfields.utils.ApplicationLogger
 
@@ -64,7 +65,7 @@ class SubscriptionFieldsMongoRepository @Inject() (mongo: MongoComponent, uuidCr
         Codecs.playFormatCodec(ApiContext.format),
         Codecs.playFormatCodec(ApiVersionNbr.format),
         Codecs.playFormatCodec(JsonFormatters.SubscriptionFieldsIdjsonFormat),
-        Codecs.playFormatCodec(JsonFormatters.ValidationJF)
+        Codecs.playFormatCodec(ValidationGroup.formatValidationGroup)
       ),
       indexes = Seq(
         IndexModel(

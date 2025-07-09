@@ -24,6 +24,7 @@ import play.api.libs.json.{JsValue, Json}
 import play.api.mvc._
 import play.api.test.Helpers._
 import play.api.test._
+import uk.gov.hmrc.apiplatform.modules.subscriptionfields.interface.models.FieldDefinitionsRequest
 
 import uk.gov.hmrc.apisubscriptionfields.model.JsonFormatters
 import uk.gov.hmrc.apisubscriptionfields.service.ApiFieldDefinitionsService

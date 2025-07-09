@@ -22,16 +22,15 @@ import scala.concurrent.Future.successful
 import play.api.test.Helpers._
 import play.api.test.{FakeRequest, StubControllerComponentsFactory}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
+import uk.gov.hmrc.apiplatform.modules.subscriptionfields.domain.models.{FieldName, FieldValue}
 import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apisubscriptionfields.AsyncHmrcSpec
 import uk.gov.hmrc.apisubscriptionfields.controller.CsvController
-import uk.gov.hmrc.apisubscriptionfields.model.Types.FieldName
 import uk.gov.hmrc.apisubscriptionfields.model.{BulkSubscriptionFieldsResponse, SubscriptionFields, SubscriptionFieldsId}
 import uk.gov.hmrc.apisubscriptionfields.service.SubscriptionFieldsService
 
 class CsvControllerSpec extends AsyncHmrcSpec with StubControllerComponentsFactory with ApiIdentifierFixtures with ClientIdFixtures {
-  import eu.timepit.refined.auto._
 
   implicit val hc: HeaderCarrier = HeaderCarrier()
 
@@ -45,12 +44,12 @@ class CsvControllerSpec extends AsyncHmrcSpec with StubControllerComponentsFacto
 
   "CsvController" should {
     "return a csv" in new Setup {
-      final val AlphanumericFieldName: FieldName = "alphanumericField"
-      final val PasswordFieldName: FieldName     = "password"
+      final val AlphanumericFieldName: FieldName = FieldName("alphanumericField")
+      final val PasswordFieldName: FieldName     = FieldName("password")
 
       val subsFields = Seq(
-        SubscriptionFields(ClientId("A2"), apiContextOne, apiVersionNbrOne, SubscriptionFieldsId.random(), Map(AlphanumericFieldName -> "A")),
-        SubscriptionFields(ClientId("A1"), apiContextTwo, apiVersionNbrTwo, SubscriptionFieldsId.random(), Map(PasswordFieldName -> "X"))
+        SubscriptionFields(ClientId("A2"), apiContextOne, apiVersionNbrOne, SubscriptionFieldsId.random(), Map(AlphanumericFieldName -> FieldValue("A"))),
+        SubscriptionFields(ClientId("A1"), apiContextTwo, apiVersionNbrTwo, SubscriptionFieldsId.random(), Map(PasswordFieldName -> FieldValue("X")))
       )
 
       when(service.getAll()).thenReturn(successful(BulkSubscriptionFieldsResponse(subsFields)))

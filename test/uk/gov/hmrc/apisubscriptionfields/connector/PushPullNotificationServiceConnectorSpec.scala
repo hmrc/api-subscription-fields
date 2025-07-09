@@ -32,6 +32,7 @@ import play.api.http.Status.OK
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
+import uk.gov.hmrc.apiplatform.modules.subscriptionfields.domain.models.FieldValue
 import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apisubscriptionfields.AsyncHmrcSpec
@@ -173,7 +174,7 @@ class PushPullNotificationServiceConnectorSpec extends AsyncHmrcSpec with GuiceO
       val path = s"/box/${boxId.value}/callback"
       primeStub(path, requestBody, responseBody)
 
-      val ret = await(connector.updateCallBackUrl(clientId, boxId, callbackUrl))
+      val ret = await(connector.updateCallBackUrl(clientId, boxId, FieldValue(callbackUrl)))
       ret shouldBe Right(())
 
       verifyPath(path)
@@ -187,7 +188,7 @@ class PushPullNotificationServiceConnectorSpec extends AsyncHmrcSpec with GuiceO
       val path = s"/box/${boxId.value}/callback"
       primeStub(path, requestBody, responseBody)
 
-      val ret = await(connector.updateCallBackUrl(clientId, boxId, callbackUrl))
+      val ret = await(connector.updateCallBackUrl(clientId, boxId, FieldValue(callbackUrl)))
       ret shouldBe Right(())
 
       verifyPath(path)
@@ -201,7 +202,7 @@ class PushPullNotificationServiceConnectorSpec extends AsyncHmrcSpec with GuiceO
       val path = s"/box/${boxId.value}/callback"
       primeStub(path, requestBody, responseBody)
 
-      val ret = await(connector.updateCallBackUrl(clientId, boxId, callbackUrl))
+      val ret = await(connector.updateCallBackUrl(clientId, boxId, FieldValue(callbackUrl)))
       ret shouldBe Left("some error")
 
       verifyPath(path)
@@ -215,7 +216,7 @@ class PushPullNotificationServiceConnectorSpec extends AsyncHmrcSpec with GuiceO
       primeError(path, requestBody)
 
       intercept[RuntimeException] {
-        await(connector.updateCallBackUrl(clientId, boxId, callbackUrl))
+        await(connector.updateCallBackUrl(clientId, boxId, FieldValue(callbackUrl)))
       }
     }
 
@@ -227,7 +228,7 @@ class PushPullNotificationServiceConnectorSpec extends AsyncHmrcSpec with GuiceO
       val path = s"/box/${boxId.value}/callback"
       primeStub(path, requestBody, responseBody)
 
-      val ret = await(connector.updateCallBackUrl(clientId, boxId, callbackUrl))
+      val ret = await(connector.updateCallBackUrl(clientId, boxId, FieldValue(callbackUrl)))
       ret shouldBe Left("Unknown Error")
 
       verifyPath(path)

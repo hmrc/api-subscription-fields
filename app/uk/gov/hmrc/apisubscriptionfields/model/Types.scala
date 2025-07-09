@@ -16,32 +16,6 @@
 
 package uk.gov.hmrc.apisubscriptionfields.model
 
-import scala.collection.immutable.Map
-
-import eu.timepit.refined._
-import eu.timepit.refined.api.Refined
-import eu.timepit.refined.string._
-
 object Types {
-  type RegexExpr = String Refined Regex
-
-  type FieldNameRegex = MatchesRegex[W.`"^[a-zA-Z]+$"`.T]
-  type FieldName      = Refined[String, FieldNameRegex]
-
-  type FieldValue = String
-
-  type Fields = Map[FieldName, FieldValue]
-
-  type ErrorMessage = String
-
-  type FieldError = (FieldName, ErrorMessage)
-
-  type FieldErrorMap = Map[FieldName, ErrorMessage]
-
-  object FieldErrorMap {
-    val empty = Map.empty[FieldName, ErrorMessage]
-  }
-
   type IsInsert = Boolean
-
 }

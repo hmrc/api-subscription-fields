@@ -20,14 +20,15 @@ import cats.data.NonEmptyList
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 
-import uk.gov.hmrc.apisubscriptionfields.model.FieldDefinitionType._
+import uk.gov.hmrc.apiplatform.modules.subscriptionfields.domain.models.FieldValue
+
 import uk.gov.hmrc.apisubscriptionfields.{FieldDefinitionTestData, SubscriptionFieldsTestData}
 
 class JsonFormatterSpec extends AnyWordSpec with Matchers with JsonFormatters with SubscriptionFieldsTestData with FieldDefinitionTestData {
 
   import play.api.libs.json._
 
-  private val fakeFields                     = Map(fieldN(1) -> "v1")
+  private val fakeFields                     = Map(fieldN(1) -> FieldValue("v1"))
   private val subscriptionFields             = SubscriptionFields(FakeClientId, FakeContext, FakeVersion, FakeFieldsId, fakeFields)
   private val bulkSubscriptionFieldsResponse = BulkSubscriptionFieldsResponse(Seq(subscriptionFields))
 
@@ -59,29 +60,6 @@ class JsonFormatterSpec extends AnyWordSpec with Matchers with JsonFormatters wi
     }
   }
 
-  "ValidationGroup" should {
-    import eu.timepit.refined.auto._
-    val singleValidation     = FakeValidation
-    val singleValidationText = """{"errorMessage":"error message","rules":[{"RegexValidationRule":{"regex":".*"}}]}"""
-
-    val dualValidation     = ValidationGroup("error message", NonEmptyList.of(RegexValidationRule("^.{12,50}+$"), UrlValidationRule))
-    val dualValidationText = """{"errorMessage":"error message","rules":[{"RegexValidationRule":{"regex":"^.{12,50}+$"}},{"UrlValidationRule":{}}]}"""
-
-    "marshal json" in {
-      objectAsJsonString(singleValidation) shouldBe singleValidationText
-      objectAsJsonString(dualValidation) shouldBe dualValidationText
-    }
-    "unmarshal text" in {
-      Json.parse(singleValidationText).validate[ValidationGroup] match {
-        case JsSuccess(r, _) => r shouldBe singleValidation
-        case JsError(e)      => fail(s"Should have parsed json text but got $e")
-      }
-      Json.parse(dualValidationText).validate[ValidationGroup] match {
-        case JsSuccess(r, _) => r shouldBe dualValidation
-        case JsError(e)      => fail(s"Should have parsed json text but got $e")
-      }
-    }
-  }
   "ApiFieldDefinitions" should {
     "marshal json" in {
       objectAsJsonString(fakeApiFieldDefinitionsResponse) shouldBe fieldDefinitionJson
@@ -131,99 +109,6 @@ class JsonFormatterSpec extends AnyWordSpec with Matchers with JsonFormatters wi
     "unmarshal text" in {
       Json.parse(json).validate[BulkApiFieldDefinitionsResponse] match {
         case JsSuccess(r, _) => r shouldBe bulkFieldsDefinitionResponse
-        case JsError(e)      => fail(s"Should have parsed json text but got $e")
-      }
-    }
-  }
-
-  "DevhubAccessRequirements" should {
-    import DevhubAccessRequirement._
-
-    "marshall a default correctly" in {
-      val rq = DevhubAccessRequirements.Default
-
-      Json.stringify(Json.toJson(rq)) shouldBe "{}"
-    }
-
-    "marshall a read option" in {
-      val rq = DevhubAccessRequirements(read = AdminOnly)
-
-      Json.stringify(Json.toJson(rq)) shouldBe """{"read":"adminOnly","write":"adminOnly"}"""
-    }
-
-    "marshall a write option" in {
-      val rq = DevhubAccessRequirements(read = DevhubAccessRequirement.Default, write = NoOne)
-
-      Json.stringify(Json.toJson(rq)) shouldBe """{"write":"noOne"}"""
-    }
-
-    "marshall a complete option" in {
-      val rq = DevhubAccessRequirements(read = AdminOnly, write = NoOne)
-
-      Json.stringify(Json.toJson(rq)) shouldBe """{"read":"adminOnly","write":"noOne"}"""
-    }
-
-    "unmarshall a default correctly" in {
-      Json.fromJson[DevhubAccessRequirements](Json.parse("{}")) shouldBe JsSuccess(DevhubAccessRequirements.Default)
-    }
-
-    "unmarshall a read correctly" in {
-      Json.fromJson[DevhubAccessRequirements](Json.parse("""{"read":"adminOnly"}""")) shouldBe JsSuccess(DevhubAccessRequirements(read = AdminOnly, write = AdminOnly))
-    }
-
-    "unmarshall a write correctly" in {
-      Json.fromJson[DevhubAccessRequirements](Json.parse("""{"write":"noOne"}""")) shouldBe JsSuccess(DevhubAccessRequirements(read = Anyone, write = NoOne))
-    }
-
-    "unmarshall a complete option correctly" in {
-      Json.fromJson[DevhubAccessRequirements](Json.parse("""{"read":"adminOnly","write":"noOne"}""")) shouldBe JsSuccess(DevhubAccessRequirements(read = AdminOnly, write = NoOne))
-    }
-  }
-
-  "AccessRequirements" should {
-    import DevhubAccessRequirement._
-
-    "marshalling a default correctly" in {
-      val rq = AccessRequirements.Default
-
-      Json.stringify(Json.toJson(rq)) shouldBe """{"devhub":{}}"""
-    }
-
-    "marshalling with some devhub requirements correctly" in {
-      // read is set explicity, but write will be given this greater restriction too.
-      val rq = AccessRequirements(devhub = DevhubAccessRequirements.apply(read = AdminOnly))
-
-      Json.stringify(Json.toJson(rq)) shouldBe """{"devhub":{"read":"adminOnly","write":"adminOnly"}}"""
-    }
-
-    "unmarshall with default correctly" in {
-      Json.fromJson[AccessRequirements](Json.parse("""{"devhub":{}}""")) shouldBe JsSuccess(AccessRequirements.Default)
-    }
-
-    "unmarshall with non default correctly" in {
-      Json.fromJson[AccessRequirements](Json.parse("""{"devhub":{"read":"adminOnly"}}""")) shouldBe JsSuccess(
-        AccessRequirements(devhub = DevhubAccessRequirements(read = AdminOnly))
-      )
-    }
-  }
-
-  "FieldDefinition" should {
-    "marshal json with non default access" in {
-      objectAsJsonString(FakeFieldDefinitionWithAccess) should include(""","access":{"devhub":{"read":"adminOnly","write":"adminOnly"}}""")
-    }
-
-    "marshal json without mention of default access" in {
-      objectAsJsonString(
-        FakeFieldDefinitionWithAccess.copy(access = AccessRequirements.Default)
-      ) should not include (""""access":{"devhub":{"read":"adminOnly", "write":"adminOnly"}}""")
-      objectAsJsonString(FakeFieldDefinitionWithAccess.copy(access = AccessRequirements.Default)) should not include (""""access"""")
-    }
-
-    "unmarshal json string into a FieldDefinition" in {
-      val json = """{"name":"fieldB","description":"desc1","hint":"hint1","type":"PPNSField","shortDescription":"short description"}"""
-
-      Json.fromJson[FieldDefinition](Json.parse(json)) match {
-        case JsSuccess(r, _) => r.`type` shouldBe PPNS_FIELD
         case JsError(e)      => fail(s"Should have parsed json text but got $e")
       }
     }

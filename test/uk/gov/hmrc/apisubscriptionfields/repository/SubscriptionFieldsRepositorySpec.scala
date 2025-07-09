@@ -27,6 +27,7 @@ import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 
 import play.api.test.{DefaultAwaitTimeout, FutureAwaits}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
+import uk.gov.hmrc.apiplatform.modules.subscriptionfields.domain.models.FieldValue
 import uk.gov.hmrc.mongo.play.json.Codecs
 
 import uk.gov.hmrc.apisubscriptionfields.AsyncHmrcSpec
@@ -55,7 +56,7 @@ class SubscriptionFieldsRepositorySpec
   }
 
   private def createApiSubscriptionFields(clientId: ClientId = FakeClientId): SubscriptionFields = {
-    val fields = Map(fieldN(1) -> "value_1", fieldN(2) -> "value_2", fieldN(3) -> "value_3")
+    val fields = Map(fieldN(1) -> FieldValue("value_1"), fieldN(2) -> FieldValue("value_2"), fieldN(3) -> FieldValue("value_3"))
     SubscriptionFields(clientId, FakeContext, FakeVersion, SubscriptionFieldsId(UUID.randomUUID()), fields)
   }
 
@@ -114,7 +115,7 @@ class SubscriptionFieldsRepositorySpec
       validateResult(resultAfterCreate, apiSubscriptionFields, true)
       collectionSize shouldBe 1
 
-      val updatedSubscriptionFields = apiSubscriptionFields.copy(fields = Map(fieldN(4) -> "value_4"))
+      val updatedSubscriptionFields = apiSubscriptionFields.copy(fields = Map(fieldN(4) -> FieldValue("value_4")))
       val resultAfterUpdate         = await(saveAtomic(updatedSubscriptionFields))
       validateResult(resultAfterUpdate, updatedSubscriptionFields, false)
       resultAfterCreate._1.fieldsId shouldBe resultAfterUpdate._1.fieldsId

@@ -21,9 +21,9 @@ import scala.concurrent.ExecutionContext
 
 import play.api.mvc.ControllerComponents
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
+import uk.gov.hmrc.apiplatform.modules.subscriptionfields.domain.models.{FieldName, FieldValue}
 
 import uk.gov.hmrc.apisubscriptionfields.model.SubscriptionFields
-import uk.gov.hmrc.apisubscriptionfields.model.Types.{FieldName, FieldValue}
 import uk.gov.hmrc.apisubscriptionfields.service.SubscriptionFieldsService
 import uk.gov.hmrc.apisubscriptionfields.utils.CsvHelper.ColumnDefinition
 import uk.gov.hmrc.apisubscriptionfields.utils.{ApplicationLogger, CsvHelper}

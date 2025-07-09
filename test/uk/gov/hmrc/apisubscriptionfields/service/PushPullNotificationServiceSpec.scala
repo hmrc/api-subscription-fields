@@ -20,6 +20,7 @@ import java.{util => ju}
 import scala.concurrent.Future.{failed, successful}
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
+import uk.gov.hmrc.apiplatform.modules.subscriptionfields.domain.models.FieldValue
 import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apisubscriptionfields.connector.PushPullNotificationServiceConnector
@@ -63,7 +64,7 @@ class PushPullNotificationServiceSpec extends AsyncHmrcSpec with SubscriptionFie
   }
 
   "updating PPNS callback URL" should {
-    val ppnsFieldValue = "localhost:9001/pingme"
+    val ppnsFieldValue = FieldValue("localhost:9001/pingme")
 
     "succeed when update of callback URL is successful" in new Setup {
       when(mockPPNSConnector.updateCallBackUrl(clientId, boxId, ppnsFieldValue)(hc)).thenReturn(successful(Right(())))

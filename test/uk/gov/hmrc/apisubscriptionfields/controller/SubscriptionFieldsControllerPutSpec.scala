@@ -26,6 +26,7 @@ import play.api.libs.json.{JsValue, Json}
 import play.api.mvc._
 import play.api.test.Helpers._
 import play.api.test.{FakeRequest, StubControllerComponentsFactory}
+import uk.gov.hmrc.apiplatform.modules.subscriptionfields.interface.models.UpsertFieldValuesRequest
 
 import uk.gov.hmrc.apisubscriptionfields.model._
 import uk.gov.hmrc.apisubscriptionfields.service.SubscriptionFieldsService
@@ -45,7 +46,7 @@ class SubscriptionFieldsControllerPutSpec extends AsyncHmrcSpec with Subscriptio
     "return CREATED when Field values are Valid and created in the repo" in {
       subsFieldServiceUpsertReturns(SuccessfulSubsFieldsUpsertResponse(FakeSubscriptionFieldsResponse, true))
 
-      val json = mkJson(SubscriptionFieldsRequest(FakeSubscriptionFields))
+      val json = mkJson(UpsertFieldValuesRequest(FakeSubscriptionFields))
       testSubmitResult(mkRequest(json)) { result =>
         status(result) shouldBe CREATED
       }
@@ -54,7 +55,7 @@ class SubscriptionFieldsControllerPutSpec extends AsyncHmrcSpec with Subscriptio
     "return OK when Field values are Valid and updated in the repo" in {
       subsFieldServiceUpsertReturns(SuccessfulSubsFieldsUpsertResponse(FakeSubscriptionFieldsResponse, false))
 
-      val json = mkJson(SubscriptionFieldsRequest(FakeSubscriptionFields))
+      val json = mkJson(UpsertFieldValuesRequest(FakeSubscriptionFields))
       testSubmitResult(mkRequest(json)) { result =>
         status(result) shouldBe OK
       }
@@ -63,7 +64,7 @@ class SubscriptionFieldsControllerPutSpec extends AsyncHmrcSpec with Subscriptio
     "return BadRequest with FieldErrorMessages when Field values are Invalid" in {
       subsFieldServiceUpsertReturns(FailedValidationSubsFieldsUpsertResponse(FakeFieldErrorMessages))
 
-      val json = mkJson(SubscriptionFieldsRequest(FakeSubscriptionFields))
+      val json = mkJson(UpsertFieldValuesRequest(FakeSubscriptionFields))
       testSubmitResult(mkRequest(json)) { result =>
         status(result) shouldBe BAD_REQUEST
         contentAsJson(result) shouldBe (Json.toJson(FakeFieldErrorMessages))
@@ -73,14 +74,14 @@ class SubscriptionFieldsControllerPutSpec extends AsyncHmrcSpec with Subscriptio
     "return BadRequest when api does not have subs fields" in {
       subsFieldServiceUpsertReturns(NotFoundSubsFieldsUpsertResponse)
 
-      val json = mkJson(SubscriptionFieldsRequest(FakeSubscriptionFields))
+      val json = mkJson(UpsertFieldValuesRequest(FakeSubscriptionFields))
       testSubmitResult(mkRequest(json)) { result =>
         status(result) shouldBe BAD_REQUEST
       }
     }
 
     "return UnprocessableEntity when no Fields are specified" in {
-      val json = mkJson(SubscriptionFieldsRequest(Map.empty))
+      val json = mkJson(UpsertFieldValuesRequest(Map.empty))
 
       testSubmitResult(mkRequest(json)) { result =>
         status(result) shouldBe UNPROCESSABLE_ENTITY
@@ -101,5 +102,5 @@ class SubscriptionFieldsControllerPutSpec extends AsyncHmrcSpec with Subscriptio
       .withJsonBody(jsonBody)
       .map(r => r.json)
 
-  private def mkJson(model: SubscriptionFieldsRequest) = Json.toJson(model)(Json.writes[SubscriptionFieldsRequest])
+  private def mkJson(model: UpsertFieldValuesRequest) = Json.toJson(model)(Json.writes[UpsertFieldValuesRequest])
 }

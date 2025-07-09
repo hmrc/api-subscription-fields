@@ -22,8 +22,9 @@ import scala.concurrent.{ExecutionContext, Future}
 import cats.data.NonEmptyList
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
+import uk.gov.hmrc.apiplatform.modules.subscriptionfields.domain.models.FieldDefinition
 
-import uk.gov.hmrc.apisubscriptionfields.model.Types._
+import uk.gov.hmrc.apisubscriptionfields.model.Types.IsInsert
 import uk.gov.hmrc.apisubscriptionfields.model._
 import uk.gov.hmrc.apisubscriptionfields.repository.ApiFieldDefinitionsRepository
 

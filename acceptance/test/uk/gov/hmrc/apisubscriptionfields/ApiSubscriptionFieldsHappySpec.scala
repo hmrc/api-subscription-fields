@@ -63,7 +63,7 @@ class ApiSubscriptionFieldsHappySpec extends AcceptanceTestSpec
     appLogger.logger.info(s"App.mode = ${app.mode.toString}")
 
     Scenario("the API is called to store some values for a new subscription field") {
-      val request: Request[AnyContentAsJson] = createSubscriptionFieldsRequest()
+      val request: Request[AnyContentAsJson] = createUpsertFieldValuesRequest()
 
       When("a PUT request with data is sent to the API")
       val result: Option[Future[Result]] = route(app, request)
@@ -82,13 +82,13 @@ class ApiSubscriptionFieldsHappySpec extends AcceptanceTestSpec
       sfr.get shouldBe SubscriptionFields(FakeClientId, ApiContext("acontext"), ApiVersionNbr("1.0.2"), fieldsId, SampleFields1)
     }
 
-    def createSubscriptionFieldsRequest(): FakeRequest[AnyContentAsJson] = {
+    def createUpsertFieldValuesRequest(): FakeRequest[AnyContentAsJson] = {
       createRequest(PUT, subscriptionFieldsEndpoint(fakeRawClientId, fakeRawContext, fakeRawVersion))
-        .withJsonBody(Json.toJson(makeSubscriptionFieldsRequest(SampleFields1)))
+        .withJsonBody(Json.toJson(makeUpsertFieldValuesRequest(SampleFields1)))
     }
 
     def createSubscriptionFields() = {
-      route(app, createSubscriptionFieldsRequest())
+      route(app, createUpsertFieldValuesRequest())
     }
 
     Scenario("the API is called to GET some existing subscription fields") {

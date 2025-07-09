@@ -33,10 +33,10 @@ import play.api.mvc._
 import play.api.mvc.request.RequestTarget
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
+import uk.gov.hmrc.apiplatform.modules.subscriptionfields.domain.models.{FieldDefinition, Fields}
 import uk.gov.hmrc.mongo.MongoComponent
 
 import uk.gov.hmrc.apisubscriptionfields.controller.Helper
-import uk.gov.hmrc.apisubscriptionfields.model._
 
 trait AcceptanceTestSpec extends AnyFeatureSpec
     with GivenWhenThen
@@ -64,11 +64,11 @@ trait AcceptanceTestSpec extends AnyFeatureSpec
 
   protected def fieldsIdEndpoint(fieldsId: UUID) = s"/field/$fieldsId"
 
-  protected val SampleFields1 = Map(fieldN(1) -> "http://www.example.com/some-endpoint", fieldN(2) -> "value2")
-  protected val SampleFields2 = Map(fieldN(1) -> "https://www.example2.com/updated", fieldN(3) -> "value3")
+  protected val SampleFields1 = Map(1 -> "http://www.example.com/some-endpoint", 2 -> "value2").asFields
+  protected val SampleFields2 = Map(1 -> "https://www.example2.com/updated", 3 -> "value3").asFields
 
-  protected def validSubscriptionPutRequest(fields: Types.Fields): FakeRequest[AnyContentAsJson] =
-    fakeRequestWithHeaders.withMethod(PUT).withJsonBody(Json.toJson(makeSubscriptionFieldsRequest(fields)))
+  protected def validSubscriptionPutRequest(fields: Fields): FakeRequest[AnyContentAsJson] =
+    fakeRequestWithHeaders.withMethod(PUT).withJsonBody(Json.toJson(makeUpsertFieldValuesRequest(fields)))
 
   protected def validDefinitionPutRequest(fieldDefinitions: NonEmptyList[FieldDefinition]): FakeRequest[AnyContentAsJson] =
     fakeRequestWithHeaders.withMethod(PUT).withJsonBody(Json.toJson(makeFieldDefinitionsRequest(fieldDefinitions)))

@@ -5,13 +5,13 @@ import scala.language.postfixOps
 val appName = "api-subscription-fields"
 
 Global / bloopAggregateSourceDependencies := true
-Global / bloopExportJarClassifiers := Some(Set("sources"))
+Global / bloopExportJarClassifiers        := Some(Set("sources"))
 
-ThisBuild / scalaVersion := "2.13.18"
-ThisBuild / majorVersion := 0
+ThisBuild / scalaVersion                                         := "2.13.18"
+ThisBuild / majorVersion                                         := 0
 ThisBuild / libraryDependencySchemes += "org.scala-lang.modules" %% "scala-xml" % VersionScheme.Always
-ThisBuild / semanticdbEnabled := true
-ThisBuild / semanticdbVersion := scalafixSemanticdb.revision
+ThisBuild / semanticdbEnabled                                    := true
+ThisBuild / semanticdbVersion                                    := scalafixSemanticdb.revision
 
 lazy val microservice = Project(appName, file("."))
   .enablePlugins(PlayScala, SbtDistributablesPlugin)
@@ -51,7 +51,6 @@ commands ++= Seq(
   Command.command("fmtAll") { state => "scalafmtAll" :: "acceptance/scalafmtAll" :: state },
   Command.command("fixAll") { state => "scalafixAll" :: "acceptance/scalafixAll" :: state },
   Command.command("testAll") { state => "test" :: "acceptance/test" :: state },
-
   Command.command("run-all-tests") { state => "testAll" :: state },
   Command.command("clean-and-test") { state => "cleanAll" :: "compile" :: "run-all-tests" :: state },
   Command.command("pre-commit") { state => "cleanAll" :: "fmtAll" :: "fixAll" :: "coverage" :: "testAll" :: "coverageOff" :: "coverageAggregate" :: state }

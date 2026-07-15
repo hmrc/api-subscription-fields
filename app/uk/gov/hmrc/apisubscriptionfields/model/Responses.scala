@@ -18,7 +18,7 @@ package uk.gov.hmrc.apisubscriptionfields.model
 
 import play.api.libs.json.Json.JsValueWrapper
 import play.api.libs.json.{Format, JsObject, Json}
-import uk.gov.hmrc.apiplatform.modules.common.domain.services.SealedTraitJsonFormatting
+import uk.gov.hmrc.apiplatform.modules.common.domain.services.SimpleEnumJsonFormatting
 import uk.gov.hmrc.apiplatform.modules.subscriptionfields.domain.models.FieldName
 
 sealed trait SubsFieldsUpsertResponse
@@ -48,7 +48,7 @@ object ErrorCode {
 
   def unsafeApply(text: String): ErrorCode = apply(text).getOrElse(throw new RuntimeException(s"$text is not a valid Error Code"))
 
-  implicit val format: Format[ErrorCode] = SealedTraitJsonFormatting.createFormatFor[ErrorCode]("Error Code", apply)
+  implicit val format: Format[ErrorCode] = SimpleEnumJsonFormatting.createStringFormatFor[ErrorCode]("Error Code", apply)
 }
 
 object JsErrorResponse {

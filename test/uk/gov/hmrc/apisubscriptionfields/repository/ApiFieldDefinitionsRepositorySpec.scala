@@ -16,6 +16,8 @@
 
 package uk.gov.hmrc.apisubscriptionfields.repository
 
+import scala.concurrent.ExecutionContext.Implicits.global
+
 import org.mongodb.scala.model.Filters
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
@@ -23,7 +25,8 @@ import org.scalatest.{BeforeAndAfterEach, OptionValues}
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 
 import play.api.test.{DefaultAwaitTimeout, FutureAwaits}
-import uk.gov.hmrc.apiplatform.modules.common.domain.models._
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.*
+import uk.gov.hmrc.mongo.logging.ObservableFutureImplicits.ObservableFuture
 import uk.gov.hmrc.mongo.play.json.Codecs
 
 import uk.gov.hmrc.apisubscriptionfields.SubscriptionFieldsTestData.{FakeContext, FakeVersion, NelOfFieldDefinitions, uniqueApiContext}
@@ -51,7 +54,7 @@ class ApiFieldDefinitionsRepositorySpec
   }
 
   def collectionSize: Long = {
-    await(repository.collection.countDocuments().toFuture())
+    await(repository.collection.countDocuments().toFuture().map(_.fold(0L)(_ + _)))
   }
 
   def createApiFieldDefinitions(apiContext: ApiContext = FakeContext) = ApiFieldDefinitions(apiContext, FakeVersion, NelOfFieldDefinitions)
@@ -108,7 +111,7 @@ class ApiFieldDefinitionsRepositorySpec
     }
 
     "return `None` when the `id` doesn't match any record in the collection" in {
-      for (i <- 1 to 3) {
+      for (_ <- 1 to 3) {
         val definitions = createApiFieldDefinitions(apiContext = uniqueApiContext)
         await(repository.save(definitions))
       }

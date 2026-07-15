@@ -1,4 +1,4 @@
-import sbt._
+import sbt.*
 
 object AppDependencies {
   def apply(): Seq[ModuleID] = dependencies ++ testDependencies
@@ -12,7 +12,6 @@ object AppDependencies {
   private lazy val dependencies = Seq(
     "uk.gov.hmrc"       %% "bootstrap-backend-play-30"       % bootstrapVersion,
     "uk.gov.hmrc.mongo" %% "hmrc-mongo-play-30"              % mongoVersion,
-    "uk.gov.hmrc"       %% "http-metrics"                    % "2.9.0",
     "org.typelevel"     %% "cats-core"                       % "2.13.0",
     "org.apache.commons" % "commons-csv"                     % "1.10.0",
     "commons-validator"  % "commons-validator"               % "1.9.0",

@@ -21,7 +21,7 @@ import scala.concurrent.Future.{failed, successful}
 
 import cats.data.NonEmptyList
 
-import uk.gov.hmrc.apisubscriptionfields.model._
+import uk.gov.hmrc.apisubscriptionfields.model.*
 import uk.gov.hmrc.apisubscriptionfields.repository.ApiFieldDefinitionsRepository
 import uk.gov.hmrc.apisubscriptionfields.{AsyncHmrcSpec, FieldDefinitionTestData}
 

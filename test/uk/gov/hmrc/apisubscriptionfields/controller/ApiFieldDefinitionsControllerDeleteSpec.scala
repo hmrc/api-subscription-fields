@@ -19,8 +19,8 @@ package uk.gov.hmrc.apisubscriptionfields.controller
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future.successful
 
-import play.api.libs.json._
-import play.api.test.Helpers._
+import play.api.libs.json.*
+import play.api.test.Helpers.*
 import play.api.test.{FakeRequest, StubControllerComponentsFactory}
 
 import uk.gov.hmrc.apisubscriptionfields.model.JsonFormatters

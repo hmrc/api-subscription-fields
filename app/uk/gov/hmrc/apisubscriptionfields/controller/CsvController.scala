@@ -20,7 +20,7 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
 
 import play.api.mvc.ControllerComponents
-import uk.gov.hmrc.apiplatform.modules.common.domain.models._
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.*
 import uk.gov.hmrc.apiplatform.modules.subscriptionfields.domain.models.{FieldName, FieldValue}
 
 import uk.gov.hmrc.apisubscriptionfields.model.SubscriptionFields
@@ -37,7 +37,7 @@ class CsvController @Inject() (val controllerComponents: ControllerComponents, s
     case class FlattenedSubscriptionFieldValue(clientId: ClientId, context: ApiContext, versionNbr: ApiVersionNbr, name: FieldName)
 
     val columnDefinitions: Seq[ColumnDefinition[FlattenedSubscriptionFieldValue]] = Seq(
-      ColumnDefinition("Environment", (_ => Environment.PRODUCTION.toString())),
+      ColumnDefinition("Environment", (_ => Environment.Production.toString().toUpperCase())),
       ColumnDefinition("ClientId", (data => data.clientId.value)),
       ColumnDefinition("ApiContext", (data => data.context.value)),
       ColumnDefinition("ApiVersionNbr", (data => data.versionNbr.value)),
@@ -46,8 +46,8 @@ class CsvController @Inject() (val controllerComponents: ControllerComponents, s
 
     def flattendFieldValues(subscriptionFieldValues: Seq[SubscriptionFields]): Seq[FlattenedSubscriptionFieldValue] = {
       subscriptionFieldValues.flatMap(allsubscriptionFieldValues => {
-        allsubscriptionFieldValues.fields.map { fieldValue: (FieldName, FieldValue) =>
-          {
+        allsubscriptionFieldValues.fields.map {
+          case fieldValue: (FieldName, FieldValue) => {
             val fieldName = fieldValue._1
             FlattenedSubscriptionFieldValue(allsubscriptionFieldValues.clientId, allsubscriptionFieldValues.apiContext, allsubscriptionFieldValues.apiVersion, fieldName)
           }

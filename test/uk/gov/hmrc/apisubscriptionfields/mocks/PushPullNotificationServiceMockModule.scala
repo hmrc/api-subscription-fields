@@ -37,20 +37,20 @@ trait PushPullNotificationServiceMockModule extends MockitoSugar with ArgumentMa
     object EnsureBoxIsCreated {
 
       def succeeds(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersionNbr, fieldName: FieldName, boxId: BoxId) =
-        when(aMock.ensureBoxIsCreated(eqTo(clientId), eqTo(apiContext), eqTo(apiVersion), eqTo(fieldName))(*)).thenReturn(successful(boxId))
+        when(aMock.ensureBoxIsCreated(eqTo(clientId), eqTo(apiContext), eqTo(apiVersion), eqTo(fieldName))(using *)).thenReturn(successful(boxId))
 
       def fails(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersionNbr, fieldName: FieldName) =
-        when(aMock.ensureBoxIsCreated(eqTo(clientId), eqTo(apiContext), eqTo(apiVersion), eqTo(fieldName))(*)).thenReturn(failed(new Exception("bang!")))
+        when(aMock.ensureBoxIsCreated(eqTo(clientId), eqTo(apiContext), eqTo(apiVersion), eqTo(fieldName))(using *)).thenReturn(failed(new Exception("bang!")))
     }
 
     object UpdateCallbackUrl {
 
       def succeeds(clientId: ClientId, boxId: BoxId, fieldValue: FieldValue) = {
-        when(aMock.updateCallbackUrl(eqTo(clientId), eqTo(boxId), eqTo(fieldValue))(*)).thenReturn(successful(Right(())))
+        when(aMock.updateCallbackUrl(eqTo(clientId), eqTo(boxId), eqTo(fieldValue))(using *)).thenReturn(successful(Right(())))
       }
 
       def fails(clientId: ClientId, boxId: BoxId, fieldValue: FieldValue, error: String) =
-        when(aMock.updateCallbackUrl(eqTo(clientId), eqTo(boxId), eqTo(fieldValue))(*)).thenReturn(successful(Left(error)))
+        when(aMock.updateCallbackUrl(eqTo(clientId), eqTo(boxId), eqTo(fieldValue))(using *)).thenReturn(successful(Left(error)))
     }
   }
 

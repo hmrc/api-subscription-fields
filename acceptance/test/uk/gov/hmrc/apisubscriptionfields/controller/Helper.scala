@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.apisubscriptionfields.controller
 
-import cats.data.{NonEmptyList => NEL}
+import cats.data.NonEmptyList as NEL
 
 import uk.gov.hmrc.apiplatform.modules.subscriptionfields.domain.models.{FieldDefinition, Fields}
 import uk.gov.hmrc.apiplatform.modules.subscriptionfields.interface.models.{FieldDefinitionsRequest, UpsertFieldValuesRequest}

@@ -20,11 +20,11 @@ import scala.concurrent.Future
 
 import org.scalatest.OptionValues
 
-import play.api.mvc._
+import play.api.mvc.*
 import play.api.mvc.request.RequestTarget
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 
-import uk.gov.hmrc.apisubscriptionfields.model._
+import uk.gov.hmrc.apisubscriptionfields.model.*
 
 class SubscriptionFieldDefinitionsHappySpec extends AcceptanceTestSpec
     with OptionValues

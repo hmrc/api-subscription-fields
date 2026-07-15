@@ -19,7 +19,7 @@ package uk.gov.hmrc.apisubscriptionfields.service
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.Future
 
-import uk.gov.hmrc.apiplatform.modules.common.domain.models._
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.*
 import uk.gov.hmrc.apiplatform.modules.subscriptionfields.domain.models.{FieldName, FieldValue}
 import uk.gov.hmrc.http.HeaderCarrier
 

@@ -25,13 +25,13 @@ import org.mongodb.scala.model.Filters.{and, equal}
 import org.mongodb.scala.model.Indexes.ascending
 import org.mongodb.scala.model.{IndexModel, IndexOptions}
 
-import uk.gov.hmrc.apiplatform.modules.common.domain.models._
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.*
 import uk.gov.hmrc.apiplatform.modules.subscriptionfields.domain.models.ValidationGroup
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.play.json.{Codecs, PlayMongoRepository}
 
-import uk.gov.hmrc.apisubscriptionfields.model.Types._
-import uk.gov.hmrc.apisubscriptionfields.model._
+import uk.gov.hmrc.apisubscriptionfields.model.*
+import uk.gov.hmrc.apisubscriptionfields.model.Types.*
 import uk.gov.hmrc.apisubscriptionfields.utils.ApplicationLogger
 
 @ImplementedBy(classOf[ApiFieldDefinitionsMongoRepository])
@@ -53,14 +53,14 @@ class ApiFieldDefinitionsMongoRepository @Inject() (mongo: MongoComponent)(impli
       mongoComponent = mongo,
       domainFormat = JsonFormatters.ApiFieldDefinitionsJF,
       extraCodecs = Seq(
-        Codecs.playFormatCodec(ApiContext.format),
-        Codecs.playFormatCodec(ApiVersionNbr.format),
+        Codecs.playFormatCodec(ApiContext.given_Format_ApiContext),
+        Codecs.playFormatCodec(ApiVersionNbr.given_Format_ApiVersionNbr),
         Codecs.playFormatCodec(JsonFormatters.ApiFieldDefinitionsJF),
-        Codecs.playFormatCodec(ValidationGroup.formatValidationGroup)
+        Codecs.playFormatCodec(ValidationGroup.given_OFormat_ValidationGroup)
       ),
       indexes = Seq(
         IndexModel(
-          ascending(List("apiContext", "apiVersion"): _*),
+          ascending(List("apiContext", "apiVersion")*),
           IndexOptions()
             .name("apiContext-apiVersion_index")
             .background(true)

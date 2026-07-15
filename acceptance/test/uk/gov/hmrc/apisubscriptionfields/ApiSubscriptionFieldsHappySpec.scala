@@ -16,19 +16,19 @@
 
 package uk.gov.hmrc.apisubscriptionfields
 
-import scala.concurrent.duration._
+import scala.concurrent.duration.*
 import scala.concurrent.{Await, Future}
 
 import org.scalatest.{BeforeAndAfterAll, OptionValues}
 
 import play.api.libs.json.Json
-import play.api.mvc._
+import play.api.mvc.*
 import play.api.mvc.request.RequestTarget
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
-import uk.gov.hmrc.apiplatform.modules.common.domain.models._
+import play.api.test.Helpers.*
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.*
 
-import uk.gov.hmrc.apisubscriptionfields.model._
+import uk.gov.hmrc.apisubscriptionfields.model.*
 import uk.gov.hmrc.apisubscriptionfields.utils.ApplicationLogger
 
 class ApiSubscriptionFieldsHappySpec extends AcceptanceTestSpec

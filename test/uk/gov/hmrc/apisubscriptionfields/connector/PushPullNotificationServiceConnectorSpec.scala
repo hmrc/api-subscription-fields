@@ -16,11 +16,11 @@
 
 package uk.gov.hmrc.apisubscriptionfields.connector
 
-import java.{util => ju}
+import java.util as ju
 
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
-import com.github.tomakehurst.wiremock.client.WireMock._
+import com.github.tomakehurst.wiremock.client.WireMock.*
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig
 import org.apache.pekko.stream.Materializer
 import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach}
@@ -31,13 +31,13 @@ import play.api.http.HeaderNames.{CONTENT_TYPE, USER_AGENT}
 import play.api.http.Status.OK
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
-import uk.gov.hmrc.apiplatform.modules.common.domain.models._
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.*
 import uk.gov.hmrc.apiplatform.modules.subscriptionfields.domain.models.FieldValue
 import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apisubscriptionfields.AsyncHmrcSpec
 import uk.gov.hmrc.apisubscriptionfields.connector.JsonFormatters
-import uk.gov.hmrc.apisubscriptionfields.model._
+import uk.gov.hmrc.apisubscriptionfields.model.*
 
 class PushPullNotificationServiceConnectorSpec extends AsyncHmrcSpec with GuiceOneAppPerSuite with JsonFormatters with BeforeAndAfterAll with BeforeAndAfterEach {
 
@@ -141,7 +141,7 @@ class PushPullNotificationServiceConnectorSpec extends AsyncHmrcSpec with GuiceO
     }
 
     "send proper request to subscribe" in new Setup {
-      val callbackUrl          = "my-callback"
+      val callbackUrl          = FieldValue("my-callback")
       val requestBody: String  = Json.stringify(Json.toJson(UpdateSubscriberRequest(SubscriberRequest(callbackUrl, "API_PUSH_SUBSCRIBER"))))
       val responseBody: String = Json.stringify(Json.toJson(UpdateSubscriberResponse(boxId)))
 
@@ -155,7 +155,7 @@ class PushPullNotificationServiceConnectorSpec extends AsyncHmrcSpec with GuiceO
     }
 
     "send to subscribe and map response on error" in new Setup {
-      val callbackUrl         = "my-callback"
+      val callbackUrl         = FieldValue("my-callback")
       val requestBody: String = Json.stringify(Json.toJson(UpdateSubscriberRequest(SubscriberRequest(callbackUrl, "API_PUSH_SUBSCRIBER"))))
 
       val path = s"/box/${boxId.value}/subscriber"
@@ -167,68 +167,68 @@ class PushPullNotificationServiceConnectorSpec extends AsyncHmrcSpec with GuiceO
     }
 
     "send proper request to update callback and map response on success" in new Setup {
-      val callbackUrl          = "my-callback"
+      val callbackUrl          = FieldValue("my-callback")
       val requestBody: String  = Json.stringify(Json.toJson(UpdateCallBackUrlRequest(clientId, callbackUrl)))
       val responseBody: String = Json.stringify(Json.toJson(UpdateCallBackUrlResponse(successful = true, None)))
 
       val path = s"/box/${boxId.value}/callback"
       primeStub(path, requestBody, responseBody)
 
-      val ret = await(connector.updateCallBackUrl(clientId, boxId, FieldValue(callbackUrl)))
+      val ret = await(connector.updateCallBackUrl(clientId, boxId, callbackUrl))
       ret shouldBe Right(())
 
       verifyPath(path)
     }
 
     "send proper request to update callback (when callback is empty) and map response on success" in new Setup {
-      val callbackUrl          = ""
+      val callbackUrl          = FieldValue.empty
       val requestBody: String  = Json.stringify(Json.toJson(UpdateCallBackUrlRequest(clientId, callbackUrl)))
       val responseBody: String = Json.stringify(Json.toJson(UpdateCallBackUrlResponse(successful = true, None)))
 
       val path = s"/box/${boxId.value}/callback"
       primeStub(path, requestBody, responseBody)
 
-      val ret = await(connector.updateCallBackUrl(clientId, boxId, FieldValue(callbackUrl)))
+      val ret = await(connector.updateCallBackUrl(clientId, boxId, callbackUrl))
       ret shouldBe Right(())
 
       verifyPath(path)
     }
 
     "send proper request to update callback and map response on failure" in new Setup {
-      val callbackUrl          = "my-callback"
+      val callbackUrl          = FieldValue("my-callback")
       val requestBody: String  = Json.stringify(Json.toJson(UpdateCallBackUrlRequest(clientId, callbackUrl)))
       val responseBody: String = Json.stringify(Json.toJson(UpdateCallBackUrlResponse(successful = false, Some("some error"))))
 
       val path = s"/box/${boxId.value}/callback"
       primeStub(path, requestBody, responseBody)
 
-      val ret = await(connector.updateCallBackUrl(clientId, boxId, FieldValue(callbackUrl)))
+      val ret = await(connector.updateCallBackUrl(clientId, boxId, callbackUrl))
       ret shouldBe Left("some error")
 
       verifyPath(path)
     }
 
     "send to update callback and map response on error" in new Setup {
-      val callbackUrl         = "my-callback"
+      val callbackUrl         = FieldValue("my-callback")
       val requestBody: String = Json.stringify(Json.toJson(UpdateCallBackUrlRequest(clientId, callbackUrl)))
 
       val path = s"/box/${boxId.value}/callback"
       primeError(path, requestBody)
 
       intercept[RuntimeException] {
-        await(connector.updateCallBackUrl(clientId, boxId, FieldValue(callbackUrl)))
+        await(connector.updateCallBackUrl(clientId, boxId, callbackUrl))
       }
     }
 
     "send proper request to update callback and map response on failure with Unknown Error" in new Setup {
-      val callbackUrl          = "my-callback"
+      val callbackUrl          = FieldValue("my-callback")
       val requestBody: String  = Json.stringify(Json.toJson(UpdateCallBackUrlRequest(clientId, callbackUrl)))
       val responseBody: String = Json.stringify(Json.toJson(UpdateCallBackUrlResponse(successful = false, None)))
 
       val path = s"/box/${boxId.value}/callback"
       primeStub(path, requestBody, responseBody)
 
-      val ret = await(connector.updateCallBackUrl(clientId, boxId, FieldValue(callbackUrl)))
+      val ret = await(connector.updateCallBackUrl(clientId, boxId, callbackUrl))
       ret shouldBe Left("Unknown Error")
 
       verifyPath(path)

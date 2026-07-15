@@ -19,6 +19,7 @@ package uk.gov.hmrc.apisubscriptionfields.repository
 import java.util.UUID
 import scala.concurrent.Future
 
+import org.mongodb.scala.SingleObservableFuture
 import org.mongodb.scala.model.Updates.set
 import org.mongodb.scala.model.{Filters, FindOneAndUpdateOptions, ReturnDocument}
 import org.scalatest.matchers.should.Matchers
@@ -26,14 +27,14 @@ import org.scalatest.{BeforeAndAfterEach, OptionValues}
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 
 import play.api.test.{DefaultAwaitTimeout, FutureAwaits}
-import uk.gov.hmrc.apiplatform.modules.common.domain.models._
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.*
 import uk.gov.hmrc.apiplatform.modules.subscriptionfields.domain.models.FieldValue
 import uk.gov.hmrc.mongo.play.json.Codecs
 
 import uk.gov.hmrc.apisubscriptionfields.AsyncHmrcSpec
-import uk.gov.hmrc.apisubscriptionfields.SubscriptionFieldsTestData._
-import uk.gov.hmrc.apisubscriptionfields.model.Types._
-import uk.gov.hmrc.apisubscriptionfields.model._
+import uk.gov.hmrc.apisubscriptionfields.SubscriptionFieldsTestData.*
+import uk.gov.hmrc.apisubscriptionfields.model.*
+import uk.gov.hmrc.apisubscriptionfields.model.Types.*
 
 class SubscriptionFieldsRepositorySpec
     extends AsyncHmrcSpec
@@ -52,7 +53,7 @@ class SubscriptionFieldsRepositorySpec
 
   override def beforeEach(): Unit = {
     super.beforeEach()
-    await(repository.collection.drop().toFuture())
+    await(repository.collection.drop().head())
   }
 
   private def createApiSubscriptionFields(clientId: ClientId = FakeClientId): SubscriptionFields = {
@@ -80,7 +81,7 @@ class SubscriptionFieldsRepositorySpec
         update = set("fieldsId", Codecs.toBson(subscription.fieldsId.value)),
         options = FindOneAndUpdateOptions().upsert(false).returnDocument(ReturnDocument.AFTER)
       )
-      .toFuture()
+      .head()
   }
 
   def saveAtomic(subscriptionFields: SubscriptionFields) =
@@ -164,7 +165,7 @@ class SubscriptionFieldsRepositorySpec
     }
 
     "return None when no subscription fields are found in the collection" in {
-      for (i <- 1 to 3) {
+      for (_ <- 1 to 3) {
         val apiSubscription = createApiSubscriptionFields(clientId = uniqueClientId)
         await(saveAtomic(apiSubscription))
       }
@@ -190,7 +191,7 @@ class SubscriptionFieldsRepositorySpec
     }
 
     "return `None` when the `fieldsId` doesn't match any record in the collection" in {
-      for (i <- 1 to 3) {
+      for (_ <- 1 to 3) {
         await(saveAtomic(createApiSubscriptionFields(clientId = uniqueClientId)))
       }
       collectionSize shouldBe 3
@@ -233,7 +234,7 @@ class SubscriptionFieldsRepositorySpec
     }
 
     "not alter the collection for unknown subscription fields" in {
-      for (i <- 1 to 3) {
+      for (_ <- 1 to 3) {
         await(saveAtomic(createApiSubscriptionFields(clientId = uniqueClientId)))
       }
       collectionSize shouldBe 3
@@ -256,7 +257,7 @@ class SubscriptionFieldsRepositorySpec
     }
 
     "not alter the collection for other client IDs" in {
-      for (i <- 1 to 3) {
+      for (_ <- 1 to 3) {
         await(saveAtomic(createApiSubscriptionFields(clientId = uniqueClientId)))
       }
       collectionSize shouldBe 3

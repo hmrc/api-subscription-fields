@@ -20,7 +20,7 @@ import java.util.UUID
 
 import play.api.http.HeaderNames.{ACCEPT, CONTENT_TYPE}
 import play.api.http.MimeTypes
-import uk.gov.hmrc.apiplatform.modules.common.domain.models._
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.*
 
 import uk.gov.hmrc.apisubscriptionfields.model.BoxId
 

@@ -19,10 +19,10 @@ package uk.gov.hmrc.apisubscriptionfields
 import java.util.UUID
 import scala.concurrent.Future
 
-import uk.gov.hmrc.apiplatform.modules.common.domain.models._
-import uk.gov.hmrc.apiplatform.modules.subscriptionfields.domain.models._
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.*
+import uk.gov.hmrc.apiplatform.modules.subscriptionfields.domain.models.*
 
-import uk.gov.hmrc.apisubscriptionfields.model._
+import uk.gov.hmrc.apisubscriptionfields.model.*
 
 trait SubscriptionFieldsTestData extends FieldDefinitionTestData {
 

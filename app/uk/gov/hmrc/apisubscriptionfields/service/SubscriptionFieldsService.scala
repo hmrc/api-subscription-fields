@@ -16,20 +16,20 @@
 
 package uk.gov.hmrc.apisubscriptionfields.service
 
-import javax.inject._
+import javax.inject.*
 import scala.concurrent.Future.successful
 import scala.concurrent.{ExecutionContext, Future}
 
 import cats.data.NonEmptyList
-import cats.data.{NonEmptyList => NEL}
-import cats.implicits._
+import cats.data.NonEmptyList as NEL
+import cats.implicits.*
 
-import uk.gov.hmrc.apiplatform.modules.common.domain.models._
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.*
 import uk.gov.hmrc.apiplatform.modules.common.services.EitherTHelper
-import uk.gov.hmrc.apiplatform.modules.subscriptionfields.domain.models._
+import uk.gov.hmrc.apiplatform.modules.subscriptionfields.domain.models.*
 import uk.gov.hmrc.http.HeaderCarrier
 
-import uk.gov.hmrc.apisubscriptionfields.model._
+import uk.gov.hmrc.apisubscriptionfields.model.*
 import uk.gov.hmrc.apisubscriptionfields.repository.SubscriptionFieldsRepository
 
 @Singleton
@@ -41,7 +41,7 @@ class SubscriptionFieldsService @Inject() (
   ) {
 
   def upsert(clientId: ClientId, apiContext: ApiContext, apiVersionNbr: ApiVersionNbr, newFields: Fields)(implicit hc: HeaderCarrier): Future[SubsFieldsUpsertResponse] = {
-    def findPpnsField(fieldDefinitions: NEL[FieldDefinition]): Option[FieldDefinition] = fieldDefinitions.find(_.`type` == FieldDefinitionType.PPNS_FIELD)
+    def findPpnsField(fieldDefinitions: NEL[FieldDefinition]): Option[FieldDefinition] = fieldDefinitions.find(_.`type` == FieldDefinitionType.PPNSField)
 
     def handleAnyPpnsSubscriptionRequired(
         clientId: ClientId,

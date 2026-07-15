@@ -1,4 +1,4 @@
-import scoverage.ScoverageKeys._
+import scoverage.ScoverageKeys.*
 
 object ScoverageSettings {
 
@@ -14,7 +14,9 @@ object ScoverageSettings {
       "testOnlyDoNotUseInAppConf.*",
       "app.*",
       "uk.gov.hmrc.apisubscriptionfields.config",
+      "uk.gov.hmrc.apisubscriptionfields.controller.binders.",
       "uk.gov.hmrc.BuildInfo"
+
     ).mkString(";")
   )
 }

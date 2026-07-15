@@ -16,10 +16,10 @@
 
 package uk.gov.hmrc.apisubscriptionfields.model
 
-import play.api.libs.json._
-import uk.gov.hmrc.apiplatform.modules.common.domain.services.NonEmptyListFormatters
+import play.api.libs.json.*
+import uk.gov.hmrc.apiplatform.modules.common.domain.services.NonEmptyListFormatters.given
 
-trait JsonFormatters extends NonEmptyListFormatters {
+trait JsonFormatters {
   implicit val BoxIdJF: Format[BoxId]                                       = Json.valueFormat[BoxId]
   implicit val SubscriptionFieldsIdjsonFormat: Format[SubscriptionFieldsId] = Json.valueFormat[SubscriptionFieldsId]
 

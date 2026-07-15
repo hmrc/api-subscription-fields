@@ -19,7 +19,7 @@ package uk.gov.hmrc.apisubscriptionfields.repository
 import cats.data.NonEmptyList
 
 import play.api.libs.json.{JsSuccess, Json}
-import uk.gov.hmrc.apiplatform.modules.subscriptionfields.domain.models._
+import uk.gov.hmrc.apiplatform.modules.subscriptionfields.domain.models.*
 
 import uk.gov.hmrc.apisubscriptionfields.AsyncHmrcSpec
 import uk.gov.hmrc.apisubscriptionfields.model.JsonFormatters
@@ -30,7 +30,7 @@ class MongoFormattersSpec extends AsyncHmrcSpec with JsonFormatters {
   final val validation = ValidationGroup("error message", NonEmptyList.one(validationRule))
   "Field definition formatter" should {
     "Correctly unmarshall a JSON field definition with all the necessary fields" in {
-      val fieldDefinition = FieldDefinition(FieldName("name"), "description", "hint", FieldDefinitionType.STRING, "short description", Some(validation))
+      val fieldDefinition = FieldDefinition(FieldName("name"), "description", "hint", FieldDefinitionType.PlainText, "short description", Some(validation))
       Json.fromJson[FieldDefinition](
         Json.parse(
           """{ "name" : "name", "description" : "description", "hint": "hint", "type" : "STRING", "shortDescription" : "short description","validation":{"errorMessage":"error message","rules":[{"RegexValidationRule":{"regex":"test regex"}}]}}"""
@@ -39,7 +39,7 @@ class MongoFormattersSpec extends AsyncHmrcSpec with JsonFormatters {
     }
 
     "Correctly unmarshall a JSON field definition without the hint field" in {
-      val fieldDefinition = FieldDefinition(FieldName("name"), "description", "", FieldDefinitionType.STRING, "short description", Some(validation))
+      val fieldDefinition = FieldDefinition(FieldName("name"), "description", "", FieldDefinitionType.PlainText, "short description", Some(validation))
       Json.fromJson[FieldDefinition](
         Json.parse(
           """{ "name" : "name", "description" : "description", "type" : "STRING", "shortDescription" : "short description","validation":{"errorMessage":"error message","rules":[{"RegexValidationRule":{"regex":"test regex"}}]}}"""
@@ -48,7 +48,7 @@ class MongoFormattersSpec extends AsyncHmrcSpec with JsonFormatters {
     }
 
     "Correctly unmarshall a JSON field definition without the shortDescription field" in {
-      val fieldDefinition = FieldDefinition(FieldName("name"), "description", "hint", FieldDefinitionType.STRING, "", Some(validation))
+      val fieldDefinition = FieldDefinition(FieldName("name"), "description", "hint", FieldDefinitionType.PlainText, "", Some(validation))
       Json.fromJson[FieldDefinition](
         Json.parse(
           """{ "name" : "name", "description" : "description", "hint": "hint", "type" : "STRING","validation":{"errorMessage":"error message","rules":[{"RegexValidationRule":{"regex":"test regex"}}]}}"""
@@ -57,7 +57,7 @@ class MongoFormattersSpec extends AsyncHmrcSpec with JsonFormatters {
     }
 
     "Correctly unmarshall a JSON field definition with empty validation field" in {
-      val fieldDefinition = FieldDefinition(FieldName("name"), "description", "hint", FieldDefinitionType.STRING, "short description", None)
+      val fieldDefinition = FieldDefinition(FieldName("name"), "description", "hint", FieldDefinitionType.PlainText, "short description", None)
       Json.fromJson[FieldDefinition](
         Json.parse("""{ "name" : "name", "description" : "description", "hint": "hint", "type" : "STRING", "shortDescription" : "short description"}""")
       ) shouldBe JsSuccess(fieldDefinition)

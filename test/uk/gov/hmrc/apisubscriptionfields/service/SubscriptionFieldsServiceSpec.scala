@@ -24,11 +24,11 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 
 import play.api.test.{DefaultAwaitTimeout, FutureAwaits}
-import uk.gov.hmrc.apiplatform.modules.subscriptionfields.domain.models._
+import uk.gov.hmrc.apiplatform.modules.subscriptionfields.domain.models.*
 import uk.gov.hmrc.http.HeaderCarrier
 
-import uk.gov.hmrc.apisubscriptionfields.mocks.{SubscriptionFieldsRepositoryMockModule, _}
-import uk.gov.hmrc.apisubscriptionfields.model._
+import uk.gov.hmrc.apisubscriptionfields.mocks.{SubscriptionFieldsRepositoryMockModule, *}
+import uk.gov.hmrc.apisubscriptionfields.model.*
 import uk.gov.hmrc.apisubscriptionfields.{FieldDefinitionTestData, SubscriptionFieldsTestData}
 
 class SubscriptionFieldsServiceSpec extends AnyWordSpec with DefaultAwaitTimeout with FutureAwaits with Matchers with SubscriptionFieldsTestData with FieldDefinitionTestData
@@ -356,7 +356,7 @@ class SubscriptionFieldsServiceSpec extends AnyWordSpec with DefaultAwaitTimeout
   }
 
   "validate value against field definition" should {
-    val fieldDefintionWithoutValidation = FieldDefinition(fieldN(1), "desc1", "hint1", FieldDefinitionType.URL, "short description", None)
+    val fieldDefintionWithoutValidation = FieldDefinition(fieldN(1), "desc1", "hint1", FieldDefinitionType.Url, "short description", None)
     val fieldDefinitionWithValidation   = fieldDefintionWithoutValidation.copy(validation = Some(validationGroup1))
 
     "succeed when no validation is present on the field defintion" in new Setup {
@@ -371,7 +371,7 @@ class SubscriptionFieldsServiceSpec extends AnyWordSpec with DefaultAwaitTimeout
   }
 
   "validate Field Names Are Defined" should {
-    val fieldDefinitionWithoutValidation = FieldDefinition(fieldN(1), "desc1", "hint1", FieldDefinitionType.URL, "short description", None)
+    val fieldDefinitionWithoutValidation = FieldDefinition(fieldN(1), "desc1", "hint1", FieldDefinitionType.Url, "short description", None)
     val fields                           = Map(fieldN(1) -> "Emily").asFields
 
     "succeed when Fields match Field Definitions" in new Setup {

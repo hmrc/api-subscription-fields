@@ -20,11 +20,11 @@ import scala.concurrent.Future
 import scala.reflect.ClassTag
 import scala.util.{Failure, Success, Try}
 
-import play.api.libs.json._
+import play.api.libs.json.*
 import play.api.mvc.{Request, Result}
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendBaseController
 
-import uk.gov.hmrc.apisubscriptionfields.model.ErrorCode._
+import uk.gov.hmrc.apisubscriptionfields.model.ErrorCode.*
 import uk.gov.hmrc.apisubscriptionfields.model.JsErrorResponse
 import uk.gov.hmrc.apisubscriptionfields.utils.ApplicationLogger
 

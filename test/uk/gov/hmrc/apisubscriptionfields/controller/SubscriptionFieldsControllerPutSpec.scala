@@ -23,12 +23,12 @@ import scala.concurrent.Future.successful
 import org.apache.pekko.actor.ActorSystem
 
 import play.api.libs.json.{JsValue, Json}
-import play.api.mvc._
-import play.api.test.Helpers._
+import play.api.mvc.*
+import play.api.test.Helpers.*
 import play.api.test.{FakeRequest, StubControllerComponentsFactory}
 import uk.gov.hmrc.apiplatform.modules.subscriptionfields.interface.models.UpsertFieldValuesRequest
 
-import uk.gov.hmrc.apisubscriptionfields.model._
+import uk.gov.hmrc.apisubscriptionfields.model.*
 import uk.gov.hmrc.apisubscriptionfields.service.SubscriptionFieldsService
 import uk.gov.hmrc.apisubscriptionfields.{AsyncHmrcSpec, SubscriptionFieldsTestData}
 
@@ -39,7 +39,7 @@ class SubscriptionFieldsControllerPutSpec extends AsyncHmrcSpec with Subscriptio
   implicit private val actorSystem: ActorSystem = ActorSystem("test")
 
   def subsFieldServiceUpsertReturns(response: SubsFieldsUpsertResponse) = {
-    when(mockSubscriptionFieldsService.upsert(eqTo(FakeClientId), eqTo(FakeContext), eqTo(FakeVersion), eqTo(FakeSubscriptionFields))(*)).thenReturn(successful(response))
+    when(mockSubscriptionFieldsService.upsert(eqTo(FakeClientId), eqTo(FakeContext), eqTo(FakeVersion), eqTo(FakeSubscriptionFields))(using *)).thenReturn(successful(response))
   }
 
   "PUT /field/application/:clientId/context/:apiContext/version/:apiVersionNbr" should {
@@ -102,5 +102,5 @@ class SubscriptionFieldsControllerPutSpec extends AsyncHmrcSpec with Subscriptio
       .withJsonBody(jsonBody)
       .map(r => r.json)
 
-  private def mkJson(model: UpsertFieldValuesRequest) = Json.toJson(model)(Json.writes[UpsertFieldValuesRequest])
+  private def mkJson(model: UpsertFieldValuesRequest) = Json.toJson(model)(using Json.writes[UpsertFieldValuesRequest])
 }

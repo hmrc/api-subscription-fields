@@ -20,11 +20,11 @@ import java.util.UUID
 
 import cats.data.NonEmptyList
 
-import uk.gov.hmrc.apiplatform.modules.common.domain.models._
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.*
+import uk.gov.hmrc.apiplatform.modules.subscriptionfields.domain.models.*
 import uk.gov.hmrc.apiplatform.modules.subscriptionfields.domain.models.DevhubAccessRequirement.AdminOnly
-import uk.gov.hmrc.apiplatform.modules.subscriptionfields.domain.models._
 
-import uk.gov.hmrc.apisubscriptionfields.model._
+import uk.gov.hmrc.apisubscriptionfields.model.*
 
 trait FieldDefinitionTestData extends TestData {
 
@@ -59,13 +59,13 @@ trait FieldDefinitionTestData extends TestData {
 
   final val FakeUrlValidation: ValidationGroup = ValidationGroup("error message", NonEmptyList.one(UrlValidationRule))
 
-  final val FakeFieldDefinitionUrl                = FieldDefinition(fieldN(1), "desc1", "hint1", FieldDefinitionType.URL, "short description", Some(FakeUrlValidation))
-  final val FakeFieldDefinitionUrlValidationEmpty = FieldDefinition(fieldN(1), "desc1", "hint1", FieldDefinitionType.URL, "short description", None)
-  final val FakeFieldDefinitionString             = FieldDefinition(fieldN(2), "desc2", "hint2", FieldDefinitionType.STRING, "short description", Some(FakeValidation))
+  final val FakeFieldDefinitionUrl                = FieldDefinition(fieldN(1), "desc1", "hint1", FieldDefinitionType.Url, "short description", Some(FakeUrlValidation))
+  final val FakeFieldDefinitionUrlValidationEmpty = FieldDefinition(fieldN(1), "desc1", "hint1", FieldDefinitionType.Url, "short description", None)
+  final val FakeFieldDefinitionString             = FieldDefinition(fieldN(2), "desc2", "hint2", FieldDefinitionType.PlainText, "short description", Some(FakeValidation))
 
   final val FakeFieldDefinitionWithAccess: FieldDefinition =
     FakeFieldDefinitionString.copy(validation = None, access = AccessRequirements(devhub = DevhubAccessRequirements(read = AdminOnly)))
-  final val FakeFieldDefinitionSecureToken                 = FieldDefinition(fieldN(3), "desc3", "hint3", FieldDefinitionType.SECURE_TOKEN, "short description", Some(FakeValidation))
+  final val FakeFieldDefinitionSecureToken                 = FieldDefinition(fieldN(3), "desc3", "hint3", FieldDefinitionType.SecureToken, "short description", Some(FakeValidation))
   final val NelOfFieldDefinitions                          = NonEmptyList.fromListUnsafe(List(FakeFieldDefinitionUrl, FakeFieldDefinitionString, FakeFieldDefinitionSecureToken))
   final val FakeApiFieldDefinitions                        = ApiFieldDefinitions(FakeContext, FakeVersion, NelOfFieldDefinitions)
   final val FakeApiFieldDefinitionsResponse                = ApiFieldDefinitions(FakeContext, FakeVersion, FakeApiFieldDefinitions.fieldDefinitions)
@@ -85,16 +85,16 @@ trait FieldDefinitionTestData extends TestData {
     FieldName("alphanumericField"),
     "an alphanumeric filed",
     "this is an alphanumeric value",
-    FieldDefinitionType.STRING,
+    FieldDefinitionType.PlainText,
     "an alphanumeric field",
     Some(FakeValidationForAlphanumeric)
   )
 
   final val FakeFieldDefinitionPassword =
-    FieldDefinition(FieldName("password"), "password", "this is your password", FieldDefinitionType.SECURE_TOKEN, "password", Some(FakeValidationForPassword))
+    FieldDefinition(FieldName("password"), "password", "this is your password", FieldDefinitionType.SecureToken, "password", Some(FakeValidationForPassword))
 
   final val FakeFieldDefinitionPPNSFields     =
-    FieldDefinition(PPNSFieldFieldName, "Callback URL", "please enter a callback url", FieldDefinitionType.PPNS_FIELD, "callback", Some(FakeValidationForPPNS))
+    FieldDefinition(PPNSFieldFieldName, "Callback URL", "please enter a callback url", FieldDefinitionType.PPNSField, "callback", Some(FakeValidationForPPNS))
   final val FakeApiFieldDefinitionssWithRegex = NonEmptyList.fromListUnsafe(List(FakeFieldDefinitionAlphnumericField, FakeFieldDefinitionPassword))
 
   final val FakeApiFieldDefinitionsPPNSWithRegex =

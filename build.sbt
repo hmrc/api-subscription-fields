@@ -1,5 +1,5 @@
 import uk.gov.hmrc.DefaultBuildSettings
-import uk.gov.hmrc.DefaultBuildSettings._
+import uk.gov.hmrc.DefaultBuildSettings.*
 import scala.language.postfixOps
 
 val appName = "api-subscription-fields"
@@ -7,7 +7,7 @@ val appName = "api-subscription-fields"
 Global / bloopAggregateSourceDependencies := true
 Global / bloopExportJarClassifiers        := Some(Set("sources"))
 
-ThisBuild / scalaVersion                                         := "2.13.18"
+ThisBuild / scalaVersion                                         := "3.7.4"
 ThisBuild / majorVersion                                         := 0
 ThisBuild / libraryDependencySchemes += "org.scala-lang.modules" %% "scala-xml" % VersionScheme.Always
 ThisBuild / semanticdbEnabled                                    := true
@@ -23,9 +23,11 @@ lazy val microservice = Project(appName, file("."))
   .settings(ScoverageSettings())
   .settings(
     routesImport ++= Seq(
-      "uk.gov.hmrc.apisubscriptionfields.model._",
-      "uk.gov.hmrc.apiplatform.modules.common.domain.models._",
-      "uk.gov.hmrc.apisubscriptionfields.controller.Binders._"
+      "uk.gov.hmrc.apisubscriptionfields.model.*",
+      "uk.gov.hmrc.apiplatform.modules.common.domain.models.*",
+      "uk.gov.hmrc.apisubscriptionfields.controller.Binders.*",
+      "uk.gov.hmrc.apisubscriptionfields.controller.binders.RouteModels.*",
+      "uk.gov.hmrc.apisubscriptionfields.controller.binders.RouteModels.Conversions.given"
     )
   )
   .settings(

@@ -16,10 +16,10 @@
 
 package uk.gov.hmrc.apisubscriptionfields.model
 
-import cats.data.{NonEmptyList => NEL}
+import cats.data.NonEmptyList as NEL
 
-import uk.gov.hmrc.apiplatform.modules.common.domain.models._
-import uk.gov.hmrc.apiplatform.modules.subscriptionfields.domain.models._
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.*
+import uk.gov.hmrc.apiplatform.modules.subscriptionfields.domain.models.*
 
 case class ApiFieldDefinitions(apiContext: ApiContext, apiVersion: ApiVersionNbr, fieldDefinitions: NEL[FieldDefinition])
 

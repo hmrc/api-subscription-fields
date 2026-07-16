@@ -26,7 +26,7 @@ import uk.gov.hmrc.apisubscriptionfields.{FieldDefinitionTestData, SubscriptionF
 
 class JsonFormatterSpec extends AnyWordSpec with Matchers with JsonFormatters with SubscriptionFieldsTestData with FieldDefinitionTestData {
 
-  import play.api.libs.json._
+  import play.api.libs.json.*
 
   private val fakeFields                     = Map(fieldN(1) -> FieldValue("v1"))
   private val subscriptionFields             = SubscriptionFields(FakeClientId, FakeContext, FakeVersion, FakeFieldsId, fakeFields)

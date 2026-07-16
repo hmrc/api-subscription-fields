@@ -22,11 +22,11 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success, Try}
 
 import play.api.libs.json.{JsError, JsSuccess, JsValue, Json}
-import play.api.mvc._
-import uk.gov.hmrc.apiplatform.modules.common.domain.models._
+import play.api.mvc.*
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.*
 import uk.gov.hmrc.apiplatform.modules.subscriptionfields.interface.models.FieldDefinitionsRequest
 
-import uk.gov.hmrc.apisubscriptionfields.model._
+import uk.gov.hmrc.apisubscriptionfields.model.*
 import uk.gov.hmrc.apisubscriptionfields.service.ApiFieldDefinitionsService
 import uk.gov.hmrc.apisubscriptionfields.utils.ApplicationLogger
 
@@ -35,7 +35,7 @@ class ApiFieldDefinitionsController @Inject() (cc: ControllerComponents, service
     extends CommonController
     with ApplicationLogger {
 
-  import JsonFormatters._
+  import JsonFormatters.*
 
   private def badRequestWithTag(fn: (UUID) => String): Result = {
     val errorTag = java.util.UUID.randomUUID()
@@ -48,11 +48,11 @@ class ApiFieldDefinitionsController @Inject() (cc: ControllerComponents, service
 
   def validateFieldsDefinition(): Action[JsValue] = Action(parse.json) { request =>
     Try(request.body.validate[FieldDefinitionsRequest]) match {
-      case Success(JsSuccess(payload, _)) => Ok("")
-      case Success(JsError(errs))         => {
+      case Success(JsSuccess(_, _)) => Ok("")
+      case Success(JsError(errs))   => {
         badRequestWithTag((tag: UUID) => s"A JSON error occurred: [${tag.toString}] ${Json.prettyPrint(JsError.toJson(errs))}")
       }
-      case Failure(e)                     => {
+      case Failure(e)               => {
         badRequestWithTag { (tag: UUID) => s"An error occurred during JSON validation: [${tag.toString}] ${e.getMessage}" }
       }
     }

@@ -1,10 +1,11 @@
-import scoverage.ScoverageKeys._
-  
+import scoverage.ScoverageKeys.*
+
 object ScoverageSettings {
+
   def apply() = Seq(
-    coverageMinimumStmtTotal := 94.00,
+    coverageMinimumStmtTotal   := 94.00,
     coverageMinimumBranchTotal := 83.00,
-    coverageFailOnMinimum := true,
+    coverageFailOnMinimum      := true,
 
     // Semicolon-separated list of regexs matching classes to exclude
     coverageExcludedPackages := Seq(
@@ -13,7 +14,9 @@ object ScoverageSettings {
       "testOnlyDoNotUseInAppConf.*",
       "app.*",
       "uk.gov.hmrc.apisubscriptionfields.config",
+      "uk.gov.hmrc.apisubscriptionfields.controller.binders.",
       "uk.gov.hmrc.BuildInfo"
+
     ).mkString(";")
   )
 }

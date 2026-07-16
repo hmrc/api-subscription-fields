@@ -17,6 +17,7 @@
 package uk.gov.hmrc.apisubscriptionfields.connector
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.ClientId
+import uk.gov.hmrc.apiplatform.modules.subscriptionfields.domain.models.FieldValue
 
 import uk.gov.hmrc.apisubscriptionfields.model.BoxId
 
@@ -24,12 +25,12 @@ private[connector] case class CreateBoxRequest(boxName: String, clientId: Client
 
 private[connector] case class CreateBoxResponse(boxId: BoxId)
 
-private[connector] case class SubscriberRequest(callBackUrl: String, subscriberType: String)
+private[connector] case class SubscriberRequest(callBackUrl: FieldValue, subscriberType: String)
 
 private[connector] case class UpdateSubscriberRequest(subscriber: SubscriberRequest)
 
 private[connector] case class UpdateSubscriberResponse(boxId: BoxId)
 
-private[connector] case class UpdateCallBackUrlRequest(clientId: ClientId, callbackUrl: String)
+private[connector] case class UpdateCallBackUrlRequest(clientId: ClientId, callbackUrl: FieldValue)
 
 private[connector] case class UpdateCallBackUrlResponse(successful: Boolean, errorMessage: Option[String])

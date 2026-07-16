@@ -16,15 +16,15 @@
 
 package uk.gov.hmrc.apisubscriptionfields.service
 
-import java.{util => ju}
+import java.util as ju
 import scala.concurrent.Future.{failed, successful}
 
-import uk.gov.hmrc.apiplatform.modules.common.domain.models._
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.*
 import uk.gov.hmrc.apiplatform.modules.subscriptionfields.domain.models.FieldValue
 import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apisubscriptionfields.connector.PushPullNotificationServiceConnector
-import uk.gov.hmrc.apisubscriptionfields.model._
+import uk.gov.hmrc.apisubscriptionfields.model.*
 import uk.gov.hmrc.apisubscriptionfields.{AsyncHmrcSpec, FieldDefinitionTestData, SubscriptionFieldsTestData}
 
 class PushPullNotificationServiceSpec extends AsyncHmrcSpec with SubscriptionFieldsTestData with FieldDefinitionTestData {
@@ -47,7 +47,7 @@ class PushPullNotificationServiceSpec extends AsyncHmrcSpec with SubscriptionFie
     val expectedTopicName = s"${apiContext.value}##${apiVersionNbr.value}##$ppnsFieldName"
 
     "succeed when box is created" in new Setup {
-      when(mockPPNSConnector.ensureBoxIsCreated(eqTo(expectedTopicName), eqTo(clientId))(*)).thenReturn(successful(boxId))
+      when(mockPPNSConnector.ensureBoxIsCreated(eqTo(expectedTopicName), eqTo(clientId))(using *)).thenReturn(successful(boxId))
 
       val result = await(service.ensureBoxIsCreated(clientId, apiContext, apiVersionNbr, ppnsFieldName))
 
@@ -55,7 +55,7 @@ class PushPullNotificationServiceSpec extends AsyncHmrcSpec with SubscriptionFie
     }
 
     "fail when box creation fails" in new Setup {
-      when(mockPPNSConnector.ensureBoxIsCreated(eqTo(expectedTopicName), eqTo(clientId))(*)).thenReturn(failed(new RuntimeException))
+      when(mockPPNSConnector.ensureBoxIsCreated(eqTo(expectedTopicName), eqTo(clientId))(using *)).thenReturn(failed(new RuntimeException))
 
       intercept[RuntimeException] {
         await(service.ensureBoxIsCreated(clientId, apiContext, apiVersionNbr, ppnsFieldName))
@@ -67,7 +67,7 @@ class PushPullNotificationServiceSpec extends AsyncHmrcSpec with SubscriptionFie
     val ppnsFieldValue = FieldValue("localhost:9001/pingme")
 
     "succeed when update of callback URL is successful" in new Setup {
-      when(mockPPNSConnector.updateCallBackUrl(clientId, boxId, ppnsFieldValue)(hc)).thenReturn(successful(Right(())))
+      when(mockPPNSConnector.updateCallBackUrl(clientId, boxId, ppnsFieldValue)(using hc)).thenReturn(successful(Right(())))
 
       val result = await(service.updateCallbackUrl(clientId, boxId, ppnsFieldValue))
 
@@ -76,7 +76,7 @@ class PushPullNotificationServiceSpec extends AsyncHmrcSpec with SubscriptionFie
 
     "fail when update of callback URL fails with an error message" in new Setup {
       val errorMessage = "Error Message"
-      when(mockPPNSConnector.updateCallBackUrl(clientId, boxId, ppnsFieldValue)(hc)).thenReturn(successful(Left(errorMessage)))
+      when(mockPPNSConnector.updateCallBackUrl(clientId, boxId, ppnsFieldValue)(using hc)).thenReturn(successful(Left(errorMessage)))
 
       val result = await(service.updateCallbackUrl(clientId, boxId, ppnsFieldValue))
 
@@ -84,7 +84,7 @@ class PushPullNotificationServiceSpec extends AsyncHmrcSpec with SubscriptionFie
     }
 
     "fail when update of callback URL fails with an exception" in new Setup {
-      when(mockPPNSConnector.updateCallBackUrl(clientId, boxId, ppnsFieldValue)(hc)).thenReturn(failed(new RuntimeException))
+      when(mockPPNSConnector.updateCallBackUrl(clientId, boxId, ppnsFieldValue)(using hc)).thenReturn(failed(new RuntimeException))
 
       intercept[RuntimeException] {
         await(service.updateCallbackUrl(clientId, boxId, ppnsFieldValue))

@@ -22,9 +22,10 @@ import scala.concurrent.Future
 import cats.data.NonEmptyList
 
 import play.api.libs.json.{JsValue, Json}
-import play.api.mvc._
-import play.api.test.Helpers._
-import play.api.test._
+import play.api.mvc.*
+import play.api.test.*
+import play.api.test.Helpers.*
+import uk.gov.hmrc.apiplatform.modules.common.domain.services.NonEmptyListFormatters.given
 import uk.gov.hmrc.apiplatform.modules.subscriptionfields.interface.models.FieldDefinitionsRequest
 
 import uk.gov.hmrc.apisubscriptionfields.model.JsonFormatters
@@ -67,6 +68,6 @@ class ApiFieldDefinitionsControllerPostSpec extends AsyncHmrcSpec with FieldDefi
       .withJsonBody(jsonBody)
       .map(r => r.json)
 
-  private def mkJson(model: FieldDefinitionsRequest) = Json.toJson(model)(Json.writes[FieldDefinitionsRequest])
+  private def mkJson(model: FieldDefinitionsRequest) = Json.toJson(model)(using Json.writes[FieldDefinitionsRequest])
 
 }

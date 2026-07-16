@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.apisubscriptionfields.model
 
-import java.{util => ju}
+import java.util as ju
 
 case class SubscriptionFieldsId(value: ju.UUID) extends AnyVal
 

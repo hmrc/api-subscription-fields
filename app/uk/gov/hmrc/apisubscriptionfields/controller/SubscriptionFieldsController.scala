@@ -19,19 +19,19 @@ package uk.gov.hmrc.apisubscriptionfields.controller
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
-import play.api.libs.json._
-import play.api.mvc._
-import uk.gov.hmrc.apiplatform.modules.common.domain.models._
+import play.api.libs.json.*
+import play.api.mvc.*
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.*
 import uk.gov.hmrc.apiplatform.modules.subscriptionfields.interface.models.UpsertFieldValuesRequest
 
-import uk.gov.hmrc.apisubscriptionfields.model.ErrorCode._
-import uk.gov.hmrc.apisubscriptionfields.model._
+import uk.gov.hmrc.apisubscriptionfields.model.*
+import uk.gov.hmrc.apisubscriptionfields.model.ErrorCode.*
 import uk.gov.hmrc.apisubscriptionfields.service.SubscriptionFieldsService
 
 @Singleton
 class SubscriptionFieldsController @Inject() (cc: ControllerComponents, service: SubscriptionFieldsService)(implicit ec: ExecutionContext) extends CommonController {
 
-  import JsonFormatters._
+  import JsonFormatters.*
 
   private def notFoundResponse(message: String) = {
     NotFound(JsErrorResponse(ErrorCode.NOT_FOUND, message))
@@ -83,7 +83,7 @@ class SubscriptionFieldsController @Inject() (cc: ControllerComponents, service:
   }
 
   def upsertSubscriptionFields(clientId: ClientId, apiContext: ApiContext, apiVersionNbr: ApiVersionNbr): Action[JsValue] = Action.async(parse.json) { implicit request =>
-    import JsonFormatters._
+    import JsonFormatters.*
 
     withJsonBody[UpsertFieldValuesRequest] { payload =>
       if (payload.fields.isEmpty) {

@@ -16,35 +16,37 @@
 
 package uk.gov.hmrc.apisubscriptionfields.controller
 
-import java.{util => ju}
+import java.util as ju
 
 import play.api.mvc.PathBindable
-import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 
 import uk.gov.hmrc.apisubscriptionfields.model.SubscriptionFieldsId
 
+// N.B. Lots commented out here until Play supports opaque types on the paths.
+//
 object Binders {
+//   import uk.gov.hmrc.apiplatform.modules.common.domain.models.*
 
-  implicit object apiContextPathBindable
-      extends PathBindable.Parsing[ApiContext](
-        ApiContext.apply,
-        _.value,
-        (key: String, e: Exception) => "Cannot parse parameter %s as ApiContext: %s".format(key, e.getMessage)
-      )
+  // implicit object apiContextPathBindable
+  //     extends PathBindable.Parsing[ApiContext](
+  //       ApiContext.apply,
+  //       _.value,
+  //       (key: String, e: Exception) => "Cannot parse parameter %s as ApiContext: %s".format(key, e.getMessage)
+  //     )
 
-  implicit object apiVersionPathBindable
-      extends PathBindable.Parsing[ApiVersionNbr](
-        ApiVersionNbr.apply,
-        _.value,
-        (key: String, e: Exception) => "Cannot parse parameter %s as ApiVersionNbr: %s".format(key, e.getMessage)
-      )
+  // implicit object apiVersionPathBindable
+  //     extends PathBindable.Parsing[ApiVersionNbr](
+  //       ApiVersionNbr.apply,
+  //       _.value,
+  //       (key: String, e: Exception) => "Cannot parse parameter %s as ApiVersionNbr: %s".format(key, e.getMessage)
+  //     )
 
-  implicit object clientIdPathBindable
-      extends PathBindable.Parsing[ClientId](
-        ClientId.apply,
-        _.value,
-        (key: String, e: Exception) => "Cannot parse parameter %s as ClientId: %s".format(key, e.getMessage)
-      )
+  // implicit object clientIdPathBindable
+  //     extends PathBindable.Parsing[ClientId](
+  //       ClientId.apply,
+  //       _.value,
+  //       (key: String, e: Exception) => "Cannot parse parameter %s as ClientId: %s".format(key, e.getMessage)
+  //     )
 
   implicit object subscriptionFieldsIdPathBindable
       extends PathBindable.Parsing[SubscriptionFieldsId](

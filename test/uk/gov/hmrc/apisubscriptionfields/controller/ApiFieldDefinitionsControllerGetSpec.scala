@@ -20,7 +20,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future.{failed, successful}
 
 import play.api.libs.json.{JsDefined, JsString, Json}
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import play.api.test.{FakeRequest, StubControllerComponentsFactory}
 
 import uk.gov.hmrc.apisubscriptionfields.model.{ApiFieldDefinitions, BulkApiFieldDefinitionsResponse, JsonFormatters}

@@ -21,8 +21,8 @@ import scala.concurrent.Future
 import org.scalatest.OptionValues
 
 import play.api.libs.json.Json
-import play.api.mvc._
-import play.api.test.Helpers._
+import play.api.mvc.*
+import play.api.test.Helpers.*
 
 import uk.gov.hmrc.apisubscriptionfields.model.{ErrorCode, JsErrorResponse}
 import uk.gov.hmrc.apisubscriptionfields.utils.ApplicationLogger

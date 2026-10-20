@@ -4,10 +4,9 @@ object AppDependencies {
   def apply(): Seq[ModuleID] = dependencies ++ testDependencies
 
   private lazy val mongoVersion        = "2.14.0"
-  private lazy val bootstrapVersion    = "10.7.1"
+  private lazy val bootstrapVersion    = "10.8.0"
   private val commonDomainVersion      = "1.4.0"
   private val applicationDomainVersion = "1.6.0"
-  private val mockitoScalaVersion      = "2.2.1"
 
   private lazy val dependencies = Seq(
     "uk.gov.hmrc"       %% "bootstrap-backend-play-30"        % bootstrapVersion,
@@ -23,6 +22,5 @@ object AppDependencies {
     "uk.gov.hmrc"       %% "bootstrap-test-play-30"              % bootstrapVersion,
     "uk.gov.hmrc.mongo" %% "hmrc-mongo-test-play-30"             % mongoVersion,
     "uk.gov.hmrc"       %% "api-platform-common-domain-fixtures" % commonDomainVersion,
-    "org.mockito"       %% "mockito-scala-scalatest"             % mockitoScalaVersion
   ).map(d => d % "test")
 }
